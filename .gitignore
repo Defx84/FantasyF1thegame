@@ -1,0 +1,12 @@
+# Node
+node_modules/
+.env
+
+# React
+build/
+dist/
+
+# Logs
+npm-debug.log
+yarn-debug.log
+yarn-error.log
