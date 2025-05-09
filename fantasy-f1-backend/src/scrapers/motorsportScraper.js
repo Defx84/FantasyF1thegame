@@ -54,7 +54,8 @@ async function saveSlugsToFile(slugs) {
 
 async function discoverMotorsportSlugs(year = new Date().getFullYear()) {
   console.log(`\n🔍 Discovering slugs for year ${year}...`);
-  const browser = await puppeteer.launch({ headless: "new" });
+  const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium';
+  const browser = await puppeteer.launch({ headless: "new", executablePath, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
   const page = await browser.newPage();
 
   try {
@@ -105,10 +106,8 @@ async function discoverMotorsportSlugs(year = new Date().getFullYear()) {
 async function scrapeMotorsportResultsByType(slug, type) {
     let browser;
     try {
-        browser = await puppeteer.launch({ 
-            headless: "new",
-            args: ['--no-sandbox', '--disable-setuid-sandbox']
-        });
+        executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium';
+        browser = await puppeteer.launch({ executablePath, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
         const page = await browser.newPage();
         
         // Set a longer timeout for page operations
