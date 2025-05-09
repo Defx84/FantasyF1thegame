@@ -21,7 +21,7 @@ async function updateRaceStatus(round, raceData) {
                 { round },
                 { 
                     $set: { 
-                        status: 'completed',
+  status: 'completed',
                         lastUpdated: new Date()
                     }
                 },
