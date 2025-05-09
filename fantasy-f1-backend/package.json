@@ -32,8 +32,7 @@
     "nodemailer": "^6.9.7",
     "puppeteer": "^21.5.0",
     "puppeteer-extra": "^3.3.6",
-    "puppeteer-extra-plugin-stealth": "^2.11.2",
-    "react-card-flip": "^1.2.3"
+    "puppeteer-extra-plugin-stealth": "^2.11.2"
   },
   "devDependencies": {
     "jest": "^29.7.0",
