@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { api } from './api';
 
-const API_URL = 'http://localhost:5000/api/league';
+const API_URL = process.env.REACT_APP_API_BASE_URL + '/api/league';
 
 export interface League {
   _id: string;

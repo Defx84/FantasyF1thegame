@@ -33,7 +33,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       try {
-        const response = await fetch('http://localhost:5000/api/auth/me', {
+        const response = await fetch(process.env.REACT_APP_API_BASE_URL + '/api/auth/me', {
           headers: {
             'Authorization': `Bearer ${token}`,
           },
@@ -53,7 +53,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (email: string, password: string) => {
-    const response = await fetch('http://localhost:5000/api/auth/login', {
+    const response = await fetch(process.env.REACT_APP_API_BASE_URL + '/api/auth/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ email, password }),
@@ -72,7 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const token = getToken();
       if (token) {
-        const response = await fetch('http://localhost:5000/api/auth/logout', {
+        const response = await fetch(process.env.REACT_APP_API_BASE_URL + '/api/auth/logout', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${token}`,
@@ -96,7 +96,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signup = async (username: string, email: string, password: string) => {
-    const response = await fetch('http://localhost:5000/api/auth/register', {
+    const response = await fetch(process.env.REACT_APP_API_BASE_URL + '/api/auth/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ username, email, password }),
