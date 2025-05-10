@@ -1,6 +1,19 @@
-FROM node:18
+FROM node:18-slim
 
-# Install Chromium and dependencies for Puppeteer
+# Prevent interactive prompts during package installation
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+ENV NODE_ENV=production
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Configure npm to skip Puppeteer download
+RUN npm config set puppeteer_skip_chromium_download true
+
+# Install Chromium and minimal dependencies
 RUN apt-get update && apt-get install -y \
     chromium \
     fonts-liberation \
@@ -21,16 +34,12 @@ RUN apt-get update && apt-get install -y \
     --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
-# Set environment variable to avoid unnecessary download
-ENV PUPPETEER_SKIP_DOWNLOAD=false
+# Install only production dependencies
+RUN npm ci --omit=dev
 
-WORKDIR /app
-
-COPY package*.json ./
-RUN npm install
-
+# Copy the rest of the app
 COPY . .
 
 EXPOSE 8080
 
-CMD ["npm", "start"] 
+CMD ["npm", "run", "prod"] 
