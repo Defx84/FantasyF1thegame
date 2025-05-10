@@ -2,16 +2,13 @@ FROM node:18-slim
 
 # Prevent interactive prompts during package installation
 ENV DEBIAN_FRONTEND=noninteractive
-ENV PUPPETEER_SKIP_DOWNLOAD=true
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV NODE_ENV=production
 
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
-
-# Configure npm to skip Puppeteer download
-RUN npm config set puppeteer_skip_chromium_download true
 
 # Install Chromium and minimal dependencies
 RUN apt-get update && apt-get install -y \
