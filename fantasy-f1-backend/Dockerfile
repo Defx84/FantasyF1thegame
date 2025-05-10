@@ -1,3 +1,18 @@
+# Build stage
+FROM node:18-slim AS builder
+
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci
+
+# Copy source code
+COPY . .
+
+# Production stage
 FROM node:18-slim
 
 # Prevent interactive prompts during package installation
@@ -9,6 +24,9 @@ WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
+
+# Install only production dependencies
+RUN npm ci --omit=dev
 
 # Install Chromium and minimal dependencies
 RUN apt-get update && apt-get install -y \
@@ -29,13 +47,11 @@ RUN apt-get update && apt-get install -y \
     libxrandr2 \
     xdg-utils \
     --no-install-recommends \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
-# Install only production dependencies
-RUN npm ci --omit=dev
-
-# Copy the rest of the app
-COPY . .
+# Copy built application from builder stage
+COPY --from=builder /app/src ./src
 
 EXPOSE 8080
 
