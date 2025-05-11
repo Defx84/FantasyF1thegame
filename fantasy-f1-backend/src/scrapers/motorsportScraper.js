@@ -1,5 +1,6 @@
 require('dotenv').config();
 const puppeteer = require("puppeteer-extra");
+const puppeteerCore = require("puppeteer-core");
 const StealthPlugin = require("puppeteer-extra-plugin-stealth");
 const cron = require("node-cron");
 const moment = require("moment");
@@ -9,6 +10,8 @@ const path = require('path');
 const RaceResult = require("../models/RaceResult");
 const { processRawResults, calculateTeamPoints, normalizeDriverName, normalizeTeamName } = require("../utils/scoringUtils");
 const { ROUND_TO_RACE } = require("../constants/roundMapping");
+
+puppeteer.puppeteer = puppeteerCore;
 
 // Define sprint rounds for 2025 (China, Miami, Belgium, Austin, Brazil, Qatar)
 const SPRINT_ROUNDS = [2, 6, 13, 19, 21, 23];
@@ -54,8 +57,7 @@ async function saveSlugsToFile(slugs) {
 
 async function discoverMotorsportSlugs(year = new Date().getFullYear()) {
   console.log(`\n🔍 Discovering slugs for year ${year}...`);
-  const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium';
-  const browser = await puppeteer.launch({ headless: "new", executablePath, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+  const browser = await puppeteer.launch({ headless: "new", executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium' });
   const page = await browser.newPage();
 
   try {
@@ -106,8 +108,11 @@ async function discoverMotorsportSlugs(year = new Date().getFullYear()) {
 async function scrapeMotorsportResultsByType(slug, type) {
     let browser;
     try {
-        executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium';
-        browser = await puppeteer.launch({ executablePath, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+        browser = await puppeteer.launch({ 
+            headless: "new",
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium'
+        });
         const page = await browser.newPage();
         
         // Set a longer timeout for page operations

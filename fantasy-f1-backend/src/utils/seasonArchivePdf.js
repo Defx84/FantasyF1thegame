@@ -1,4 +1,4 @@
-const puppeteer = require('puppeteer');
+const puppeteer = require('puppeteer-core');
 const path = require('path');
 const fs = require('fs');
 
@@ -122,7 +122,7 @@ async function generateSeasonArchivePdf(league, seasonData, outputPath = null) {
   `;
 
   // 2. Use puppeteer to render HTML to PDF
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({ executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium' });
   const page = await browser.newPage();
   await page.setContent(html, { waitUntil: 'networkidle0' });
   const pdfBuffer = await page.pdf({ format: 'A4' });
