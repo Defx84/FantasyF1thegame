@@ -7,7 +7,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install dependencies
-RUN npm ci
+RUN npm install
 
 # Copy source code
 COPY . .
@@ -15,10 +15,9 @@ COPY . .
 # Production stage
 FROM node:18-slim
 
-# Prevent interactive prompts during package installation
-ENV DEBIAN_FRONTEND=noninteractive
-ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 ENV NODE_ENV=production
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 WORKDIR /app
 
@@ -26,7 +25,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install only production dependencies
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 
 # Install Chromium and minimal dependencies
 RUN apt-get update && apt-get install -y \
@@ -50,9 +49,9 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
-# Copy built application from builder stage
-COPY --from=builder /app/src ./src
+# Copy everything from builder stage
+COPY --from=builder /app ./
 
 EXPOSE 8080
 
-CMD ["npm", "run", "prod"] 
+CMD ["node", "src/server.js"] 
