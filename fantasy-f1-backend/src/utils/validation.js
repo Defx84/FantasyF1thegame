@@ -6,7 +6,7 @@ const {
     normalizedDriverNames,
     normalizedTeamNames
 } = require('../constants/f1Data2025');
-const { normalizeDriver, normalizeTeam } = require('../../../shared/normalization');
+const { normalizeDriver, normalizeTeam } = require('../../shared/normalization');
 
 // Export the lists for compatibility
 const drivers = F1_DRIVERS_2025.map(d => d.name);
