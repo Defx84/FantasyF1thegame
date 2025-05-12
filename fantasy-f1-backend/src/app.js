@@ -11,14 +11,24 @@ const app = express();
 
 // Middleware
 app.use(helmet());
+const allowedOrigins = [
+  'http://localhost:3000',
+  'http://localhost:3001',
+  'https://fantasy-f1-frontend.vercel.app',
+  'https://fantasy-f1-thegame.vercel.app',
+  'https://fantasyf1thegame-production.up.railway.app',
+  'https://thefantasyf1game.com'
+];
+
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || [
-    'http://localhost:3000',
-    'http://localhost:3001',
-    'https://fantasy-f1-frontend.vercel.app',
-    'https://fantasy-f1-thegame.vercel.app',
-    'https://fantasyf1thegame-production.up.railway.app'
-  ],
+  origin: function (origin, callback) {
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('Not allowed by CORS'), false);
+    }
+  },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
