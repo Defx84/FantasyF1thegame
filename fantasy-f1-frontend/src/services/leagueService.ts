@@ -2,7 +2,7 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 import { api } from './api';
 
-const API_URL = process.env.REACT_APP_API_BASE_URL + '/api/league';
+const API_URL = '/api/league';
 
 export interface League {
   _id: string;
@@ -78,9 +78,7 @@ export const createLeague = async (leagueData: {
   maxMembers?: number;
 }) => {
   try {
-    const response = await axios.post(API_URL, leagueData, {
-      headers: getAuthHeader()
-    });
+    const response = await api.post(API_URL, leagueData);
     return response.data;
   } catch (error) {
     throw error;
@@ -89,9 +87,7 @@ export const createLeague = async (leagueData: {
 
 export const joinLeague = async (code: string) => {
   try {
-    const response = await axios.post(`${API_URL}/join`, { code }, {
-      headers: getAuthHeader()
-    });
+    const response = await api.post(`${API_URL}/join`, { code });
     return response.data;
   } catch (error) {
     throw error;
@@ -100,9 +96,7 @@ export const joinLeague = async (code: string) => {
 
 export const getLeague = async (leagueId: string) => {
   try {
-    const response = await axios.get(`${API_URL}/${leagueId}`, {
-      headers: getAuthHeader()
-    });
+    const response = await api.get(`${API_URL}/${leagueId}`);
     return response.data;
   } catch (error) {
     throw error;
@@ -111,7 +105,7 @@ export const getLeague = async (leagueId: string) => {
 
 export const getLeagueByCode = async (code: string) => {
   try {
-    const response = await axios.get(`${API_URL}/code/${code}`);
+    const response = await api.get(`${API_URL}/code/${code}`);
     return response.data;
   } catch (error) {
     throw error;
@@ -119,9 +113,7 @@ export const getLeagueByCode = async (code: string) => {
 };
 
 export const getUserLeagues = async (): Promise<League[]> => {
-  const response = await axios.get(`${API_URL}/user/leagues`, {
-    headers: getAuthHeader()
-  });
+  const response = await api.get(`${API_URL}/user/leagues`);
   return response.data;
 };
 
