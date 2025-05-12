@@ -1,5 +1,5 @@
 const mongoose = require('mongoose');
-const { normalizeDriver, normalizeTeam, F1_DRIVERS_2025, F1_TEAMS_2025 } = require('../../../shared/normalization');
+const { normalizeDriver, normalizeTeam, F1_DRIVERS_2025, F1_TEAMS_2025 } = require('../../shared/normalization');
 const UsedSelection = require('./UsedSelection');
 
 // Helper function to normalize driver names (now uses shared)
