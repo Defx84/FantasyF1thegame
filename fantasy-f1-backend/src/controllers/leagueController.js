@@ -80,7 +80,7 @@ const joinLeague = async (req, res) => {
             await initializeRaceSelections(league._id, race._id, race.round);
         }
 
-        res.json({ message: 'Successfully joined league', league });
+        res.json(league);
     } catch (error) {
         console.error('Error joining league:', error);
         res.status(500).json({ message: 'Error joining league' });
