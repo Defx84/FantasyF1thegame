@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { getUserLeagues, League, deleteLeague, abandonLeague } from '../services/leagueService';
 import { FaUser, FaEnvelope, FaTrophy, FaKey, FaArrowLeft, FaTrash, FaSignOutAlt, FaEye } from 'react-icons/fa';
 import IconWrapper from '../utils/iconWrapper';
-import axios from 'axios';
+import { api } from '../services/api';
 
 const ProfilePage: React.FC = () => {
   const { user, logout, getToken } = useAuth();
@@ -58,9 +58,7 @@ const ProfilePage: React.FC = () => {
     setDeleting(true);
     setDeleteError(null);
     try {
-      await axios.delete('/api/auth/delete', {
-        headers: { Authorization: `Bearer ${getToken()}` }
-      });
+      await api.delete('/api/auth/delete');
       await logout();
       navigate('/');
     } catch (err: any) {
