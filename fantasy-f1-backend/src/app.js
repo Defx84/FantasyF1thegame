@@ -16,7 +16,8 @@ app.use(cors({
     'http://localhost:3000',
     'http://localhost:3001',
     'https://fantasy-f1-frontend.vercel.app',
-    'https://fantasy-f1-thegame.vercel.app'
+    'https://fantasy-f1-thegame.vercel.app',
+    'https://fantasyf1thegame-production.up.railway.app'
   ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
