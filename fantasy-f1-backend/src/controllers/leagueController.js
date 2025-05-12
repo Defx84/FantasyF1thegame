@@ -59,10 +59,10 @@ const createLeague = async (req, res) => {
 
 const joinLeague = async (req, res) => {
     try {
-        const { code } = req.params;
+        const { code } = req.body;
         const userId = req.user._id;
 
-        const league = await League.findOne({ inviteCode: code });
+        const league = await League.findOne({ code });
         if (!league) {
             return res.status(404).json({ message: 'League not found' });
         }
