@@ -1,7 +1,11 @@
 import axios, { AxiosInstance } from 'axios';
 
+if (!process.env.REACT_APP_API_BASE_URL) {
+  throw new Error('REACT_APP_API_BASE_URL is not set!');
+}
+
 const api: AxiosInstance = axios.create({
-  baseURL: process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000',
+  baseURL: process.env.REACT_APP_API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },

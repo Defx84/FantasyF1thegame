@@ -13,7 +13,10 @@ export const ENV: string = process.env.REACT_APP_ENV || 'development';
 export const IS_PRODUCTION: boolean = ENV === 'production';
 
 // API configuration
-export const API_BASE_URL: string = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+if (!process.env.REACT_APP_API_BASE_URL) {
+  throw new Error('REACT_APP_API_BASE_URL is not set!');
+}
+export const API_BASE_URL: string = process.env.REACT_APP_API_BASE_URL;
 
 // Feature flags
 export const FEATURES = {
