@@ -151,106 +151,102 @@ const Dashboard: React.FC = () => {
               </h1>
 
               {/* Action buttons */}
-              <div className="flex justify-center space-x-4">
-                <div className="card-container w-40 h-16">
-                <button
-                  onClick={() => {
-                    setActiveTab('create-league');
-                    setShowCreateLeagueForm(true);
-                  }}
+              <div className="flex flex-col sm:flex-row justify-center gap-4 w-full">
+                <div className="card-container w-full sm:w-40 h-16 mb-2 sm:mb-0">
+                  <button
+                    onClick={() => {
+                      setActiveTab('create-league');
+                      setShowCreateLeagueForm(true);
+                    }}
                     className="card-flip-half bg-red-500 text-white rounded-xl w-full h-full"
-                >
+                  >
                     <div className="card-front-half absolute inset-0 flex flex-row items-center justify-center p-6">
                       <IconWrapper icon={FaPlus} size={24} className="text-white mr-2" />
                       <span className="text-white text-base font-semibold">Create League</span>
-                  </div>
+                    </div>
                     <div className="card-back-half absolute inset-0 flex flex-row items-center justify-center p-6">
                       <IconWrapper icon={FaPlus} size={20} className="text-white mr-2" />
                       <span className="text-white text-base font-semibold">start your own</span>
-                  </div>
-                </button>
+                    </div>
+                  </button>
                 </div>
-
-                <div className="card-container w-40 h-16">
-                <button
-                  onClick={() => {
-                    setActiveTab('join-league');
-                    setShowJoinLeagueForm(true);
-                  }}
+                <div className="card-container w-full sm:w-40 h-16 mb-2 sm:mb-0">
+                  <button
+                    onClick={() => {
+                      setActiveTab('join-league');
+                      setShowJoinLeagueForm(true);
+                    }}
                     className="card-flip-half bg-red-500 text-white rounded-xl w-full h-full"
-                >
+                  >
                     <div className="card-front-half absolute inset-0 flex flex-row items-center justify-center p-6">
                       <IconWrapper icon={FaSearch} size={24} className="text-white mr-2" />
                       <span className="text-white text-base font-semibold">Join League</span>
-                  </div>
+                    </div>
                     <div className="card-back-half absolute inset-0 flex flex-row items-center justify-center p-6">
                       <IconWrapper icon={FaSearch} size={20} className="text-white mr-2" />
                       <span className="text-white text-base font-semibold">join your friends</span>
-                  </div>
-                </button>
+                    </div>
+                  </button>
                 </div>
-
-                <div className="card-container w-40 h-16">
-                <button
-                  onClick={() => setActiveTab('my-league')}
+                <div className="card-container w-full sm:w-40 h-16 mb-2 sm:mb-0">
+                  <button
+                    onClick={() => setActiveTab('my-league')}
                     className="card-flip-half bg-red-500 text-white rounded-xl w-full h-full"
-                >
+                  >
                     <div className="card-front-half absolute inset-0 flex flex-row items-center justify-center p-6">
                       <IconWrapper icon={FaUsers} size={24} className="text-white mr-2" />
                       <span className="text-white text-base font-semibold">My Leagues</span>
-                  </div>
+                    </div>
                     <div className="card-back-half absolute inset-0 flex flex-row items-center justify-center p-6">
                       <IconWrapper icon={FaUsers} size={20} className="text-white mr-2" />
                       <span className="text-white text-base font-semibold">explore</span>
-                  </div>
-                </button>
+                    </div>
+                  </button>
                 </div>
-
-                <div className="card-container w-40 h-16">
-                <button
-                  onClick={() => navigate('/rules')}
+                <div className="card-container w-full sm:w-40 h-16 mb-2 sm:mb-0">
+                  <button
+                    onClick={() => navigate('/rules')}
                     className="card-flip-half bg-red-500 text-white rounded-xl w-full h-full"
-                >
+                  >
                     <div className="card-front-half absolute inset-0 flex flex-row items-center justify-center p-6">
                       <IconWrapper icon={FaBook} size={24} className="text-white mr-2" />
                       <span className="text-white text-base font-semibold">Rules</span>
-                  </div>
+                    </div>
                     <div className="card-back-half absolute inset-0 flex flex-row items-center justify-center p-6">
                       <IconWrapper icon={FaBook} size={20} className="text-white mr-2" />
                       <span className="text-white text-base font-semibold">how to play</span>
-                  </div>
-                </button>
+                    </div>
+                  </button>
                 </div>
-
-                <div className="card-container w-40 h-16">
-                <button
-                  onClick={() => navigate('/info')}
+                <div className="card-container w-full sm:w-40 h-16">
+                  <button
+                    onClick={() => navigate('/info')}
                     className="card-flip-half bg-red-500 text-white rounded-xl w-full h-full"
-                >
+                  >
                     <div className="card-front-half absolute inset-0 flex flex-row items-center justify-center p-6">
                       <IconWrapper icon={FaInfoCircle} size={24} className="text-white mr-2" />
                       <span className="text-white text-base font-semibold">Info</span>
-                  </div>
+                    </div>
                     <div className="card-back-half absolute inset-0 flex flex-row items-center justify-center p-6">
                       <IconWrapper icon={FaInfoCircle} size={20} className="text-white mr-2" />
                       <span className="text-white text-base font-semibold">learn more</span>
-                  </div>
-                </button>
+                    </div>
+                  </button>
                 </div>
               </div>
             </div>
 
             {/* Split layout for countdown and right panel */}
-            <div className="flex flex-col md:flex-row gap-2 relative h-64 justify-center items-center">
+            <div className="flex flex-col md:flex-row gap-4 relative md:h-64 justify-center items-center mt-4">
               {/* Countdown - left half */}
-              <div className="w-full max-w-[400px] h-64 flex flex-col justify-center">
+              <div className="w-full md:max-w-[400px] h-auto md:h-64 flex flex-col justify-center mb-4 md:mb-0">
                 <div className="backdrop-blur-sm bg-white/[0.02] rounded-xl p-2 border border-white/10 w-full h-full flex flex-col justify-center overflow-hidden">
                   <NextRaceCountdown />
                 </div>
               </div>
 
               {/* Right panel: Flex-based carousel for create/join/my leagues */}
-              <div className="w-full max-w-[400px] h-64 flex flex-col justify-center">
+              <div className="w-full md:max-w-[400px] h-auto md:h-64 flex flex-col justify-center">
                 <div className="relative w-full h-full max-w-[400px] overflow-hidden">
                   <div
                     className="flex w-full h-full transition-transform duration-500"
