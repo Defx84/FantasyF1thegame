@@ -12,7 +12,12 @@ const app = express();
 // Middleware
 app.use(helmet());
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || ['http://localhost:3000', 'http://localhost:3001'],
+  origin: process.env.CORS_ORIGIN || [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'https://fantasy-f1-frontend.vercel.app',
+    'https://fantasy-f1-thegame.vercel.app'
+  ],
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
