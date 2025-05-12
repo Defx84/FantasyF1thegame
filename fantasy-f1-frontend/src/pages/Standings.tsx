@@ -243,7 +243,7 @@ const Standings: React.FC = () => {
       <div 
         className="fixed inset-0 w-full h-full"
         style={{
-          backgroundImage: 'url("/Standings.webp")',
+          backgroundImage: 'url("/standings.webp")',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
