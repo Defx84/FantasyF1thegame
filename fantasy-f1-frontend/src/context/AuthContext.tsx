@@ -19,6 +19,8 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
 
+console.log('REACT_APP_API_BASE_URL:', process.env.REACT_APP_API_BASE_URL);
+
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
