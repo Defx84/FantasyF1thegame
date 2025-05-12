@@ -23,6 +23,8 @@ interface Team {
   color: string;
 }
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+
 const NextRaceSelections: React.FC = () => {
   const navigate = useNavigate();
   const { leagueId } = useParams<{ leagueId: string }>();
@@ -362,7 +364,7 @@ const NextRaceSelections: React.FC = () => {
     setSwitcherooError(null);
     try {
       const accessToken = localStorage.getItem('token');
-      const res = await fetch(`/api/switcheroo/remaining`, {
+      const res = await fetch(`${API_BASE_URL}/api/switcheroo/remaining`, {
         headers: {
           Authorization: `Bearer ${accessToken}`
         }
