@@ -18,4 +18,7 @@ router.get('/:leagueId/history', validateObjectId, switcherooController.getSwitc
 // Perform a switcheroo
 router.post('/', validateSwitcherooInput, switcherooController.performSwitcheroo);
 
+// Get switcheroo window status for a race
+router.get('/window-status', switcherooController.getSwitcherooWindowStatus);
+
 module.exports = router; 

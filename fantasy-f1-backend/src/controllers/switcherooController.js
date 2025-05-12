@@ -135,8 +135,25 @@ const performSwitcheroo = async (req, res) => {
   }
 };
 
+const getSwitcherooWindowStatus = async (req, res) => {
+  try {
+    const { raceId } = req.query;
+    if (!raceId) {
+      return res.status(400).json({ message: 'raceId is required' });
+    }
+    const race = await RaceResult.findOne({ round: Number(raceId) });
+    if (!race) {
+      return res.status(404).json({ message: 'Race not found' });
+    }
+    res.json({ isSwitcherooAllowed: race.isSwitcherooAllowed() });
+  } catch (error) {
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
 module.exports = {
   getRemainingSwitcheroos,
   getSwitcherooHistory,
-  performSwitcheroo
+  performSwitcheroo,
+  getSwitcherooWindowStatus
 }; 
