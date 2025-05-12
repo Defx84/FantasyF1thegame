@@ -146,92 +146,92 @@ const Dashboard: React.FC = () => {
             {/* Menu block */}
             <div className="backdrop-blur-sm bg-white/[0.02] rounded-xl p-8 border border-white/10 mb-12">
               {/* Main header */}
-              <h1 className="text-5xl font-bold text-white text-center mb-12 tracking-wider">
+              <h1 className="mx-auto max-w-xs sm:max-w-md md:max-w-2xl text-3xl sm:text-4xl md:text-5xl font-bold text-white text-center mb-12 tracking-wider break-words">
                 <span className="text-white">TheFantasy</span><span className="text-red-500">F1</span><span className="text-white">game</span>
               </h1>
 
               {/* Action buttons */}
               <div className="flex flex-col sm:flex-row justify-center gap-4 w-full">
                 <div className="card-container w-full sm:w-40 h-16 mb-2 sm:mb-0">
-                  <button
-                    onClick={() => {
-                      setActiveTab('create-league');
-                      setShowCreateLeagueForm(true);
-                    }}
+                <button
+                  onClick={() => {
+                    setActiveTab('create-league');
+                    setShowCreateLeagueForm(true);
+                  }}
                     className="card-flip-half bg-red-500 text-white rounded-xl w-full h-full"
-                  >
+                >
                     <div className="card-front-half absolute inset-0 flex flex-row items-center justify-center p-6">
                       <IconWrapper icon={FaPlus} size={24} className="text-white mr-2" />
                       <span className="text-white text-base font-semibold">Create League</span>
-                    </div>
+                  </div>
                     <div className="card-back-half absolute inset-0 flex flex-row items-center justify-center p-6">
                       <IconWrapper icon={FaPlus} size={20} className="text-white mr-2" />
                       <span className="text-white text-base font-semibold">start your own</span>
-                    </div>
-                  </button>
+                  </div>
+                </button>
                 </div>
                 <div className="card-container w-full sm:w-40 h-16 mb-2 sm:mb-0">
-                  <button
-                    onClick={() => {
-                      setActiveTab('join-league');
-                      setShowJoinLeagueForm(true);
-                    }}
+                <button
+                  onClick={() => {
+                    setActiveTab('join-league');
+                    setShowJoinLeagueForm(true);
+                  }}
                     className="card-flip-half bg-red-500 text-white rounded-xl w-full h-full"
-                  >
+                >
                     <div className="card-front-half absolute inset-0 flex flex-row items-center justify-center p-6">
                       <IconWrapper icon={FaSearch} size={24} className="text-white mr-2" />
                       <span className="text-white text-base font-semibold">Join League</span>
-                    </div>
+                  </div>
                     <div className="card-back-half absolute inset-0 flex flex-row items-center justify-center p-6">
                       <IconWrapper icon={FaSearch} size={20} className="text-white mr-2" />
                       <span className="text-white text-base font-semibold">join your friends</span>
-                    </div>
-                  </button>
+                  </div>
+                </button>
                 </div>
                 <div className="card-container w-full sm:w-40 h-16 mb-2 sm:mb-0">
-                  <button
-                    onClick={() => setActiveTab('my-league')}
+                <button
+                  onClick={() => setActiveTab('my-league')}
                     className="card-flip-half bg-red-500 text-white rounded-xl w-full h-full"
-                  >
+                >
                     <div className="card-front-half absolute inset-0 flex flex-row items-center justify-center p-6">
                       <IconWrapper icon={FaUsers} size={24} className="text-white mr-2" />
                       <span className="text-white text-base font-semibold">My Leagues</span>
-                    </div>
+                  </div>
                     <div className="card-back-half absolute inset-0 flex flex-row items-center justify-center p-6">
                       <IconWrapper icon={FaUsers} size={20} className="text-white mr-2" />
                       <span className="text-white text-base font-semibold">explore</span>
-                    </div>
-                  </button>
+                  </div>
+                </button>
                 </div>
                 <div className="card-container w-full sm:w-40 h-16 mb-2 sm:mb-0">
-                  <button
-                    onClick={() => navigate('/rules')}
+                <button
+                  onClick={() => navigate('/rules')}
                     className="card-flip-half bg-red-500 text-white rounded-xl w-full h-full"
-                  >
+                >
                     <div className="card-front-half absolute inset-0 flex flex-row items-center justify-center p-6">
                       <IconWrapper icon={FaBook} size={24} className="text-white mr-2" />
                       <span className="text-white text-base font-semibold">Rules</span>
-                    </div>
+                  </div>
                     <div className="card-back-half absolute inset-0 flex flex-row items-center justify-center p-6">
                       <IconWrapper icon={FaBook} size={20} className="text-white mr-2" />
                       <span className="text-white text-base font-semibold">how to play</span>
-                    </div>
-                  </button>
+                  </div>
+                </button>
                 </div>
                 <div className="card-container w-full sm:w-40 h-16">
-                  <button
-                    onClick={() => navigate('/info')}
+                <button
+                  onClick={() => navigate('/info')}
                     className="card-flip-half bg-red-500 text-white rounded-xl w-full h-full"
-                  >
+                >
                     <div className="card-front-half absolute inset-0 flex flex-row items-center justify-center p-6">
                       <IconWrapper icon={FaInfoCircle} size={24} className="text-white mr-2" />
                       <span className="text-white text-base font-semibold">Info</span>
-                    </div>
+                  </div>
                     <div className="card-back-half absolute inset-0 flex flex-row items-center justify-center p-6">
                       <IconWrapper icon={FaInfoCircle} size={20} className="text-white mr-2" />
                       <span className="text-white text-base font-semibold">learn more</span>
-                    </div>
-                  </button>
+                  </div>
+                </button>
                 </div>
               </div>
             </div>
