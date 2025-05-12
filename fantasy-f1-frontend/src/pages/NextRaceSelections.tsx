@@ -467,9 +467,9 @@ const NextRaceSelections: React.FC = () => {
           </div>
 
           {/* Main content area with selections and utility panel */}
-          <div className="flex max-w-7xl mx-auto gap-6">
+          <div className="flex flex-col lg:flex-row max-w-7xl mx-auto gap-6">
             {/* Selection columns */}
-            <div className="flex-1 grid grid-cols-3 gap-4">
+            <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Main Driver */}
               <div className="backdrop-blur-sm bg-black/20 rounded-lg p-3 flex flex-col max-h-[calc(100vh-180px)]">
                 <h3 className="text-lg font-bold mb-2 text-center">Main Driver</h3>
@@ -504,7 +504,7 @@ const NextRaceSelections: React.FC = () => {
             </div>
 
             {/* Utility panel with Switcheroo and main actions */}
-            <div className="w-64 flex flex-col justify-center">
+            <div className="w-full lg:w-64 flex flex-col justify-center mt-6 lg:mt-0">
               <div className="backdrop-blur-sm bg-black/20 rounded-lg p-6 text-center space-y-4">
                 <div className="flex flex-col items-center gap-4">
                   <button
