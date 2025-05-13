@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { FaSignOutAlt, FaUser, FaPlus, FaUsers, FaCalendarAlt, FaBook, FaSearch, FaTimes, FaTrophy, FaInfoCircle, FaInstagram } from 'react-icons/fa';
 import IconWrapper from '../utils/iconWrapper';
@@ -21,6 +21,7 @@ const Dashboard: React.FC = () => {
   const [userLeagues, setUserLeagues] = useState<League[]>([]);
   const [isLoadingLeagues, setIsLoadingLeagues] = useState(false);
   const navigate = useNavigate();
+  const carouselSectionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchUserLeagues = async () => {
@@ -43,6 +44,15 @@ const Dashboard: React.FC = () => {
   const handleProfileClick = () => {
     // TODO: Navigate to user profile
     console.log('Navigate to profile');
+  };
+
+  const handleTabAndScroll = (tab: string, showFormSetter?: (v: boolean) => void) => {
+    setActiveTab(tab);
+    if (showFormSetter) showFormSetter(true);
+    // Only scroll on mobile
+    if (window.innerWidth < 768 && carouselSectionRef.current) {
+      carouselSectionRef.current.scrollIntoView({ behavior: 'smooth' });
+    }
   };
 
   const handleCreateLeague = async (e: React.FormEvent) => {
@@ -171,10 +181,7 @@ const Dashboard: React.FC = () => {
               <div className="flex flex-col sm:flex-row justify-center gap-4 w-full">
                 <div className="card-container w-full sm:w-40 h-16 mb-2 sm:mb-0">
                 <button
-                  onClick={() => {
-                    setActiveTab('create-league');
-                    setShowCreateLeagueForm(true);
-                  }}
+                  onClick={() => handleTabAndScroll('create-league', setShowCreateLeagueForm)}
                     className="card-flip-half bg-red-500 text-white rounded-xl w-full h-full"
                 >
                     <div className="card-front-half absolute inset-0 flex flex-row items-center justify-center p-6">
@@ -189,10 +196,7 @@ const Dashboard: React.FC = () => {
                 </div>
                 <div className="card-container w-full sm:w-40 h-16 mb-2 sm:mb-0">
                 <button
-                  onClick={() => {
-                    setActiveTab('join-league');
-                    setShowJoinLeagueForm(true);
-                  }}
+                  onClick={() => handleTabAndScroll('join-league', setShowJoinLeagueForm)}
                     className="card-flip-half bg-red-500 text-white rounded-xl w-full h-full"
                 >
                     <div className="card-front-half absolute inset-0 flex flex-row items-center justify-center p-6">
@@ -207,7 +211,7 @@ const Dashboard: React.FC = () => {
                 </div>
                 <div className="card-container w-full sm:w-40 h-16 mb-2 sm:mb-0">
                 <button
-                  onClick={() => setActiveTab('my-league')}
+                  onClick={() => handleTabAndScroll('my-league')}
                     className="card-flip-half bg-red-500 text-white rounded-xl w-full h-full"
                 >
                     <div className="card-front-half absolute inset-0 flex flex-row items-center justify-center p-6">
@@ -254,7 +258,7 @@ const Dashboard: React.FC = () => {
             </div>
 
             {/* Split layout for countdown and right panel */}
-            <div className="flex flex-col md:flex-row gap-4 relative md:h-64 justify-center items-center mt-4">
+            <div ref={carouselSectionRef} className="flex flex-col md:flex-row gap-4 relative md:h-64 justify-center items-center mt-4">
               {/* Countdown - left half */}
               <div className="w-full md:max-w-[400px] h-auto md:h-64 flex flex-col justify-center mb-4 md:mb-0">
                 <div className="backdrop-blur-sm bg-white/[0.02] rounded-xl p-2 border border-white/10 w-full h-full flex flex-col justify-center overflow-hidden">
