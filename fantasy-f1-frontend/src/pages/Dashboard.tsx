@@ -6,6 +6,8 @@ import { useNavigate } from 'react-router-dom';
 import { createLeague, joinLeague, getUserLeagues, League } from '../services/leagueService';
 import NextRaceCountdown from '../components/NextRaceCountdown';
 
+const TypedInstagramIcon = FaInstagram as unknown as React.FC<{ size?: number; className?: string }>;
+
 const Dashboard: React.FC = () => {
   const { user, logout, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('create-league');
@@ -123,7 +125,7 @@ const Dashboard: React.FC = () => {
           className="absolute top-4 right-4 z-20"
           title="Follow us on Instagram"
         >
-          <FaInstagram
+          <TypedInstagramIcon
             size={24}
             className="text-transparent bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 bg-clip-text drop-shadow-md hover:scale-110 transition-transform duration-150"
           />
