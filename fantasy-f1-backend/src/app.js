@@ -12,10 +12,10 @@ const app = express();
 // Middleware
 app.use(helmet());
 const allowedOrigins = [
-  'http://localhost:3000',
-  'http://localhost:3001',
-  'https://fantasy-f1-frontend.vercel.app',
-  'https://fantasy-f1-thegame.vercel.app',
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'https://fantasy-f1-frontend.vercel.app',
+    'https://fantasy-f1-thegame.vercel.app',
   'https://fantasyf1thegame-production.up.railway.app',
   'https://thefantasyf1game.com'
 ];

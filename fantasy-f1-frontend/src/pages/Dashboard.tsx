@@ -5,6 +5,7 @@ import IconWrapper from '../utils/iconWrapper';
 import { useNavigate } from 'react-router-dom';
 import { createLeague, joinLeague, getUserLeagues, League } from '../services/leagueService';
 import NextRaceCountdown from '../components/NextRaceCountdown';
+import BulletinBoard from '../components/BulletinBoard';
 
 const TypedInstagramIcon = FaInstagram as unknown as React.FC<{ size?: number; className?: string }>;
 
@@ -257,18 +258,18 @@ const Dashboard: React.FC = () => {
               </div>
             </div>
 
-            {/* Split layout for countdown and right panel */}
+            {/* Split layout for countdown, carousel, and bulletin board */}
             <div ref={carouselSectionRef} className="flex flex-col md:flex-row gap-4 relative md:h-64 justify-center items-center mt-4">
-              {/* Countdown - left half */}
-              <div className="w-full md:max-w-[400px] h-auto md:h-64 flex flex-col justify-center mb-4 md:mb-0">
+              {/* Next Race Countdown */}
+              <div className="w-full md:w-1/3 h-auto md:h-64 flex flex-col justify-center mb-4 md:mb-0">
                 <div className="backdrop-blur-sm bg-white/[0.02] rounded-xl p-2 border border-white/10 w-full h-full flex flex-col justify-center overflow-hidden">
                   <NextRaceCountdown />
                 </div>
               </div>
 
-              {/* Right panel: Flex-based carousel for create/join/my leagues */}
-              <div className="w-full md:max-w-[400px] h-auto md:h-64 flex flex-col justify-center">
-                <div className="relative w-full h-full max-w-[400px] overflow-hidden">
+              {/* Carousel for create/join/my leagues */}
+              <div className="w-full md:w-1/3 h-auto md:h-64 flex flex-col justify-center">
+                <div className="relative w-full h-full max-w-full overflow-hidden">
                   <div
                     className="flex w-full h-full transition-transform duration-500"
                     style={{ transform: `translateX(-${['create-league', 'join-league', 'my-league'].indexOf(activeTab) * 100}%)` }}
@@ -391,6 +392,11 @@ const Dashboard: React.FC = () => {
                     </div>
                   </div>
                 </div>
+              </div>
+
+              {/* Bulletin Board */}
+              <div className="w-full md:w-1/3 h-auto md:h-64 flex flex-col justify-center">
+                <BulletinBoard />
               </div>
             </div>
           </div>
