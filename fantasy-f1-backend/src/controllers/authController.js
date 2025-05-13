@@ -251,7 +251,8 @@ const getCurrentUser = async (req, res) => {
                 email: user.email,
                 username: user.username,
                 isAdmin: leagues.length > 0,
-                adminLeagues: leagues
+                adminLeagues: leagues,
+                isAppAdmin: user.isAppAdmin
             }
         });
     } catch (error) {
