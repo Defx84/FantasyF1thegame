@@ -116,7 +116,9 @@ const Dashboard: React.FC = () => {
 
       {/* Content wrapper */}
       <div className="relative min-h-screen">
-        {/* Instagram Icon Top Right */}
+        {/* Semi-transparent overlay */}
+        <div className="absolute inset-0 bg-black bg-opacity-30" />
+        {/* Instagram Icon Top Right (moved after overlay for visibility) */}
         <a
           href="https://instagram.com/thefantasyf1game"
           target="_blank"
@@ -130,8 +132,6 @@ const Dashboard: React.FC = () => {
             className="text-transparent bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 bg-clip-text drop-shadow-md hover:scale-110 transition-transform duration-150"
           />
         </a>
-        {/* Semi-transparent overlay */}
-        <div className="absolute inset-0 bg-black bg-opacity-30" />
 
         {/* Main content */}
         <div className="relative z-10 min-h-screen p-4 md:p-8">
