@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { FaSignOutAlt, FaUser, FaPlus, FaUsers, FaCalendarAlt, FaBook, FaSearch, FaTimes, FaTrophy, FaInfoCircle } from 'react-icons/fa';
+import { FaSignOutAlt, FaUser, FaPlus, FaUsers, FaCalendarAlt, FaBook, FaSearch, FaTimes, FaTrophy, FaInfoCircle, FaInstagram } from 'react-icons/fa';
 import IconWrapper from '../utils/iconWrapper';
 import { useNavigate } from 'react-router-dom';
 import { createLeague, joinLeague, getUserLeagues, League } from '../services/leagueService';
@@ -114,6 +114,20 @@ const Dashboard: React.FC = () => {
 
       {/* Content wrapper */}
       <div className="relative min-h-screen">
+        {/* Instagram Icon Top Right */}
+        <a
+          href="https://instagram.com/thefantasyf1game"
+          target="_blank"
+          rel="noopener noreferrer"
+          aria-label="Instagram @thefantasyf1game"
+          className="absolute top-4 right-4 z-20"
+          title="Follow us on Instagram"
+        >
+          <FaInstagram
+            size={24}
+            className="text-transparent bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 bg-clip-text drop-shadow-md hover:scale-110 transition-transform duration-150"
+          />
+        </a>
         {/* Semi-transparent overlay */}
         <div className="absolute inset-0 bg-black bg-opacity-30" />
 
