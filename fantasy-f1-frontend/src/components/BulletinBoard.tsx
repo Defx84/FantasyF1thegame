@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { FaPlus } from 'react-icons/fa';
+import { FaPlus, FaTrash } from 'react-icons/fa';
 
 interface Announcement {
   _id: string;
@@ -11,6 +11,7 @@ interface Announcement {
 }
 
 const TypedFaPlus = FaPlus as unknown as React.FC<{ size?: number; className?: string }>;
+const TypedFaTrash = FaTrash as unknown as React.FC<{ size?: number; className?: string }>;
 
 const BulletinBoard: React.FC = () => {
   const { user } = useAuth();
@@ -48,6 +49,17 @@ const BulletinBoard: React.FC = () => {
       fetchAnnouncements();
     } catch (err) {
       setError('Failed to post announcement');
+    }
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!window.confirm('Are you sure you want to delete this announcement?')) return;
+    setError('');
+    try {
+      await api.delete(`/api/announcements/${id}`);
+      fetchAnnouncements();
+    } catch (err) {
+      setError('Failed to delete announcement');
     }
   };
 
@@ -101,7 +113,18 @@ const BulletinBoard: React.FC = () => {
             <li key={a._id} className="bg-white/10 rounded p-2 border border-white/10">
               <div className="flex items-center justify-between mb-1">
                 <span className="font-semibold text-white text-sm">{a.title}</span>
-                <span className="text-xs text-white/60">{new Date(a.createdAt).toLocaleString()}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-white/60">{new Date(a.createdAt).toLocaleString()}</span>
+                  {user?.isAppAdmin && (
+                    <button
+                      className="ml-2 text-red-400 hover:text-red-600 transition-colors"
+                      title="Delete announcement"
+                      onClick={() => handleDelete(a._id)}
+                    >
+                      <TypedFaTrash size={16} />
+                    </button>
+                  )}
+                </div>
               </div>
               <div className="text-white/90 text-xs whitespace-pre-line">{a.content}</div>
             </li>
