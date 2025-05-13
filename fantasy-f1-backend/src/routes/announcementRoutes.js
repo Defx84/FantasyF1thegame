@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const announcementController = require('../controllers/announcementController');
 const { auth } = require('../middleware/auth');
+const isAppAdmin = require('../middleware/isAppAdmin');
 
 // Debug logging
 console.log({
@@ -16,9 +17,9 @@ console.log({
 router.get('/active', auth, announcementController.getActiveAnnouncements);
 
 // System admin routes
-router.get('/', auth, announcementController.getAllAnnouncements);
-router.post('/', auth, announcementController.createAnnouncement);
-router.put('/:id', auth, announcementController.updateAnnouncement);
-router.delete('/:id', auth, announcementController.deleteAnnouncement);
+router.get('/', auth, isAppAdmin, announcementController.getAllAnnouncements);
+router.post('/', auth, isAppAdmin, announcementController.createAnnouncement);
+router.put('/:id', auth, isAppAdmin, announcementController.updateAnnouncement);
+router.delete('/:id', auth, isAppAdmin, announcementController.deleteAnnouncement);
 
 module.exports = router; 
