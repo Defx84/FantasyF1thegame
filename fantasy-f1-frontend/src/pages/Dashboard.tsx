@@ -161,7 +161,7 @@ const Dashboard: React.FC = () => {
                   >
                     <TypedInstagramIcon
                       size={28}
-                      className="text-transparent bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 bg-clip-text drop-shadow-md hover:scale-110 transition-transform duration-150"
+                      className="text-pink-500 hover:scale-110 transition-transform duration-150"
                     />
                   </a>
                 </h1>
