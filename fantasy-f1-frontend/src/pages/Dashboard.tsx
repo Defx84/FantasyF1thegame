@@ -159,10 +159,12 @@ const Dashboard: React.FC = () => {
                     className="ml-3 align-middle"
                     title="Follow us on Instagram"
                   >
-                    <TypedInstagramIcon
-                      size={28}
-                      className="text-pink-500 hover:scale-110 transition-transform duration-150"
-                    />
+                    <span className="bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 bg-clip-text text-transparent">
+                      <TypedInstagramIcon
+                        size={28}
+                        className="hover:scale-110 transition-transform duration-150"
+                      />
+                    </span>
                   </a>
                 </h1>
               </div>
