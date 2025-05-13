@@ -159,23 +159,23 @@ const Dashboard: React.FC = () => {
             {/* Menu block */}
             <div className="backdrop-blur-sm bg-white/[0.02] rounded-xl p-8 border border-white/10 mb-12">
               {/* Main header with Instagram icon aligned right */}
-              <div className="flex items-center justify-center md:justify-between mb-12 gap-4 relative">
-                <h1 className="mx-auto max-w-xs sm:max-w-md md:max-w-2xl text-3xl sm:text-4xl md:text-5xl font-bold text-white text-center tracking-wider break-words flex-1">
+              <div className="flex items-center justify-center mb-12 gap-4 relative">
+                <h1 className="flex items-center mx-auto max-w-xs sm:max-w-md md:max-w-2xl text-3xl sm:text-4xl md:text-5xl font-bold text-white text-center tracking-wider break-words">
                   <span className="text-white">TheFantasy</span><span className="text-red-500">F1</span><span className="text-white">game</span>
+                  <a
+                    href="https://instagram.com/thefantasyf1game"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Instagram @thefantasyf1game"
+                    className="ml-3 align-middle"
+                    title="Follow us on Instagram"
+                  >
+                    <TypedInstagramIcon
+                      size={28}
+                      className="text-transparent bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 bg-clip-text drop-shadow-md hover:scale-110 transition-transform duration-150"
+                    />
+                  </a>
                 </h1>
-                <a
-                  href="https://instagram.com/thefantasyf1game"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  aria-label="Instagram @thefantasyf1game"
-                  className="ml-2 md:ml-4 flex-shrink-0"
-                  title="Follow us on Instagram"
-                >
-                  <TypedInstagramIcon
-                    size={28}
-                    className="text-transparent bg-gradient-to-tr from-yellow-400 via-pink-500 to-purple-600 bg-clip-text drop-shadow-md hover:scale-110 transition-transform duration-150"
-                  />
-                </a>
               </div>
 
               {/* Action buttons */}
