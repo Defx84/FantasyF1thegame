@@ -127,10 +127,7 @@ const Dashboard: React.FC = () => {
           className="absolute top-4 right-4 z-20"
           title="Follow us on Instagram"
         >
-          <TypedInstagramIcon
-            size={24}
-            className="text-pink-500"
-          />
+          <span className="text-pink-500 font-bold text-xl">IG</span>
         </a>
 
         {/* Main content */}
