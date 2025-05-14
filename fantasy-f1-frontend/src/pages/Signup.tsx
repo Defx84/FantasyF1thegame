@@ -77,7 +77,7 @@ const Signup: React.FC = () => {
               <h1 className="flex flex-col gap-2">
                 <span className="text-xl font-medium text-white/80">Join</span>
                 <span className="text-3xl font-bold text-red-500 animate-pulse drop-shadow-[0_0_10px_rgba(239,68,68,0.7)] [text-shadow:_2px_2px_0_rgb(0_0_0),_-2px_-2px_0_rgb(0_0_0),_2px_-2px_0_rgb(0_0_0),_-2px_2px_0_rgb(0_0_0)]">
-                  FantasyF1thegame
+                  the<span className="text-red-500">fantasyF1</span>game
                 </span>
               </h1>
             </div>
