@@ -2,6 +2,7 @@ const User = require('../models/User');
 const RaceSelection = require('../models/RaceSelection');
 const RaceResult = require('../models/RaceResult');
 const mongoose = require('mongoose');
+const Switcheroo = require('../models/Switcheroo');
 
 const MAX_SWITCHEROOS_PER_SEASON = 3;
 
@@ -10,13 +11,16 @@ const MAX_SWITCHEROOS_PER_SEASON = 3;
  */
 const getRemainingSwitcheroos = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).lean();
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+    const { leagueId } = req.query;
+    if (!leagueId) {
+      return res.status(400).json({ message: 'League ID is required' });
     }
-
+    const switcherooCount = await Switcheroo.countDocuments({
+      user: req.user._id,
+      league: leagueId
+    });
     return res.json({
-      remaining: user.switcheroos?.remaining ?? MAX_SWITCHEROOS_PER_SEASON,
+      remaining: MAX_SWITCHEROOS_PER_SEASON - switcherooCount,
       total: MAX_SWITCHEROOS_PER_SEASON
     });
   } catch (error) {

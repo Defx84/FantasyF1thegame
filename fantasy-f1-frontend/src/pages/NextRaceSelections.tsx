@@ -364,11 +364,13 @@ const NextRaceSelections: React.FC = () => {
     setSwitcherooError(null);
     try {
       const accessToken = localStorage.getItem('token');
-      const res = await fetch(`${API_BASE_URL}/api/switcheroo/remaining`, {
-        headers: {
-          Authorization: `Bearer ${accessToken}`
+      const res = await fetch(`${API_BASE_URL}/api/switcheroo/remaining?leagueId=${leagueId}`,
+        {
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
         }
-      });
+      );
       if (!res.ok) throw new Error('Failed to fetch switcheroo count');
       const data = await res.json();
       setSwitcherooCount(data.remaining);
