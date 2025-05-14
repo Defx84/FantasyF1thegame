@@ -398,7 +398,9 @@ const NextRaceSelections: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchSwitcherooWindowStatus();
+    if (raceData?.round) {
+      fetchSwitcherooWindowStatus();
+    }
   }, [raceData]);
 
   // Switcheroo handler
