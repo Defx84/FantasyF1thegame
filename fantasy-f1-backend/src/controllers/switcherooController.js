@@ -3,6 +3,7 @@ const RaceSelection = require('../models/RaceSelection');
 const RaceResult = require('../models/RaceResult');
 const Switcheroo = require('../models/Switcheroo');
 const mongoose = require('mongoose');
+const Switcheroo = require('../models/Switcheroo');
 
 const MAX_SWITCHEROOS_PER_SEASON = 3;
 
