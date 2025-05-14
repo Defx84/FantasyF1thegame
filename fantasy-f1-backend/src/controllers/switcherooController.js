@@ -1,22 +1,26 @@
 const User = require('../models/User');
 const RaceSelection = require('../models/RaceSelection');
 const RaceResult = require('../models/RaceResult');
+const Switcheroo = require('../models/Switcheroo');
 const mongoose = require('mongoose');
 
 const MAX_SWITCHEROOS_PER_SEASON = 3;
 
 /**
- * Get the number of remaining switcheroos for a user
+ * Get the number of remaining switcheroos for a user in a league
  */
 const getRemainingSwitcheroos = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id).lean();
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+    const { leagueId } = req.query;
+    if (!leagueId) {
+      return res.status(400).json({ message: 'League ID is required' });
     }
-
+    const switcherooCount = await Switcheroo.countDocuments({
+      user: req.user._id,
+      league: leagueId
+    });
     return res.json({
-      remaining: user.switcheroos?.remaining ?? MAX_SWITCHEROOS_PER_SEASON,
+      remaining: MAX_SWITCHEROOS_PER_SEASON - switcherooCount,
       total: MAX_SWITCHEROOS_PER_SEASON
     });
   } catch (error) {
@@ -26,19 +30,22 @@ const getRemainingSwitcheroos = async (req, res) => {
 };
 
 /**
- * Get the switcheroo history for a user
+ * Get the switcheroo history for a user in a league
  */
 const getSwitcherooHistory = async (req, res) => {
   try {
-    const user = await User.findById(req.user._id)
-      .populate('switcheroos.used.leagueId', 'name')
-      .lean();
-    
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
+    const leagueId = req.params.leagueId;
+    if (!leagueId) {
+      return res.status(400).json({ message: 'League ID is required' });
     }
-
-    return res.json(user.switcheroos?.used || []);
+    const history = await Switcheroo.find({
+      user: req.user._id,
+      league: leagueId
+    })
+      .sort({ timeUsed: -1 })
+      .populate('race', 'raceName date')
+      .lean();
+    return res.json(history);
   } catch (error) {
     console.error('Error in getSwitcherooHistory:', error);
     return res.status(500).json({ message: 'Internal server error' });
@@ -49,87 +56,55 @@ const getSwitcherooHistory = async (req, res) => {
  * Perform a switcheroo for a user in a league
  */
 const performSwitcheroo = async (req, res) => {
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
     const { raceId, leagueId, originalDriver, newDriver } = req.body;
-
-    // Validate required fields
     if (!raceId || !leagueId || !originalDriver || !newDriver) {
-      return res.status(400).json({ 
-        message: 'Race ID, League ID, original driver, and new driver are required' 
-      });
+      return res.status(400).json({ message: 'Race ID, League ID, original driver, and new driver are required' });
     }
-
-    // Get user with their switcheroo data
-    const user = await User.findById(req.user._id).session(session);
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
     // Check remaining switcheroos
-    const remaining = user.switcheroos?.remaining ?? MAX_SWITCHEROOS_PER_SEASON;
-    if (remaining <= 0) {
+    const switcherooCount = await Switcheroo.countDocuments({
+      user: req.user._id,
+      league: leagueId
+    });
+    if (switcherooCount >= MAX_SWITCHEROOS_PER_SEASON) {
       return res.status(400).json({ message: 'No switcheroos remaining' });
     }
-
-    // Check if race is locked
-    const race = await RaceResult.findOne({ round: Number(raceId) }).lean();
-    if (!race) {
-      return res.status(404).json({ message: 'Race not found' });
-    }
-    if (race.isLocked) {
-      return res.status(400).json({ message: 'Race is locked' });
-    }
-
-    // Check if switcheroo is allowed based on race timing
-    const isSwitcherooWindow = race.isSwitcherooAllowed();
-    if (!isSwitcherooWindow) {
-      return res.status(400).json({ message: 'Switcheroo is not allowed at this time' });
-    }
-
     // Get user's selection
     const selection = await RaceSelection.findOne({
       user: req.user._id,
       league: leagueId,
       round: Number(raceId)
-    }).session(session);
-
+    });
     if (!selection) {
       return res.status(404).json({ message: 'Selection not found' });
     }
-
-    // Update user's switcheroo count and history
-    user.switcheroos.remaining = remaining - 1;
-    user.switcheroos.used.push({
-      round: race.round,
-      date: new Date(),
-      leagueId,
+    // Verify original driver is in selection
+    const hasDriver = selection.mainDriver === originalDriver || selection.reserveDriver === originalDriver;
+    if (!hasDriver) {
+      return res.status(400).json({ message: 'Original driver not found in selection' });
+    }
+    // Update selection with new driver
+    if (selection.mainDriver === originalDriver) {
+      selection.mainDriver = newDriver;
+    } else {
+      selection.reserveDriver = newDriver;
+    }
+    await selection.save();
+    // Create switcheroo record
+    const switcheroo = new Switcheroo({
+      user: req.user._id,
+      league: leagueId,
+      race: raceId,
       originalDriver,
-      newDriver
+      newDriver,
+      timeUsed: new Date()
     });
-
-    // Save all changes in a transaction
-    await Promise.all([
-      user.save({ session })
-    ]);
-
-    await session.commitTransaction();
-    console.log('Transaction committed');
-    session.endSession();
-
-    // Re-fetch fresh selection from DB
-    const updatedSelection = await RaceSelection.findById(selection._id);
-    console.log('Re-fetched selection:', updatedSelection);
-    res.status(200).json({
+    await switcheroo.save();
+    return res.json({
       message: 'Switcheroo performed successfully',
-      updatedSelection,
-      remainingSwitcheroos: user.switcheroos.remaining,
-      switcherooHistory: user.switcheroos.used,
+      remaining: MAX_SWITCHEROOS_PER_SEASON - (switcherooCount + 1)
     });
   } catch (error) {
-    await session.abortTransaction();
     console.error('Error in performSwitcheroo:', error);
     return res.status(500).json({ message: 'Internal server error' });
   }
