@@ -6,11 +6,11 @@ const rulesSections = [
     title: '📝 General Rules',
     content: (
       <ul className="list-disc list-inside space-y-1">
-        <li>Join or create* a League.</li>
+        <li>Join or create a League.</li>
         <li>Every league has a Driver Championship and a Constructors Championship.</li>
         <li>Each player selects a Main Driver, a Reserve Driver and a Team with the deadline set 5 minutes before the qualifying session of each F1 race.</li>
         <li>The main driver will be awarded with the real points scored during the grand prix.</li>
-        <li>On a normal racing weekend the Reserve Driver will only be activated* if the main driver cannot start a race "DNS". DQ or DNFs will award no points to the main driver.</li>
+        <li>On a normal racing weekend the Reserve Driver will only be activated if the main driver cannot start a race "DNS". DQ or DNFs will award no points to the main driver.</li>
         <li>Each race requires the selection of a different main driver, only when the list has been exhausted all 20 drivers will be available again.</li>
         <li>Each race requires the selection of a different reserve driver, only when the list has been exhausted all 20 drivers will be available again.</li>
         <li>Each race requires the selection of a different team, only when the list has been exhausted all 10 teams will be available again.</li>
