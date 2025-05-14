@@ -3,6 +3,7 @@ const RaceSelection = require('../models/RaceSelection');
 const League = require('../models/League');
 const User = require('../models/User');
 const RaceResult = require('../models/RaceResult');
+const { normalizeTeamName } = require('../constants/f1Data2025');
 
 class LeaderboardService {
     /**
@@ -102,10 +103,11 @@ class LeaderboardService {
                     driverTotalPoints += driverResult.totalPoints;
 
                     // Constructor race result - always create an entry
+                    const normalizedTeam = normalizeTeamName(selection.team);
                     const constructorResult = {
                         round: selection.round,
                         raceName: selection.race.raceName,
-                        team: selection.team,
+                        team: normalizedTeam,
                         mainRacePoints: pb.teamPoints || 0,
                         sprintPoints: 0,
                         totalPoints: pb.teamPoints || 0,
