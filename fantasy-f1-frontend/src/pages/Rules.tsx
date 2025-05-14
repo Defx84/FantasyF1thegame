@@ -62,7 +62,7 @@ const rulesSections = [
         <li>The player who creates the the league will also be the "admin" for the league.</li>
         <li>The admin can assign the drivers when a selection has not been made in a past race.</li>
         <li>If a selection has not been made by the deadline the admin can assign drivers and team but award 0 points to the driver as a penalty.</li>
-        <li>The admin can also award the real points scored during that weekend, this is done for those who join the league late or are accessing thefantasyF1game when the season has already started.</li>
+        <li>The admin can also award the real points scored during that weekend, this is done for those who join the league late or are accessing TheFantasyF1game when the season has already started.</li>
         <li>The selections assigned by the admin will be clearly marked for the players to recognize.</li>
       </ul>
     ),
@@ -101,7 +101,7 @@ const Rules: React.FC = () => {
       />
       {/* Content wrapper */}
       <div className="relative z-10 w-full max-w-2xl backdrop-blur-sm bg-white/60 rounded-xl p-8 border border-white/20 shadow-lg flex flex-col items-center">
-        <h1 className="text-3xl font-bold text-center text-black mb-6">the<span className="text-red-500">fantasyF1</span>game Rules & Game Flow <span role='img' aria-label='race car'>🏎️</span></h1>
+        <h1 className="text-3xl font-bold text-center text-black mb-6">The<span className="text-red-500">FantasyF1</span>game Rules & Game Flow <span role='img' aria-label='race car'>🏎️</span></h1>
         <div className="w-full text-black text-base space-y-4 min-h-[250px] flex flex-col items-center justify-center transition-all duration-500">
           <h2 className="font-semibold text-lg mb-2 text-center text-black">{rulesSections[current].title}</h2>
           <div>{rulesSections[current].content}</div>

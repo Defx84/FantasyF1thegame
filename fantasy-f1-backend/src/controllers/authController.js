@@ -45,12 +45,12 @@ const register = async (req, res) => {
     try {
       await sendEmail({
         to: email,
-        subject: 'Welcome to thefantasyF1game!',
-        text: `Hello ${username},\n\nWelcome to thefantasyF1game — we're thrilled to have you join our racing community!\n\nGet ready to:\n🏁 Create your dream team\n🚥 Compete in leagues\n🏆 Track your stats and climb the leaderboard\n\nYour account is now active and ready to go. If you have any questions, we're just a pit stop away — contact us at fantasyf1thegame@gmail.com.\n\nSee you on the grid!\n\nThe thefantasyF1game Team`,
+        subject: 'Welcome to TheFantasyF1game!',
+        text: `Hello ${username},\n\nWelcome to TheFantasyF1game — we're thrilled to have you join our racing community!\n\nGet ready to:\n🏁 Create your dream team\n🚥 Compete in leagues\n🏆 Track your stats and climb the leaderboard\n\nYour account is now active and ready to go. If you have any questions, we're just a pit stop away — contact us at fantasyf1thegame@gmail.com.\n\nSee you on the grid!\n\nThe TheFantasyF1game Team`,
         html: `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa; border-radius: 10px;">
       <h2 style="color: #dc2626; text-align: center;">Welcome, ${username},</h2>
-      <p>Welcome to <b>thefantasyF1game</b> — we're thrilled to have you join our racing community!</p>
+      <p>Welcome to <b>TheFantasyF1game</b> — we're thrilled to have you join our racing community!</p>
       <ul style="font-size: 1.1em;">
         <li>🏁 <b>Create your dream team</b></li>
         <li>🚥 <b>Compete in leagues</b></li>
@@ -58,7 +58,7 @@ const register = async (req, res) => {
       </ul>
       <p>Your account is now active and ready to go. If you have any questions, we're just a pit stop away — contact us at <a href="mailto:fantasyf1thegame@gmail.com">fantasyf1thegame@gmail.com</a>.</p>
       <p style="margin-top:2em;">See you on the grid!<br>
-      <b>The thefantasyF1game Team</b></p>
+      <b>The TheFantasyF1game Team</b></p>
     </div>
   `
       });
