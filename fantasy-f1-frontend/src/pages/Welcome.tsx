@@ -1,6 +1,6 @@
 import React, { useState, memo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaEnvelope, FaLock, FaTrophy, FaChartLine, FaCar } from 'react-icons/fa';
+import { FaEnvelope, FaLock, FaTrophy, FaChartLine, FaCar, FaInstagram } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 
 const TypedEnvelopeIcon = FaEnvelope as unknown as React.FC<{ size?: number; className?: string }>;
@@ -8,6 +8,7 @@ const TypedLockIcon = FaLock as unknown as React.FC<{ size?: number; className?:
 const TypedTrophyIcon = FaTrophy as unknown as React.FC<{ size?: number; className?: string }>;
 const TypedChartIcon = FaChartLine as unknown as React.FC<{ size?: number; className?: string }>;
 const TypedCarIcon = FaCar as unknown as React.FC<{ size?: number; className?: string }>;
+const TypedInstagramIcon = FaInstagram as unknown as React.FC<{ size?: number; className?: string }>;
 
 const FeatureBox = memo(({ icon: Icon, title, description }: { 
   icon: React.FC<{ size?: number; className?: string }>; 
@@ -73,8 +74,24 @@ const Welcome: React.FC = () => {
               <h1 className="flex flex-col gap-2">
                 <span className="text-xl font-medium text-white/80">Welcome to</span>
                 <span className="text-3xl font-bold animate-pulse drop-shadow-[0_0_10px_rgba(239,68,68,0.7)] [text-shadow:_2px_2px_0_rgb(0_0_0),_-2px_-2px_0_rgb(0_0_0),_2px_-2px_0_rgb(0_0_0),_-2px_2px_0_rgb(0_0_0)]">
-                  <span className="text-white">TheFantasy</span><span className="text-red-500">F1</span><span className="text-white">game</span>
+                  <span className="text-white">TheFantasy</span>
+                  <span className="text-red-500">F1</span>
+                  <span className="text-white">game</span>
                 </span>
+                <div className="flex justify-center mt-2">
+                  <a
+                    href="https://instagram.com/thefantasyf1game"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Instagram @thefantasyf1game"
+                    title="Follow us on Instagram"
+                  >
+                    <TypedInstagramIcon
+                      size={28}
+                      className="text-pink-500 hover:scale-110 transition-transform duration-150"
+                    />
+                  </a>
+                </div>
               </h1>
             </div>
 
