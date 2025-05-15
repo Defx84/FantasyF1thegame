@@ -19,6 +19,7 @@ const F1_DRIVERS_2025 = [
   { name: 'Liam Lawson', shortName: 'L. Lawson', alternateNames: ['L. Lawson', 'Liam', 'Lawson', 'L Lawson'] },
   { name: 'Isack Hadjar', shortName: 'I. Hadjar', alternateNames: ['I. Hadjar', 'Isack', 'Hadjar', 'I Hadjar'] },
   { name: 'Pierre Gasly', shortName: 'P. Gasly', alternateNames: ['P. Gasly', 'Pierre', 'Gasly', 'P Gasly'] },
+  { name: 'Franco Colapinto', shortName: 'F. Colapinto', alternateNames: ['F. Colapinto', 'Franco', 'Colapinto', 'F Colapinto', 'franco colapinto'] },
   { name: 'Jack Doohan', shortName: 'J. Doohan', alternateNames: ['J. Doohan', 'Jack', 'Doohan', 'J Doohan'] },
   { name: 'Nico Hulkenberg', shortName: 'N. Hulkenberg', alternateNames: ['N. Hulkenberg', 'Nico', 'Hulkenberg', 'N Hulkenberg'] },
   { name: 'Gabriel Bortoleto', shortName: 'G. Bortoleto', alternateNames: ['G. Bortoleto', 'Gabriel', 'Bortoleto', 'G Bortoleto'] }
