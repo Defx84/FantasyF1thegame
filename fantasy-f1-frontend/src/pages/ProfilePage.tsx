@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getUserLeagues, League, deleteLeague, abandonLeague } from '../services/leagueService';
-import { FaUser, FaEnvelope, FaTrophy, FaKey, FaArrowLeft, FaTrash, FaSignOutAlt, FaEye } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaTrophy, FaKey, FaArrowLeft, FaTrash, FaSignOutAlt, FaEye, FaSyncAlt } from 'react-icons/fa';
 import IconWrapper from '../utils/iconWrapper';
 import { api } from '../services/api';
 
@@ -18,6 +18,11 @@ const ProfilePage: React.FC = () => {
   const [abandonLoading, setAbandonLoading] = useState(false);
   const [abandonError, setAbandonError] = useState<string | null>(null);
   const [abandonSuccess, setAbandonSuccess] = useState<string | null>(null);
+  const [allLeagues, setAllLeagues] = useState<any[]>([]);
+  const [adminLoading, setAdminLoading] = useState(false);
+  const [adminError, setAdminError] = useState<string | null>(null);
+  const [updatingLeagueId, setUpdatingLeagueId] = useState<string | null>(null);
+  const [updateMessage, setUpdateMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchLeagues = async () => {
@@ -33,6 +38,15 @@ const ProfilePage: React.FC = () => {
     };
 
     fetchLeagues();
+
+    // If app admin, fetch all leagues
+    if (user?.isAppAdmin) {
+      setAdminLoading(true);
+      api.get('/api/admin/all-leagues')
+        .then(res => setAllLeagues(res.data))
+        .catch(() => setAdminError('Failed to load all leagues.'))
+        .finally(() => setAdminLoading(false));
+    }
   }, []);
 
   const handleDeleteLeague = async (leagueId: string) => {
@@ -80,6 +94,20 @@ const ProfilePage: React.FC = () => {
       setAbandonError('Failed to abandon league. Please try again.');
     } finally {
       setAbandonLoading(false);
+    }
+  };
+
+  const handleUpdateLeaderboard = async (leagueId: string, season: number) => {
+    setUpdatingLeagueId(leagueId);
+    setUpdateMessage(null);
+    try {
+      await api.post(`/api/admin/initialize-leaderboard/${leagueId}/${season}`);
+      setUpdateMessage('Leaderboard updated!');
+    } catch (err) {
+      setUpdateMessage('Failed to update leaderboard.');
+    } finally {
+      setUpdatingLeagueId(null);
+      setTimeout(() => setUpdateMessage(null), 3000);
     }
   };
 
@@ -244,6 +272,53 @@ const ProfilePage: React.FC = () => {
               </div>
             )}
           </div>
+
+          {/* App Admin: All Leagues Section */}
+          {user.isAppAdmin && (
+            <div className="backdrop-blur-lg bg-white/2 rounded-2xl p-8 border border-white/10 shadow-xl mt-8">
+              <h2 className="text-2xl font-bold mb-6 flex items-center text-white/90">
+                <FaSyncAlt className="mr-2" size={22} />
+                All Leagues (Admin)
+              </h2>
+              {adminLoading ? (
+                <div className="text-white/70">Loading all leagues...</div>
+              ) : adminError ? (
+                <div className="text-red-500">{adminError}</div>
+              ) : allLeagues.length === 0 ? (
+                <div className="text-white/70">No leagues found.</div>
+              ) : (
+                <div className="space-y-4">
+                  {allLeagues.map((league) => (
+                    <div
+                      key={league._id}
+                      className="flex items-center justify-between bg-white/10 p-4 rounded-lg border border-white/10"
+                    >
+                      <div className="flex flex-col">
+                        <span className="font-semibold text-white/90">{league.name}</span>
+                        <span className="text-sm text-white/70">Season {league.season}</span>
+                        <span className="text-xs text-white/50">Code: {league.code}</span>
+                      </div>
+                      <button
+                        onClick={() => handleUpdateLeaderboard(league._id, league.season)}
+                        className="flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow text-white font-semibold disabled:opacity-60"
+                        disabled={updatingLeagueId === league._id}
+                      >
+                        {updatingLeagueId === league._id ? (
+                          <span className="animate-spin mr-2">🔄</span>
+                        ) : (
+                          <FaSyncAlt className="mr-2" />
+                        )}
+                        {updatingLeagueId === league._id ? 'Updating...' : 'Update Leaderboard'}
+                      </button>
+                    </div>
+                  ))}
+                  {updateMessage && (
+                    <div className="text-green-400 text-sm mt-2">{updateMessage}</div>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
