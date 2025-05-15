@@ -279,7 +279,7 @@ const ProfilePage: React.FC = () => {
           {user.isAppAdmin && (
             <div className="backdrop-blur-lg bg-white/2 rounded-2xl p-8 border border-white/10 shadow-xl mt-8">
               <h2 className="text-2xl font-bold mb-6 flex items-center text-white/90">
-                <FaSyncAlt className="mr-2" size={22} />
+                <IconWrapper icon={FaSyncAlt} size={22} className="mr-2" />
                 All Leagues (Admin)
               </h2>
               {adminLoading ? (
@@ -308,7 +308,7 @@ const ProfilePage: React.FC = () => {
                         {updatingLeagueId === league._id ? (
                           <span className="animate-spin mr-2">🔄</span>
                         ) : (
-                          <FaSyncAlt className="mr-2" />
+                          <IconWrapper icon={FaSyncAlt} size={16} className="mr-2" />
                         )}
                         {updatingLeagueId === league._id ? 'Updating...' : 'Update Leaderboard'}
                       </button>
