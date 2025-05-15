@@ -111,6 +111,7 @@ const initializeLeaderboard = async (leagueId, season) => {
                 });
                 if (!selection) continue;
                 if (race.status !== 'completed') continue;
+                if (!selection.mainDriver || !selection.reserveDriver || !selection.team) continue;
 
                 // Use points and pointBreakdown from RaceSelection
                 const points = selection.points || 0;
