@@ -38,8 +38,10 @@ const ProfilePage: React.FC = () => {
     };
 
     fetchLeagues();
+  }, []);
 
-    // If app admin, fetch all leagues
+  // Fetch all leagues for app admin when user changes
+  useEffect(() => {
     if (user?.isAppAdmin) {
       setAdminLoading(true);
       api.get('/api/admin/all-leagues')
@@ -47,7 +49,7 @@ const ProfilePage: React.FC = () => {
         .catch(() => setAdminError('Failed to load all leagues.'))
         .finally(() => setAdminLoading(false));
     }
-  }, []);
+  }, [user]);
 
   const handleDeleteLeague = async (leagueId: string) => {
     if (!window.confirm('Are you sure you want to delete this league? This action cannot be undone.')) {
