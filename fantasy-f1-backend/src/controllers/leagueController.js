@@ -6,6 +6,7 @@ const RaceCalendar = require('../models/RaceCalendar');
 const { initializeRaceSelections, initializeAllRaceSelections } = require('../utils/raceUtils');
 const LeagueLeaderboard = require('../models/LeagueLeaderboard');
 const UsedSelection = require('../models/UsedSelection');
+const { initializeLeaderboard } = require('../utils/initializeLeaderboard');
 
 // Function to generate a unique league code
 const generateLeagueCode = async () => {
@@ -79,6 +80,9 @@ const joinLeague = async (req, res) => {
         for (const race of races) {
             await initializeRaceSelections(league._id, race._id, race.round);
         }
+
+        // Trigger leaderboard initialization/update for this league and season
+        await initializeLeaderboard(league._id, league.season);
 
         res.json(league);
     } catch (error) {
