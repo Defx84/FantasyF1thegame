@@ -80,7 +80,9 @@ const getRaceSelections = async (req, res) => {
         .lean();
 
         // Format selections for frontend
-        const formattedSelections = selections.map(selection => ({
+        const formattedSelections = selections
+          .filter(selection => selection.user)
+          .map(selection => ({
             _id: selection._id,
             userId: selection.user._id,
             username: selection.user.username,
