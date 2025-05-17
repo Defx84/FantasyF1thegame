@@ -33,18 +33,18 @@ const getNextRaceTiming = async (req, res) => {
             qualifyingStart: { $gt: now }
         }).sort({ qualifyingStart: 1 });
 
-        console.log('Query result:', nextRace ? {
-            id: nextRace._id,
-            raceName: nextRace.raceName,
-            date: nextRace.date,
-            status: nextRace.status
-        } : 'No race found');
-
         if (!nextRace) {
             return res.status(404).json({ 
                 message: 'No upcoming races found',
                 hasUpcomingRace: false
             });
+        }
+
+        // Find the race result for this round to get the status
+        let raceStatus = 'scheduled';
+        const raceResult = await RaceResult.findOne({ round: nextRace.round });
+        if (raceResult && raceResult.status) {
+            raceStatus = raceResult.status;
         }
 
         // Build the response for the frontend
@@ -53,6 +53,7 @@ const getNextRaceTiming = async (req, res) => {
             raceName: nextRace.raceName,
             round: nextRace.round,
             isSprintWeekend: nextRace.isSprintWeekend,
+            status: raceStatus,
             qualifying: {
                 startTime: nextRace.qualifyingStart ? nextRace.qualifyingStart.toISOString() : null
             },
