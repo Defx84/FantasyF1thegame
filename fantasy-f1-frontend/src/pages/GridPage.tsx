@@ -64,39 +64,43 @@ const GridPage: React.FC<GridPageProps> = ({ players, raceData, leaderboard, cur
         </div>
 
         <div className="grid grid-cols-2 gap-4 md:gap-8">
-          {sortedPlayers.map((player, index) => (
-            <div
-              key={player.username}
-              className={`backdrop-blur-md bg-black/5 border border-white/10 rounded-xl shadow-lg p-4 transform transition-all duration-300 ${
-                index % 2 === 0 ? 'translate-y-8' : ''
-              }`}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <h2 className="text-xl font-semibold text-white">{player.username}</h2>
-                <div
-                  className={`w-4 h-4 rounded-full ${
-                    player.selectionMade ? 'bg-green-500' : 'bg-red-500'
-                  }`}
-                />
-              </div>
-
-              {showSelections && player.selectionMade && (
-                <div className="space-y-2 text-gray-300">
-                  <div>
-                    <span className="font-medium">Main Driver:</span>{' '}
-                    {player.selections?.mainDriver}
-                  </div>
-                  <div>
-                    <span className="font-medium">Reserve Driver:</span>{' '}
-                    {player.selections?.reserveDriver}
-                  </div>
-                  <div>
-                    <span className="font-medium">Team:</span> {player.selections?.team}
-                  </div>
+          {sortedPlayers.map((player, index) => {
+            const isLastOdd =
+              sortedPlayers.length % 2 === 1 && index === sortedPlayers.length - 1;
+            return (
+              <div
+                key={player.username}
+                className={`backdrop-blur-md bg-black/5 border border-white/10 rounded-xl shadow-lg p-4 transform transition-all duration-300 ${
+                  index % 2 === 0 ? 'translate-y-8' : ''
+                } ${isLastOdd ? 'col-start-2' : ''}`}
+              >
+                <div className="flex items-center justify-between mb-2">
+                  <h2 className="text-xl font-semibold text-white">{player.username}</h2>
+                  <div
+                    className={`w-4 h-4 rounded-full ${
+                      player.selectionMade ? 'bg-green-500' : 'bg-red-500'
+                    }`}
+                  />
                 </div>
-              )}
-            </div>
-          ))}
+
+                {showSelections && player.selectionMade && (
+                  <div className="space-y-2 text-gray-300">
+                    <div>
+                      <span className="font-medium">Main Driver:</span>{' '}
+                      {player.selections?.mainDriver}
+                    </div>
+                    <div>
+                      <span className="font-medium">Reserve Driver:</span>{' '}
+                      {player.selections?.reserveDriver}
+                    </div>
+                    <div>
+                      <span className="font-medium">Team:</span> {player.selections?.team}
+                    </div>
+                  </div>
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
     </div>
