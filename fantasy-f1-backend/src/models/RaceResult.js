@@ -203,23 +203,30 @@ raceResultSchema.virtual('isLocked').get(function() {
 // Method to check if switcheroo is allowed
 raceResultSchema.methods.isSwitcherooAllowed = function() {
   const now = new Date();
-  
   if (this.isSprintWeekend) {
-    // Sprint weekend: between sprint qualifying and 5 minutes before sprint race
-    if (!this.sprintQualifyingEnd || !this.sprintStart) {
+    // Sprint weekend: between sprint qualifying end (or start+1h) and 5 minutes before sprint race
+    let sprintQualifyingEnd = this.sprintQualifyingEnd;
+    if (!sprintQualifyingEnd && this.sprintQualifyingStart) {
+      sprintQualifyingEnd = new Date(this.sprintQualifyingStart.getTime() + 60 * 60 * 1000); // +1 hour
+    }
+    if (!sprintQualifyingEnd || !this.sprintStart) {
       return false;
     }
     const switcherooEnd = new Date(this.sprintStart);
     switcherooEnd.setMinutes(switcherooEnd.getMinutes() - 5);
-    return now >= this.sprintQualifyingEnd && now <= switcherooEnd;
+    return now >= sprintQualifyingEnd && now <= switcherooEnd;
   } else {
-    // Regular weekend: between qualifying and 5 minutes before race
-    if (!this.qualifyingEnd || !this.raceStart) {
+    // Regular weekend: between qualifying end (or start+1h) and 5 minutes before race
+    let qualifyingEnd = this.qualifyingEnd;
+    if (!qualifyingEnd && this.qualifyingStart) {
+      qualifyingEnd = new Date(this.qualifyingStart.getTime() + 60 * 60 * 1000); // +1 hour
+    }
+    if (!qualifyingEnd || !this.raceStart) {
       return false;
     }
     const switcherooEnd = new Date(this.raceStart);
     switcherooEnd.setMinutes(switcherooEnd.getMinutes() - 5);
-    return now >= this.qualifyingEnd && now <= switcherooEnd;
+    return now >= qualifyingEnd && now <= switcherooEnd;
   }
 };
 
