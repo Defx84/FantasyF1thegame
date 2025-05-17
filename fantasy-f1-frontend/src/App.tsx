@@ -41,19 +41,16 @@ const GridPageWrapper: React.FC = () => {
     if (leagueId && user) {
       const fetchData = async () => {
         try {
-          const [raceData, leagueStandings] = await Promise.all([
-            getNextRaceTiming(),
-            getLeagueStandings(leagueId, new Date().getFullYear())
-          ]);
+          const raceData = await getNextRaceTiming();
+          console.log('Race data:', raceData);
 
-          // Get race selections for the next race
+          // Get race selections for the current race
           const raceSelections = await getRaceSelections(leagueId, raceData.round);
+          console.log('Race selections:', raceSelections);
 
-          console.log('API Responses:', {
-            raceData,
-            raceSelections,
-            leagueStandings
-          });
+          // Get league standings
+          const leagueStandings = await getLeagueStandings(leagueId, new Date().getFullYear());
+          console.log('League standings:', leagueStandings);
 
           // Get all league members from standings
           const members = leagueStandings.driverStandings.map(standing => standing.user.username);
