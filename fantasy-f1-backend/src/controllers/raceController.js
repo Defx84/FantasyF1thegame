@@ -27,37 +27,60 @@ const getNextRaceTiming = async (req, res) => {
     try {
         const now = new Date();
         console.log('Current time:', now);
-        
-        // Find the next upcoming race from RaceCalendar collection
-        const nextRace = await RaceCalendar.findOne({
-            qualifyingStart: { $gt: now }
-        }).sort({ qualifyingStart: 1 });
 
+        // Utility to calculate endOfWeekend (Sunday at 23:59)
+        function getEndOfWeekend(raceDate) {
+            const end = new Date(raceDate);
+            end.setDate(end.getDate() + (7 - end.getDay()) % 7); // Move to Sunday if not already
+            end.setHours(23, 59, 0, 0); // 23:59:00
+            return end;
+        }
+
+        // 1. Find the most recent race whose raceStart is in the past
+        const currentRace = await RaceCalendar.findOne({ raceStart: { $lte: now } }).sort({ raceStart: -1 });
+        if (currentRace) {
+            const endOfWeekend = getEndOfWeekend(currentRace.raceStart || currentRace.date);
+            if (now < endOfWeekend) {
+                // Find the race result for this round to get the status
+                let raceStatus = 'scheduled';
+                const raceResult = await RaceResult.findOne({ round: currentRace.round });
+                if (raceResult && raceResult.status) {
+                    raceStatus = raceResult.status;
+                }
+                return res.json({
+                    hasUpcomingRace: true,
+                    raceName: currentRace.raceName,
+                    round: currentRace.round,
+                    isSprintWeekend: currentRace.isSprintWeekend,
+                    status: raceStatus,
+                    qualifying: {
+                        startTime: currentRace.qualifyingStart ? currentRace.qualifyingStart.toISOString() : null
+                    },
+                    sprintQualifying: currentRace.sprintQualifyingStart ? {
+                        startTime: currentRace.sprintQualifyingStart.toISOString()
+                    } : undefined,
+                    race: {
+                        startTime: currentRace.raceStart ? currentRace.raceStart.toISOString() : null
+                    },
+                    endOfWeekend: endOfWeekend.toISOString()
+                });
+            }
+        }
+
+        // 2. Otherwise, return the next upcoming race as before
+        const nextRace = await RaceCalendar.findOne({ qualifyingStart: { $gt: now } }).sort({ qualifyingStart: 1 });
         if (!nextRace) {
             return res.status(404).json({ 
                 message: 'No upcoming races found',
                 hasUpcomingRace: false
             });
         }
-
-        // Find the race result for this round to get the status
         let raceStatus = 'scheduled';
         const raceResult = await RaceResult.findOne({ round: nextRace.round });
         if (raceResult && raceResult.status) {
             raceStatus = raceResult.status;
         }
-
-        // Calculate endOfWeekend (Sunday at 23:59)
-        function getEndOfWeekend(raceDate) {
-            const end = new Date(raceDate);
-            // Set to Sunday of the race weekend
-            end.setDate(end.getDate() + (7 - end.getDay()) % 7); // Move to Sunday if not already
-            end.setHours(23, 59, 0, 0); // 23:59:00
-            return end;
-        }
         const endOfWeekend = getEndOfWeekend(nextRace.raceStart || nextRace.date);
-
-        // Build the response for the frontend
         return res.json({
             hasUpcomingRace: true,
             raceName: nextRace.raceName,
