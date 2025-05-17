@@ -36,10 +36,12 @@ const getNextRaceTiming = async (req, res) => {
             return end;
         }
 
-        // 1. Find the most recent race whose raceStart is in the past
-        const currentRace = await RaceCalendar.findOne({ raceStart: { $lte: now } }).sort({ raceStart: -1 });
+        // 1. Find the most recent race whose qualifyingStart is in the past
+        const currentRace = await RaceCalendar.findOne({ qualifyingStart: { $lte: now } }).sort({ qualifyingStart: -1 });
+        console.log('Current race found:', currentRace);
         if (currentRace) {
             const endOfWeekend = getEndOfWeekend(currentRace.raceStart || currentRace.date);
+            console.log('End of weekend for current race:', endOfWeekend);
             if (now < endOfWeekend) {
                 // Find the race result for this round to get the status
                 let raceStatus = 'scheduled';
@@ -47,29 +49,25 @@ const getNextRaceTiming = async (req, res) => {
                 if (raceResult && raceResult.status) {
                     raceStatus = raceResult.status;
                 }
+                console.log('Returning current race:', currentRace.raceName, 'Status:', raceStatus);
                 return res.json({
                     hasUpcomingRace: true,
                     raceName: currentRace.raceName,
                     round: currentRace.round,
-                    isSprintWeekend: currentRace.isSprintWeekend,
+                    season: currentRace.season,
+                    raceStart: currentRace.raceStart,
+                    qualifyingStart: currentRace.qualifyingStart,
                     status: raceStatus,
-                    qualifying: {
-                        startTime: currentRace.qualifyingStart ? currentRace.qualifyingStart.toISOString() : null
-                    },
-                    sprintQualifying: currentRace.sprintQualifyingStart ? {
-                        startTime: currentRace.sprintQualifyingStart.toISOString()
-                    } : undefined,
-                    race: {
-                        startTime: currentRace.raceStart ? currentRace.raceStart.toISOString() : null
-                    },
-                    endOfWeekend: endOfWeekend.toISOString()
+                    endOfWeekend: endOfWeekend,
                 });
             }
         }
 
-        // 2. Otherwise, return the next upcoming race as before
+        // 2. Otherwise, find the next upcoming race
         const nextRace = await RaceCalendar.findOne({ qualifyingStart: { $gt: now } }).sort({ qualifyingStart: 1 });
+        console.log('Next race found:', nextRace);
         if (!nextRace) {
+            console.log('No upcoming races found');
             return res.status(404).json({ 
                 message: 'No upcoming races found',
                 hasUpcomingRace: false
@@ -81,25 +79,20 @@ const getNextRaceTiming = async (req, res) => {
             raceStatus = raceResult.status;
         }
         const endOfWeekend = getEndOfWeekend(nextRace.raceStart || nextRace.date);
+        console.log('Returning next race:', nextRace.raceName, 'Status:', raceStatus);
         return res.json({
             hasUpcomingRace: true,
             raceName: nextRace.raceName,
             round: nextRace.round,
-            isSprintWeekend: nextRace.isSprintWeekend,
+            season: nextRace.season,
+            raceStart: nextRace.raceStart,
+            qualifyingStart: nextRace.qualifyingStart,
             status: raceStatus,
-            qualifying: {
-                startTime: nextRace.qualifyingStart ? nextRace.qualifyingStart.toISOString() : null
-            },
-            sprintQualifying: nextRace.sprintQualifyingStart ? {
-                startTime: nextRace.sprintQualifyingStart.toISOString()
-            } : undefined,
-            race: {
-                startTime: nextRace.raceStart ? nextRace.raceStart.toISOString() : null
-            },
-            endOfWeekend: endOfWeekend.toISOString()
+            endOfWeekend: endOfWeekend,
         });
     } catch (error) {
-        handleError(res, error);
+        console.error('Error in getNextRaceTiming:', error);
+        res.status(500).json({ message: 'Internal server error' });
     }
 };
 
