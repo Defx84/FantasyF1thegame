@@ -51,6 +51,7 @@ const NextRaceSelections: React.FC = () => {
   const [switcherooError, setSwitcherooError] = useState<string | null>(null);
   const [isSwitcherooWindow, setIsSwitcherooWindow] = useState(false);
   const [raceStatus, setRaceStatus] = useState<string | null>(null);
+  const [lastSwitcherooWindowFetch, setLastSwitcherooWindowFetch] = useState<number>(0);
 
   // Map drivers to our interface
   const drivers: Driver[] = allDrivers.map(name => ({
@@ -401,6 +402,9 @@ const NextRaceSelections: React.FC = () => {
   }, []);
 
   const fetchSwitcherooWindowStatus = async () => {
+    const now = Date.now();
+    if (now - lastSwitcherooWindowFetch < 30000) return; // Only fetch once every 30 seconds
+    setLastSwitcherooWindowFetch(now);
     try {
       const response = await api.get('/api/switcheroo/window-status', {
         params: { raceId: raceData?.round }
