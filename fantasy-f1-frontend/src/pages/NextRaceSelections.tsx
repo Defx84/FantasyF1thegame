@@ -50,6 +50,7 @@ const NextRaceSelections: React.FC = () => {
   const [switcherooLoading, setSwitcherooLoading] = useState(true);
   const [switcherooError, setSwitcherooError] = useState<string | null>(null);
   const [isSwitcherooWindow, setIsSwitcherooWindow] = useState(false);
+  const [raceStatus, setRaceStatus] = useState<string | null>(null);
 
   // Map drivers to our interface
   const drivers: Driver[] = allDrivers.map(name => ({
@@ -87,6 +88,7 @@ const NextRaceSelections: React.FC = () => {
       const currentSelectionsData = await getCurrentSelections(leagueId);
 
       setRaceData(raceTiming);
+      setRaceStatus(raceTiming.status || null);
       setUsedSelections(usedSelectionsData);
       setCurrentSelections(currentSelectionsData);
       setEditingSelections(currentSelectionsData || {
@@ -116,19 +118,25 @@ const NextRaceSelections: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!raceData || timeUntilDeadline <= 0) {
+    if (!raceData) return;
+    // Only advance to next race if status is 'completed'
+    if (raceStatus === 'completed') {
+      // Optionally, trigger logic to advance to next race here
+      // For now, just lock the UI
       setIsLocked(true);
       return;
     }
-
+    if (timeUntilDeadline <= 0) {
+      setIsLocked(true);
+      return;
+    }
     const timer = setInterval(() => {
       const newTimeLeft = getTimeUntilLock(raceData);
       setTimeUntilDeadline(newTimeLeft);
       setIsLocked(isSelectionsLocked(raceData));
     }, 1000);
-
     return () => clearInterval(timer);
-  }, [raceData, timeUntilDeadline]);
+  }, [raceData, timeUntilDeadline, raceStatus]);
 
   const handleSelection = (type: keyof Selection, id: string) => {
     // Allow selection if editing or if no selections have been made yet
