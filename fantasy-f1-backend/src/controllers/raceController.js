@@ -47,6 +47,16 @@ const getNextRaceTiming = async (req, res) => {
             raceStatus = raceResult.status;
         }
 
+        // Calculate endOfWeekend (Sunday at 23:59)
+        function getEndOfWeekend(raceDate) {
+            const end = new Date(raceDate);
+            // Set to Sunday of the race weekend
+            end.setDate(end.getDate() + (7 - end.getDay()) % 7); // Move to Sunday if not already
+            end.setHours(23, 59, 0, 0); // 23:59:00
+            return end;
+        }
+        const endOfWeekend = getEndOfWeekend(nextRace.raceStart || nextRace.date);
+
         // Build the response for the frontend
         return res.json({
             hasUpcomingRace: true,
@@ -62,7 +72,8 @@ const getNextRaceTiming = async (req, res) => {
             } : undefined,
             race: {
                 startTime: nextRace.raceStart ? nextRace.raceStart.toISOString() : null
-            }
+            },
+            endOfWeekend: endOfWeekend.toISOString()
         });
     } catch (error) {
         handleError(res, error);

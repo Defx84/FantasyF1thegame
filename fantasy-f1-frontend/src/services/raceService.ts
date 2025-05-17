@@ -23,6 +23,7 @@ export interface RaceTiming {
     timeUntil: number;
   };
   status?: string;
+  endOfWeekend?: string;
 }
 
 export const TEAM_COLORS: Record<string, string> = {

@@ -119,10 +119,16 @@ const NextRaceSelections: React.FC = () => {
 
   useEffect(() => {
     if (!raceData) return;
-    // Only advance to next race if status is 'completed'
-    if (raceStatus === 'completed') {
+    // Only advance to next race after endOfWeekend
+    const now = new Date();
+    const endOfWeekend = raceData.endOfWeekend ? new Date(raceData.endOfWeekend) : null;
+    if (endOfWeekend && now > endOfWeekend) {
       // Optionally, trigger logic to advance to next race here
-      // For now, just lock the UI
+      // For now, just lock the UI (or you could trigger a refetch for the next race)
+      setIsLocked(true);
+      return;
+    }
+    if (raceStatus === 'completed') {
       setIsLocked(true);
       return;
     }
