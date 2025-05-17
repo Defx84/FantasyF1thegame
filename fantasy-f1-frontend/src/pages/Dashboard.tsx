@@ -4,7 +4,7 @@ import { FaSignOutAlt, FaUser, FaPlus, FaUsers, FaCalendarAlt, FaBook, FaSearch,
 import IconWrapper from '../utils/iconWrapper';
 import { useNavigate } from 'react-router-dom';
 import { createLeague, joinLeague, getUserLeagues, League } from '../services/leagueService';
-import NextRaceCountdown from '../components/NextRaceCountdown';
+import DashboardRaceCountdown from '../components/DashboardRaceCountdown';
 import BulletinBoard from '../components/BulletinBoard';
 
 const TypedInstagramIcon = FaInstagram as unknown as React.FC<{ size?: number; className?: string }>;
@@ -263,7 +263,7 @@ const Dashboard: React.FC = () => {
               {/* Next Race Countdown */}
               <div className="w-full md:w-1/3 h-auto md:h-64 flex flex-col justify-center mb-4 md:mb-0">
                 <div className="backdrop-blur-sm bg-white/[0.02] rounded-xl p-2 border border-white/10 w-full h-full flex flex-col justify-center overflow-hidden">
-                  <NextRaceCountdown />
+                  <DashboardRaceCountdown />
                 </div>
               </div>
 
