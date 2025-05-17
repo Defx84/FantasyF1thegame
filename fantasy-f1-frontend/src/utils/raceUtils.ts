@@ -3,13 +3,13 @@ import { RaceTiming } from '../services/raceService';
 /**
  * Calculate the lock time for selections (5 minutes before qualifying/sprint qualifying)
  */
-export const getLockTime = (race: RaceTiming): Date | null => {
+export const getLockTime = (race: any): Date | null => {
   if (!race) return null;
 
-  // Use sprintQualifying.startTime for sprint weekends, else qualifying.startTime
+  // Use sprintQualifying.startTime for sprint weekends, else qualifyingStart
   let baseTimeStr = race.isSprintWeekend && race.sprintQualifying && race.sprintQualifying.startTime
     ? race.sprintQualifying.startTime
-    : race.qualifying.startTime;
+    : race['qualifyingStart'];
 
   if (!baseTimeStr) return null;
   const baseTime = new Date(baseTimeStr);
