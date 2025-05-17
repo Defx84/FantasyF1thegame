@@ -22,6 +22,7 @@ export interface RaceTiming {
     startTime: string;
     timeUntil: number;
   };
+  status?: string;
 }
 
 export const TEAM_COLORS: Record<string, string> = {
