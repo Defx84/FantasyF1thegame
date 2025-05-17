@@ -3,6 +3,7 @@ const RaceSelection = require('../models/RaceSelection');
 const RaceResult = require('../models/RaceResult');
 const Switcheroo = require('../models/Switcheroo');
 const mongoose = require('mongoose');
+const RaceCalendar = require('../models/RaceCalendar');
 
 const MAX_SWITCHEROOS_PER_SEASON = 3;
 
@@ -116,11 +117,35 @@ const getSwitcherooWindowStatus = async (req, res) => {
     if (!raceId) {
       return res.status(400).json({ message: 'raceId is required' });
     }
-    const race = await RaceResult.findOne({ round: Number(raceId) });
+    // Use RaceCalendar for timing
+    const race = await RaceCalendar.findOne({ round: Number(raceId) });
     if (!race) {
       return res.status(404).json({ message: 'Race not found' });
     }
-    res.json({ isSwitcherooAllowed: race.isSwitcherooAllowed() });
+    const now = new Date();
+    let isSwitcherooAllowed = false;
+    if (race.isSprintWeekend) {
+      // Sprint weekend: between sprintQualifyingEnd (or start+1h) and 5 min before sprintStart
+      let sprintQualifyingEnd = race.sprintQualifyingEnd;
+      if (!sprintQualifyingEnd && race.sprintQualifyingStart) {
+        sprintQualifyingEnd = new Date(race.sprintQualifyingStart.getTime() + 60 * 60 * 1000);
+      }
+      if (sprintQualifyingEnd && race.sprintStart) {
+        const switcherooEnd = new Date(race.sprintStart.getTime() - 5 * 60 * 1000);
+        isSwitcherooAllowed = now >= sprintQualifyingEnd && now <= switcherooEnd;
+      }
+    } else {
+      // Regular weekend: between qualifyingEnd (or start+1h) and 5 min before raceStart
+      let qualifyingEnd = race.qualifyingEnd;
+      if (!qualifyingEnd && race.qualifyingStart) {
+        qualifyingEnd = new Date(race.qualifyingStart.getTime() + 60 * 60 * 1000);
+      }
+      if (qualifyingEnd && race.raceStart) {
+        const switcherooEnd = new Date(race.raceStart.getTime() - 5 * 60 * 1000);
+        isSwitcherooAllowed = now >= qualifyingEnd && now <= switcherooEnd;
+      }
+    }
+    res.json({ isSwitcherooAllowed });
   } catch (error) {
     res.status(500).json({ message: 'Internal server error' });
   }
