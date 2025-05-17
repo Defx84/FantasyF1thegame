@@ -405,7 +405,7 @@ const NextRaceSelections: React.FC = () => {
       const response = await api.get('/api/switcheroo/window-status', {
         params: { raceId: raceData?.round }
       });
-      setIsSwitcherooWindow(response.data.isSwitcherooWindow);
+      setIsSwitcherooWindow(response.data.isSwitcherooAllowed);
     } catch (error) {
       console.error('Error fetching switcheroo window status:', error);
     }
