@@ -56,11 +56,9 @@ const GridPage: React.FC<GridPageProps> = ({ players, raceData, leaderboard, cur
       <div className="relative z-10 max-w-7xl mx-auto pt-16">
         <div className="flex justify-between items-center mb-8 backdrop-blur-md bg-black/5 border border-white/10 rounded-xl shadow-lg px-8 py-4">
           <h1 className="text-3xl font-bold text-white">Starting Grid</h1>
-          {!showSelections && (
-            <div className="text-xl font-semibold text-red-500">
-              Lock in: {formatTimeLeft(timeLeft)}
-            </div>
-          )}
+          <div className="text-xl font-semibold text-red-500">
+            Lock in: {formatTimeLeft(timeLeft)}
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4 md:gap-8">
