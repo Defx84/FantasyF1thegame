@@ -84,12 +84,10 @@ const performSwitcheroo = async (req, res) => {
     if (!hasDriver) {
       return res.status(400).json({ message: 'Original driver not found in selection' });
     }
-    // Update selection with new driver
-    if (selection.mainDriver === originalDriver) {
-      selection.mainDriver = newDriver;
-    } else {
-      selection.reserveDriver = newDriver;
-    }
+    // Swap mainDriver and reserveDriver
+    const temp = selection.mainDriver;
+    selection.mainDriver = selection.reserveDriver;
+    selection.reserveDriver = temp;
     await selection.save();
     // Create switcheroo record
     const raceResult = await RaceResult.findOne({ round: Number(raceId) });

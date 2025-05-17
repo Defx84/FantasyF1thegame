@@ -424,16 +424,9 @@ const NextRaceSelections: React.FC = () => {
   // Switcheroo handler
   const handleSwitcheroo = async () => {
     if (!currentSelections || !currentSelections.mainDriver || !currentSelections.reserveDriver || !leagueId) return;
-    // Swap main and reserve driver
-    const swapped = {
-      ...currentSelections,
-      mainDriver: currentSelections.reserveDriver,
-      reserveDriver: currentSelections.mainDriver,
-    };
     try {
       setSwitcherooLoading(true);
-      await saveSelections(swapped, leagueId);
-      // Call the switcheroo endpoint to decrement the count
+      // Call the switcheroo endpoint to perform the swap on the backend
       await api.post('/api/switcheroo', {
         raceId: raceData?.round,
         leagueId,
