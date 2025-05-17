@@ -28,6 +28,10 @@ const calculateTimeLeft = (target: number) => {
   return { days, hours, minutes, seconds };
 };
 
+const FaFlagCheckeredIcon = FaFlagCheckered as React.FC<{ className?: string }>;
+const FaStopwatchIcon = FaStopwatch as React.FC<{ className?: string }>;
+const FaRunningIcon = FaRunning as React.FC<{ className?: string }>;
+
 const DashboardRaceCountdown: React.FC = () => {
   const [raceData, setRaceData] = useState<DashboardRaceTiming | null>(null);
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
@@ -69,10 +73,10 @@ const DashboardRaceCountdown: React.FC = () => {
   }
 
   const events = [
-    raceData?.qualifyingStart ? { label: 'Qualifying', icon: <FaStopwatch className="text-yellow-400" />, time: raceData.qualifyingStart } : null,
-    raceData?.sprintQualifyingStart ? { label: 'Sprint Qualifying', icon: <FaRunning className="text-green-400" />, time: raceData.sprintQualifyingStart } : null,
-    raceData?.sprintStart ? { label: 'Sprint Race', icon: <FaRunning className="text-green-400" />, time: raceData.sprintStart } : null,
-    raceData?.raceStart ? { label: 'Race', icon: <FaFlagCheckered className="text-red-400" />, time: raceData.raceStart } : null,
+    raceData?.qualifyingStart ? { label: 'Qualifying', icon: <FaStopwatchIcon className="text-yellow-400" />, time: raceData.qualifyingStart } : null,
+    raceData?.sprintQualifyingStart ? { label: 'Sprint Qualifying', icon: <FaRunningIcon className="text-green-400" />, time: raceData.sprintQualifyingStart } : null,
+    raceData?.sprintStart ? { label: 'Sprint Race', icon: <FaRunningIcon className="text-green-400" />, time: raceData.sprintStart } : null,
+    raceData?.raceStart ? { label: 'Race', icon: <FaFlagCheckeredIcon className="text-red-400" />, time: raceData.raceStart } : null,
   ].filter((e): e is { label: string; icon: JSX.Element; time: string } => !!e);
 
   return (
@@ -80,7 +84,7 @@ const DashboardRaceCountdown: React.FC = () => {
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold text-white mb-2">{raceData.raceName || 'Next Race'}</h2>
         <div className="flex items-center justify-center space-x-2 text-white/70">
-          <FaFlagCheckered className="text-red-500" size={20} />
+          <FaFlagCheckeredIcon className="text-red-500" />
           <span>Race Countdown</span>
         </div>
       </div>
