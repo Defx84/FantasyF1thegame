@@ -92,10 +92,14 @@ const performSwitcheroo = async (req, res) => {
     }
     await selection.save();
     // Create switcheroo record
+    const raceResult = await RaceResult.findOne({ round: Number(raceId) });
+    if (!raceResult) {
+      return res.status(404).json({ message: 'Race result not found' });
+    }
     const switcheroo = new Switcheroo({
       user: req.user._id,
       league: leagueId,
-      race: raceId,
+      race: raceResult._id,
       originalDriver,
       newDriver,
       timeUsed: new Date()
