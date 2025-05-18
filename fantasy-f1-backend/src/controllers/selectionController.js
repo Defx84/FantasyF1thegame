@@ -165,56 +165,36 @@ const getUsedSelections = async (req, res) => {
  */
 const getCurrentSelections = async (req, res) => {
     try {
-        // Get the league ID from the request
-        const { leagueId } = req.query;
-        
+        const { leagueId, round } = req.query;
         if (!leagueId) {
             return res.status(400).json({ error: 'League ID is required' });
         }
-
-        // Find the next upcoming race
-        const now = new Date();
-        const nextRace = await RaceCalendar.findOne({
-            date: { $gt: now }
-        }).sort({ date: 1 });
-
-        if (!nextRace) {
-            console.log('No upcoming race found');
-            return res.json({
-                mainDriver: null,
-                reserveDriver: null,
-                team: null
-            });
+        let roundNumber = round ? parseInt(round) : null;
+        let raceQuery = {};
+        if (roundNumber) {
+            raceQuery = { round: roundNumber };
+        } else {
+            // Fallback to next race by date
+            const now = new Date();
+            raceQuery = { date: { $gt: now } };
         }
-
-        console.log('Found next race:', nextRace);
-
-        // Find existing selection for this race and league
+        const race = await RaceCalendar.findOne(raceQuery).sort({ date: 1 });
+        if (!race) {
+            return res.json({ mainDriver: null, reserveDriver: null, team: null });
+        }
         const selection = await RaceSelection.findOne({
             user: req.user._id,
             league: leagueId,
-            round: nextRace.round
+            round: race.round
         }).lean();
-
-        console.log('Found selection:', selection);
-
         if (!selection) {
-            console.log('No selection found for user:', req.user._id);
-            return res.json({
-                mainDriver: null,
-                reserveDriver: null,
-                team: null
-            });
+            return res.json({ mainDriver: null, reserveDriver: null, team: null });
         }
-
-        // Return the selection data
         const response = {
             mainDriver: selection.mainDriver,
             reserveDriver: selection.reserveDriver,
             team: selection.team
         };
-
-        console.log('Returning selection:', response);
         res.json(response);
     } catch (error) {
         console.error('Error in getCurrentSelections:', error);
