@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaArrowLeft, FaTrophy, FaMedal, FaChevronDown, FaChevronUp } from 'react-icons/fa';
+import { FaArrowLeft, FaTrophy, FaMedal, FaChevronDown, FaChevronUp, FaInfoCircle } from 'react-icons/fa';
 import IconWrapper from '../utils/iconWrapper';
 import { api } from '../services/api';
 
@@ -238,66 +238,45 @@ const Standings: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
-      {/* Background image */}
-      <div 
-        className="fixed inset-0 w-full h-full"
-        style={{
-          backgroundImage: 'url("/standings.webp")',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
-          backgroundRepeat: 'no-repeat',
-          filter: 'brightness(0.7)'
-        }}
-      />
-
-      {/* Content */}
-      <div className="relative z-10 container mx-auto px-4 py-8">
-        {/* Back button container */}
-        <div className="max-w-3xl mx-auto">
-          {/* Header */}
-          <div className="backdrop-blur-sm bg-white/[0.02] rounded-xl p-6 border border-white/5 mb-8">
-            <h1 className="text-3xl font-bold text-white/90 mb-2">Championship Standings</h1>
-            <p className="text-white/60">Season {leaderboard.season}</p>
-          </div>
-
-          {/* Tabs */}
-          <div className="flex space-x-4 mb-6">
+    <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-gray-800 pb-12">
+      <div className="max-w-4xl mx-auto px-4 pt-12">
+        <div className="backdrop-blur-md bg-black/40 rounded-xl p-6 mb-6 shadow-lg">
+          <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-2">Championship Standings</h1>
+          <div className="text-lg text-white/80 mb-4">Season 2025</div>
+          <div className="flex items-center gap-4 mb-6">
             <button
+              className={`px-6 py-2 rounded-lg font-bold text-lg transition-all duration-200 ${activeTab === 'drivers' ? 'bg-white text-red-600' : 'bg-gray-700 text-white/80 hover:bg-gray-600'}`}
               onClick={() => setActiveTab('drivers')}
-              className={`px-6 py-3 rounded-lg font-medium transition-colors ${
-                activeTab === 'drivers'
-                  ? 'bg-red-500 text-white'
-                  : 'bg-white/[0.02] text-white/70 hover:bg-white/[0.05] backdrop-blur-sm border border-white/5'
-              }`}
             >
               Drivers Championship
             </button>
             <button
+              className={`px-6 py-2 rounded-lg font-bold text-lg transition-all duration-200 border-2 ${activeTab === 'teams' ? 'bg-red-600 text-white border-white' : 'bg-gray-700 text-white/80 hover:bg-gray-600 border-transparent'}`}
               onClick={() => setActiveTab('teams')}
-              className={`px-6 py-3 rounded-lg font-medium transition-colors ${
-                activeTab === 'teams'
-                  ? 'bg-red-500 text-white'
-                  : 'bg-white/[0.02] text-white/70 hover:bg-white/[0.05] backdrop-blur-sm border border-white/5'
-              }`}
             >
               Teams Championship
             </button>
-          </div>
-
-          {/* Standings List Container */}
-          <div className="backdrop-blur-sm bg-white/[0.02] rounded-xl border border-white/5 p-6">
-            <div className="space-y-2">
-              {activeTab === 'drivers'
-                ? leaderboard.driverStandings.map((standing, index) => renderStandingRow(standing, index))
-                : leaderboard.constructorStandings.map((standing, index) => renderStandingRow(standing, index))
-              }
+            {/* Info icon with tooltip */}
+            <div className="relative group ml-2">
+              <FaInfoCircle className="text-yellow-300 text-xl cursor-pointer" />
+              <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-72 bg-black/90 text-white text-sm rounded-lg shadow-lg px-4 py-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-200 z-50"
+                style={{ whiteSpace: 'normal' }}
+              >
+                The leaderboards are updated 20 minutes after the scheduled end of the race and 12hrs later to allow for late changes.
+              </div>
             </div>
           </div>
-
-          <div className="mt-4 text-white/40 text-sm text-right">
-            Last updated: {new Date(leaderboard.lastUpdated).toLocaleString()}
+        </div>
+        <div className="backdrop-blur-sm bg-white/[0.02] rounded-xl border border-white/5 p-6">
+          <div className="space-y-2">
+            {activeTab === 'drivers'
+              ? leaderboard.driverStandings.map((standing, index) => renderStandingRow(standing, index))
+              : leaderboard.constructorStandings.map((standing, index) => renderStandingRow(standing, index))
+            }
           </div>
+        </div>
+        <div className="mt-4 text-white/40 text-sm text-right">
+          Last updated: {new Date(leaderboard.lastUpdated).toLocaleString()}
         </div>
       </div>
     </div>
