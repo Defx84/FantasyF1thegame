@@ -270,11 +270,11 @@ const Standings: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center gap-2 mb-6">
-            <div className="flex bg-transparent rounded-full p-1">
+            <div className="flex bg-transparent rounded-full p-1 border border-white/20" style={{ minWidth: 250 }}>
               <button
-                className={`px-4 py-1.5 rounded-full font-bold text-base transition-all duration-200 
-                  ${activeTab === 'drivers' ? 'bg-red-600 text-white' : 'bg-transparent text-black'}`}
-                style={{ minWidth: 120 }}
+                className={`px-4 py-2 rounded-full font-bold text-base transition-all duration-200 whitespace-normal text-center w-1/2 
+                  ${activeTab === 'drivers' ? 'bg-red-600' : 'bg-transparent'} text-white`}
+                style={{ minWidth: 120, border: 'none', boxShadow: 'none', lineHeight: '1.1' }}
                 onClick={() => {
                   setActiveTab('drivers');
                   setSliderPosition('drivers');
@@ -283,9 +283,9 @@ const Standings: React.FC = () => {
                 Drivers Championship
               </button>
               <button
-                className={`px-4 py-1.5 rounded-full font-bold text-base transition-all duration-200 
-                  ${activeTab === 'teams' ? 'bg-red-600 text-white' : 'bg-transparent text-black'}`}
-                style={{ minWidth: 120 }}
+                className={`px-4 py-2 rounded-full font-bold text-base transition-all duration-200 whitespace-normal text-center w-1/2 
+                  ${activeTab === 'teams' ? 'bg-red-600' : 'bg-transparent'} text-white`}
+                style={{ minWidth: 120, border: 'none', boxShadow: 'none', lineHeight: '1.1' }}
                 onClick={() => {
                   setActiveTab('teams');
                   setSliderPosition('teams');
