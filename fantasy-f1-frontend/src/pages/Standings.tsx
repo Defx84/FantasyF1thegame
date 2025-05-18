@@ -241,7 +241,18 @@ const Standings: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-gray-800 pb-12">
-      <div className="max-w-4xl mx-auto px-4 pt-12">
+      <div 
+        className="fixed inset-0 w-full h-full"
+        style={{
+          backgroundImage: 'url("/standings.webp")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          filter: 'brightness(0.7)',
+          zIndex: 0
+        }}
+      />
+      <div className="max-w-4xl mx-auto px-4 pt-12 relative z-10">
         <div className="backdrop-blur-md bg-black/40 rounded-xl p-6 mb-6 shadow-lg">
           <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-2">Championship Standings</h1>
           <div className="text-lg text-white/80 mb-4">Season 2025</div>
@@ -258,10 +269,10 @@ const Standings: React.FC = () => {
             >
               Teams Championship
             </button>
-            {/* Info icon with tooltip */}
+            {/* Info icon with tooltip above */}
             <div className="relative group ml-2">
               <FaInfoCircleIcon className="text-yellow-300 text-xl cursor-pointer" />
-              <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-72 bg-black/90 text-white text-sm rounded-lg shadow-lg px-4 py-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-200 z-50"
+              <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-3 w-72 bg-black/90 text-white text-sm rounded-lg shadow-lg px-4 py-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-200 z-50 border border-yellow-300"
                 style={{ whiteSpace: 'normal' }}
               >
                 The leaderboards are updated 20 minutes after the scheduled end of the race and 12hrs later to allow for late changes.
