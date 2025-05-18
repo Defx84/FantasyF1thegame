@@ -256,11 +256,24 @@ const Standings: React.FC = () => {
       <div className="max-w-4xl mx-auto px-4 pt-12 relative z-10">
         <div className="backdrop-blur-md bg-black/40 rounded-xl p-6 mb-6 shadow-lg">
           <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-2">Championship Standings</h1>
-          <div className="text-lg text-white/80 mb-4">Season 2025</div>
-          <div className="flex items-center gap-4 mb-6 relative">
-            <div className="relative">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-lg text-white/80 flex items-center gap-2">
+              Season 2025
+              <div className="relative group ml-2">
+                <FaInfoCircleIcon className="text-yellow-300 text-xl cursor-pointer" />
+                <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-3 w-72 bg-black/90 text-white text-sm rounded-lg shadow-lg px-4 py-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-200 z-50 border border-yellow-300"
+                  style={{ whiteSpace: 'normal' }}
+                >
+                  The leaderboards are updated 20 minutes after the scheduled end of the race and 12hrs later to allow for late changes.
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex items-center gap-2 mb-6 relative">
+            <div className="relative flex bg-transparent rounded-full p-1">
               <button
-                className={`px-6 py-2 rounded-lg font-bold text-lg transition-all duration-200 bg-red-600 text-white border-2 border-white ${activeTab === 'drivers' ? 'opacity-100' : 'opacity-70'}`}
+                className={`px-4 py-1.5 rounded-full font-bold text-base transition-all duration-200 border-2 ${activeTab === 'drivers' ? 'bg-red-600 text-white border-red-600 shadow' : 'bg-transparent text-red-600 border-red-600'}`}
+                style={{ minWidth: 120 }}
                 onClick={() => {
                   setActiveTab('drivers');
                   setSliderPosition('drivers');
@@ -269,7 +282,8 @@ const Standings: React.FC = () => {
                 Drivers Championship
               </button>
               <button
-                className={`px-6 py-2 rounded-lg font-bold text-lg transition-all duration-200 bg-red-600 text-white border-2 border-white ${activeTab === 'teams' ? 'opacity-100' : 'opacity-70'}`}
+                className={`px-4 py-1.5 rounded-full font-bold text-base transition-all duration-200 border-2 ${activeTab === 'teams' ? 'bg-red-600 text-white border-red-600 shadow' : 'bg-transparent text-red-600 border-red-600'}`}
+                style={{ minWidth: 120 }}
                 onClick={() => {
                   setActiveTab('teams');
                   setSliderPosition('teams');
@@ -278,21 +292,13 @@ const Standings: React.FC = () => {
                 Teams Championship
               </button>
               <div
-                className="absolute bottom-0 left-0 h-1 bg-yellow-300 transition-all duration-300"
+                className="absolute bottom-0 left-0 h-1 bg-yellow-300 rounded-full transition-all duration-300"
                 style={{
-                  width: '50%',
-                  transform: `translateX(${sliderPosition === 'drivers' ? '0%' : '100%'})`,
+                  width: '120px',
+                  transform: `translateX(${sliderPosition === 'drivers' ? '0px' : '124px'})`,
+                  boxShadow: '0 2px 8px 0 rgba(255, 193, 7, 0.2)'
                 }}
               />
-            </div>
-            {/* Info icon with tooltip above */}
-            <div className="relative group ml-2">
-              <FaInfoCircleIcon className="text-yellow-300 text-xl cursor-pointer" />
-              <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-3 w-72 bg-black/90 text-white text-sm rounded-lg shadow-lg px-4 py-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-200 z-50 border border-yellow-300"
-                style={{ whiteSpace: 'normal' }}
-              >
-                The leaderboards are updated 20 minutes after the scheduled end of the race and 12hrs later to allow for late changes.
-              </div>
             </div>
           </div>
         </div>
