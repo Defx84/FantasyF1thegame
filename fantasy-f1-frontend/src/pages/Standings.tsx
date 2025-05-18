@@ -269,10 +269,11 @@ const Standings: React.FC = () => {
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2 mb-6 relative">
-            <div className="relative flex bg-transparent rounded-full p-1">
+          <div className="flex items-center gap-2 mb-6">
+            <div className="flex bg-transparent rounded-full p-1">
               <button
-                className={`px-4 py-1.5 rounded-full font-bold text-base transition-all duration-200 border-2 ${activeTab === 'drivers' ? 'bg-red-600 text-white border-red-600 shadow' : 'bg-transparent text-red-600 border-red-600'}`}
+                className={`px-4 py-1.5 rounded-full font-bold text-base transition-all duration-200 
+                  ${activeTab === 'drivers' ? 'bg-red-600 text-white' : 'bg-transparent text-black'}`}
                 style={{ minWidth: 120 }}
                 onClick={() => {
                   setActiveTab('drivers');
@@ -282,7 +283,8 @@ const Standings: React.FC = () => {
                 Drivers Championship
               </button>
               <button
-                className={`px-4 py-1.5 rounded-full font-bold text-base transition-all duration-200 border-2 ${activeTab === 'teams' ? 'bg-red-600 text-white border-red-600 shadow' : 'bg-transparent text-red-600 border-red-600'}`}
+                className={`px-4 py-1.5 rounded-full font-bold text-base transition-all duration-200 
+                  ${activeTab === 'teams' ? 'bg-red-600 text-white' : 'bg-transparent text-black'}`}
                 style={{ minWidth: 120 }}
                 onClick={() => {
                   setActiveTab('teams');
@@ -291,14 +293,6 @@ const Standings: React.FC = () => {
               >
                 Teams Championship
               </button>
-              <div
-                className="absolute bottom-0 left-0 h-1 bg-yellow-300 rounded-full transition-all duration-300"
-                style={{
-                  width: '120px',
-                  transform: `translateX(${sliderPosition === 'drivers' ? '0px' : '124px'})`,
-                  boxShadow: '0 2px 8px 0 rgba(255, 193, 7, 0.2)'
-                }}
-              />
             </div>
           </div>
         </div>
