@@ -64,6 +64,7 @@ const Standings: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+  const [sliderPosition, setSliderPosition] = useState<'drivers' | 'teams'>('drivers');
 
   useEffect(() => {
     const fetchStandings = async () => {
@@ -256,19 +257,34 @@ const Standings: React.FC = () => {
         <div className="backdrop-blur-md bg-black/40 rounded-xl p-6 mb-6 shadow-lg">
           <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-2">Championship Standings</h1>
           <div className="text-lg text-white/80 mb-4">Season 2025</div>
-          <div className="flex items-center gap-4 mb-6">
-            <button
-              className={`px-6 py-2 rounded-lg font-bold text-lg transition-all duration-200 bg-red-600 text-white border-2 border-white`}
-              onClick={() => setActiveTab('drivers')}
-            >
-              Drivers Championship
-            </button>
-            <button
-              className={`px-6 py-2 rounded-lg font-bold text-lg transition-all duration-200 bg-red-600 text-white border-2 border-white`}
-              onClick={() => setActiveTab('teams')}
-            >
-              Teams Championship
-            </button>
+          <div className="flex items-center gap-4 mb-6 relative">
+            <div className="relative">
+              <button
+                className={`px-6 py-2 rounded-lg font-bold text-lg transition-all duration-200 bg-red-600 text-white border-2 border-white ${activeTab === 'drivers' ? 'opacity-100' : 'opacity-70'}`}
+                onClick={() => {
+                  setActiveTab('drivers');
+                  setSliderPosition('drivers');
+                }}
+              >
+                Drivers Championship
+              </button>
+              <button
+                className={`px-6 py-2 rounded-lg font-bold text-lg transition-all duration-200 bg-red-600 text-white border-2 border-white ${activeTab === 'teams' ? 'opacity-100' : 'opacity-70'}`}
+                onClick={() => {
+                  setActiveTab('teams');
+                  setSliderPosition('teams');
+                }}
+              >
+                Teams Championship
+              </button>
+              <div
+                className="absolute bottom-0 left-0 h-1 bg-yellow-300 transition-all duration-300"
+                style={{
+                  width: '50%',
+                  transform: `translateX(${sliderPosition === 'drivers' ? '0%' : '100%'})`,
+                }}
+              />
+            </div>
             {/* Info icon with tooltip above */}
             <div className="relative group ml-2">
               <FaInfoCircleIcon className="text-yellow-300 text-xl cursor-pointer" />
