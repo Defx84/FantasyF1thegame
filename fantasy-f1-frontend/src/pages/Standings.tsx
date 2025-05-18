@@ -258,13 +258,13 @@ const Standings: React.FC = () => {
           <div className="text-lg text-white/80 mb-4">Season 2025</div>
           <div className="flex items-center gap-4 mb-6">
             <button
-              className={`px-6 py-2 rounded-lg font-bold text-lg transition-all duration-200 ${activeTab === 'drivers' ? 'bg-white text-red-600' : 'bg-gray-700 text-white/80 hover:bg-gray-600'}`}
+              className={`px-6 py-2 rounded-lg font-bold text-lg transition-all duration-200 bg-red-600 text-white border-2 border-white`}
               onClick={() => setActiveTab('drivers')}
             >
               Drivers Championship
             </button>
             <button
-              className={`px-6 py-2 rounded-lg font-bold text-lg transition-all duration-200 border-2 ${activeTab === 'teams' ? 'bg-red-600 text-white border-white' : 'bg-gray-700 text-white/80 hover:bg-gray-600 border-transparent'}`}
+              className={`px-6 py-2 rounded-lg font-bold text-lg transition-all duration-200 bg-red-600 text-white border-2 border-white`}
               onClick={() => setActiveTab('teams')}
             >
               Teams Championship
