@@ -54,6 +54,8 @@ interface LeaderboardData {
   constructorStandings: TeamStanding[];
 }
 
+const FaInfoCircleIcon = FaInfoCircle as React.FC<{ className?: string }>;
+
 const Standings: React.FC = () => {
   const { leagueId } = useParams<{ leagueId: string }>();
   const navigate = useNavigate();
@@ -258,7 +260,7 @@ const Standings: React.FC = () => {
             </button>
             {/* Info icon with tooltip */}
             <div className="relative group ml-2">
-              <FaInfoCircle className="text-yellow-300 text-xl cursor-pointer" />
+              <FaInfoCircleIcon className="text-yellow-300 text-xl cursor-pointer" />
               <div className="absolute left-1/2 -translate-x-1/2 mt-2 w-72 bg-black/90 text-white text-sm rounded-lg shadow-lg px-4 py-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-200 z-50"
                 style={{ whiteSpace: 'normal' }}
               >
