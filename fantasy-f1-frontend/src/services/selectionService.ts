@@ -90,8 +90,8 @@ export const saveSelections = async (selections: Selection, leagueId: string): P
   }
 };
 
-export const getCurrentSelections = async (leagueId: string): Promise<Selection> => {
-  const response: AxiosResponse<Selection> = await api.get(`/api/selections/current?leagueId=${leagueId}`);
+export const getCurrentSelections = async (leagueId: string, round: number): Promise<Selection> => {
+  const response: AxiosResponse<Selection> = await api.get(`/api/selections/current?leagueId=${leagueId}&round=${round}`);
   return response.data;
 };
 
