@@ -21,8 +21,7 @@ const ProfilePage: React.FC = () => {
   const [allLeagues, setAllLeagues] = useState<any[]>([]);
   const [adminLoading, setAdminLoading] = useState(false);
   const [adminError, setAdminError] = useState<string | null>(null);
-  const [updatingLeagueId, setUpdatingLeagueId] = useState<string | null>(null);
-  const [updateMessage, setUpdateMessage] = useState<string | null>(null);
+  const [scrapeStatus, setScrapeStatus] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchLeagues = async () => {
@@ -100,41 +99,24 @@ const ProfilePage: React.FC = () => {
   };
 
   const handleUpdateLeaderboard = async (leagueId: string, season: number) => {
-    setUpdatingLeagueId(leagueId);
-    setUpdateMessage(null);
     try {
       await api.post(`/api/admin/initialize-leaderboard/${leagueId}/${season}`);
-      setUpdateMessage('Leaderboard updated!');
     } catch (err) {
-      setUpdateMessage('Failed to update leaderboard.');
-    } finally {
-      setUpdatingLeagueId(null);
-      setTimeout(() => setUpdateMessage(null), 3000);
+      console.error('Failed to update leaderboard:', err);
     }
   };
 
-  const handleManualUpdate = async () => {
-    if (!updatingLeagueId || !updateMessage) return;
-    
+  const handleScrapeAllRaces = async () => {
     setAdminLoading(true);
     setAdminError(null);
-    
+    setScrapeStatus(null);
     try {
-      const response = await api.post(`/api/admin/update-race-results/${updatingLeagueId}`, {
-        raceName: updateMessage,
-        slug: updateMessage.toLowerCase().replace(' ', '-')
-      });
-      
+      const response = await api.post('/api/admin/scrape-missing-races');
       if (response.data.message) {
-        setUpdateMessage(null);
-        setUpdatingLeagueId(null);
-        setAdminError(null);
-        // Show success message
-        setUpdateMessage('Race results updated successfully!');
-        setTimeout(() => setUpdateMessage(null), 3000);
+        setScrapeStatus('Scraping triggered for all missing or incomplete race results.');
       }
     } catch (error: any) {
-      setAdminError(error.response?.data?.message || 'Failed to update race results');
+      setAdminError(error.response?.data?.message || 'Failed to trigger race results scraping');
     } finally {
       setAdminLoading(false);
     }
@@ -330,59 +312,29 @@ const ProfilePage: React.FC = () => {
                       <button
                         onClick={() => handleUpdateLeaderboard(league._id, league.season)}
                         className="flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow text-white font-semibold disabled:opacity-60"
-                        disabled={updatingLeagueId === league._id}
                       >
-                        {updatingLeagueId === league._id ? (
-                          <span className="animate-spin mr-2">🔄</span>
-                        ) : (
-                          <IconWrapper icon={FaSyncAlt} size={16} className="mr-2" />
-                        )}
-                        {updatingLeagueId === league._id ? 'Updating...' : 'Update Leaderboard'}
+                        <IconWrapper icon={FaSyncAlt} size={16} className="mr-2" />
+                        Update Leaderboard
                       </button>
                     </div>
                   ))}
-                  {updateMessage && (
-                    <div className="text-green-400 text-sm mt-2">{updateMessage}</div>
-                  )}
-                </div>
-              )}
-
-              {/* Manual Race Results Update Section */}
-              <div className="mt-8">
-                <h3 className="text-xl font-bold mb-4 text-white/90">Manual Race Results Update</h3>
-                <div className="bg-white/10 p-4 rounded-lg border border-white/10">
-                  <div className="flex flex-col gap-4">
-                    <div>
-                      <label className="block text-sm font-medium text-white/70 mb-1">Round</label>
-                      <input
-                        type="number"
-                        value={updatingLeagueId || ''}
-                        onChange={(e) => setUpdatingLeagueId(e.target.value)}
-                        className="w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-red-500"
-                        placeholder="Enter race round number"
-                      />
+                  {/* Update All Races Button Section */}
+                  <div className="mt-8">
+                    <h3 className="text-xl font-bold mb-4 text-white/90">Update All Races</h3>
+                    <div className="bg-white/10 p-4 rounded-lg border border-white/10 flex flex-col gap-4 items-start">
+                      <button
+                        onClick={handleScrapeAllRaces}
+                        disabled={adminLoading}
+                        className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {adminLoading ? 'Updating...' : 'Update All Races'}
+                      </button>
+                      {scrapeStatus && <div className="text-green-400 text-sm">{scrapeStatus}</div>}
+                      {adminError && <div className="text-red-500 text-sm">{adminError}</div>}
                     </div>
-                    <div>
-                      <label className="block text-sm font-medium text-white/70 mb-1">Race Name</label>
-                      <input
-                        type="text"
-                        value={updateMessage || ''}
-                        onChange={(e) => setUpdateMessage(e.target.value)}
-                        className="w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-red-500"
-                        placeholder="Enter race name (e.g., 'australia')"
-                      />
-                    </div>
-                    <button
-                      onClick={handleManualUpdate}
-                      disabled={!updatingLeagueId || !updateMessage || adminLoading}
-                      className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                      {adminLoading ? 'Updating...' : 'Update Race Results'}
-                    </button>
-                    {adminError && <div className="text-red-500 text-sm">{adminError}</div>}
                   </div>
                 </div>
-              </div>
+              )}
             </div>
           )}
         </div>

@@ -60,4 +60,17 @@ router.post('/update-race-results/:round', async (req, res) => {
     }
 });
 
+// Add route for triggering the scraper for all missing or incomplete race results
+router.post('/scrape-missing-races', async (req, res) => {
+    try {
+        // Import the main scraping function
+        const { scrapeRaceResults } = require('../../scripts/scrapeRaceResults');
+        await scrapeRaceResults();
+        res.json({ message: 'Scraping triggered for all missing or incomplete race results.' });
+    } catch (error) {
+        console.error('Error triggering race results scraping:', error);
+        res.status(500).json({ message: 'Failed to trigger race results scraping', error: error.message });
+    }
+});
+
 module.exports = router; 
