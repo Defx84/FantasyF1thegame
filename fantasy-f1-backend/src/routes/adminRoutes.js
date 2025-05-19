@@ -73,4 +73,7 @@ router.post('/scrape-missing-races', async (req, res) => {
     }
 });
 
+// Assign real points to all users in a league for a given round
+router.post('/assign-real-points-league', adminController.assignRealPointsToLeague);
+
 module.exports = router; 

@@ -269,4 +269,61 @@ exports.deleteRace = async (req, res) => {
     console.error('Error in deleteRace:', error);
     res.status(500).json({ message: 'Error deleting race', error: error.message });
   }
+};
+
+// Assign real points to all users in a league for a given round
+exports.assignRealPointsToLeague = async (req, res) => {
+  try {
+    const { leagueId, round } = req.body;
+    if (!leagueId || typeof round === 'undefined') {
+      return res.status(400).json({ message: 'leagueId and round are required' });
+    }
+
+    const league = await require('../models/League').findById(leagueId).populate('members');
+    if (!league) {
+      return res.status(404).json({ message: 'League not found' });
+    }
+
+    const raceResult = await require('../models/RaceResult').findOne({ round });
+    if (!raceResult) {
+      return res.status(404).json({ message: 'RaceResult not found for this round' });
+    }
+
+    const RaceSelection = require('../models/RaceSelection');
+    const ScoringService = require('../services/ScoringService');
+    const scoringService = new ScoringService();
+    const LeaderboardService = require('../services/LeaderboardService');
+    const leaderboardService = new LeaderboardService();
+
+    let updatedCount = 0;
+    for (const member of league.members) {
+      let selection = await RaceSelection.findOne({
+        user: member._id,
+        league: leagueId,
+        round
+      });
+      if (!selection) continue;
+      // Only update if not already assigned real points
+      if (!selection.pointBreakdown || selection.status === 'empty') {
+        const pointsData = scoringService.calculateRacePoints({
+          mainDriver: selection.mainDriver,
+          reserveDriver: selection.reserveDriver,
+          team: selection.team
+        }, raceResult);
+        selection.points = pointsData.totalPoints;
+        selection.pointBreakdown = pointsData.breakdown;
+        selection.status = 'admin-assigned';
+        selection.isAdminAssigned = true;
+        selection.assignedAt = new Date();
+        await selection.save();
+        updatedCount++;
+      }
+    }
+    // Update leaderboard for the league
+    await leaderboardService.updateStandings(leagueId);
+    res.json({ message: `Assigned real points to ${updatedCount} users in league for round ${round}` });
+  } catch (error) {
+    console.error('Error in assignRealPointsToLeague:', error);
+    res.status(500).json({ message: 'Error assigning real points to league', error: error.message });
+  }
 }; 
