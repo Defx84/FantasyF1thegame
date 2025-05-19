@@ -179,22 +179,47 @@ const initializeLeaderboard = async (leagueId, season) => {
         // Update last updated timestamp
         leaderboard.lastUpdated = new Date();
 
-        // Save leaderboard
-        try {
-        await leaderboard.save();
-        } catch (error) {
-            // If duplicate key error, find and return the existing leaderboard
-            if (error.name === 'MongoServerError' && error.code === 11000) {
-                const existing = await LeagueLeaderboard.findOne({
-                    league: league._id,
-                    season: season
-                });
-                if (existing) return existing;
+        // Save leaderboard with retry mechanism
+        const maxRetries = 3;
+        let retryCount = 0;
+        let savedLeaderboard = null;
+
+        while (retryCount < maxRetries) {
+            try {
+                savedLeaderboard = await leaderboard.save();
+                break; // Success, exit the loop
+            } catch (error) {
+                // Handle duplicate key error
+                if (error.name === 'MongoServerError' && error.code === 11000) {
+                    const existing = await LeagueLeaderboard.findOne({
+                        league: league._id,
+                        season: season
+                    });
+                    if (existing) return existing;
+                }
+                
+                // Handle version error
+                if (error.name === 'VersionError') {
+                    retryCount++;
+                    if (retryCount === maxRetries) {
+                        throw new Error(`Failed to save leaderboard after ${maxRetries} retries due to version conflicts`);
+                    }
+                    // Reload the leaderboard and try again
+                    leaderboard = await LeagueLeaderboard.findOne({
+                        league: league._id,
+                        season: season
+                    });
+                    if (!leaderboard) {
+                        throw new Error('Leaderboard not found during retry');
+                    }
+                    continue;
+                }
+                
+                throw error; // Re-throw other errors
             }
-            throw error;
         }
 
-        return leaderboard;
+        return savedLeaderboard;
     } catch (error) {
         console.error('Error initializing leaderboard:', error);
         throw error;
