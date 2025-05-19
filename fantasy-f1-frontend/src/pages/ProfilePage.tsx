@@ -22,6 +22,8 @@ const ProfilePage: React.FC = () => {
   const [adminLoading, setAdminLoading] = useState(false);
   const [adminError, setAdminError] = useState<string | null>(null);
   const [scrapeStatus, setScrapeStatus] = useState<string | null>(null);
+  const [assignPointsStatus, setAssignPointsStatus] = useState<string | null>(null);
+  const [selectedRound, setSelectedRound] = useState<string>('');
 
   useEffect(() => {
     const fetchLeagues = async () => {
@@ -117,6 +119,28 @@ const ProfilePage: React.FC = () => {
       }
     } catch (error: any) {
       setAdminError(error.response?.data?.message || 'Failed to trigger race results scraping');
+    } finally {
+      setAdminLoading(false);
+    }
+  };
+
+  const handleAssignRealPoints = async (leagueId: string) => {
+    if (!selectedRound) {
+      setAdminError('Please select a round first');
+      return;
+    }
+
+    setAdminLoading(true);
+    setAdminError(null);
+    setAssignPointsStatus(null);
+    try {
+      const response = await api.post('/api/admin/assign-real-points-league', {
+        leagueId,
+        round: parseInt(selectedRound)
+      });
+      setAssignPointsStatus(response.data.message);
+    } catch (error: any) {
+      setAdminError(error.response?.data?.message || 'Failed to assign real points');
     } finally {
       setAdminLoading(false);
     }
@@ -302,20 +326,47 @@ const ProfilePage: React.FC = () => {
                   {allLeagues.map((league) => (
                     <div
                       key={league._id}
-                      className="flex items-center justify-between bg-white/10 p-4 rounded-lg border border-white/10"
+                      className="flex flex-col gap-4 bg-white/10 p-4 rounded-lg border border-white/10"
                     >
-                      <div className="flex flex-col">
-                        <span className="font-semibold text-white/90">{league.name}</span>
-                        <span className="text-sm text-white/70">Season {league.season}</span>
-                        <span className="text-xs text-white/50">Code: {league.code}</span>
+                      <div className="flex items-center justify-between">
+                        <div className="flex flex-col">
+                          <span className="font-semibold text-white/90">{league.name}</span>
+                          <span className="text-sm text-white/70">Season {league.season}</span>
+                          <span className="text-xs text-white/50">Code: {league.code}</span>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => handleUpdateLeaderboard(league._id, league.season)}
+                            className="flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow text-white font-semibold disabled:opacity-60"
+                          >
+                            <IconWrapper icon={FaSyncAlt} size={16} className="mr-2" />
+                            Update Leaderboard
+                          </button>
+                        </div>
                       </div>
-                      <button
-                        onClick={() => handleUpdateLeaderboard(league._id, league.season)}
-                        className="flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow text-white font-semibold disabled:opacity-60"
-                      >
-                        <IconWrapper icon={FaSyncAlt} size={16} className="mr-2" />
-                        Update Leaderboard
-                      </button>
+                      {/* Assign Real Points Section */}
+                      <div className="flex items-center gap-4">
+                        <input
+                          type="number"
+                          value={selectedRound}
+                          onChange={(e) => setSelectedRound(e.target.value)}
+                          placeholder="Round number"
+                          className="px-3 py-2 rounded bg-white/20 border border-white/30 text-white placeholder-white/50 focus:outline-none focus:border-red-500 w-32"
+                          min="1"
+                          max="24"
+                        />
+                        <button
+                          onClick={() => handleAssignRealPoints(league._id)}
+                          disabled={adminLoading || !selectedRound}
+                          className="flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors shadow text-white font-semibold disabled:opacity-60"
+                        >
+                          <IconWrapper icon={FaSyncAlt} size={16} className="mr-2" />
+                          Assign Real Points
+                        </button>
+                      </div>
+                      {assignPointsStatus && (
+                        <div className="text-green-400 text-sm">{assignPointsStatus}</div>
+                      )}
                     </div>
                   ))}
                   {/* Update All Races Button Section */}
