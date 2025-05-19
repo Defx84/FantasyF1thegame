@@ -287,6 +287,8 @@ async function triggerRaceUpdate(round, label) {
             }
         }
 
+        // Debug log for SERVER_KEY
+        console.log('[DEBUG] SERVER_KEY being sent:', process.env.SERVER_KEY);
         const res = await axios.post(
             `${API_BASE_URL}/api/race/update-race-results/${round}`,
             updateData,
