@@ -5,9 +5,11 @@ const { auth } = require('../middleware/auth');
 const isAppAdmin = require('../middleware/isAppAdmin');
 const { initializeLeaderboard } = require('../utils/initializeLeaderboard');
 const League = require('../models/League');
+const { processRace } = require('../scripts/updateRaceResults');
 
 // Apply auth middleware to all routes
 router.use(auth);
+router.use(isAppAdmin);
 
 // Assign selections for missed deadline
 router.post('/assign-missed', adminController.assignMissedSelection);
@@ -37,6 +39,25 @@ router.get('/all-leagues', isAppAdmin, async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
+});
+
+// Add route for manually updating race results
+router.post('/update-race-results/:round', async (req, res) => {
+    try {
+        const { round } = req.params;
+        const raceName = req.body.raceName;
+        const slug = req.body.slug;
+
+        if (!raceName || !slug) {
+            return res.status(400).json({ message: 'Race name and slug are required' });
+        }
+
+        await processRace(round, raceName, slug);
+        res.json({ message: 'Race results updated successfully' });
+    } catch (error) {
+        console.error('Error updating race results:', error);
+        res.status(500).json({ message: 'Failed to update race results', error: error.message });
+    }
 });
 
 module.exports = router; 

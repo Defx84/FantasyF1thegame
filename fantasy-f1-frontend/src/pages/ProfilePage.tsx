@@ -113,6 +113,33 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  const handleManualUpdate = async () => {
+    if (!updatingLeagueId || !updateMessage) return;
+    
+    setAdminLoading(true);
+    setAdminError(null);
+    
+    try {
+      const response = await api.post(`/api/admin/update-race-results/${updatingLeagueId}`, {
+        raceName: updateMessage,
+        slug: updateMessage.toLowerCase().replace(' ', '-')
+      });
+      
+      if (response.data.message) {
+        setUpdateMessage(null);
+        setUpdatingLeagueId(null);
+        setAdminError(null);
+        // Show success message
+        setUpdateMessage('Race results updated successfully!');
+        setTimeout(() => setUpdateMessage(null), 3000);
+      }
+    } catch (error: any) {
+      setAdminError(error.response?.data?.message || 'Failed to update race results');
+    } finally {
+      setAdminLoading(false);
+    }
+  };
+
   if (!user) {
     return null; // This shouldn't happen due to PrivateRoute, but just in case
   }
@@ -319,6 +346,43 @@ const ProfilePage: React.FC = () => {
                   )}
                 </div>
               )}
+
+              {/* Manual Race Results Update Section */}
+              <div className="mt-8">
+                <h3 className="text-xl font-bold mb-4 text-white/90">Manual Race Results Update</h3>
+                <div className="bg-white/10 p-4 rounded-lg border border-white/10">
+                  <div className="flex flex-col gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-white/70 mb-1">Round</label>
+                      <input
+                        type="number"
+                        value={updatingLeagueId || ''}
+                        onChange={(e) => setUpdatingLeagueId(e.target.value)}
+                        className="w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-red-500"
+                        placeholder="Enter race round number"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-white/70 mb-1">Race Name</label>
+                      <input
+                        type="text"
+                        value={updateMessage || ''}
+                        onChange={(e) => setUpdateMessage(e.target.value)}
+                        className="w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-red-500"
+                        placeholder="Enter race name (e.g., 'australia')"
+                      />
+                    </div>
+                    <button
+                      onClick={handleManualUpdate}
+                      disabled={!updatingLeagueId || !updateMessage || adminLoading}
+                      className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {adminLoading ? 'Updating...' : 'Update Race Results'}
+                    </button>
+                    {adminError && <div className="text-red-500 text-sm">{adminError}</div>}
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </div>
