@@ -117,6 +117,9 @@ const initializeLeaderboard = async (leagueId, season) => {
                 const points = selection.points || 0;
                 const pb = selection.pointBreakdown || {};
 
+                // Check if main driver didn't start the race
+                const mainDriverDidNotStart = pb.mainDriverDidNotStart || false;
+                
                 // Add driver race result
                 const driverRaceResult = {
                     round: race.round,
@@ -124,7 +127,7 @@ const initializeLeaderboard = async (leagueId, season) => {
                     mainDriver: selection.mainDriver,
                     reserveDriver: selection.reserveDriver,
                     points,
-                    mainRacePoints: pb.mainDriverPoints || 0,
+                    mainRacePoints: mainDriverDidNotStart ? (pb.reserveDriverPoints || 0) : (pb.mainDriverPoints || 0),
                     sprintPoints: pb.reserveDriverPoints || 0,
                     totalPoints: points
                 };
