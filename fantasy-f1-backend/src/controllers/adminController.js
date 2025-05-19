@@ -300,7 +300,7 @@ exports.assignRealPointsToLeague = async (req, res) => {
       let selection = await RaceSelection.findOne({
         user: member._id,
         league: leagueId,
-        round
+        race: raceResult._id
       });
       if (!selection) continue;
       // Only update if not already assigned real points
