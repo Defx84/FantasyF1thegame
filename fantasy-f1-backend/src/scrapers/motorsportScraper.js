@@ -219,6 +219,8 @@ async function scrapeMotorsportResultsByType(slug, type) {
     }
 }
 
+const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:5000';
+
 async function triggerRaceUpdate(round, label) {
     try {
         console.log(`\n🔍 [${label}] Starting update process for round ${round}...`);
@@ -286,7 +288,7 @@ async function triggerRaceUpdate(round, label) {
         }
 
         const res = await axios.post(
-            `http://localhost:5000/api/race/update-race-results/${round}`,
+            `${API_BASE_URL}/api/race/update-race-results/${round}`,
             updateData,
             {
                 headers: {
