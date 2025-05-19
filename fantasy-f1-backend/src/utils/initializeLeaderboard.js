@@ -163,7 +163,7 @@ const initializeLeaderboard = async (leagueId, season) => {
 
             // Update total points
             driverStanding.totalPoints = driverStanding.raceResults.reduce(
-                (sum, result) => sum + (result.points ?? result.totalPoints ?? 0),
+                (sum, result) => sum + (result.mainRacePoints ?? 0) + (result.sprintPoints ?? 0),
                 0
             );
             constructorStanding.totalPoints = constructorStanding.raceResults.reduce(
