@@ -119,6 +119,7 @@ const initializeLeaderboard = async (leagueId, season) => {
 
                 // Check if main driver didn't start the race
                 const mainDriverDidNotStart = pb.mainDriverDidNotStart || false;
+                const isSprintWeekend = pb.isSprintWeekend || false;
                 
                 // Add driver race result
                 const driverRaceResult = {
@@ -127,8 +128,12 @@ const initializeLeaderboard = async (leagueId, season) => {
                     mainDriver: selection.mainDriver,
                     reserveDriver: selection.reserveDriver,
                     points,
+                    // For normal race: main driver points (or reserve if DNS)
+                    // For sprint race: main driver points for main race
                     mainRacePoints: mainDriverDidNotStart ? (pb.reserveDriverPoints || 0) : (pb.mainDriverPoints || 0),
-                    sprintPoints: pb.reserveDriverPoints || 0,
+                    // For sprint race: reserve driver points for sprint
+                    // For normal race: 0
+                    sprintPoints: isSprintWeekend ? (pb.reserveDriverPoints || 0) : 0,
                     totalPoints: points
                 };
 
@@ -144,7 +149,7 @@ const initializeLeaderboard = async (leagueId, season) => {
 
                 // Add constructor race result
                 const teamMainRacePoints = pb.teamRacePoints ?? pb.teamPoints ?? 0;
-                const teamSprintPoints = pb.teamSprintPoints ?? 0;
+                const teamSprintPoints = isSprintWeekend ? (pb.teamSprintPoints ?? 0) : 0;
                 const constructorTotal = teamMainRacePoints + teamSprintPoints;
                 const constructorRaceResult = {
                     round: race.round,
