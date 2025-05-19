@@ -47,9 +47,9 @@ class LeaderboardService {
 
             // Process each member's standings
             for (const member of members) {
-                // Get ALL member's selections
+                // Get ALL member's selections, skip if selection.user is null
                 const memberSelections = selections.filter(
-                    selection => selection.user._id.toString() === member._id.toString()
+                    selection => selection.user && selection.user._id && member._id && selection.user._id.toString() === member._id.toString()
                 );
 
                 // Calculate total points and prepare race results
@@ -59,8 +59,8 @@ class LeaderboardService {
                 let constructorTotalPoints = 0;
 
                 for (const selection of memberSelections) {
-                    // Only process if all required fields are present
-                    if (!selection.mainDriver || !selection.reserveDriver || !selection.team) continue;
+                    // Only process if all required fields are present and selection.race is not null
+                    if (!selection.mainDriver || !selection.reserveDriver || !selection.team || !selection.race) continue;
                     // Only process if the race is completed (check RaceResult)
                     const raceResult = await RaceResult.findOne({ round: selection.round });
                     if (!raceResult || raceResult.status !== "completed") continue;
@@ -89,7 +89,7 @@ class LeaderboardService {
                     // Driver race result - always create an entry
                     const driverResult = {
                         round: selection.round,
-                        raceName: selection.race.raceName,
+                        raceName: selection.race ? selection.race.raceName : '',
                         mainDriver: selection.mainDriver,
                         reserveDriver: selection.reserveDriver,
                         mainRacePoints: pb.mainDriverPoints || 0,
@@ -106,7 +106,7 @@ class LeaderboardService {
                     const normalizedTeam = normalizeTeamName(selection.team);
                     const constructorResult = {
                         round: selection.round,
-                        raceName: selection.race.raceName,
+                        raceName: selection.race ? selection.race.raceName : '',
                         team: normalizedTeam,
                         mainRacePoints: pb.teamPoints || 0,
                         sprintPoints: 0,
