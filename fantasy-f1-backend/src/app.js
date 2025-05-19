@@ -9,6 +9,9 @@ const { initializeScraperSystem, runScraper } = require('./scrapers/motorsportSc
 
 const app = express();
 
+// Fix: Trust the first proxy (needed for Railway and other cloud hosts)
+app.set('trust proxy', 1);
+
 // Middleware
 app.use(helmet());
 const allowedOrigins = [
