@@ -224,7 +224,9 @@ const Standings: React.FC = () => {
                       )}
                     </div>
                     <div className="text-white/90 font-medium">
-                      {typeof result.totalPoints === 'number' ? `${result.totalPoints} pts` : '-'}
+                      {typeof result.mainRacePoints === 'number' || typeof result.sprintPoints === 'number'
+                        ? `${(result.mainRacePoints || 0) + (result.sprintPoints || 0)} pts`
+                        : '-'}
                     </div>
                   </div>
                 ))
