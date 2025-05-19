@@ -41,8 +41,9 @@ class ScoringService {
         }
 
         // Calculate team points
+        const userTeam = normalizeTeamName(selection.team);
         const teamResult = raceResult.teamResults?.find(t => 
-            t.team.toLowerCase() === selection.team.toLowerCase()
+            normalizeTeamName(t.team) === userTeam
         );
         console.log('Team result found:', teamResult);
 
