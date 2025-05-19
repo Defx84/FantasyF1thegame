@@ -181,12 +181,14 @@ const Standings: React.FC = () => {
     );
   };
 
-  const renderStandingRow = (standing: DriverStanding | TeamStanding, index: number) => {
+  // Render a driver standing row with custom driver points sum
+  const renderDriverStandingRow = (standing: DriverStanding, index: number) => {
     const isExpanded = expandedRows.has(standing.user._id);
-
-    // Sort race results by round in descending order (most recent first)
     const sortedResults = [...standing.raceResults].sort((a, b) => b.round - a.round);
-
+    const driverPoints = sortedResults.reduce(
+      (sum, result) => sum + (result.mainRacePoints || 0) + (result.sprintPoints || 0),
+      0
+    );
     return (
       <div key={standing.user._id} className="backdrop-blur-sm bg-white/[0.02] rounded-lg mb-4 border border-white/5 overflow-hidden transition-all duration-200">
         <div 
@@ -197,14 +199,13 @@ const Standings: React.FC = () => {
             <span className="text-2xl font-bold mr-4 text-white/90">{index + 1}</span>
             <div>
               <div className="text-lg font-semibold text-white/90">{standing.user.username}</div>
-              <div className="text-sm text-white/60">Total Points: {standing.totalPoints}</div>
+              <div className="text-sm text-white/60">Total Points: {driverPoints}</div>
             </div>
           </div>
           <div className="flex items-center text-white/60">
             {isExpanded ? <IconWrapper icon={FaChevronUp} /> : <IconWrapper icon={FaChevronDown} />}
           </div>
         </div>
-        
         {isExpanded && (
           <div className="border-t border-white/5">
             <div className="space-y-1 p-2">
@@ -227,6 +228,62 @@ const Standings: React.FC = () => {
                       {typeof result.mainRacePoints === 'number' || typeof result.sprintPoints === 'number'
                         ? `${(result.mainRacePoints || 0) + (result.sprintPoints || 0)} pts`
                         : '-'}
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center text-white/40 py-4">
+                  No race results available
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  // Render a team standing row (uses backend totalPoints)
+  const renderTeamStandingRow = (standing: TeamStanding, index: number) => {
+    const isExpanded = expandedRows.has(standing.user._id);
+    const sortedResults = [...standing.raceResults].sort((a, b) => b.round - a.round);
+    return (
+      <div key={standing.user._id} className="backdrop-blur-sm bg-white/[0.02] rounded-lg mb-4 border border-white/5 overflow-hidden transition-all duration-200">
+        <div 
+          className="flex items-center justify-between p-4 cursor-pointer hover:bg-white/[0.05] transition-colors"
+          onClick={() => toggleRowExpansion(standing.user._id)}
+        >
+          <div className="flex items-center">
+            <span className="text-2xl font-bold mr-4 text-white/90">{index + 1}</span>
+            <div>
+              <div className="text-lg font-semibold text-white/90">{standing.user.username}</div>
+              <div className="text-sm text-white/60">Total Points: {standing.totalPoints}</div>
+            </div>
+          </div>
+          <div className="flex items-center text-white/60">
+            {isExpanded ? <IconWrapper icon={FaChevronUp} /> : <IconWrapper icon={FaChevronDown} />}
+          </div>
+        </div>
+        {isExpanded && (
+          <div className="border-t border-white/5">
+            <div className="space-y-1 p-2">
+              {sortedResults && sortedResults.length > 0 ? (
+                sortedResults.map((result, idx) => (
+                  <div 
+                    key={idx} 
+                    className="flex justify-between items-center p-2 rounded hover:bg-white/[0.05] transition-colors"
+                  >
+                    <div className="flex items-center space-x-2">
+                      <span className="text-white/60 text-sm">Round {result.round}</span>
+                      <span className="text-white/90">{result.raceName}</span>
+                      {result.breakdown?.isSprintWeekend && (
+                        <span className="px-2 py-0.5 text-xs bg-yellow-600/20 text-yellow-400 rounded">
+                          Sprint
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-white/90 font-medium">
+                      {typeof result.totalPoints === 'number' ? `${result.totalPoints} pts` : '-'}
                     </div>
                   </div>
                 ))
@@ -301,8 +358,8 @@ const Standings: React.FC = () => {
         <div className="backdrop-blur-sm bg-white/[0.02] rounded-xl border border-white/5 p-6">
           <div className="space-y-2">
             {activeTab === 'drivers'
-              ? leaderboard.driverStandings.map((standing, index) => renderStandingRow(standing, index))
-              : leaderboard.constructorStandings.map((standing, index) => renderStandingRow(standing, index))
+              ? leaderboard.driverStandings.map((standing, index) => renderDriverStandingRow(standing, index))
+              : leaderboard.constructorStandings.map((standing, index) => renderTeamStandingRow(standing, index))
             }
           </div>
         </div>
