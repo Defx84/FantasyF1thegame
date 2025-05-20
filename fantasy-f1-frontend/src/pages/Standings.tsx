@@ -181,6 +181,14 @@ const Standings: React.FC = () => {
     );
   };
 
+  // Helper to format driver name as 'Initial. Surname'
+  const formatDriverName = (name?: string) => {
+    if (!name) return '-';
+    const parts = name.split(' ');
+    if (parts.length === 1) return name;
+    return `${parts[0][0]}. ${parts.slice(1).join(' ')}`;
+  };
+
   // Render a driver standing row with custom driver points sum
   const renderDriverStandingRow = (standing: DriverStanding, index: number) => {
     const isExpanded = expandedRows.has(standing.user._id);
@@ -212,26 +220,26 @@ const Standings: React.FC = () => {
               {sortedResults && sortedResults.length > 0 ? (
                 <div>
                   <div className="flex font-semibold text-white/70 text-sm mb-1 px-2">
-                    <div className="w-28">Round</div>
-                    <div className="flex-1">Race</div>
-                    <div className="w-24 text-center">Main</div>
-                    <div className="w-24 text-center">Reserve</div>
-                    <div className="w-16 text-right">Points</div>
+                    <div className="w-28 pr-2">Round</div>
+                    <div className="flex-1 pr-2 border-r border-white/10">Race</div>
+                    <div className="w-24 px-2 border-r border-white/10 text-center">Main</div>
+                    <div className="w-24 px-2 border-r border-white/10 text-center">Reserve</div>
+                    <div className="w-16 pl-2 text-right">Points</div>
                   </div>
                   {sortedResults.map((result, idx) => (
                     <div
                       key={idx}
                       className="flex items-center p-2 rounded hover:bg-white/[0.05] transition-colors text-white/90 text-sm"
                     >
-                      <div className="w-28 text-white/60">Round {result.round}</div>
-                      <div className="flex-1">{result.raceName}{' '}
+                      <div className="w-28 pr-2 text-white/60">Round {result.round}</div>
+                      <div className="flex-1 pr-2 border-r border-white/10">{result.raceName}{' '}
                         {result.breakdown?.isSprintWeekend && (
                           <span className="ml-2 px-2 py-0.5 text-xs bg-yellow-600/20 text-yellow-400 rounded">Sprint</span>
                         )}
                       </div>
-                      <div className="w-24 text-center">{result.mainDriver || result.breakdown?.mainDriver || '-'}</div>
-                      <div className="w-24 text-center">{result.reserveDriver || result.breakdown?.reserveDriver || '-'}</div>
-                      <div className="w-16 text-right font-medium">
+                      <div className="w-24 px-2 border-r border-white/10 text-center">{formatDriverName(result.mainDriver || result.breakdown?.mainDriver)}</div>
+                      <div className="w-24 px-2 border-r border-white/10 text-center">{formatDriverName(result.reserveDriver || result.breakdown?.reserveDriver)}</div>
+                      <div className="w-16 pl-2 text-right font-medium">
                         {typeof result.mainRacePoints === 'number' || typeof result.sprintPoints === 'number'
                           ? `${(result.mainRacePoints || 0) + (result.sprintPoints || 0)} pts`
                           : '-'}
