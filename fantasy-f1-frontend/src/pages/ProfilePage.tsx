@@ -326,47 +326,44 @@ const ProfilePage: React.FC = () => {
                   {allLeagues.map((league) => (
                     <div
                       key={league._id}
-                      className="flex flex-col gap-4 bg-white/10 p-4 rounded-lg border border-white/10"
+                      className="flex flex-col md:flex-row items-stretch justify-between bg-white/10 p-6 rounded-lg border border-white/10 shadow-md md:space-x-6 space-y-4 md:space-y-0 transition-all duration-200"
                     >
-                      <div className="flex items-center justify-between">
-                        <div className="flex flex-col">
-                          <span className="font-semibold text-white/90">{league.name}</span>
-                          <span className="text-sm text-white/70">Season {league.season}</span>
-                          <span className="text-xs text-white/50">Code: {league.code}</span>
-                        </div>
-                        <div className="flex gap-2">
-                          <button
-                            onClick={() => handleUpdateLeaderboard(league._id, league.season)}
-                            className="flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow text-white font-semibold disabled:opacity-60"
-                          >
-                            <IconWrapper icon={FaSyncAlt} size={16} className="mr-2" />
-                            Update Leaderboard
-                          </button>
-                        </div>
+                      {/* League Info */}
+                      <div className="flex flex-col justify-center min-w-[180px] mb-2 md:mb-0">
+                        <span className="font-semibold text-white/90 text-lg">{league.name}</span>
+                        <span className="text-sm text-white/70">Season {league.season}</span>
+                        <span className="text-xs text-white/50">Code: {league.code}</span>
                       </div>
-                      {/* Assign Real Points Section */}
-                      <div className="flex items-center gap-4">
+                      {/* Center: Round input + Assign Real Points */}
+                      <div className="flex flex-row items-center gap-3 flex-1 justify-center">
                         <input
                           type="number"
                           value={selectedRound}
                           onChange={(e) => setSelectedRound(e.target.value)}
-                          placeholder="Round number"
-                          className="px-3 py-2 rounded bg-white/20 border border-white/30 text-white placeholder-white/50 focus:outline-none focus:border-red-500 w-32"
+                          placeholder="Round #"
+                          className="px-3 py-2 rounded bg-white/20 border border-white/30 text-white placeholder-white/50 focus:outline-none focus:border-red-500 w-24 text-center"
                           min="1"
                           max="24"
                         />
                         <button
                           onClick={() => handleAssignRealPoints(league._id)}
                           disabled={adminLoading || !selectedRound}
-                          className="flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors shadow text-white font-semibold disabled:opacity-60"
+                          className="flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors shadow text-white font-semibold disabled:opacity-60 min-w-[160px] justify-center"
                         >
                           <IconWrapper icon={FaSyncAlt} size={16} className="mr-2" />
                           Assign Real Points
                         </button>
                       </div>
-                      {assignPointsStatus && (
-                        <div className="text-green-400 text-sm">{assignPointsStatus}</div>
-                      )}
+                      {/* Right: Update Leaderboard */}
+                      <div className="flex items-center justify-end min-w-[180px]">
+                        <button
+                          onClick={() => handleUpdateLeaderboard(league._id, league.season)}
+                          className="flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow text-white font-semibold disabled:opacity-60 min-w-[160px] justify-center"
+                        >
+                          <IconWrapper icon={FaSyncAlt} size={16} className="mr-2" />
+                          Update Leaderboard
+                        </button>
+                      </div>
                     </div>
                   ))}
                   {/* Update All Races Button Section */}
