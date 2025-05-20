@@ -3,6 +3,8 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaTrophy, FaMedal, FaChevronDown, FaChevronUp, FaInfoCircle } from 'react-icons/fa';
 import IconWrapper from '../utils/iconWrapper';
 import { api } from '../services/api';
+import { F1_DRIVERS_2025 } from '../constants/f1Data2025';
+import { getTeamColor } from '../constants/teamColors';
 
 interface RaceResult {
   round: number;
@@ -189,6 +191,13 @@ const Standings: React.FC = () => {
     return `${parts[0][0]}. ${parts.slice(1).join(' ')}`;
   };
 
+  // Helper to get team for a driver
+  const getDriverTeam = (driverName?: string) => {
+    if (!driverName) return undefined;
+    const driver = F1_DRIVERS_2025.find(d => d.name === driverName || d.shortName === driverName || d.alternateNames.includes(driverName));
+    return driver?.team;
+  };
+
   // Render a driver standing row with custom driver points sum
   const renderDriverStandingRow = (standing: DriverStanding, index: number) => {
     const isExpanded = expandedRows.has(standing.user._id);
@@ -226,30 +235,30 @@ const Standings: React.FC = () => {
                     <div className="w-36 px-3 border-r border-white/10 text-center">Reserve</div>
                     <div className="w-16 pl-2 text-right">Points</div>
                   </div>
-                  {sortedResults.map((result, idx) => (
-                    <div
-                      key={idx}
-                      className={`flex items-center p-2 rounded transition-colors text-red-400 text-sm whitespace-nowrap ${
-                        idx % 2 === 0
-                          ? 'bg-gradient-to-r from-black/60 via-gray-900/60 to-black/60'
-                          : 'bg-gradient-to-r from-red-900/30 via-gray-800/30 to-red-900/30'
-                      } hover:bg-white/[0.05]`}
-                    >
-                      <div className="w-28 pr-2">Round {result.round}</div>
-                      <div className="flex-1 pr-2 border-r border-white/10">{result.raceName}{' '}
-                        {result.breakdown?.isSprintWeekend && (
-                          <span className="ml-2 px-2 py-0.5 text-xs bg-yellow-600/20 text-yellow-400 rounded">Sprint</span>
-                        )}
+                  {sortedResults.map((result, idx) => {
+                    const mainTeam = getDriverTeam(result.mainDriver || result.breakdown?.mainDriver);
+                    const reserveTeam = getDriverTeam(result.reserveDriver || result.breakdown?.reserveDriver);
+                    return (
+                      <div
+                        key={idx}
+                        className={`flex items-center p-2 rounded transition-colors text-white text-sm whitespace-nowrap ${
+                          idx % 2 === 0
+                            ? 'bg-gray-800'
+                            : 'bg-gray-700'
+                        } hover:bg-white/[0.05]`}
+                      >
+                        <div className="w-28 pr-2">Round {result.round}</div>
+                        <div className="flex-1 pr-2 border-r border-white/10">{result.raceName}{' '}
+                          {result.breakdown?.isSprintWeekend && (
+                            <span className="ml-2 px-2 py-0.5 text-xs bg-yellow-600/20 text-yellow-400 rounded">Sprint</span>
+                          )}
+                        </div>
+                        <div className="w-36 px-3 border-r border-white/10 text-center whitespace-nowrap" style={{color: mainTeam ? getTeamColor(mainTeam) : undefined}}>{formatDriverName(result.mainDriver || result.breakdown?.mainDriver)}</div>
+                        <div className="w-36 px-3 border-r border-white/10 text-center whitespace-nowrap" style={{color: reserveTeam ? getTeamColor(reserveTeam) : undefined}}>{formatDriverName(result.reserveDriver || result.breakdown?.reserveDriver)}</div>
+                        <div className="w-16 pl-2 text-right font-medium">{typeof result.mainRacePoints === 'number' || typeof result.sprintPoints === 'number' ? `${(result.mainRacePoints || 0) + (result.sprintPoints || 0)} pts` : '-'}</div>
                       </div>
-                      <div className="w-36 px-3 border-r border-white/10 text-center">{formatDriverName(result.mainDriver || result.breakdown?.mainDriver)}</div>
-                      <div className="w-36 px-3 border-r border-white/10 text-center">{formatDriverName(result.reserveDriver || result.breakdown?.reserveDriver)}</div>
-                      <div className="w-16 pl-2 text-right font-medium">
-                        {typeof result.mainRacePoints === 'number' || typeof result.sprintPoints === 'number'
-                          ? `${(result.mainRacePoints || 0) + (result.sprintPoints || 0)} pts`
-                          : '-'}
-                      </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="text-center text-white/40 py-4">
@@ -298,10 +307,10 @@ const Standings: React.FC = () => {
                   {sortedResults.map((result, idx) => (
                     <div
                       key={idx}
-                      className={`flex items-center p-2 rounded transition-colors text-red-400 text-sm whitespace-nowrap ${
+                      className={`flex items-center p-2 rounded transition-colors text-white text-sm whitespace-nowrap ${
                         idx % 2 === 0
-                          ? 'bg-gradient-to-r from-black/60 via-gray-900/60 to-black/60'
-                          : 'bg-gradient-to-r from-red-900/30 via-gray-800/30 to-red-900/30'
+                          ? 'bg-gray-800'
+                          : 'bg-gray-700'
                       } hover:bg-white/[0.05]`}
                     >
                       <div className="w-28 text-white/60">Round {result.round}</div>
