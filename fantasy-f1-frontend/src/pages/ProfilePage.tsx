@@ -310,75 +310,102 @@ const ProfilePage: React.FC = () => {
 
           {/* App Admin: All Leagues Section */}
           {user.isAppAdmin && (
-            <div className="backdrop-blur-lg bg-white/2 rounded-2xl p-8 border border-white/10 shadow-xl mt-8">
-              <h2 className="text-2xl font-bold mb-6 flex items-center text-white/90">
+            <div className="backdrop-blur-lg bg-white/2 rounded-2xl p-8 border border-white/10 shadow-xl mt-8 mx-auto" style={{ maxWidth: 900 }}>
+              <h2 className="text-2xl font-bold mb-8 flex items-center text-white/90 border-b border-white/10 pb-4">
                 <IconWrapper icon={FaSyncAlt} size={22} className="mr-2" />
-                All Leagues (Admin)
+                Admin Dashboard
               </h2>
               {adminLoading ? (
-                <div className="text-white/70">Loading all leagues...</div>
+                <div className="text-white/70 flex items-center justify-center py-8">
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white/70"></div>
+                  <span className="ml-3">Loading leagues...</span>
+                </div>
               ) : adminError ? (
-                <div className="text-red-500">{adminError}</div>
+                <div className="text-red-500 bg-red-500/10 p-4 rounded-lg border border-red-500/20">{adminError}</div>
               ) : allLeagues.length === 0 ? (
-                <div className="text-white/70">No leagues found.</div>
+                <div className="text-white/70 text-center py-8">No leagues found.</div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-6">
                   {allLeagues.map((league) => (
                     <div
                       key={league._id}
-                      className="flex flex-col md:flex-row items-stretch justify-between bg-white/10 p-6 rounded-lg border border-white/10 shadow-md md:space-x-6 space-y-4 md:space-y-0 transition-all duration-200"
+                      className="flex flex-col md:flex-row items-stretch justify-between bg-white/10 p-6 rounded-xl border border-white/10 shadow-md md:space-x-6 space-y-4 md:space-y-0 transition-all duration-200 hover:bg-white/15"
                     >
                       {/* League Info */}
                       <div className="flex flex-col justify-center min-w-[180px] mb-2 md:mb-0">
                         <span className="font-semibold text-white/90 text-lg">{league.name}</span>
-                        <span className="text-sm text-white/70">Season {league.season}</span>
-                        <span className="text-xs text-white/50">Code: {league.code}</span>
+                        <span className="text-sm text-white/70 mt-1">Season {league.season}</span>
+                        <span className="text-xs text-white/50 mt-1">Code: {league.code}</span>
                       </div>
                       {/* Center: Round input + Assign Real Points */}
                       <div className="flex flex-row items-center gap-3 flex-1 justify-center">
-                        <input
-                          type="number"
-                          value={selectedRound}
-                          onChange={(e) => setSelectedRound(e.target.value)}
-                          placeholder="Round #"
-                          className="px-3 py-2 rounded bg-white/20 border border-white/30 text-white placeholder-white/50 focus:outline-none focus:border-red-500 w-24 text-center"
-                          min="1"
-                          max="24"
-                        />
+                        <div className="flex flex-col items-center">
+                          <label className="text-sm text-white/70 mb-1">Round</label>
+                          <input
+                            type="number"
+                            value={selectedRound}
+                            onChange={(e) => setSelectedRound(e.target.value)}
+                            placeholder="#"
+                            className="px-3 py-2 rounded-lg bg-white/20 border border-white/30 text-white placeholder-white/50 focus:outline-none focus:border-red-500 w-20 text-center text-sm"
+                            min="1"
+                            max="24"
+                          />
+                        </div>
                         <button
                           onClick={() => handleAssignRealPoints(league._id)}
                           disabled={adminLoading || !selectedRound}
-                          className="flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors shadow text-white font-semibold disabled:opacity-60 min-w-[160px] justify-center"
+                          className="flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-all shadow text-white font-semibold disabled:opacity-60 text-sm min-w-[140px] justify-center hover:shadow-lg hover:scale-[1.02]"
                         >
-                          <IconWrapper icon={FaSyncAlt} size={16} className="mr-2" />
-                          Assign Real Points
+                          <IconWrapper icon={FaSyncAlt} size={14} className="mr-2" />
+                          Assign Points
                         </button>
                       </div>
                       {/* Right: Update Leaderboard */}
-                      <div className="flex items-center justify-end min-w-[180px]">
+                      <div className="flex items-center justify-end min-w-[140px]">
                         <button
                           onClick={() => handleUpdateLeaderboard(league._id, league.season)}
-                          className="flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow text-white font-semibold disabled:opacity-60 min-w-[160px] justify-center"
+                          className="flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-all shadow text-white font-semibold disabled:opacity-60 text-sm min-w-[140px] justify-center hover:shadow-lg hover:scale-[1.02]"
                         >
-                          <IconWrapper icon={FaSyncAlt} size={16} className="mr-2" />
-                          Update Leaderboard
+                          <IconWrapper icon={FaSyncAlt} size={14} className="mr-2" />
+                          Update Board
                         </button>
                       </div>
                     </div>
                   ))}
                   {/* Update All Races Button Section */}
-                  <div className="mt-8">
-                    <h3 className="text-xl font-bold mb-4 text-white/90">Update All Races</h3>
-                    <div className="bg-white/10 p-4 rounded-lg border border-white/10 flex flex-col gap-4 items-start">
+                  <div className="mt-10 bg-white/5 rounded-xl p-6 border border-white/10">
+                    <h3 className="text-xl font-bold mb-4 text-white/90 flex items-center">
+                      <IconWrapper icon={FaSyncAlt} size={18} className="mr-2" />
+                      Race Results
+                    </h3>
+                    <div className="flex flex-col gap-4">
                       <button
                         onClick={handleScrapeAllRaces}
                         disabled={adminLoading}
-                        className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:shadow-lg hover:scale-[1.02] flex items-center justify-center"
                       >
-                        {adminLoading ? 'Updating...' : 'Update All Races'}
+                        {adminLoading ? (
+                          <>
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                            Updating...
+                          </>
+                        ) : (
+                          <>
+                            <IconWrapper icon={FaSyncAlt} size={16} className="mr-2" />
+                            Update All Races
+                          </>
+                        )}
                       </button>
-                      {scrapeStatus && <div className="text-green-400 text-sm">{scrapeStatus}</div>}
-                      {adminError && <div className="text-red-500 text-sm">{adminError}</div>}
+                      {scrapeStatus && (
+                        <div className="text-green-400 text-sm bg-green-500/10 p-3 rounded-lg border border-green-500/20">
+                          {scrapeStatus}
+                        </div>
+                      )}
+                      {adminError && (
+                        <div className="text-red-500 text-sm bg-red-500/10 p-3 rounded-lg border border-red-500/20">
+                          {adminError}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
