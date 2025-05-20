@@ -210,27 +210,35 @@ const Standings: React.FC = () => {
           <div className="border-t border-white/5">
             <div className="space-y-1 p-2">
               {sortedResults && sortedResults.length > 0 ? (
-                sortedResults.map((result, idx) => (
-                  <div 
-                    key={idx} 
-                    className="flex justify-between items-center p-2 rounded hover:bg-white/[0.05] transition-colors"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <span className="text-white/60 text-sm">Round {result.round}</span>
-                      <span className="text-white/90">{result.raceName}</span>
-                      {result.breakdown?.isSprintWeekend && (
-                        <span className="px-2 py-0.5 text-xs bg-yellow-600/20 text-yellow-400 rounded">
-                          Sprint
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-white/90 font-medium">
-                      {typeof result.mainRacePoints === 'number' || typeof result.sprintPoints === 'number'
-                        ? `${(result.mainRacePoints || 0) + (result.sprintPoints || 0)} pts`
-                        : '-'}
-                    </div>
+                <div>
+                  <div className="flex font-semibold text-white/70 text-sm mb-1 px-2">
+                    <div className="w-28">Round</div>
+                    <div className="flex-1">Race</div>
+                    <div className="w-24 text-center">Main</div>
+                    <div className="w-24 text-center">Reserve</div>
+                    <div className="w-16 text-right">Points</div>
                   </div>
-                ))
+                  {sortedResults.map((result, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center p-2 rounded hover:bg-white/[0.05] transition-colors text-white/90 text-sm"
+                    >
+                      <div className="w-28 text-white/60">Round {result.round}</div>
+                      <div className="flex-1">{result.raceName}{' '}
+                        {result.breakdown?.isSprintWeekend && (
+                          <span className="ml-2 px-2 py-0.5 text-xs bg-yellow-600/20 text-yellow-400 rounded">Sprint</span>
+                        )}
+                      </div>
+                      <div className="w-24 text-center">{result.mainDriver || result.breakdown?.mainDriver || '-'}</div>
+                      <div className="w-24 text-center">{result.reserveDriver || result.breakdown?.reserveDriver || '-'}</div>
+                      <div className="w-16 text-right font-medium">
+                        {typeof result.mainRacePoints === 'number' || typeof result.sprintPoints === 'number'
+                          ? `${(result.mainRacePoints || 0) + (result.sprintPoints || 0)} pts`
+                          : '-'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <div className="text-center text-white/40 py-4">
                   No race results available
@@ -268,25 +276,31 @@ const Standings: React.FC = () => {
           <div className="border-t border-white/5">
             <div className="space-y-1 p-2">
               {sortedResults && sortedResults.length > 0 ? (
-                sortedResults.map((result, idx) => (
-                  <div 
-                    key={idx} 
-                    className="flex justify-between items-center p-2 rounded hover:bg-white/[0.05] transition-colors"
-                  >
-                    <div className="flex items-center space-x-2">
-                      <span className="text-white/60 text-sm">Round {result.round}</span>
-                      <span className="text-white/90">{result.raceName}</span>
-                      {result.breakdown?.isSprintWeekend && (
-                        <span className="px-2 py-0.5 text-xs bg-yellow-600/20 text-yellow-400 rounded">
-                          Sprint
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-white/90 font-medium">
-                      {typeof result.totalPoints === 'number' ? `${result.totalPoints} pts` : '-'}
-                    </div>
+                <div>
+                  <div className="flex font-semibold text-white/70 text-sm mb-1 px-2">
+                    <div className="w-28">Round</div>
+                    <div className="flex-1">Race</div>
+                    <div className="w-32 text-center">Team</div>
+                    <div className="w-16 text-right">Points</div>
                   </div>
-                ))
+                  {sortedResults.map((result, idx) => (
+                    <div
+                      key={idx}
+                      className="flex items-center p-2 rounded hover:bg-white/[0.05] transition-colors text-white/90 text-sm"
+                    >
+                      <div className="w-28 text-white/60">Round {result.round}</div>
+                      <div className="flex-1">{result.raceName}{' '}
+                        {result.breakdown?.isSprintWeekend && (
+                          <span className="ml-2 px-2 py-0.5 text-xs bg-yellow-600/20 text-yellow-400 rounded">Sprint</span>
+                        )}
+                      </div>
+                      <div className="w-32 text-center">{result.team || result.breakdown?.team || '-'}</div>
+                      <div className="w-16 text-right font-medium">
+                        {typeof result.totalPoints === 'number' ? `${result.totalPoints} pts` : '-'}
+                      </div>
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <div className="text-center text-white/40 py-4">
                   No race results available
