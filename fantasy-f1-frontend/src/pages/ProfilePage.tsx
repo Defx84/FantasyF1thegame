@@ -340,8 +340,8 @@ const ProfilePage: React.FC = () => {
                         <span className="text-xs text-white/70 leading-tight">Season {league.season}</span>
                         <span className="text-xs text-white/50 leading-tight">Code: {league.code}</span>
                       </div>
-                      {/* Center: Round input + Assign Real Points */}
-                      <div className="flex flex-row items-center gap-2 flex-1 justify-center">
+                      {/* Center: Round input + Assign Real Points and Update Board */}
+                      <div className="flex flex-row items-center flex-1 justify-center gap-1">
                         <input
                           type="number"
                           value={selectedRound}
@@ -359,9 +359,6 @@ const ProfilePage: React.FC = () => {
                           <IconWrapper icon={FaSyncAlt} size={14} className="mr-2" />
                           Assign Points
                         </button>
-                      </div>
-                      {/* Right: Update Leaderboard */}
-                      <div className="flex items-center justify-end">
                         <button
                           onClick={() => handleUpdateLeaderboard(league._id, league.season)}
                           className="flex items-center justify-center min-w-[120px] h-10 bg-red-600 hover:bg-red-700 rounded-lg transition-all shadow text-white font-semibold disabled:opacity-60 text-sm"
