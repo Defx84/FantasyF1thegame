@@ -393,6 +393,16 @@ function scheduleRaceResultScraping() {
             console.error('❌ Delayed race result scraping failed:', error);
         }
     });
+
+    // Schedule for 1 hour after race (17:00 UTC Sunday)
+    cron.schedule('0 17 * * Sun', async () => {
+        console.log('\n⏰ Running 1-hour post-race result scraping...');
+        try {
+            await runScraper();
+        } catch (error) {
+            console.error('❌ 1-hour post-race result scraping failed:', error);
+        }
+    });
 }
 
 // Schedule slug discovery
