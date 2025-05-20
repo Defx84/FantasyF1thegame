@@ -312,8 +312,8 @@ const ProfilePage: React.FC = () => {
 
         {/* App Admin: All Leagues Section */}
         {user.isAppAdmin && (
-          <div className="w-full md:max-w-xl mt-8 md:mt-0">
-            <div className="backdrop-blur-lg bg-white/2 rounded-2xl p-6 border border-white/10 shadow-xl mx-auto" style={{ maxWidth: 500 }}>
+          <div className="w-full md:max-w-2xl mt-8 md:mt-0">
+            <div className="backdrop-blur-lg bg-white/2 rounded-2xl p-6 border border-white/10 shadow-xl mx-auto" style={{ maxWidth: 600 }}>
               <h2 className="text-2xl font-bold mb-6 flex items-center text-white/90 border-b border-white/10 pb-3">
                 <IconWrapper icon={FaSyncAlt} size={22} className="mr-2" />
                 Admin Dashboard
@@ -332,7 +332,7 @@ const ProfilePage: React.FC = () => {
                   {allLeagues.map((league) => (
                     <div
                       key={league._id}
-                      className="flex flex-col md:flex-row items-center justify-between bg-white/10 p-3 rounded-lg border border-white/10 shadow-md md:space-x-2 space-y-2 md:space-y-0 transition-all duration-200 hover:bg-white/15 min-h-[70px]"
+                      className="flex flex-col md:flex-row md:flex-wrap items-center justify-between bg-white/10 p-3 rounded-lg border border-white/10 shadow-md md:space-x-2 space-y-2 md:space-y-0 transition-all duration-200 hover:bg-white/15 min-h-[70px]"
                     >
                       {/* League Info */}
                       <div className="flex flex-col justify-center min-w-[120px]">
@@ -354,7 +354,7 @@ const ProfilePage: React.FC = () => {
                         <button
                           onClick={() => handleAssignRealPoints(league._id)}
                           disabled={adminLoading || !selectedRound}
-                          className="flex items-center justify-center w-36 h-10 bg-green-600 hover:bg-green-700 rounded-lg transition-all shadow text-white font-semibold disabled:opacity-60 text-sm"
+                          className="flex items-center justify-center min-w-[120px] h-10 bg-green-600 hover:bg-green-700 rounded-lg transition-all shadow text-white font-semibold disabled:opacity-60 text-sm"
                         >
                           <IconWrapper icon={FaSyncAlt} size={14} className="mr-2" />
                           Assign Points
@@ -364,7 +364,7 @@ const ProfilePage: React.FC = () => {
                       <div className="flex items-center justify-end">
                         <button
                           onClick={() => handleUpdateLeaderboard(league._id, league.season)}
-                          className="flex items-center justify-center w-36 h-10 bg-red-600 hover:bg-red-700 rounded-lg transition-all shadow text-white font-semibold disabled:opacity-60 text-sm"
+                          className="flex items-center justify-center min-w-[120px] h-10 bg-red-600 hover:bg-red-700 rounded-lg transition-all shadow text-white font-semibold disabled:opacity-60 text-sm"
                         >
                           <IconWrapper icon={FaSyncAlt} size={14} className="mr-2" />
                           Update Board
