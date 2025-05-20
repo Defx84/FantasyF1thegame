@@ -165,9 +165,10 @@ const ProfilePage: React.FC = () => {
       {/* Dark overlay for readability */}
       <div className="fixed inset-0 bg-black bg-opacity-30 z-0" />
 
-      {/* Content wrapper */}
-      <div className="relative z-10 min-h-screen flex flex-col items-start justify-center p-4 md:p-8 ml-0 md:ml-16">
-        <div className="w-full max-w-lg">
+      {/* Responsive Flex Layout for Profile + Admin */}
+      <div className={`relative z-10 min-h-screen flex flex-col ${user.isAppAdmin ? 'md:flex-row md:items-start md:justify-center' : 'items-start justify-center'} p-4 md:p-8 ml-0 md:ml-16 w-full`}>
+        {/* Profile Container */}
+        <div className={`w-full ${user.isAppAdmin ? 'md:max-w-lg md:mr-8' : 'max-w-lg'}`}>
           {/* Profile Header */}
           <div className="backdrop-blur-lg bg-white/2 rounded-2xl p-8 mb-8 border border-white/10 shadow-xl">
             <h1 className="text-3xl font-bold mb-6 text-white/90">Profile</h1>
@@ -307,11 +308,13 @@ const ProfilePage: React.FC = () => {
               </div>
             )}
           </div>
+        </div>
 
-          {/* App Admin: All Leagues Section */}
-          {user.isAppAdmin && (
-            <div className="backdrop-blur-lg bg-white/2 rounded-2xl p-8 border border-white/10 shadow-xl mt-8 mx-auto" style={{ maxWidth: 900 }}>
-              <h2 className="text-2xl font-bold mb-8 flex items-center text-white/90 border-b border-white/10 pb-4">
+        {/* App Admin: All Leagues Section */}
+        {user.isAppAdmin && (
+          <div className="w-full md:max-w-xl mt-8 md:mt-0">
+            <div className="backdrop-blur-lg bg-white/2 rounded-2xl p-6 border border-white/10 shadow-xl mx-auto" style={{ maxWidth: 500 }}>
+              <h2 className="text-2xl font-bold mb-6 flex items-center text-white/90 border-b border-white/10 pb-3">
                 <IconWrapper icon={FaSyncAlt} size={22} className="mr-2" />
                 Admin Dashboard
               </h2>
@@ -325,46 +328,43 @@ const ProfilePage: React.FC = () => {
               ) : allLeagues.length === 0 ? (
                 <div className="text-white/70 text-center py-8">No leagues found.</div>
               ) : (
-                <div className="space-y-6">
+                <div className="space-y-4">
                   {allLeagues.map((league) => (
                     <div
                       key={league._id}
-                      className="flex flex-col md:flex-row items-stretch justify-between bg-white/10 p-6 rounded-xl border border-white/10 shadow-md md:space-x-6 space-y-4 md:space-y-0 transition-all duration-200 hover:bg-white/15"
+                      className="flex flex-col md:flex-row items-center justify-between bg-white/10 p-3 rounded-lg border border-white/10 shadow-md md:space-x-2 space-y-2 md:space-y-0 transition-all duration-200 hover:bg-white/15 min-h-[70px]"
                     >
                       {/* League Info */}
-                      <div className="flex flex-col justify-center min-w-[180px] mb-2 md:mb-0">
-                        <span className="font-semibold text-white/90 text-lg">{league.name}</span>
-                        <span className="text-sm text-white/70 mt-1">Season {league.season}</span>
-                        <span className="text-xs text-white/50 mt-1">Code: {league.code}</span>
+                      <div className="flex flex-col justify-center min-w-[120px]">
+                        <span className="font-semibold text-white/90 text-base leading-tight">{league.name}</span>
+                        <span className="text-xs text-white/70 leading-tight">Season {league.season}</span>
+                        <span className="text-xs text-white/50 leading-tight">Code: {league.code}</span>
                       </div>
                       {/* Center: Round input + Assign Real Points */}
-                      <div className="flex flex-row items-center gap-3 flex-1 justify-center">
-                        <div className="flex flex-col items-center">
-                          <label className="text-sm text-white/70 mb-1">Round</label>
-                          <input
-                            type="number"
-                            value={selectedRound}
-                            onChange={(e) => setSelectedRound(e.target.value)}
-                            placeholder="#"
-                            className="px-3 py-2 rounded-lg bg-white/20 border border-white/30 text-white placeholder-white/50 focus:outline-none focus:border-red-500 w-20 text-center text-sm"
-                            min="1"
-                            max="24"
-                          />
-                        </div>
+                      <div className="flex flex-row items-center gap-2 flex-1 justify-center">
+                        <input
+                          type="number"
+                          value={selectedRound}
+                          onChange={(e) => setSelectedRound(e.target.value)}
+                          placeholder="#"
+                          className="px-2 py-1 rounded bg-white/20 border border-white/30 text-white placeholder-white/50 focus:outline-none focus:border-red-500 w-14 text-center text-sm"
+                          min="1"
+                          max="24"
+                        />
                         <button
                           onClick={() => handleAssignRealPoints(league._id)}
                           disabled={adminLoading || !selectedRound}
-                          className="flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-all shadow text-white font-semibold disabled:opacity-60 text-sm min-w-[140px] justify-center hover:shadow-lg hover:scale-[1.02]"
+                          className="flex items-center justify-center w-36 h-10 bg-green-600 hover:bg-green-700 rounded-lg transition-all shadow text-white font-semibold disabled:opacity-60 text-sm"
                         >
                           <IconWrapper icon={FaSyncAlt} size={14} className="mr-2" />
                           Assign Points
                         </button>
                       </div>
                       {/* Right: Update Leaderboard */}
-                      <div className="flex items-center justify-end min-w-[140px]">
+                      <div className="flex items-center justify-end">
                         <button
                           onClick={() => handleUpdateLeaderboard(league._id, league.season)}
-                          className="flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-all shadow text-white font-semibold disabled:opacity-60 text-sm min-w-[140px] justify-center hover:shadow-lg hover:scale-[1.02]"
+                          className="flex items-center justify-center w-36 h-10 bg-red-600 hover:bg-red-700 rounded-lg transition-all shadow text-white font-semibold disabled:opacity-60 text-sm"
                         >
                           <IconWrapper icon={FaSyncAlt} size={14} className="mr-2" />
                           Update Board
@@ -373,16 +373,16 @@ const ProfilePage: React.FC = () => {
                     </div>
                   ))}
                   {/* Update All Races Button Section */}
-                  <div className="mt-10 bg-white/5 rounded-xl p-6 border border-white/10">
-                    <h3 className="text-xl font-bold mb-4 text-white/90 flex items-center">
-                      <IconWrapper icon={FaSyncAlt} size={18} className="mr-2" />
+                  <div className="mt-6 bg-white/5 rounded-xl p-4 border border-white/10">
+                    <h3 className="text-lg font-bold mb-2 text-white/90 flex items-center">
+                      <IconWrapper icon={FaSyncAlt} size={16} className="mr-2" />
                       Race Results
                     </h3>
-                    <div className="flex flex-col gap-4">
+                    <div className="flex flex-col gap-2">
                       <button
                         onClick={handleScrapeAllRaces}
                         disabled={adminLoading}
-                        className="bg-red-500 text-white px-6 py-3 rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:shadow-lg hover:scale-[1.02] flex items-center justify-center"
+                        className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:shadow-lg hover:scale-[1.02] flex items-center justify-center w-44 h-10"
                       >
                         {adminLoading ? (
                           <>
@@ -397,12 +397,12 @@ const ProfilePage: React.FC = () => {
                         )}
                       </button>
                       {scrapeStatus && (
-                        <div className="text-green-400 text-sm bg-green-500/10 p-3 rounded-lg border border-green-500/20">
+                        <div className="text-green-400 text-sm bg-green-500/10 p-2 rounded-lg border border-green-500/20">
                           {scrapeStatus}
                         </div>
                       )}
                       {adminError && (
-                        <div className="text-red-500 text-sm bg-red-500/10 p-3 rounded-lg border border-red-500/20">
+                        <div className="text-red-500 text-sm bg-red-500/10 p-2 rounded-lg border border-red-500/20">
                           {adminError}
                         </div>
                       )}
@@ -411,8 +411,8 @@ const ProfilePage: React.FC = () => {
                 </div>
               )}
             </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );
