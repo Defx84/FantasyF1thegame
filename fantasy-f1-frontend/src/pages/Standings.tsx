@@ -141,7 +141,7 @@ const Standings: React.FC = () => {
   const renderRaceName = (result: RaceResult) => {
     return (
       <div className="flex items-center">
-        <span>{result.raceName}</span>
+        <span>{result.raceName.replace('Grand Prix', 'GP')}</span>
         {result.breakdown?.isSprintWeekend && (
           <span className="ml-2 px-2 py-1 text-xs bg-yellow-600 text-white rounded">
             Sprint Weekend
@@ -247,7 +247,7 @@ const Standings: React.FC = () => {
                             : 'bg-gray-700'
                         } hover:bg-gray-600`}
                       >
-                        <div className="w-28 pr-2">Round {result.round}</div>
+                        <div className="w-28 pr-2">{result.round}</div>
                         <div className="flex-1 pr-2 border-r border-white/10">{result.raceName}{' '}
                           {result.breakdown?.isSprintWeekend && (
                             <span className="ml-2 px-2 py-0.5 text-xs bg-yellow-600/20 text-yellow-400 rounded">Sprint</span>
@@ -313,7 +313,7 @@ const Standings: React.FC = () => {
                           : 'bg-gray-700'
                       } hover:bg-gray-600`}
                     >
-                      <div className="w-28 text-white/60">Round {result.round}</div>
+                      <div className="w-28 text-white/60">{result.round}</div>
                       <div className="flex-1">{result.raceName}{' '}
                         {result.breakdown?.isSprintWeekend && (
                           <span className="ml-2 px-2 py-0.5 text-xs bg-yellow-600/20 text-yellow-400 rounded">Sprint</span>
