@@ -228,13 +228,6 @@ const Standings: React.FC = () => {
             <div className="space-y-1 p-2">
               {sortedResults && sortedResults.length > 0 ? (
                 <div>
-                  <div className="flex font-semibold text-white/70 text-sm mb-1 px-2">
-                    <div className="w-28 pr-2 border-r-2 border-gray-900">Round</div>
-                    <div className="flex-1 pr-2 border-r-2 border-gray-900">Race</div>
-                    <div className="w-36 px-3 border-r-2 border-gray-900 text-center">Main</div>
-                    <div className="w-36 px-3 border-r-2 border-gray-900 text-center">Reserve</div>
-                    <div className="w-16 pl-2 text-right">Points</div>
-                  </div>
                   {sortedResults.map((result, idx) => {
                     const mainTeam = getDriverTeam(result.mainDriver || result.breakdown?.mainDriver);
                     const reserveTeam = getDriverTeam(result.reserveDriver || result.breakdown?.reserveDriver);
@@ -311,12 +304,6 @@ const Standings: React.FC = () => {
             <div className="space-y-1 p-2">
               {sortedResults && sortedResults.length > 0 ? (
                 <div>
-                  <div className="flex font-semibold text-white/70 text-sm mb-1 px-2">
-                    <div className="w-28">Round</div>
-                    <div className="flex-1">Race</div>
-                    <div className="w-32 text-center">Team</div>
-                    <div className="w-16 text-right">Points</div>
-                  </div>
                   {sortedResults.map((result, idx) => (
                     <div
                       key={idx}
