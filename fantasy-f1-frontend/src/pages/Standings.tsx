@@ -241,36 +241,33 @@ const Standings: React.FC = () => {
                     return (
                       <div
                         key={idx}
-                        className={`flex flex-col md:flex-row items-start md:items-center p-2 rounded transition-colors text-white text-xs md:text-sm whitespace-nowrap ${
-                          idx % 2 === 0
-                            ? 'bg-gray-800'
-                            : 'bg-gray-700'
+                        className={`md:flex-row flex flex-col items-start md:items-center p-2 rounded transition-colors text-white text-xs md:text-sm whitespace-nowrap ${
+                          idx % 2 === 0 ? 'bg-gray-800' : 'bg-gray-700'
                         } hover:bg-gray-600 border-b border-gray-900 pl-3`}
                         style={{ minWidth: 0 }}
                       >
-                        <div className="flex flex-row md:flex-col w-full md:w-28 pr-2 md:border-r-2 border-gray-900 mb-1 md:mb-0">
-                          <span className="font-semibold md:hidden mr-1">Round:</span>
-                          <span>{result.round}</span>
-                        </div>
-                        <div className="flex flex-row md:flex-col flex-1 pr-2 md:border-r-2 border-gray-900 mb-1 md:mb-0">
-                          <span className="font-semibold md:hidden mr-1">Race:</span>
-                          <span>{result.raceName.replace('Grand Prix', 'GP')}{' '}
-                            {result.breakdown?.isSprintWeekend && (
-                              <span className="ml-2 px-2 py-0.5 text-xs bg-yellow-600/20 text-yellow-400 rounded">Sprint</span>
-                            )}
-                          </span>
-                        </div>
-                        <div className="flex flex-row md:flex-col w-full md:w-36 px-3 md:border-r-2 border-gray-900 mb-1 md:mb-0 text-left whitespace-nowrap items-center">
-                          <span className="font-semibold md:hidden mr-1 text-white">Main:</span>
-                          <span style={{color: mainTeam ? getTeamColor(mainTeam) : undefined}}>{formatDriverName(result.mainDriver || result.breakdown?.mainDriver)}</span>
-                        </div>
-                        <div className="flex flex-row md:flex-col w-full md:w-36 px-3 md:border-r-2 border-gray-900 mb-1 md:mb-0 text-left whitespace-nowrap items-center">
-                          <span className="font-semibold md:hidden mr-1 text-white">Reserve:</span>
-                          <span style={{color: reserveTeam ? getTeamColor(reserveTeam) : undefined}}>{formatDriverName(result.reserveDriver || result.breakdown?.reserveDriver)}</span>
-                        </div>
-                        <div className="flex flex-row md:flex-col w-full md:w-16 pl-2 text-right font-medium">
-                          <span className="font-semibold md:hidden mr-1">Points:</span>
-                          <span>{typeof result.mainRacePoints === 'number' || typeof result.sprintPoints === 'number' ? `${(result.mainRacePoints || 0) + (result.sprintPoints || 0)} pts` : '-'}</span>
+                        <div className="flex flex-col w-full">
+                          {/* Two-column layout for mobile */}
+                          <div className="flex flex-row w-full">
+                            <div className="min-w-[80px] w-20 font-semibold text-white/90 border-r-2 border-white/20 pr-2 flex flex-col gap-1">
+                              <div>Round:</div>
+                              <div>Race:</div>
+                              <div>Main:</div>
+                              <div>Reserve:</div>
+                              <div>Points:</div>
+                            </div>
+                            <div className="flex-1 pl-3 flex flex-col gap-1">
+                              <div>{result.round}</div>
+                              <div>{result.raceName.replace('Grand Prix', 'GP')}{' '}
+                                {result.breakdown?.isSprintWeekend && (
+                                  <span className="ml-2 px-2 py-0.5 text-xs bg-yellow-600/20 text-yellow-400 rounded">Sprint</span>
+                                )}
+                              </div>
+                              <div style={{color: mainTeam ? getTeamColor(mainTeam) : undefined}}>{formatDriverName(result.mainDriver || result.breakdown?.mainDriver)}</div>
+                              <div style={{color: reserveTeam ? getTeamColor(reserveTeam) : undefined}}>{formatDriverName(result.reserveDriver || result.breakdown?.reserveDriver)}</div>
+                              <div>{typeof result.mainRacePoints === 'number' || typeof result.sprintPoints === 'number' ? `${(result.mainRacePoints || 0) + (result.sprintPoints || 0)} pts` : '-'}</div>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     );
@@ -323,36 +320,35 @@ const Standings: React.FC = () => {
                   {sortedResults.map((result, idx) => (
                     <div
                       key={idx}
-                      className={`flex flex-col md:flex-row items-start md:items-center p-2 rounded transition-colors text-white text-xs md:text-sm whitespace-nowrap ${
-                        idx % 2 === 0
-                          ? 'bg-gray-800'
-                          : 'bg-gray-700'
+                      className={`md:flex-row flex flex-col items-start md:items-center p-2 rounded transition-colors text-white text-xs md:text-sm whitespace-nowrap ${
+                        idx % 2 === 0 ? 'bg-gray-800' : 'bg-gray-700'
                       } hover:bg-gray-600 border-b border-gray-900 pl-3`}
                       style={{ minWidth: 0 }}
                     >
-                      <div className="flex flex-row md:flex-col w-full md:w-28 pr-2 md:border-r-2 border-gray-900 mb-1 md:mb-0">
-                        <span className="font-semibold md:hidden mr-1">Round:</span>
-                        <span>{result.round}</span>
-                      </div>
-                      <div className="flex flex-row md:flex-col flex-1 pr-2 md:border-r-2 border-gray-900 mb-1 md:mb-0">
-                        <span className="font-semibold md:hidden mr-1">Race:</span>
-                        <span>{result.raceName.replace('Grand Prix', 'GP')}{' '}
-                          {result.breakdown?.isSprintWeekend && (
-                            <span className="ml-2 px-2 py-0.5 text-xs bg-yellow-600/20 text-yellow-400 rounded">Sprint</span>
-                          )}
-                        </span>
-                      </div>
-                      <div className="flex flex-row md:flex-col w-full md:w-32 text-center md:border-r-2 border-gray-900 mb-1 md:mb-0">
-                        <span className="font-semibold md:hidden mr-1">Team:</span>
-                        <span style={{
-                          color: getTeamColor((result.team || result.breakdown?.team) || '')
-                        }}>
-                          {result.team || result.breakdown?.team || '-'}
-                        </span>
-                      </div>
-                      <div className="flex flex-row md:flex-col w-full md:w-16 text-right font-medium">
-                        <span className="font-semibold md:hidden mr-1">Points:</span>
-                        <span>{typeof result.totalPoints === 'number' ? `${result.totalPoints} pts` : '-'}</span>
+                      <div className="flex flex-col w-full">
+                        {/* Two-column layout for mobile */}
+                        <div className="flex flex-row w-full">
+                          <div className="min-w-[80px] w-20 font-semibold text-white/90 border-r-2 border-white/20 pr-2 flex flex-col gap-1">
+                            <div>Round:</div>
+                            <div>Race:</div>
+                            <div>Team:</div>
+                            <div>Points:</div>
+                          </div>
+                          <div className="flex-1 pl-3 flex flex-col gap-1">
+                            <div>{result.round}</div>
+                            <div>{result.raceName.replace('Grand Prix', 'GP')}{' '}
+                              {result.breakdown?.isSprintWeekend && (
+                                <span className="ml-2 px-2 py-0.5 text-xs bg-yellow-600/20 text-yellow-400 rounded">Sprint</span>
+                              )}
+                            </div>
+                            <div style={{
+                              color: getTeamColor((result.team || result.breakdown?.team) || '')
+                            }}>
+                              {result.team || result.breakdown?.team || '-'}
+                            </div>
+                            <div>{typeof result.totalPoints === 'number' ? `${result.totalPoints} pts` : '-'}</div>
+                          </div>
+                        </div>
                       </div>
                     </div>
                   ))}
