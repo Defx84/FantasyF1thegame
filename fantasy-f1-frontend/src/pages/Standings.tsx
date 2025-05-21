@@ -319,7 +319,11 @@ const Standings: React.FC = () => {
                           <span className="ml-2 px-2 py-0.5 text-xs bg-yellow-600/20 text-yellow-400 rounded">Sprint</span>
                         )}
                       </div>
-                      <div className="w-32 text-center">{result.team || result.breakdown?.team || '-'}</div>
+                      <div className="w-32 text-center" style={{
+                        color: getTeamColor((result.team || result.breakdown?.team) || '')
+                      }}>
+                        {result.team || result.breakdown?.team || '-'}
+                      </div>
                       <div className="w-16 text-right font-medium">
                         {typeof result.totalPoints === 'number' ? `${result.totalPoints} pts` : '-'}
                       </div>
