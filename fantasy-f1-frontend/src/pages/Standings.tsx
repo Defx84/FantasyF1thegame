@@ -245,7 +245,7 @@ const Standings: React.FC = () => {
                           idx % 2 === 0
                             ? 'bg-gray-800'
                             : 'bg-gray-700'
-                        } hover:bg-gray-600 border-b border-gray-900`}
+                        } hover:bg-gray-600 border-b border-gray-900 border-l-4 border-white pl-3`}
                         style={{ minWidth: 0 }}
                       >
                         <div className="flex flex-row md:flex-col w-full md:w-28 pr-2 md:border-r-2 border-gray-900 mb-1 md:mb-0">
@@ -327,7 +327,7 @@ const Standings: React.FC = () => {
                         idx % 2 === 0
                           ? 'bg-gray-800'
                           : 'bg-gray-700'
-                      } hover:bg-gray-600 border-b border-gray-900`}
+                      } hover:bg-gray-600 border-b border-gray-900 border-l-4 border-white pl-3`}
                       style={{ minWidth: 0 }}
                     >
                       <div className="flex flex-row md:flex-col w-full md:w-28 pr-2 md:border-r-2 border-gray-900 mb-1 md:mb-0">
