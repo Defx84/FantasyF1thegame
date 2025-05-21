@@ -8,7 +8,10 @@ export const teamColors: { [key: string]: string } = {
   'Haas F1 Team': '#B6BABD',
   'Racing Bulls': '#6692FF',
   'Williams': '#64C4FF',
-  'Kick Sauber': '#52E252'
+  'Kick Sauber': '#00FF87',
+  'Stake F1 Team Kick Sauber': '#00FF87',
+  'Stake F1 Team': '#00FF87',
+  'Sauber': '#00FF87'
 };
 
 export const getTeamColor = (teamName: string): string => {
