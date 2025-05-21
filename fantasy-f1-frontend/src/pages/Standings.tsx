@@ -260,13 +260,13 @@ const Standings: React.FC = () => {
                             )}
                           </span>
                         </div>
-                        <div className="flex flex-row md:flex-col w-full md:w-36 px-3 md:border-r-2 border-gray-900 mb-1 md:mb-0 text-center whitespace-nowrap" style={{color: mainTeam ? getTeamColor(mainTeam) : undefined}}>
-                          <span className="font-semibold md:hidden mr-1">Main:</span>
-                          <span>{formatDriverName(result.mainDriver || result.breakdown?.mainDriver)}</span>
+                        <div className="flex flex-row md:flex-col w-full md:w-36 px-3 md:border-r-2 border-gray-900 mb-1 md:mb-0 text-left whitespace-nowrap items-center">
+                          <span className="font-semibold md:hidden mr-1 text-white">Main:</span>
+                          <span style={{color: mainTeam ? getTeamColor(mainTeam) : undefined}}>{formatDriverName(result.mainDriver || result.breakdown?.mainDriver)}</span>
                         </div>
-                        <div className="flex flex-row md:flex-col w-full md:w-36 px-3 md:border-r-2 border-gray-900 mb-1 md:mb-0 text-center whitespace-nowrap" style={{color: reserveTeam ? getTeamColor(reserveTeam) : undefined}}>
-                          <span className="font-semibold md:hidden mr-1">Reserve:</span>
-                          <span>{formatDriverName(result.reserveDriver || result.breakdown?.reserveDriver)}</span>
+                        <div className="flex flex-row md:flex-col w-full md:w-36 px-3 md:border-r-2 border-gray-900 mb-1 md:mb-0 text-left whitespace-nowrap items-center">
+                          <span className="font-semibold md:hidden mr-1 text-white">Reserve:</span>
+                          <span style={{color: reserveTeam ? getTeamColor(reserveTeam) : undefined}}>{formatDriverName(result.reserveDriver || result.breakdown?.reserveDriver)}</span>
                         </div>
                         <div className="flex flex-row md:flex-col w-full md:w-16 pl-2 text-right font-medium">
                           <span className="font-semibold md:hidden mr-1">Points:</span>
