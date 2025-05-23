@@ -270,7 +270,7 @@ const updateRaceResults = async (req, res) => {
             teamResults: calculatedTeamResults,
             sprintResults,
             isSprintWeekend: raceCalendarEntry.isSprintWeekend,
-            status: 'completed',
+            status: 'in_progress',
             updatedAt: new Date()
         };
 

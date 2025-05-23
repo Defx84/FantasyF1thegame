@@ -21,7 +21,7 @@ async function updateRaceStatus(round, raceData) {
                 { round },
                 { 
                     $set: { 
-  status: 'completed',
+                        status: 'in_progress',
                         lastUpdated: new Date()
                     }
                 },
@@ -29,7 +29,7 @@ async function updateRaceStatus(round, raceData) {
             );
             
             if (result) {
-                console.log(`Updated round ${round} (${raceData.name}) to completed`);
+                console.log(`Updated round ${round} (${raceData.name}) to in_progress`);
             } else {
                 console.log(`No race found for round ${round}`);
             }
