@@ -6,10 +6,10 @@ import { RaceTiming } from '../services/raceService';
 export const getLockTime = (race: any): Date | null => {
   if (!race) return null;
 
-  // Use sprintQualifying.startTime for sprint weekends, else qualifyingStart
-  let baseTimeStr = race.isSprintWeekend && race.sprintQualifying && race.sprintQualifying.startTime
+  // Use sprintQualifying.startTime for sprint weekends, else qualifying.startTime
+  let baseTimeStr = race.isSprintWeekend && race.sprintQualifying?.startTime
     ? race.sprintQualifying.startTime
-    : race['qualifyingStart'];
+    : race.qualifying?.startTime;
 
   if (!baseTimeStr) return null;
   const baseTime = new Date(baseTimeStr);

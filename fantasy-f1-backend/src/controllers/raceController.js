@@ -27,7 +27,7 @@ const getNextRaceTiming = async (req, res) => {
     try {
         const now = new Date();
         console.log('Current time:', now);
-
+        
         // Utility to calculate endOfWeekend (Sunday at 23:59)
         function getEndOfWeekend(raceDate) {
             const end = new Date(raceDate);
@@ -85,10 +85,25 @@ const getNextRaceTiming = async (req, res) => {
             raceName: nextRace.raceName,
             round: nextRace.round,
             season: nextRace.season,
-            raceStart: nextRace.raceStart,
-            qualifyingStart: nextRace.qualifyingStart,
+            qualifying: {
+                startTime: nextRace.qualifyingStart,
+                timeUntil: Math.max(0, nextRace.qualifyingStart - now)
+            },
+            race: {
+                startTime: nextRace.raceStart,
+                timeUntil: Math.max(0, nextRace.raceStart - now)
+            },
+            sprintQualifying: nextRace.sprintQualifyingStart ? {
+                startTime: nextRace.sprintQualifyingStart,
+                timeUntil: Math.max(0, nextRace.sprintQualifyingStart - now)
+            } : undefined,
+            sprint: nextRace.sprintStart ? {
+                startTime: nextRace.sprintStart,
+                timeUntil: Math.max(0, nextRace.sprintStart - now)
+            } : undefined,
+            isSprintWeekend: nextRace.isSprintWeekend,
             status: raceStatus,
-            endOfWeekend: endOfWeekend,
+            endOfWeekend: endOfWeekend
         });
     } catch (error) {
         console.error('Error in getNextRaceTiming:', error);
@@ -274,35 +289,42 @@ const updateRaceResults = async (req, res) => {
         const scoringService = new ScoringService();
         const leaderboardService = new LeaderboardService();
 
-        // Update points and standings for each league
+        // AUTOMATION: Assign real points to all users in all leagues for this round
+        let totalUpdated = 0;
         for (const leagueId of selections) {
-            // Get all selections for this league and race
-            const leagueSelections = await RaceSelection.find({
+            const league = await require('../models/League').findById(leagueId).populate('members');
+            if (!league) {
+                console.error(`[AutoAssign] League not found: ${leagueId}`);
+                continue;
+            }
+            let updatedCount = 0;
+            for (const member of league.members) {
+                let selection = await RaceSelection.findOne({
+                    user: member._id,
                 league: leagueId,
-                round: parseInt(round)
-            });
-
-            // Calculate and update points for each selection
-            for (const selection of leagueSelections) {
-                const pointsData = scoringService.calculateRacePoints(
-                    {
+                    race: updatedRace._id
+                });
+                if (!selection) continue;
+                if (!selection.pointBreakdown || selection.status === 'empty') {
+                    const pointsData = scoringService.calculateRacePoints({
                         mainDriver: selection.mainDriver,
                         reserveDriver: selection.reserveDriver,
                         team: selection.team
-                    },
-                    updatedRace
-                );
-
-                // Update selection with points
-                await RaceSelection.findByIdAndUpdate(selection._id, {
-                    points: pointsData.totalPoints,
-                    pointBreakdown: pointsData.breakdown
-                });
+                    }, updatedRace);
+                    selection.points = pointsData.totalPoints;
+                    selection.pointBreakdown = pointsData.breakdown;
+                    selection.status = 'admin-assigned';
+                    selection.isAdminAssigned = true;
+                    selection.assignedAt = new Date();
+                    await selection.save();
+                    updatedCount++;
+                }
             }
-
-            // Update league standings
-            await leaderboardService.updateStandings(leagueId, updatedRace._id);
+            await leaderboardService.updateStandings(leagueId);
+            console.log(`[AutoAssign] Assigned real points to ${updatedCount} users in league ${league.name} for round ${round}`);
+            totalUpdated += updatedCount;
         }
+        console.log(`[AutoAssign] Total users updated for round ${round}: ${totalUpdated}`);
 
         res.json(updatedRace);
     } catch (error) {
