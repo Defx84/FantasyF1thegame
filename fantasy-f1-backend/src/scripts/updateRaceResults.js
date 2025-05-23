@@ -13,10 +13,10 @@ mongoose.connect(process.env.MONGODB_URI)
 async function updateRaceStatus(round, raceData) {
     try {
         const now = new Date();
-        const raceDate = new Date(raceData.date);
+        const qualifyingStart = new Date(raceData.qualifyingStart);
         
         // Only update races that have already happened
-        if (now > raceDate) {
+        if (now > qualifyingStart) {
             const result = await RaceResult.findOneAndUpdate(
                 { round },
                 { 
