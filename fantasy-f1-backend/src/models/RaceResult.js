@@ -274,9 +274,7 @@ raceResultSchema.methods.getTeamPoints = function(teamName) {
 raceResultSchema.pre('save', function(next) {
   const now = new Date();
 
-  if (this.raceEnd && now > this.raceEnd) {
-    this.status = 'completed';
-  } else if (this.raceStart && now >= this.raceStart) {
+  if (this.raceStart && now >= this.raceStart) {
     this.status = 'in_progress';
   } else if (this.sprintStart && now >= this.sprintStart) {
     this.status = 'sprint';

@@ -10,12 +10,16 @@ async function updatePastRaces() {
     const RaceResult = require('../src/models/RaceResult');
     const now = new Date();
 
+    // Only update races that have started but not completed
     const result = await RaceResult.updateMany(
-      { raceStart: { $lt: now } }, // Race started in the past
-      { $set: { status: 'completed' } }
+      { 
+        raceStart: { $lt: now },
+        status: { $ne: 'completed' }
+      },
+      { $set: { status: 'in_progress' } }
     );
 
-    console.log(`✅ Updated ${result.modifiedCount} races to completed status.`);
+    console.log(`✅ Updated ${result.modifiedCount} races to in_progress status.`);
   } catch (error) {
     console.error('Error:', error);
     process.exit(1);
