@@ -87,19 +87,19 @@ const getNextRaceTiming = async (req, res) => {
             season: nextRace.season,
             qualifying: {
                 startTime: nextRace.qualifyingStart,
-                timeUntil: Math.max(0, nextRace.qualifyingStart - now)
+                timeUntil: Math.max(0, new Date(nextRace.qualifyingStart).getTime() - now.getTime())
             },
             race: {
                 startTime: nextRace.raceStart,
-                timeUntil: Math.max(0, nextRace.raceStart - now)
+                timeUntil: Math.max(0, new Date(nextRace.raceStart).getTime() - now.getTime())
             },
             sprintQualifying: nextRace.sprintQualifyingStart ? {
                 startTime: nextRace.sprintQualifyingStart,
-                timeUntil: Math.max(0, nextRace.sprintQualifyingStart - now)
+                timeUntil: Math.max(0, new Date(nextRace.sprintQualifyingStart).getTime() - now.getTime())
             } : undefined,
             sprint: nextRace.sprintStart ? {
                 startTime: nextRace.sprintStart,
-                timeUntil: Math.max(0, nextRace.sprintStart - now)
+                timeUntil: Math.max(0, new Date(nextRace.sprintStart).getTime() - now.getTime())
             } : undefined,
             isSprintWeekend: nextRace.isSprintWeekend,
             status: raceStatus,

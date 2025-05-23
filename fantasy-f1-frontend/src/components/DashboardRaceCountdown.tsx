@@ -4,10 +4,25 @@ import { FaFlagCheckered, FaStopwatch, FaRunning } from 'react-icons/fa';
 
 interface DashboardRaceTiming {
   raceName: string;
-  raceStart?: string;
-  qualifyingStart?: string;
-  sprintQualifyingStart?: string;
-  sprintStart?: string;
+  round: number;
+  qualifying?: {
+    startTime: string;
+    timeUntil: number;
+  };
+  race?: {
+    startTime: string;
+    timeUntil: number;
+  };
+  sprintQualifying?: {
+    startTime: string;
+    timeUntil: number;
+  };
+  sprint?: {
+    startTime: string;
+    timeUntil: number;
+  };
+  status?: string;
+  endOfWeekend?: string;
 }
 
 const formatDateEU = (isoString: string) => {
@@ -43,8 +58,8 @@ const DashboardRaceCountdown: React.FC = () => {
       try {
         const data = await getNextRaceTiming();
         setRaceData(data as DashboardRaceTiming);
-        if (data && (data as DashboardRaceTiming).raceStart) {
-          const target = new Date((data as DashboardRaceTiming).raceStart!).getTime();
+        if (data && data.race?.startTime) {
+          const target = new Date(data.race.startTime).getTime();
           setTimeLeft(calculateTimeLeft(target));
         }
       } catch (err) {
@@ -57,8 +72,8 @@ const DashboardRaceCountdown: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!raceData?.raceStart) return;
-    const target = new Date(raceData.raceStart).getTime();
+    if (!raceData?.race?.startTime) return;
+    const target = new Date(raceData.race.startTime).getTime();
     const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft(target));
     }, 1000);
@@ -73,10 +88,10 @@ const DashboardRaceCountdown: React.FC = () => {
   }
 
   const events = [
-    raceData?.qualifyingStart ? { label: 'Qualifying', icon: <FaStopwatchIcon className="text-yellow-400" />, time: raceData.qualifyingStart } : null,
-    raceData?.sprintQualifyingStart ? { label: 'Sprint Qualifying', icon: <FaRunningIcon className="text-green-400" />, time: raceData.sprintQualifyingStart } : null,
-    raceData?.sprintStart ? { label: 'Sprint Race', icon: <FaRunningIcon className="text-green-400" />, time: raceData.sprintStart } : null,
-    raceData?.raceStart ? { label: 'Race', icon: <FaFlagCheckeredIcon className="text-red-400" />, time: raceData.raceStart } : null,
+    raceData?.qualifying ? { label: 'Qualifying', icon: <FaStopwatchIcon className="text-yellow-400" />, time: raceData.qualifying.startTime } : null,
+    raceData?.sprintQualifying ? { label: 'Sprint Qualifying', icon: <FaRunningIcon className="text-green-400" />, time: raceData.sprintQualifying.startTime } : null,
+    raceData?.sprint ? { label: 'Sprint Race', icon: <FaRunningIcon className="text-green-400" />, time: raceData.sprint.startTime } : null,
+    raceData?.race ? { label: 'Race', icon: <FaFlagCheckeredIcon className="text-red-400" />, time: raceData.race.startTime } : null,
   ].filter((e): e is { label: string; icon: JSX.Element; time: string } => !!e);
 
   return (
