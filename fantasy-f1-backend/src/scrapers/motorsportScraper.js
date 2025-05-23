@@ -374,35 +374,26 @@ async function processRace(round, raceName) {
 
 // Schedule race result scraping
 function scheduleRaceResultScraping() {
-    // Schedule for 20 minutes after race (assuming race end at 16:00 UTC)
-    cron.schedule('20 16 * * Sun', async () => {
-        console.log('\n⏰ Running immediate race result scraping...');
-        try {
-            await runScraper();
-        } catch (error) {
-            console.error('❌ Immediate race result scraping failed:', error);
+    // Remove old fixed schedules
+    // Dynamically schedule based on raceStart for each race
+    const RaceCalendar = require('../models/RaceCalendar');
+    const OFFSETS = [120, 180, 360]; // in minutes
+    (async () => {
+        const now = new Date();
+        const upcomingRaces = await RaceCalendar.find({ raceStart: { $gte: now } });
+        for (const race of upcomingRaces) {
+            const raceStart = new Date(race.raceStart);
+            OFFSETS.forEach(offset => {
+                const runTime = new Date(raceStart.getTime() + offset * 60 * 1000);
+                const cronTime = `${runTime.getUTCMinutes()} ${runTime.getUTCHours()} ${runTime.getUTCDate()} ${runTime.getUTCMonth() + 1} *`;
+                cron.schedule(cronTime, async () => {
+                    console.log(`⏰ Running scraper for round ${race.round} at offset ${offset} min`);
+                    await runScraper();
+                });
+                console.log(`Scheduled scraper for round ${race.round} at: ${runTime.toUTCString()} (offset ${offset} min)`);
+            });
         }
-    });
-
-    // Schedule for 12 hours later (04:20 UTC on Monday)
-    cron.schedule('20 4 * * Mon', async () => {
-        console.log('\n⏰ Running delayed race result scraping...');
-        try {
-            await runScraper();
-        } catch (error) {
-            console.error('❌ Delayed race result scraping failed:', error);
-        }
-    });
-
-    // Schedule for 1 hour after race (17:00 UTC Sunday)
-    cron.schedule('0 17 * * Sun', async () => {
-        console.log('\n⏰ Running 1-hour post-race result scraping...');
-        try {
-            await runScraper();
-        } catch (error) {
-            console.error('❌ 1-hour post-race result scraping failed:', error);
-        }
-    });
+    })();
 }
 
 // Schedule slug discovery
