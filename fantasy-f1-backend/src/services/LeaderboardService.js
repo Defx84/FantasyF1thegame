@@ -60,10 +60,21 @@ class LeaderboardService {
 
                 for (const selection of memberSelections) {
                     // Only process if all required fields are present and selection.race is not null
-                    if (!selection.mainDriver || !selection.reserveDriver || !selection.team || !selection.race) continue;
+                    if (!selection.mainDriver || !selection.reserveDriver || !selection.team || !selection.race) {
+                        console.log(`[Leaderboard] Skipping selection for user ${member.username} - missing required fields`);
+                        continue;
+                    }
+                    
                     // Only process if the race is completed (check RaceResult)
                     const raceResult = await RaceResult.findOne({ round: selection.round });
-                    if (!raceResult || raceResult.status !== "completed") continue;
+                    if (!raceResult) {
+                        console.log(`[Leaderboard] Skipping selection for user ${member.username} - race result not found for round ${selection.round}`);
+                        continue;
+                    }
+                    if (raceResult.status !== "completed") {
+                        console.log(`[Leaderboard] Skipping selection for user ${member.username} - race ${raceResult.raceName} (round ${selection.round}) status is ${raceResult.status}, expected 'completed'`);
+                        continue;
+                    }
 
                     // Always create a pointBreakdown object, even if null
                     const pb = selection.pointBreakdown || {

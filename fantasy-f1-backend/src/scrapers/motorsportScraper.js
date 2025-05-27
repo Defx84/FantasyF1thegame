@@ -388,7 +388,7 @@ function scheduleRaceResultScraping() {
                 const cronTime = `${runTime.getUTCMinutes()} ${runTime.getUTCHours()} ${runTime.getUTCDate()} ${runTime.getUTCMonth() + 1} *`;
                 cron.schedule(cronTime, async () => {
                     console.log(`⏰ Running scraper for round ${race.round} at offset ${offset} min`);
-                    await runScraper();
+            await runScraper();
                 });
                 console.log(`Scheduled scraper for round ${race.round} at: ${runTime.toUTCString()} (offset ${offset} min)`);
             });

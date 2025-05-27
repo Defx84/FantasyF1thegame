@@ -273,8 +273,17 @@ raceResultSchema.methods.getTeamPoints = function(teamName) {
 // Update status based on timing
 raceResultSchema.pre('save', function(next) {
   const now = new Date();
+  const oldStatus = this.status;
 
-  if (this.raceStart && now >= this.raceStart) {
+  // Don't change status if it's already completed
+  if (this.status === 'completed') {
+    console.log(`[Race Status] Preserving completed status for race ${this.raceName} (round ${this.round})`);
+    return next();
+  }
+
+  if (this.raceEnd && now > this.raceEnd) {
+    this.status = 'completed';
+  } else if (this.raceStart && now >= this.raceStart) {
     this.status = 'in_progress';
   } else if (this.sprintStart && now >= this.sprintStart) {
     this.status = 'sprint';
@@ -284,6 +293,11 @@ raceResultSchema.pre('save', function(next) {
     this.status = 'qualifying';
   } else {
     this.status = 'scheduled';
+  }
+
+  // Log status changes
+  if (oldStatus !== this.status) {
+    console.log(`[Race Status] Race ${this.raceName} (round ${this.round}) status changed from ${oldStatus} to ${this.status}`);
   }
 
   next();

@@ -13,7 +13,6 @@ interface GridPageProps {
 const GridPage: React.FC<GridPageProps> = ({ players, raceData, leaderboard, currentRace }) => {
   const [showSelections, setShowSelections] = useState(false);
   const [timeLeft, setTimeLeft] = useState<number>(getTimeUntilLock(raceData));
-  const [isImageLoaded, setIsImageLoaded] = useState(false);
   const navigate = useNavigate();
   const { leagueId } = useParams<{ leagueId: string }>();
 
@@ -41,41 +40,18 @@ const GridPage: React.FC<GridPageProps> = ({ players, raceData, leaderboard, cur
 
   return (
     <div className="relative min-h-screen w-full">
-      {/* Background container */}
-      <div className="fixed inset-0 w-screen h-screen z-0">
-        {/* Low-resolution placeholder */}
-        <div
-          className="absolute inset-0 transition-opacity duration-1000"
-          style={{
-            backgroundImage: 'url("/GridPage-small.webp")',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            backgroundAttachment: 'fixed',
-            filter: 'blur(10px)',
-            opacity: isImageLoaded ? 0 : 1,
-          }}
-        />
-        {/* High-resolution image */}
-        <div
-          className="absolute inset-0 transition-opacity duration-1000"
-          style={{
-            backgroundImage: 'url("/GridPage.webp")',
-            backgroundSize: 'cover',
-            backgroundPosition: 'center',
-            backgroundRepeat: 'no-repeat',
-            backgroundAttachment: 'fixed',
-            opacity: isImageLoaded ? 1 : 0,
-          }}
-        />
-        {/* Hidden image to trigger load event */}
-        <img
-          src="/GridPage.webp"
-          alt=""
-          className="hidden"
-          onLoad={() => setIsImageLoaded(true)}
-        />
-      </div>
+      {/* Fixed background image */}
+      <div
+        className="fixed inset-0 w-screen h-screen z-0"
+        style={{
+          backgroundImage: 'url("/GridPage.png")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundAttachment: 'fixed',
+        }}
+        aria-hidden="true"
+      />
       {/* Main content above background */}
       <div className="relative z-10 max-w-7xl mx-auto pt-16">
         <div className="flex justify-between items-center mb-8 backdrop-blur-md bg-black/5 border border-white/10 rounded-xl shadow-lg px-8 py-4">

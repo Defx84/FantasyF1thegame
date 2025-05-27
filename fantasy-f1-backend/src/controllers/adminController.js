@@ -269,7 +269,7 @@ exports.deleteRace = async (req, res) => {
     console.error('Error in deleteRace:', error);
     res.status(500).json({ message: 'Error deleting race', error: error.message });
   }
-};
+}; 
 
 // Assign real points to all users in a league for a given round
 exports.assignRealPointsToLeague = async (req, res) => {
@@ -289,6 +289,14 @@ exports.assignRealPointsToLeague = async (req, res) => {
       return res.status(404).json({ message: 'RaceResult not found for this round' });
     }
 
+    // Check if race is completed
+    if (raceResult.status !== 'completed') {
+      console.log(`[Admin Points] Race ${raceResult.raceName} (round ${round}) is not completed (status: ${raceResult.status})`);
+      return res.status(400).json({ 
+        message: `Cannot assign points - race is not completed (current status: ${raceResult.status})` 
+      });
+    }
+
     const RaceSelection = require('../models/RaceSelection');
     const ScoringService = require('../services/ScoringService');
     const scoringService = new ScoringService();
@@ -302,9 +310,13 @@ exports.assignRealPointsToLeague = async (req, res) => {
         league: leagueId,
         race: raceResult._id
       });
-      if (!selection) continue;
+      if (!selection) {
+        console.log(`[Admin Points] No selection found for user ${member.username} in league ${league.name} for round ${round}`);
+        continue;
+      }
       // Only update if not already assigned real points
       if (!selection.pointBreakdown || selection.status === 'empty') {
+        console.log(`[Admin Points] Assigning points for user ${member.username} in league ${league.name} for round ${round}`);
         const pointsData = scoringService.calculateRacePoints({
           mainDriver: selection.mainDriver,
           reserveDriver: selection.reserveDriver,
@@ -317,10 +329,14 @@ exports.assignRealPointsToLeague = async (req, res) => {
         selection.assignedAt = new Date();
         await selection.save();
         updatedCount++;
+        console.log(`[Admin Points] Assigned ${pointsData.totalPoints} points to user ${member.username}`);
+      } else {
+        console.log(`[Admin Points] Skipping user ${member.username} - points already assigned`);
       }
     }
     // Update leaderboard for the league
     await leaderboardService.updateStandings(leagueId);
+    console.log(`[Admin Points] Updated leaderboard for league ${league.name}`);
     res.json({ message: `Assigned real points to ${updatedCount} users in league for round ${round}` });
   } catch (error) {
     console.error('Error in assignRealPointsToLeague:', error);

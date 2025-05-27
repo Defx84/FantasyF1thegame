@@ -193,25 +193,25 @@ const initializeLeaderboard = async (leagueId, season) => {
         let savedLeaderboard = null;
 
         while (retryCount < maxRetries) {
-            try {
+        try {
                 savedLeaderboard = await leaderboard.save();
                 break; // Success, exit the loop
-            } catch (error) {
+        } catch (error) {
                 // Handle duplicate key error
-                if (error.name === 'MongoServerError' && error.code === 11000) {
-                    const existing = await LeagueLeaderboard.findOne({
-                        league: league._id,
-                        season: season
-                    });
-                    if (existing) return existing;
-                }
+            if (error.name === 'MongoServerError' && error.code === 11000) {
+                const existing = await LeagueLeaderboard.findOne({
+                    league: league._id,
+                    season: season
+                });
+                if (existing) return existing;
+            }
                 
                 // Handle version error
                 if (error.name === 'VersionError') {
                     retryCount++;
                     if (retryCount === maxRetries) {
                         throw new Error(`Failed to save leaderboard after ${maxRetries} retries due to version conflicts`);
-                    }
+        }
                     // Reload the leaderboard and try again
                     leaderboard = await LeagueLeaderboard.findOne({
                         league: league._id,

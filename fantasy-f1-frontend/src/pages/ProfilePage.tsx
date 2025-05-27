@@ -308,10 +308,10 @@ const ProfilePage: React.FC = () => {
               </div>
             )}
           </div>
-        </div>
+          </div>
 
-        {/* App Admin: All Leagues Section */}
-        {user.isAppAdmin && (
+          {/* App Admin: All Leagues Section */}
+          {user.isAppAdmin && (
           <div className="w-full md:max-w-2xl mt-8 md:mt-0">
             <div className="backdrop-blur-lg bg-white/2 rounded-2xl p-6 border border-white/10 shadow-xl mx-auto" style={{ maxWidth: 600 }}>
               <h2 className="text-2xl font-bold mb-6 flex items-center text-white/90 border-b border-white/10 pb-3">
@@ -388,7 +388,7 @@ const ProfilePage: React.FC = () => {
                           </>
                         ) : (
                           <>
-                            <IconWrapper icon={FaSyncAlt} size={16} className="mr-2" />
+                          <IconWrapper icon={FaSyncAlt} size={16} className="mr-2" />
                             Update All Races
                           </>
                         )}
@@ -408,8 +408,8 @@ const ProfilePage: React.FC = () => {
                 </div>
               )}
             </div>
-          </div>
-        )}
+            </div>
+          )}
       </div>
     </div>
   );

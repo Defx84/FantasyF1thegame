@@ -270,7 +270,7 @@ const updateRaceResults = async (req, res) => {
             teamResults: calculatedTeamResults,
             sprintResults,
             isSprintWeekend: raceCalendarEntry.isSprintWeekend,
-            status: 'in_progress',
+            status: 'completed',
             updatedAt: new Date()
         };
 
@@ -280,6 +280,9 @@ const updateRaceResults = async (req, res) => {
             { $set: updateData },
             { new: true, upsert: true }
         );
+
+        // Add logging for race status
+        console.log(`[Race Update] Updated race ${updatedRace.raceName} (round ${round}) to status: ${updatedRace.status}`);
 
         // Find all leagues that have selections for this race
         const selections = await RaceSelection.find({ round: parseInt(round) })
