@@ -2,6 +2,7 @@ const mongoose = require('mongoose');
 const { F1_DRIVERS_2025 } = require('../constants/f1DriverData');
 const { normalizeDriverName } = require('../constants/driverNameNormalization');
 const { normalizedTeams } = require('../constants/validTeams');
+const RaceCalendar = require('./RaceCalendar');
 
 // Create a set of all valid driver names
 const normalizedDrivers = new Set();
@@ -271,9 +272,22 @@ raceResultSchema.methods.getTeamPoints = function(teamName) {
 };
 
 // Update status based on timing
-raceResultSchema.pre('save', function(next) {
+raceResultSchema.pre('save', async function(next) {
   const now = new Date();
   const oldStatus = this.status;
+
+  // Fetch missing timing fields from RaceCalendar
+  if (!this.raceStart || !this.qualifyingStart) {
+    try {
+      const calendar = await RaceCalendar.findOne({ round: this.round });
+      if (calendar) {
+        if (!this.raceStart) this.raceStart = calendar.raceStart;
+        if (!this.qualifyingStart) this.qualifyingStart = calendar.qualifyingStart;
+      }
+    } catch (err) {
+      console.error(`[Race Status] Error fetching RaceCalendar for round ${this.round}:`, err);
+    }
+  }
 
   // Don't change status if it's already completed
   if (this.status === 'completed') {
