@@ -285,7 +285,11 @@ raceResultSchema.pre('save', function(next) {
   const BUFFER_MINUTES = 5;
   const bufferTime = new Date(now.getTime() + BUFFER_MINUTES * 60 * 1000);
 
-  if (this.raceEnd && bufferTime > this.raceEnd) {
+  // Calculate race end time (3 hours after race start)
+  const RACE_DURATION_HOURS = 3;
+  const raceEndTime = this.raceStart ? new Date(this.raceStart.getTime() + RACE_DURATION_HOURS * 60 * 60 * 1000) : null;
+
+  if (raceEndTime && bufferTime > raceEndTime) {
     this.status = 'completed';
   } else if (this.raceStart && bufferTime >= this.raceStart) {
     this.status = 'in_progress';
@@ -303,7 +307,7 @@ raceResultSchema.pre('save', function(next) {
   if (oldStatus !== this.status) {
     console.log(`[Race Status] Race ${this.raceName} (round ${this.round}) status changed from ${oldStatus} to ${this.status}`);
     console.log(`[Race Status] Current time: ${now.toISOString()}, Buffer time: ${bufferTime.toISOString()}`);
-    console.log(`[Race Status] Qualifying start: ${this.qualifyingStart?.toISOString()}, Race start: ${this.raceStart?.toISOString()}`);
+    console.log(`[Race Status] Qualifying start: ${this.qualifyingStart?.toISOString()}, Race start: ${this.raceStart?.toISOString()}, Race end: ${raceEndTime?.toISOString()}`);
   }
 
   next();
