@@ -68,7 +68,7 @@ const GridPage: React.FC<GridPageProps> = ({ players, raceData, leaderboard, cur
             return (
             <div
               key={player.username}
-              className={`backdrop-blur-md bg-black/5 border border-white/10 rounded-xl shadow-lg p-4 transform transition-all duration-300 ${
+              className={`bg-white/80 border border-white/10 rounded-xl shadow-lg p-4 transform transition-all duration-300 ${
                 index % 2 === 0 ? 'translate-y-8' : ''
                 } ${isLastOdd ? 'col-start-2' : ''}`}
             >
