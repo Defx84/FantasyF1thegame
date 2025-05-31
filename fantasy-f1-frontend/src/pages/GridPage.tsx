@@ -73,9 +73,9 @@ const GridPage: React.FC<GridPageProps> = ({ players, raceData, leaderboard, cur
                 } ${isLastOdd ? 'col-start-2' : ''}`}
             >
               <div className="flex items-center justify-between mb-2">
-                <h2 className="text-xl font-semibold text-white">{player.username}</h2>
+                <h2 className="text-xl font-semibold text-white truncate">{player.username}</h2>
                 <div
-                  className={`w-4 h-4 rounded-full ${
+                  className={`w-4 h-4 rounded-full flex-shrink-0 ${
                     player.selectionMade ? 'bg-green-500' : 'bg-red-500'
                   }`}
                 />
@@ -83,15 +83,15 @@ const GridPage: React.FC<GridPageProps> = ({ players, raceData, leaderboard, cur
 
               {showSelections && player.selectionMade && (
                 <div className="space-y-2 text-gray-300">
-                  <div>
+                  <div className="truncate">
                     <span className="font-medium">Main Driver:</span>{' '}
                     {player.selections?.mainDriver}
                   </div>
-                  <div>
+                  <div className="truncate">
                     <span className="font-medium">Reserve Driver:</span>{' '}
                     {player.selections?.reserveDriver}
                   </div>
-                  <div>
+                  <div className="truncate">
                     <span className="font-medium">Team:</span> {player.selections?.team}
                   </div>
                 </div>
