@@ -1,3 +1,4 @@
+// Trigger redeploy test
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Player } from '../types/player';
