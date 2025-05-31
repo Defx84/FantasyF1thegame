@@ -281,15 +281,19 @@ raceResultSchema.pre('save', function(next) {
     return next();
   }
 
-  if (this.raceEnd && now > this.raceEnd) {
+  // Add buffer time to prevent premature status changes
+  const BUFFER_MINUTES = 5;
+  const bufferTime = new Date(now.getTime() + BUFFER_MINUTES * 60 * 1000);
+
+  if (this.raceEnd && bufferTime > this.raceEnd) {
     this.status = 'completed';
-  } else if (this.raceStart && now >= this.raceStart) {
+  } else if (this.raceStart && bufferTime >= this.raceStart) {
     this.status = 'in_progress';
-  } else if (this.sprintStart && now >= this.sprintStart) {
+  } else if (this.sprintStart && bufferTime >= this.sprintStart) {
     this.status = 'sprint';
-  } else if (this.sprintQualifyingStart && now >= this.sprintQualifyingEnd) {
+  } else if (this.sprintQualifyingStart && bufferTime >= this.sprintQualifyingStart) {
     this.status = 'sprint_qualifying';
-  } else if (this.qualifyingStart && now >= this.qualifyingEnd) {
+  } else if (this.qualifyingStart && bufferTime >= this.qualifyingStart) {
     this.status = 'qualifying';
   } else {
     this.status = 'scheduled';
@@ -298,6 +302,8 @@ raceResultSchema.pre('save', function(next) {
   // Log status changes
   if (oldStatus !== this.status) {
     console.log(`[Race Status] Race ${this.raceName} (round ${this.round}) status changed from ${oldStatus} to ${this.status}`);
+    console.log(`[Race Status] Current time: ${now.toISOString()}, Buffer time: ${bufferTime.toISOString()}`);
+    console.log(`[Race Status] Qualifying start: ${this.qualifyingStart?.toISOString()}, Race start: ${this.raceStart?.toISOString()}`);
   }
 
   next();
