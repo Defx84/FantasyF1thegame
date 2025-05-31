@@ -289,19 +289,24 @@ raceResultSchema.pre('save', async function(next) {
     }
   }
 
+  // Add buffer time to prevent premature status changes
+  const BUFFER_MINUTES = 5;
+  const bufferTime = new Date(now.getTime() + BUFFER_MINUTES * 60 * 1000);
+  // Calculate race end time (3 hours after race start)
+  const RACE_DURATION_HOURS = 3;
+  const raceEndTime = this.raceStart ? new Date(this.raceStart.getTime() + RACE_DURATION_HOURS * 60 * 60 * 1000) : null;
+
+  // Add debug logging
+  console.log('[DEBUG] now:', now.toISOString());
+  console.log('[DEBUG] bufferTime:', bufferTime?.toISOString());
+  console.log('[DEBUG] raceStart:', this.raceStart?.toISOString());
+  console.log('[DEBUG] raceEndTime:', raceEndTime?.toISOString());
+
   // Don't change status if it's already completed
   if (this.status === 'completed') {
     console.log(`[Race Status] Preserving completed status for race ${this.raceName} (round ${this.round})`);
     return next();
   }
-
-  // Add buffer time to prevent premature status changes
-  const BUFFER_MINUTES = 5;
-  const bufferTime = new Date(now.getTime() + BUFFER_MINUTES * 60 * 1000);
-
-  // Calculate race end time (3 hours after race start)
-  const RACE_DURATION_HOURS = 3;
-  const raceEndTime = this.raceStart ? new Date(this.raceStart.getTime() + RACE_DURATION_HOURS * 60 * 60 * 1000) : null;
 
   if (raceEndTime && bufferTime > raceEndTime) {
     this.status = 'completed';
