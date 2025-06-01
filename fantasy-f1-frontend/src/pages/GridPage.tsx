@@ -69,7 +69,7 @@ const GridPage: React.FC<GridPageProps> = ({ players, raceData, leaderboard, cur
             return (
             <div
               key={player.username}
-              className={`bg-white/80 border border-white/10 rounded-xl shadow-lg p-4 transform transition-all duration-300 ${
+              className={`backdrop-blur-sm bg-white/[0.02] hover:bg-white/[0.05] border border-white/5 rounded-xl shadow-lg p-6 transition-all duration-300 ${
                 index % 2 === 0 ? 'translate-y-8' : ''
                 } ${isLastOdd ? 'col-start-2' : ''}`}
             >
@@ -83,7 +83,7 @@ const GridPage: React.FC<GridPageProps> = ({ players, raceData, leaderboard, cur
               </div>
 
               {showSelections && player.selectionMade && (
-                <div className="space-y-2 text-gray-300">
+                <div className="space-y-2 text-white">
                   <div className="truncate">
                     <span className="font-medium">Main Driver:</span>{' '}
                     {player.selections?.mainDriver}
