@@ -3,13 +3,14 @@ import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { FaBars, FaArrowLeft, FaUser, FaHome, FaUsers, FaSignOutAlt, FaTimes } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import { getUserLeagues, League } from '../services/leagueService';
+import OverlayLoader from './OverlayLoader';
 
 const EXCLUDED_PATHS = ['/', '/dashboard', '/welcome'];
 
 const AppLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, loading } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [leagues, setLeagues] = useState<League[]>([]);
@@ -55,6 +56,7 @@ const AppLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
 
   return (
     <div className="relative min-h-screen w-full">
+      {loading && <OverlayLoader />}
       {/* Top bar */}
       {!hideNav && (
         <div className="fixed top-0 left-0 w-full flex justify-between items-center z-50 px-4 py-3 pointer-events-none">
