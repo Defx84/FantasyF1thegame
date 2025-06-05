@@ -207,7 +207,7 @@ const Standings: React.FC = () => {
       0
     );
     return (
-      <div key={standing.user._id} className="bg-red-200/30 rounded-lg mb-4 border border-white/5 overflow-hidden transition-all duration-200">
+      <div key={standing.user._id} className="bg-red-200/30 rounded-lg border border-white/5 overflow-hidden transition-all duration-200">
         <div 
           className="flex items-center justify-between p-4 cursor-pointer hover:bg-white/[0.05] transition-colors"
           onClick={() => toggleRowExpansion(standing.user._id)}
@@ -283,7 +283,7 @@ const Standings: React.FC = () => {
     const isExpanded = expandedRows.has(standing.user._id);
     const sortedResults = [...standing.raceResults].sort((a, b) => b.round - a.round);
     return (
-      <div key={standing.user._id} className="bg-red-200/30 rounded-lg mb-4 border border-white/5 overflow-hidden transition-all duration-200">
+      <div key={standing.user._id} className="bg-red-200/30 rounded-lg border border-white/5 overflow-hidden transition-all duration-200">
         <div 
           className="flex items-center justify-between p-4 cursor-pointer hover:bg-white/[0.05] transition-colors"
           onClick={() => toggleRowExpansion(standing.user._id)}
