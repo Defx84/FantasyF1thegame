@@ -1,3 +1,4 @@
+// Trigger redeploy: trivial change
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaTrophy, FaMedal, FaChevronDown, FaChevronUp, FaInfoCircle } from 'react-icons/fa';
@@ -408,7 +409,7 @@ const Standings: React.FC = () => {
             </div>
           </div>
         </div>
-        <div className="backdrop-blur-sm bg-white/[0.02] rounded-xl border border-white/5 p-6">
+        <div className="backdrop-blur-sm bg-white/[0.02] rounded-xl border border-white/5 pt-2 pb-2 px-6">
           <div className="space-y-2">
             {activeTab === 'drivers'
               ? leaderboard.driverStandings.map((standing, index) => renderDriverStandingRow(standing, index))
