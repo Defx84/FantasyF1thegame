@@ -332,6 +332,126 @@ raceResultSchema.pre('save', async function(next) {
   next();
 });
 
+// Add post-save hook to trigger points assignment when race is completed
+raceResultSchema.post('save', async function(doc) {
+  try {
+    // Only proceed if the race is completed
+    if (doc.status !== 'completed') {
+      console.log(`[RaceResult Post-Save] Race ${doc.raceName} (round ${doc.round}) is not completed, skipping points assignment.`);
+      return;
+    }
+
+    console.log(`[RaceResult Post-Save] Processing race ${doc.raceName} (round ${doc.round})...`);
+
+    // Initialize services
+    const scoringService = new (require('../services/ScoringService'))();
+    const leaderboardService = new (require('../services/LeaderboardService'))();
+    const PointsUpdateLog = require('./PointsUpdateLog');
+
+    // Find all leagues with selections for this round
+    const leagues = await mongoose.model('League').find({}).distinct('_id');
+    const RaceSelection = mongoose.model('RaceSelection');
+
+    let totalUpdated = 0;
+    for (const leagueId of leagues) {
+      const league = await mongoose.model('League').findById(leagueId).populate('members');
+      if (!league) {
+        console.error(`[RaceResult Post-Save] League not found: ${leagueId}`);
+        continue;
+      }
+
+      let updatedCount = 0;
+      for (const member of league.members) {
+        let selection = await RaceSelection.findOne({
+          user: member._id,
+          league: leagueId,
+          race: doc._id
+        });
+        if (!selection) continue;
+
+        // Calculate new points
+        const pointsData = scoringService.calculateRacePoints({
+          mainDriver: selection.mainDriver,
+          reserveDriver: selection.reserveDriver,
+          team: selection.team
+        }, doc);
+
+        // Validate points against race results
+        const mainDriverResult = doc.getDriverResult(selection.mainDriver);
+        const reserveDriverResult = doc.getDriverResult(selection.reserveDriver);
+        const teamResult = doc.getTeamResult(selection.team);
+
+        // Verify points match what's in race results
+        const expectedPoints = {
+          mainDriver: mainDriverResult?.points || 0,
+          reserveDriver: reserveDriverResult?.points || 0,
+          team: teamResult?.totalPoints || 0
+        };
+
+        // Log any discrepancies
+        if (pointsData.breakdown.mainDriver !== expectedPoints.mainDriver ||
+            pointsData.breakdown.reserveDriver !== expectedPoints.reserveDriver ||
+            pointsData.breakdown.team !== expectedPoints.team) {
+          console.error(`[Validation] Points mismatch for user ${member._id} in race ${doc.round}:`, {
+            mainDriver: {
+              expected: expectedPoints.mainDriver,
+              calculated: pointsData.breakdown.mainDriver
+            },
+            reserveDriver: {
+              expected: expectedPoints.reserveDriver,
+              calculated: pointsData.breakdown.reserveDriver
+            },
+            team: {
+              expected: expectedPoints.team,
+              calculated: pointsData.breakdown.team
+            }
+          });
+        }
+
+        // Check if points have changed
+        const pointsChanged = 
+          selection.points !== pointsData.totalPoints || 
+          JSON.stringify(selection.pointBreakdown) !== JSON.stringify(pointsData.breakdown);
+
+        if (pointsChanged) {
+          // Log the points update
+          await PointsUpdateLog.create({
+            round: doc.round,
+            raceName: doc.raceName,
+            userId: member._id,
+            leagueId: leagueId,
+            points: pointsData.totalPoints,
+            pointBreakdown: pointsData.breakdown,
+            updateReason: selection.pointBreakdown ? 'scraper_update' : 'initial'
+          });
+
+          selection.points = pointsData.totalPoints;
+          selection.pointBreakdown = pointsData.breakdown;
+          selection.status = 'admin-assigned';
+          selection.isAdminAssigned = true;
+          selection.assignedAt = new Date();
+          await selection.save();
+          updatedCount++;
+        }
+      }
+
+      if (updatedCount > 0) {
+        await leaderboardService.updateStandings(leagueId);
+        console.log(`[RaceResult Post-Save] Updated points for ${updatedCount} users in league ${league.name} for round ${doc.round}`);
+        totalUpdated += updatedCount;
+      }
+    }
+
+    if (totalUpdated > 0) {
+      console.log(`[RaceResult Post-Save] Total users updated for round ${doc.round}: ${totalUpdated}`);
+    } else {
+      console.log(`[RaceResult Post-Save] No points changes detected for round ${doc.round}`);
+    }
+  } catch (error) {
+    console.error('[RaceResult Post-Save] Error assigning points:', error);
+  }
+});
+
 const RaceResult = mongoose.model('RaceResult', raceResultSchema);
 
 module.exports = RaceResult;
