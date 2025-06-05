@@ -95,7 +95,7 @@ const DashboardRaceCountdown: React.FC = () => {
   ].filter((e): e is { label: string; icon: JSX.Element; time: string } => !!e);
 
   return (
-    <div className="bg-white/[0.02] backdrop-blur-sm rounded-lg p-6 shadow-lg">
+    <div className="bg-red-200/30 rounded-lg p-6 shadow-lg">
       <div className="text-center mb-6">
         <h2 className="text-2xl font-bold text-white mb-2">{raceData.raceName || 'Next Race'}</h2>
         <div className="flex items-center justify-center space-x-2 text-white/70">
