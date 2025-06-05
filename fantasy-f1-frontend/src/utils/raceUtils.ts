@@ -11,18 +11,50 @@ export const getLockTime = (race: any): Date | null => {
     ? race.sprintQualifying.startTime
     : race.qualifying?.startTime;
 
-  if (!baseTimeStr) return null;
+  if (!baseTimeStr) {
+    console.log('[Race Utils] No qualifying time available for race:', race);
+    return null;
+  }
+
   const baseTime = new Date(baseTimeStr);
-  return new Date(baseTime.getTime() - 5 * 60 * 1000);
+  const lockTime = new Date(baseTime.getTime() - 5 * 60 * 1000);
+  
+  console.log('[Race Utils] Lock time calculation:', {
+    raceName: race.raceName,
+    baseTime: baseTime.toISOString(),
+    lockTime: lockTime.toISOString(),
+    currentTime: new Date().toISOString()
+  });
+  
+  return lockTime;
 };
 
 /**
  * Check if selections are currently locked
  */
 export const isSelectionsLocked = (race: RaceTiming): boolean => {
-  if (!race) return true;
+  if (!race) {
+    console.log('[Race Utils] No race data provided for lock check');
+    return true;
+  }
+
   const lockTime = getLockTime(race);
-  return lockTime ? new Date() >= lockTime : true;
+  if (!lockTime) {
+    console.log('[Race Utils] Could not determine lock time for race:', race);
+    return true;
+  }
+
+  const now = new Date();
+  const isLocked = now >= lockTime;
+  
+  console.log('[Race Utils] Lock status check:', {
+    raceName: race.raceName,
+    lockTime: lockTime.toISOString(),
+    currentTime: now.toISOString(),
+    isLocked
+  });
+  
+  return isLocked;
 };
 
 /**

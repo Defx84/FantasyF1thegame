@@ -120,28 +120,63 @@ const NextRaceSelections: React.FC = () => {
 
   useEffect(() => {
     if (!raceData) return;
-    // Only advance to next race after endOfWeekend
-    const now = new Date();
-    const endOfWeekend = raceData.endOfWeekend ? new Date(raceData.endOfWeekend) : null;
-    if (endOfWeekend && now > endOfWeekend) {
-      // Optionally, trigger logic to advance to next race here
-      // For now, just lock the UI (or you could trigger a refetch for the next race)
-      setIsLocked(true);
-      return;
-    }
-    if (raceStatus === 'completed') {
-      setIsLocked(true);
-      return;
-    }
-    if (timeUntilDeadline <= 0) {
-      setIsLocked(true);
-      return;
-    }
-    const timer = setInterval(() => {
-      const newTimeLeft = getTimeUntilLock(raceData);
-      setTimeUntilDeadline(newTimeLeft);
-      setIsLocked(isSelectionsLocked(raceData));
-    }, 1000);
+
+    const updateLockStatus = () => {
+      try {
+        const now = new Date();
+        console.log('[NextRaceSelections] Checking lock status:', {
+          raceName: raceData.raceName,
+          status: raceStatus,
+          timeUntilDeadline,
+          endOfWeekend: raceData.endOfWeekend
+        });
+
+        // Only advance to next race after endOfWeekend
+        const endOfWeekend = raceData.endOfWeekend ? new Date(raceData.endOfWeekend) : null;
+        if (endOfWeekend && now > endOfWeekend) {
+          console.log('[NextRaceSelections] Locking due to end of weekend');
+          setIsLocked(true);
+          return;
+        }
+
+        // Only lock if race is explicitly completed
+        if (raceStatus === 'completed') {
+          console.log('[NextRaceSelections] Locking due to completed status');
+          setIsLocked(true);
+          return;
+        }
+
+        // Check time until deadline with a small buffer
+        const BUFFER_MS = 1000; // 1 second buffer
+        if (timeUntilDeadline <= BUFFER_MS) {
+          console.log('[NextRaceSelections] Locking due to deadline');
+          setIsLocked(true);
+          return;
+        }
+
+        // Update time and lock status
+        const newTimeLeft = getTimeUntilLock(raceData);
+        setTimeUntilDeadline(newTimeLeft);
+        const newLockStatus = isSelectionsLocked(raceData);
+        if (newLockStatus !== isLocked) {
+          console.log('[NextRaceSelections] Lock status changed:', {
+            from: isLocked,
+            to: newLockStatus,
+            timeLeft: newTimeLeft
+          });
+        }
+        setIsLocked(newLockStatus);
+      } catch (error) {
+        console.error('[NextRaceSelections] Error updating lock status:', error);
+        // Don't lock on error, but log it
+      }
+    };
+
+    // Initial update
+    updateLockStatus();
+
+    // Set up interval for updates
+    const timer = setInterval(updateLockStatus, 1000);
     return () => clearInterval(timer);
   }, [raceData, timeUntilDeadline, raceStatus]);
 
