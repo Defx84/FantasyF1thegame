@@ -102,9 +102,8 @@ const StatisticsSummary: React.FC<StatisticsSummaryProps> = ({ userId, leagueId,
         {/* Front Side */}
         <div
           key="front-total"
-          className="flex flex-col justify-center items-center p-6 h-40 rounded-lg shadow bg-white/10 backdrop-blur-md border border-white/10 cursor-pointer relative"
+          className="flex flex-col justify-center items-center p-6 h-40 rounded-lg shadow bg-white/80 border border-white/10 cursor-pointer relative"
           onClick={() => setIsTotalPointsFlipped(true)}
-          style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
         >
           <h3 className="text-lg font-semibold mb-2 text-center text-white">Total Points</h3>
           <span className="text-3xl font-bold text-white text-center">{stats.totalPoints}</span>
@@ -115,9 +114,8 @@ const StatisticsSummary: React.FC<StatisticsSummaryProps> = ({ userId, leagueId,
         {/* Back Side */}
         <div
           key="back-total"
-          className="flex flex-col justify-center items-center p-6 h-40 rounded-lg shadow bg-white/10 backdrop-blur-md border border-white/10 cursor-pointer"
+          className="flex flex-col justify-center items-center p-6 h-40 rounded-lg shadow bg-white/80 border border-white/10 cursor-pointer"
           onClick={() => setIsTotalPointsFlipped(false)}
-          style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
         >
           <h3 className="text-lg font-semibold mb-2 text-center text-white">Breakdown</h3>
           <span className="text-lg font-bold text-white text-center">Driver Points: {mainDriverPoints}</span>
@@ -129,9 +127,8 @@ const StatisticsSummary: React.FC<StatisticsSummaryProps> = ({ userId, leagueId,
         {/* Front Side */}
         <div
           key="front-average"
-          className="flex flex-col justify-center items-center p-6 h-40 rounded-lg shadow bg-white/10 backdrop-blur-md border border-white/10 cursor-pointer relative"
+          className="flex flex-col justify-center items-center p-6 h-40 rounded-lg shadow bg-white/80 border border-white/10 cursor-pointer relative"
           onClick={() => setIsAveragePointsFlipped(true)}
-          style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
         >
           <h3 className="text-lg font-semibold mb-2 text-center text-white">Average Points</h3>
           <span className="text-3xl font-bold text-white text-center">{stats.averagePoints.toFixed(2)}</span>
@@ -142,9 +139,8 @@ const StatisticsSummary: React.FC<StatisticsSummaryProps> = ({ userId, leagueId,
         {/* Back Side */}
         <div
           key="back-average"
-          className="flex flex-col justify-center items-center p-6 h-40 rounded-lg shadow bg-white/10 backdrop-blur-md border border-white/10 cursor-pointer"
+          className="flex flex-col justify-center items-center p-6 h-40 rounded-lg shadow bg-white/80 border border-white/10 cursor-pointer"
           onClick={() => setIsAveragePointsFlipped(false)}
-          style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
         >
           <h3 className="text-base font-semibold mb-1 text-center text-white">Progressive Averages</h3>
           <div className="flex flex-col items-center space-y-1 w-full">
@@ -154,7 +150,7 @@ const StatisticsSummary: React.FC<StatisticsSummaryProps> = ({ userId, leagueId,
         </div>
       </ReactCardFlip>
       {/* Success Rate Card (now in the middle) */}
-      <div className={`flex flex-col justify-center items-center p-6 h-40 rounded-lg shadow bg-white/10 backdrop-blur-md border border-white/10 relative`}>
+      <div className={`flex flex-col justify-center items-center p-6 h-40 rounded-lg shadow bg-white/80 border border-white/10 relative`}>
         <h3 className="text-lg font-semibold mb-2 text-center text-white">Success Rate</h3>
         <span className="text-3xl font-bold text-white text-center">{stats.successRate !== undefined ? `${stats.successRate.toFixed(1)}%` : '-'}</span>
         {/* Info Icon with Tooltip */}
@@ -172,9 +168,8 @@ const StatisticsSummary: React.FC<StatisticsSummaryProps> = ({ userId, leagueId,
         {/* Front Side */}
         <div
           key="front-best"
-          className="flex flex-col justify-center items-center p-6 h-40 rounded-lg shadow bg-white/10 backdrop-blur-md border border-white/10 cursor-pointer relative"
+          className="flex flex-col justify-center items-center p-6 h-40 rounded-lg shadow bg-white/80 border border-white/10 cursor-pointer relative"
           onClick={() => setIsBestRaceFlipped(true)}
-          style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
         >
           <h3 className="text-lg font-semibold mb-2 text-center text-white">Best Race</h3>
           {stats.bestRace ? (
@@ -189,9 +184,8 @@ const StatisticsSummary: React.FC<StatisticsSummaryProps> = ({ userId, leagueId,
         {/* Back Side */}
         <div
           key="back-best"
-          className="flex flex-col justify-center items-center p-6 h-40 rounded-lg shadow bg-white/10 backdrop-blur-md border border-white/10 cursor-pointer"
+          className="flex flex-col justify-center items-center p-6 h-40 rounded-lg shadow bg-white/80 border border-white/10 cursor-pointer"
           onClick={() => setIsBestRaceFlipped(false)}
-          style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
         >
           {stats.bestRace ? (
             <>
@@ -211,9 +205,8 @@ const StatisticsSummary: React.FC<StatisticsSummaryProps> = ({ userId, leagueId,
         {/* Front Side */}
         <div
           key="front-comeback"
-          className="flex flex-col justify-center items-center p-6 h-40 rounded-lg shadow bg-white/10 backdrop-blur-md border border-white/10 cursor-pointer relative"
+          className="flex flex-col justify-center items-center p-6 h-40 rounded-lg shadow bg-white/80 border border-white/10 cursor-pointer relative"
           onClick={() => setIsComebackFlipped(true)}
-          style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden' }}
         >
           <h3 className="text-lg font-semibold mb-2 text-center text-white">Comebacks</h3>
           <span className="text-3xl font-bold text-white text-center">{stats.comebackCount !== undefined ? stats.comebackCount : '-'}</span>
@@ -224,9 +217,8 @@ const StatisticsSummary: React.FC<StatisticsSummaryProps> = ({ userId, leagueId,
         {/* Back Side */}
         <div
           key="back-comeback"
-          className="flex flex-col justify-center items-center p-6 h-40 rounded-lg shadow bg-white/10 backdrop-blur-md border border-white/10 cursor-pointer"
+          className="flex flex-col justify-center items-center p-6 h-40 rounded-lg shadow bg-white/80 border border-white/10 cursor-pointer"
           onClick={() => setIsComebackFlipped(false)}
-          style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
         >
           <h3 className="text-lg font-semibold mb-2 text-center text-white">Comeback Rounds</h3>
           {comebackRounds.length > 0 ? (
