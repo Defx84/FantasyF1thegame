@@ -67,6 +67,8 @@ We use industry-standard measures to protect your personal data.
 We may update this Privacy Policy from time to time. We'll notify you of significant changes by email or in-app notifications.`
   };
 
+  const TypedFaTimes = FaTimes as unknown as React.FC<{ className?: string }>;
+
   return (
     <div className="fixed inset-0 z-50 overflow-y-auto">
       <div className="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
@@ -84,7 +86,7 @@ We may update this Privacy Policy from time to time. We'll notify you of signifi
                 onClick={onClose}
                 className="text-gray-400 hover:text-gray-500 focus:outline-none"
               >
-                <FaTimes className="h-6 w-6" />
+                <TypedFaTimes className="h-6 w-6" />
               </button>
             </div>
             <div className="mt-2">
