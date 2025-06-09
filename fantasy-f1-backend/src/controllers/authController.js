@@ -19,7 +19,14 @@ const generateTokens = (userId) => {
 // Register new user
 const register = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, termsAccepted } = req.body;
+
+    // Check if terms were accepted
+    if (!termsAccepted) {
+      return res.status(400).json({
+        error: 'You must accept the Terms & Conditions to register'
+      });
+    }
 
     // Check if user already exists
     const existingUser = await User.findOne({ $or: [{ email }, { username }] });
@@ -33,7 +40,9 @@ const register = async (req, res) => {
     const user = new User({
       username,
       email,
-      password
+      password,
+      termsAccepted: true,
+      termsAcceptedAt: new Date()
     });
 
     await user.save();

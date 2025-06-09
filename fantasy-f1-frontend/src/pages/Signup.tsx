@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaUser, FaEnvelope, FaLock, FaTrophy, FaChartLine, FaCar } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
+import TermsModal from '../components/TermsModal';
 
 // Move FeatureBox outside Signup
 const FeatureBox: React.FC<{ icon: React.FC<{ size?: number; className?: string }>; title: string; description: string }> = ({ icon: Icon, title, description }) => (
@@ -21,6 +22,9 @@ const Signup: React.FC = () => {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
+  const [termsAccepted, setTermsAccepted] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
+  const [showPrivacyModal, setShowPrivacyModal] = useState(false);
   const { signup } = useAuth();
   const navigate = useNavigate();
 
@@ -30,11 +34,15 @@ const Signup: React.FC = () => {
       setError('Passwords do not match');
       return;
     }
+    if (!termsAccepted) {
+      setError('You must accept the Terms & Conditions and Privacy Policy');
+      return;
+    }
     setError('');
     setSuccess('');
 
     try {
-      const result = await signup(username, email, password);
+      const result = await signup(username, email, password, termsAccepted);
       setSuccess(result.message);
       // Redirect to Welcome page after 2 seconds
       setTimeout(() => {
@@ -179,6 +187,39 @@ const Signup: React.FC = () => {
                 </div>
               </div>
 
+              <div className="flex items-start">
+                <div className="flex items-center h-5">
+                  <input
+                    id="terms"
+                    name="terms"
+                    type="checkbox"
+                    checked={termsAccepted}
+                    onChange={(e) => setTermsAccepted(e.target.checked)}
+                    className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                  />
+                </div>
+                <div className="ml-3 text-sm">
+                  <label htmlFor="terms" className="font-medium text-white/90">
+                    I accept the{' '}
+                    <button
+                      type="button"
+                      onClick={() => setShowTermsModal(true)}
+                      className="text-red-400 hover:text-red-300 underline"
+                    >
+                      Terms & Conditions
+                    </button>
+                    {' '}and{' '}
+                    <button
+                      type="button"
+                      onClick={() => setShowPrivacyModal(true)}
+                      className="text-red-400 hover:text-red-300 underline"
+                    >
+                      Privacy Policy
+                    </button>
+                  </label>
+                </div>
+              </div>
+
               <div>
                 <button
                   type="submit"
@@ -223,6 +264,17 @@ const Signup: React.FC = () => {
           </div>
         </div>
       </div>
+
+      <TermsModal
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+        type="terms"
+      />
+      <TermsModal
+        isOpen={showPrivacyModal}
+        onClose={() => setShowPrivacyModal(false)}
+        type="privacy"
+      />
     </>
   );
 };

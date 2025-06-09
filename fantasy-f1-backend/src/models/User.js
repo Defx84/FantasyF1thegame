@@ -44,6 +44,14 @@ const userSchema = new mongoose.Schema({
     required: true,
     minlength: 6
   },
+  termsAccepted: {
+    type: Boolean,
+    required: true,
+    default: false
+  },
+  termsAcceptedAt: {
+    type: Date
+  },
   isAppAdmin: {
     type: Boolean,
     default: false
@@ -72,22 +80,6 @@ const userSchema = new mongoose.Schema({
       team: Number
     }
   }],
-  switcheroos: {
-    remaining: {
-      type: Number,
-      default: 3
-    },
-    used: [{
-      round: Number,
-      date: Date,
-      leagueId: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'League'
-      },
-      originalDriver: String,
-      newDriver: String
-    }]
-  }
 }, {
   timestamps: true
 });
