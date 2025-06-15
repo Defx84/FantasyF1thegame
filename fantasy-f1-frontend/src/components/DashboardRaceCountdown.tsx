@@ -1,30 +1,7 @@
 // DEBUG: Triggering a visible change for git detection
 import React, { useState, useEffect } from 'react';
-import { getNextRaceTiming } from '../services/raceService';
+import { getNextRaceTiming, RaceTiming } from '../services/raceService';
 import { FaFlagCheckered, FaStopwatch, FaRunning } from 'react-icons/fa';
-
-interface DashboardRaceTiming {
-  raceName: string;
-  round: number;
-  qualifying?: {
-    startTime: string;
-    timeUntil: number;
-  };
-  race?: {
-    startTime: string;
-    timeUntil: number;
-  };
-  sprintQualifying?: {
-    startTime: string;
-    timeUntil: number;
-  };
-  sprint?: {
-    startTime: string;
-    timeUntil: number;
-  };
-  status?: string;
-  endOfWeekend?: string;
-}
 
 const formatDateEU = (isoString: string) => {
   if (!isoString) return 'TBD';
@@ -49,7 +26,7 @@ const FaStopwatchIcon = FaStopwatch as React.FC<{ className?: string }>;
 const FaRunningIcon = FaRunning as React.FC<{ className?: string }>;
 
 const DashboardRaceCountdown: React.FC = () => {
-  const [raceData, setRaceData] = useState<DashboardRaceTiming | null>(null);
+  const [raceData, setRaceData] = useState<RaceTiming | null>(null);
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -58,14 +35,14 @@ const DashboardRaceCountdown: React.FC = () => {
     const fetchRace = async () => {
       try {
         const data = await getNextRaceTiming();
-        setRaceData(data as DashboardRaceTiming);
-        if (data && data.race?.startTime) {
-          const target = new Date(data.race.startTime).getTime();
+        setRaceData(data);
+        if (data && data.raceStart) {
+          const target = new Date(data.raceStart).getTime();
           const now = Date.now();
           // Debug logs for countdown issue
           console.log("DEBUG: Current time (local):", new Date());
           console.log("DEBUG: Current time (UTC):", new Date().toISOString());
-          console.log("DEBUG: Race start (from API):", data.race.startTime, "as Date:", new Date(data.race.startTime));
+          console.log("DEBUG: Race start (from API):", data.raceStart, "as Date:", new Date(data.raceStart));
           console.log("DEBUG: Milliseconds until race:", target - now);
           setTimeLeft(calculateTimeLeft(target));
         }
@@ -79,8 +56,8 @@ const DashboardRaceCountdown: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!raceData?.race?.startTime) return;
-    const target = new Date(raceData.race.startTime).getTime();
+    if (!raceData?.raceStart) return;
+    const target = new Date(raceData.raceStart).getTime();
     const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft(target));
     }, 1000);
@@ -98,7 +75,7 @@ const DashboardRaceCountdown: React.FC = () => {
     raceData?.qualifying ? { label: 'Qualifying', icon: <FaStopwatchIcon className="text-yellow-400" />, time: raceData.qualifying.startTime } : null,
     raceData?.sprintQualifying ? { label: 'Sprint Qualifying', icon: <FaRunningIcon className="text-green-400" />, time: raceData.sprintQualifying.startTime } : null,
     raceData?.sprint ? { label: 'Sprint Race', icon: <FaRunningIcon className="text-green-400" />, time: raceData.sprint.startTime } : null,
-    raceData?.race ? { label: 'Race', icon: <FaFlagCheckeredIcon className="text-red-400" />, time: raceData.race.startTime } : null,
+    raceData.raceStart ? { label: 'Race', icon: <FaFlagCheckeredIcon className="text-red-400" />, time: raceData.raceStart } : null,
   ].filter((e): e is { label: string; icon: JSX.Element; time: string } => !!e);
 
   return (
@@ -115,9 +92,9 @@ const DashboardRaceCountdown: React.FC = () => {
         <div><b>DEBUG:</b></div>
         <div>Now (local): {new Date().toString()}</div>
         <div>Now (UTC): {new Date().toISOString()}</div>
-        <div>Race start (from API): {raceData.race?.startTime}</div>
-        <div>Race start (parsed): {raceData.race?.startTime ? new Date(raceData.race.startTime).toString() : 'N/A'}</div>
-        <div>Milliseconds until race: {raceData.race?.startTime ? new Date(raceData.race.startTime).getTime() - Date.now() : 'N/A'}</div>
+        <div>Race start (from API): {raceData.raceStart}</div>
+        <div>Race start (parsed): {raceData.raceStart ? new Date(raceData.raceStart).toString() : 'N/A'}</div>
+        <div>Milliseconds until race: {raceData.raceStart ? new Date(raceData.raceStart).getTime() - Date.now() : 'N/A'}</div>
       </div>
       {/* DEBUG INFO END */}
       <div className="grid grid-cols-4 gap-4 mb-6">
