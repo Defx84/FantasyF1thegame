@@ -1,4 +1,4 @@
-// Trigger frontend update: trivial change
+// DEBUG: Triggering a visible change for git detection
 import React, { useState, useEffect } from 'react';
 import { getNextRaceTiming } from '../services/raceService';
 import { FaFlagCheckered, FaStopwatch, FaRunning } from 'react-icons/fa';
@@ -107,9 +107,19 @@ const DashboardRaceCountdown: React.FC = () => {
         <h2 className="text-2xl font-bold text-white mb-2">{raceData.raceName || 'Next Race'}</h2>
         <div className="flex items-center justify-center space-x-2 text-white/70">
           <FaFlagCheckeredIcon className="text-red-500" />
-          <span>Race Countdown</span>
+          <span>Race Countdown (DEBUG)</span>
         </div>
       </div>
+      {/* DEBUG INFO START */}
+      <div style={{ color: 'yellow', background: 'black', padding: '8px', borderRadius: '6px', marginBottom: '12px', fontSize: '12px' }}>
+        <div><b>DEBUG:</b></div>
+        <div>Now (local): {new Date().toString()}</div>
+        <div>Now (UTC): {new Date().toISOString()}</div>
+        <div>Race start (from API): {raceData.race?.startTime}</div>
+        <div>Race start (parsed): {raceData.race?.startTime ? new Date(raceData.race.startTime).toString() : 'N/A'}</div>
+        <div>Milliseconds until race: {raceData.race?.startTime ? new Date(raceData.race.startTime).getTime() - Date.now() : 'N/A'}</div>
+      </div>
+      {/* DEBUG INFO END */}
       <div className="grid grid-cols-4 gap-4 mb-6">
         <div className="text-center">
           <div className="text-xl font-bold text-white drop-shadow-md">{timeLeft.days}</div>
