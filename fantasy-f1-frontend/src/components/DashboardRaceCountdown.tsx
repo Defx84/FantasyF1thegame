@@ -84,7 +84,7 @@ const DashboardRaceCountdown: React.FC = () => {
         <h2 className="text-2xl font-bold text-white mb-2">{raceData.raceName || 'Next Race'}</h2>
         <div className="flex items-center justify-center space-x-2 text-white/70">
           <FaFlagCheckeredIcon className="text-red-500" />
-          <span>Race Countdown (DEBUG)</span>
+          <span>Race Countdown</span>
         </div>
       </div>
       <div className="grid grid-cols-4 gap-4 mb-6">
