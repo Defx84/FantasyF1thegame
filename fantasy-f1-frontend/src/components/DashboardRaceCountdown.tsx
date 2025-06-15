@@ -60,6 +60,12 @@ const DashboardRaceCountdown: React.FC = () => {
         setRaceData(data as DashboardRaceTiming);
         if (data && data.race?.startTime) {
           const target = new Date(data.race.startTime).getTime();
+          const now = Date.now();
+          // Debug logs for countdown issue
+          console.log("DEBUG: Current time (local):", new Date());
+          console.log("DEBUG: Current time (UTC):", new Date().toISOString());
+          console.log("DEBUG: Race start (from API):", data.race.startTime, "as Date:", new Date(data.race.startTime));
+          console.log("DEBUG: Milliseconds until race:", target - now);
           setTimeLeft(calculateTimeLeft(target));
         }
       } catch (err) {
