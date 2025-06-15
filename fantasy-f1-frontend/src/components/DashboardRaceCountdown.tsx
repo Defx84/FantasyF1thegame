@@ -87,16 +87,6 @@ const DashboardRaceCountdown: React.FC = () => {
           <span>Race Countdown (DEBUG)</span>
         </div>
       </div>
-      {/* DEBUG INFO START */}
-      <div style={{ color: 'yellow', background: 'black', padding: '8px', borderRadius: '6px', marginBottom: '12px', fontSize: '12px' }}>
-        <div><b>DEBUG:</b></div>
-        <div>Now (local): {new Date().toString()}</div>
-        <div>Now (UTC): {new Date().toISOString()}</div>
-        <div>Race start (from API): {raceData.raceStart}</div>
-        <div>Race start (parsed): {raceData.raceStart ? new Date(raceData.raceStart).toString() : 'N/A'}</div>
-        <div>Milliseconds until race: {raceData.raceStart ? new Date(raceData.raceStart).getTime() - Date.now() : 'N/A'}</div>
-      </div>
-      {/* DEBUG INFO END */}
       <div className="grid grid-cols-4 gap-4 mb-6">
         <div className="text-center">
           <div className="text-xl font-bold text-white drop-shadow-md">{timeLeft.days}</div>
