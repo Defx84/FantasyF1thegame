@@ -1,3 +1,4 @@
+// Trigger frontend update: trivial change
 import React, { useState, useEffect } from 'react';
 import { getNextRaceTiming } from '../services/raceService';
 import { FaFlagCheckered, FaStopwatch, FaRunning } from 'react-icons/fa';
