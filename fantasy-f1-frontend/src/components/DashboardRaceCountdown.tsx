@@ -36,13 +36,13 @@ const DashboardRaceCountdown: React.FC = () => {
       try {
         const data = await getNextRaceTiming();
         setRaceData(data);
-        if (data && data.raceStart) {
-          const target = new Date(data.raceStart).getTime();
+        if (data && data.race && data.race.startTime) {
+          const target = new Date(data.race.startTime).getTime();
           const now = Date.now();
           // Debug logs for countdown issue
           console.log("DEBUG: Current time (local):", new Date());
           console.log("DEBUG: Current time (UTC):", new Date().toISOString());
-          console.log("DEBUG: Race start (from API):", data.raceStart, "as Date:", new Date(data.raceStart));
+          console.log("DEBUG: Race start (from API):", data.race.startTime, "as Date:", new Date(data.race.startTime));
           console.log("DEBUG: Milliseconds until race:", target - now);
           setTimeLeft(calculateTimeLeft(target));
         }
@@ -56,8 +56,8 @@ const DashboardRaceCountdown: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (!raceData?.raceStart) return;
-    const target = new Date(raceData.raceStart).getTime();
+    if (!raceData?.race?.startTime) return;
+    const target = new Date(raceData.race.startTime).getTime();
     const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft(target));
     }, 1000);
@@ -75,7 +75,7 @@ const DashboardRaceCountdown: React.FC = () => {
     raceData?.qualifying ? { label: 'Qualifying', icon: <FaStopwatchIcon className="text-yellow-400" />, time: raceData.qualifying.startTime } : null,
     raceData?.sprintQualifying ? { label: 'Sprint Qualifying', icon: <FaRunningIcon className="text-green-400" />, time: raceData.sprintQualifying.startTime } : null,
     raceData?.sprint ? { label: 'Sprint Race', icon: <FaRunningIcon className="text-green-400" />, time: raceData.sprint.startTime } : null,
-    raceData.raceStart ? { label: 'Race', icon: <FaFlagCheckeredIcon className="text-red-400" />, time: raceData.raceStart } : null,
+    raceData.race?.startTime ? { label: 'Race', icon: <FaFlagCheckeredIcon className="text-red-400" />, time: raceData.race.startTime } : null,
   ].filter((e): e is { label: string; icon: JSX.Element; time: string } => !!e);
 
   return (
