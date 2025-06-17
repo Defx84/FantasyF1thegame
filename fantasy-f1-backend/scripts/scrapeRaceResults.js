@@ -47,8 +47,8 @@ async function scrapeRaceResults() {
 
             try {
                 // Find existing race result document
-                const existingRaceResult = await RaceResult.findOne({ round });
-                if (!existingRaceResult) {
+                const raceResultDoc = await RaceResult.findOne({ round });
+                if (!raceResultDoc) {
                     console.log(`No race result found for round ${round}, skipping...`);
                     continue;
                 }
@@ -83,21 +83,13 @@ async function scrapeRaceResults() {
                 const teamResults = processTeamResults(raceResults, sprintResults);
 
                 // Update the existing race result
-                const updateData = {
-                    results: raceResults,
-                    sprintResults,
-                    teamResults,
-                    status: 'completed',
-                    lastUpdated: new Date()
-                };
-
-                const updatedRaceResult = await RaceResult.findOneAndUpdate(
-                    { round },
-                    updateData,
-                    { new: true }
-                );
-
-                console.log(`Updated results for ${raceName}`);
+                raceResultDoc.results = raceResults;
+                raceResultDoc.sprintResults = sprintResults;
+                raceResultDoc.teamResults = teamResults;
+                raceResultDoc.status = 'completed';
+                raceResultDoc.lastUpdated = new Date();
+                await raceResultDoc.save(); // Triggers post-save hook
+                console.log(`Updated and saved results for ${raceName} (post-save hook triggered)`);
                 console.log(`Main race positions:`, raceResults.map(r => `${r.position}. ${r.driver}`).join(', '));
                 if (sprintResults.length > 0) {
                     console.log(`Sprint positions:`, sprintResults.map(r => `${r.position}. ${r.driver}`).join(', '));
