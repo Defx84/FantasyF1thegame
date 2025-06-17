@@ -41,38 +41,41 @@ const getNextRaceTiming = async (req, res) => {
         console.log('Current race found:', currentRace);
         if (currentRace) {
             const endOfWeekend = getEndOfWeekend(currentRace.raceStart || currentRace.date);
-            // Find the race result for this round to get the status
-            let raceStatus = 'scheduled';
-            const raceResult = await RaceResult.findOne({ round: currentRace.round });
-            if (raceResult && raceResult.status) {
-                raceStatus = raceResult.status;
+            if (now < endOfWeekend) {
+                // Find the race result for this round to get the status
+                let raceStatus = 'scheduled';
+                const raceResult = await RaceResult.findOne({ round: currentRace.round });
+                if (raceResult && raceResult.status) {
+                    raceStatus = raceResult.status;
+                }
+                console.log('Returning current race:', currentRace.raceName, 'Status:', raceStatus);
+                return res.json({
+                    hasUpcomingRace: true,
+                    raceName: currentRace.raceName,
+                    round: currentRace.round,
+                    season: currentRace.season,
+                    qualifying: {
+                        startTime: currentRace.qualifyingStart,
+                        timeUntil: Math.max(0, new Date(currentRace.qualifyingStart).getTime() - now.getTime())
+                    },
+                    race: {
+                        startTime: currentRace.raceStart,
+                        timeUntil: Math.max(0, new Date(currentRace.raceStart).getTime() - now.getTime())
+                    },
+                    sprintQualifying: currentRace.sprintQualifyingStart ? {
+                        startTime: currentRace.sprintQualifyingStart,
+                        timeUntil: Math.max(0, new Date(currentRace.sprintQualifyingStart).getTime() - now.getTime())
+                    } : undefined,
+                    sprint: currentRace.sprintStart ? {
+                        startTime: currentRace.sprintStart,
+                        timeUntil: Math.max(0, new Date(currentRace.sprintStart).getTime() - now.getTime())
+                    } : undefined,
+                    isSprintWeekend: currentRace.isSprintWeekend,
+                    status: raceStatus,
+                    endOfWeekend: endOfWeekend
+                });
             }
-            console.log('Returning current race:', currentRace.raceName, 'Status:', raceStatus);
-            return res.json({
-                hasUpcomingRace: true,
-                raceName: currentRace.raceName,
-                round: currentRace.round,
-                season: currentRace.season,
-                qualifying: {
-                    startTime: currentRace.qualifyingStart,
-                    timeUntil: Math.max(0, new Date(currentRace.qualifyingStart).getTime() - now.getTime())
-                },
-                race: {
-                    startTime: currentRace.raceStart,
-                    timeUntil: Math.max(0, new Date(currentRace.raceStart).getTime() - now.getTime())
-                },
-                sprintQualifying: currentRace.sprintQualifyingStart ? {
-                    startTime: currentRace.sprintQualifyingStart,
-                    timeUntil: Math.max(0, new Date(currentRace.sprintQualifyingStart).getTime() - now.getTime())
-                } : undefined,
-                sprint: currentRace.sprintStart ? {
-                    startTime: currentRace.sprintStart,
-                    timeUntil: Math.max(0, new Date(currentRace.sprintStart).getTime() - now.getTime())
-                } : undefined,
-                isSprintWeekend: currentRace.isSprintWeekend,
-                status: raceStatus,
-                endOfWeekend: endOfWeekend
-            });
+            // If now >= endOfWeekend, fall through to nextRace logic below
         }
 
         // 2. Otherwise, find the next upcoming race
