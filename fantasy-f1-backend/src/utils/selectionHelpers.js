@@ -130,7 +130,8 @@ const validateSelection = (selection, pastSelections, qualifyingTime) => {
 };
 
 // Get all valid driver names (normalized)
-const normalizedDrivers = Array.from(driverToTeam.keys());
+// Note: normalizedDrivers is already imported from '../constants/validDrivers'
+// const normalizedDrivers = Array.from(driverToTeam.keys());
 
 // Helper functions
 const getDriverTeam = (driver) => {
