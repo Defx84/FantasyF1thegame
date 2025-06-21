@@ -5,6 +5,7 @@ const UsedSelection = require('../models/UsedSelection');
 const { shouldShowSelections } = require('./raceController');
 const { handleError } = require('../utils/errorHandler');
 const { normalizedDrivers, normalizedTeams, isValidDriver, isValidTeam, normalizeDriver, normalizeTeam } = require('../utils/validation');
+const { checkTeamReuse, checkDriverReuse } = require('../utils/selectionHelpers');
 const RaceCalendar = require('../models/RaceCalendar');
 const { initializeRaceSelections, initializeAllRaceSelections } = require('../utils/raceUtils');
 const ScoringService = require('../services/ScoringService');
@@ -139,20 +140,30 @@ const getUsedSelections = async (req, res) => {
             }
         }
 
-        const usedSelections = await UsedSelection.find({
+        // Get all past selections for this user and league
+        const pastSelections = await RaceSelection.find({
             user: targetUserId,
             league: leagueId,
             round: { $lt: numericRound }
         }).sort({ round: 1 });
 
-        const usedMainDrivers = [...new Set(usedSelections.map(s => s.mainDriver).filter(Boolean))];
-        const usedReserveDrivers = [...new Set(usedSelections.map(s => s.reserveDriver).filter(Boolean))];
-        const usedTeams = [...new Set(usedSelections.map(s => s.team).filter(Boolean))];
+        // Build the used lists from past selections
+        const usedMainDrivers = [...new Set(pastSelections.map(s => s.mainDriver).filter(Boolean))];
+        const usedReserveDrivers = [...new Set(pastSelections.map(s => s.reserveDriver).filter(Boolean))];
+        const usedTeams = [...new Set(pastSelections.map(s => s.team).filter(Boolean))];
+
+        // Apply reset logic: if all drivers/teams have been used, reset the lists
+        // For teams: if 10 or more teams have been used, reset the list
+        const finalUsedTeams = usedTeams.length >= 10 ? [] : usedTeams;
+        
+        // For drivers: if 20 or more drivers have been used, reset the list
+        const finalUsedMainDrivers = usedMainDrivers.length >= 20 ? [] : usedMainDrivers;
+        const finalUsedReserveDrivers = usedReserveDrivers.length >= 20 ? [] : usedReserveDrivers;
 
         res.json({
-            usedMainDrivers,
-            usedReserveDrivers,
-            usedTeams
+            usedMainDrivers: finalUsedMainDrivers,
+            usedReserveDrivers: finalUsedReserveDrivers,
+            usedTeams: finalUsedTeams
         });
     } catch (error) {
         console.error('Error getting used selections:', error);
