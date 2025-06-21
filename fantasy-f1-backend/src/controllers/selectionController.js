@@ -115,6 +115,7 @@ const getRaceSelections = async (req, res) => {
 
 /**
  * Get used selections for a user
+ * Updated to implement reset logic for teams and drivers
  */
 const getUsedSelections = async (req, res) => {
     try {
