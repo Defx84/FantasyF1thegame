@@ -129,17 +129,6 @@ const validateSelection = (selection, pastSelections, qualifyingTime) => {
   };
 };
 
-// Create a map of driver names to their teams
-const driverToTeam = new Map();
-F1_DRIVERS_2025.forEach(driver => {
-    // Map all variations of the driver's name to their team
-    driverToTeam.set(driver.name.toLowerCase(), driver.team);
-    driverToTeam.set(driver.shortName.toLowerCase(), driver.team);
-    driver.alternateNames.forEach(name => {
-        driverToTeam.set(name.toLowerCase(), driver.team);
-    });
-});
-
 // Get all valid driver names (normalized)
 const normalizedDrivers = Array.from(driverToTeam.keys());
 
