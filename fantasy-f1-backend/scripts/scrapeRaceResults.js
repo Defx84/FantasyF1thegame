@@ -86,6 +86,7 @@ async function scrapeRaceResults() {
                 raceResultDoc.results = raceResults;
                 raceResultDoc.sprintResults = sprintResults;
                 raceResultDoc.teamResults = teamResults;
+                raceResultDoc.isSprintWeekend = raceInfo.hasSprint;
                 raceResultDoc.status = 'completed';
                 raceResultDoc.lastUpdated = new Date();
                 await raceResultDoc.save(); // Triggers post-save hook

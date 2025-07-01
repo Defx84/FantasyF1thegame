@@ -335,6 +335,8 @@ raceResultSchema.pre('save', async function(next) {
 // Add post-save hook to trigger points assignment when race is completed
 raceResultSchema.post('save', async function(doc) {
   try {
+    console.log(`[RaceResult Post-Save] Hook triggered for race ${doc.raceName} (round ${doc.round}) with status: ${doc.status}`);
+    
     // Only proceed if the race is completed
     if (doc.status !== 'completed') {
       console.log(`[RaceResult Post-Save] Race ${doc.raceName} (round ${doc.round}) is not completed, skipping points assignment.`);
@@ -342,6 +344,12 @@ raceResultSchema.post('save', async function(doc) {
     }
 
     console.log(`[RaceResult Post-Save] Processing race ${doc.raceName} (round ${doc.round})...`);
+    console.log(`[RaceResult Post-Save] Race data:`, {
+      isSprintWeekend: doc.isSprintWeekend,
+      resultsCount: doc.results?.length || 0,
+      sprintResultsCount: doc.sprintResults?.length || 0,
+      teamResultsCount: doc.teamResults?.length || 0
+    });
 
     // Initialize services
     const scoringService = new (require('../services/ScoringService'))();

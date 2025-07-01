@@ -108,12 +108,19 @@ function processTeamResults(raceResults, sprintResults = []) {
         }
     });
     
-    // Calculate total points
-    Object.values(teamResults).forEach(team => {
+    // Calculate total points and add position
+    const teamsArray = Object.values(teamResults);
+    teamsArray.forEach(team => {
         team.totalPoints = team.racePoints + team.sprintPoints;
     });
     
-    return Object.values(teamResults);
+    // Sort by total points descending and add position
+    teamsArray.sort((a, b) => b.totalPoints - a.totalPoints);
+    teamsArray.forEach((team, index) => {
+        team.position = index + 1;
+    });
+    
+    return teamsArray;
 }
 
 // Calculate team points based on race and sprint results
