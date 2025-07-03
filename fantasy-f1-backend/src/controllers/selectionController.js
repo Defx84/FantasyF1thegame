@@ -149,7 +149,7 @@ const getUsedSelections = async (req, res) => {
         }).sort({ round: 1 });
 
         // Debug log: show all rounds and teams
-        console.log('pastSelections:', pastSelections.map(s => ({ round: s.round, team: s.team })));
+        console.log('pastSelections:', pastSelections.map(s => (s && typeof s === 'object') ? { round: s.round, team: s.team } : s));
 
         // Build the used lists from past selections
         const usedMainDrivers = [...new Set(pastSelections.map(s => s.mainDriver).filter(Boolean))];
