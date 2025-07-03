@@ -115,7 +115,7 @@ const getRaceSelections = async (req, res) => {
 
 /**
  * Get used selections for a user
- * Updated to implement reset logic for teams and drivers
+ * Updated to implement proper cycle tracking for teams and drivers
  */
 const getUsedSelections = async (req, res) => {
     try {
@@ -145,7 +145,7 @@ const getUsedSelections = async (req, res) => {
         const pastSelections = await RaceSelection.find({
             user: targetUserId,
             league: leagueId,
-            round: { $lt: numericRound }
+            round: { $lte: numericRound }
         }).sort({ round: 1 });
 
         // Build the used lists from past selections
@@ -153,13 +153,26 @@ const getUsedSelections = async (req, res) => {
         const usedReserveDrivers = [...new Set(pastSelections.map(s => s.reserveDriver).filter(Boolean))];
         const usedTeams = [...new Set(pastSelections.map(s => s.team).filter(Boolean))];
 
-        // Apply reset logic: if all drivers/teams have been used, reset the lists
-        // For teams: if 10 or more teams have been used, reset the list
-        const finalUsedTeams = usedTeams.length >= 10 ? [] : usedTeams;
+        // Implement cycle tracking logic
+        // For teams: each cycle is 10 teams, for drivers: each cycle is 20 drivers
         
-        // For drivers: if 20 or more drivers have been used, reset the list
-        const finalUsedMainDrivers = usedMainDrivers.length >= 20 ? [] : usedMainDrivers;
-        const finalUsedReserveDrivers = usedReserveDrivers.length >= 20 ? [] : usedReserveDrivers;
+        // Calculate current cycle for teams (0-based)
+        const teamCycle = Math.floor(usedTeams.length / 10);
+        // Get teams used in the current cycle only
+        const currentCycleTeamStart = teamCycle * 10;
+        const finalUsedTeams = usedTeams.slice(currentCycleTeamStart);
+        
+        // Calculate current cycle for main drivers (0-based)
+        const mainDriverCycle = Math.floor(usedMainDrivers.length / 20);
+        // Get main drivers used in the current cycle only
+        const currentCycleMainDriverStart = mainDriverCycle * 20;
+        const finalUsedMainDrivers = usedMainDrivers.slice(currentCycleMainDriverStart);
+        
+        // Calculate current cycle for reserve drivers (0-based)
+        const reserveDriverCycle = Math.floor(usedReserveDrivers.length / 20);
+        // Get reserve drivers used in the current cycle only
+        const currentCycleReserveDriverStart = reserveDriverCycle * 20;
+        const finalUsedReserveDrivers = usedReserveDrivers.slice(currentCycleReserveDriverStart);
 
         res.json({
             usedMainDrivers: finalUsedMainDrivers,
