@@ -171,6 +171,18 @@ const getUsedSelections = async (req, res) => {
         // Debug log: show finalUsedTeams after slicing
         console.log('finalUsedTeams:', finalUsedTeams);
 
+        // Calculate current cycle for main drivers (0-based)
+        const mainDriverCycle = Math.floor(usedMainDrivers.length / 20);
+        // Get main drivers used in the current cycle only
+        const currentCycleMainDriverStart = mainDriverCycle * 20;
+        const finalUsedMainDrivers = usedMainDrivers.slice(currentCycleMainDriverStart);
+        
+        // Calculate current cycle for reserve drivers (0-based)
+        const reserveDriverCycle = Math.floor(usedReserveDrivers.length / 20);
+        // Get reserve drivers used in the current cycle only
+        const currentCycleReserveDriverStart = reserveDriverCycle * 20;
+        const finalUsedReserveDrivers = usedReserveDrivers.slice(currentCycleReserveDriverStart);
+
         res.json({
             usedMainDrivers: finalUsedMainDrivers,
             usedReserveDrivers: finalUsedReserveDrivers,
