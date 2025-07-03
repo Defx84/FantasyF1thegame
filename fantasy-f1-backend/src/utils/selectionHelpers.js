@@ -32,7 +32,7 @@ const checkDriverReuse = (pastSelections, driverName) => {
   // Normalize driver name for comparison
   const normalizedDriver = driverName.toLowerCase();
 
-  // Get all unique drivers used in past selections
+  // Get all unique drivers used in past selections (main + reserve)
   const allUsedDrivers = [];
   pastSelections.forEach(selection => {
     if (selection.mainDriver) allUsedDrivers.push(selection.mainDriver.toLowerCase());
@@ -40,7 +40,7 @@ const checkDriverReuse = (pastSelections, driverName) => {
   });
   const uniqueDrivers = [...new Set(allUsedDrivers)];
 
-  // Implement cycle tracking logic (same as controller)
+  // Only consider the current cycle
   const driverCycle = Math.floor(uniqueDrivers.length / 20);
   const currentCycleDriverStart = driverCycle * 20;
   const currentCycleDrivers = uniqueDrivers.slice(currentCycleDriverStart);
@@ -73,7 +73,7 @@ const checkTeamReuse = (pastSelections, teamName) => {
   // Get all unique teams used in past selections
   const uniqueTeams = [...new Set(pastSelections.map(s => s.team).filter(Boolean))];
 
-  // Implement cycle tracking logic (same as controller)
+  // Only consider the current cycle
   const teamCycle = Math.floor(uniqueTeams.length / 10);
   const currentCycleTeamStart = teamCycle * 10;
   const currentCycleTeams = uniqueTeams.slice(currentCycleTeamStart);
