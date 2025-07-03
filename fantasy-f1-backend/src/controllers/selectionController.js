@@ -148,10 +148,16 @@ const getUsedSelections = async (req, res) => {
             round: { $lte: numericRound }
         }).sort({ round: 1 });
 
+        // Debug log: show all rounds and teams
+        console.log('pastSelections:', pastSelections.map(s => ({ round: s.round, team: s.team })));
+
         // Build the used lists from past selections
         const usedMainDrivers = [...new Set(pastSelections.map(s => s.mainDriver).filter(Boolean))];
         const usedReserveDrivers = [...new Set(pastSelections.map(s => s.reserveDriver).filter(Boolean))];
         const usedTeams = [...new Set(pastSelections.map(s => s.team).filter(Boolean))];
+
+        // Debug log: show usedTeams before slicing
+        console.log('usedTeams:', usedTeams);
 
         // Implement cycle tracking logic
         // For teams: each cycle is 10 teams, for drivers: each cycle is 20 drivers
@@ -161,18 +167,9 @@ const getUsedSelections = async (req, res) => {
         // Get teams used in the current cycle only
         const currentCycleTeamStart = teamCycle * 10;
         const finalUsedTeams = usedTeams.slice(currentCycleTeamStart);
-        
-        // Calculate current cycle for main drivers (0-based)
-        const mainDriverCycle = Math.floor(usedMainDrivers.length / 20);
-        // Get main drivers used in the current cycle only
-        const currentCycleMainDriverStart = mainDriverCycle * 20;
-        const finalUsedMainDrivers = usedMainDrivers.slice(currentCycleMainDriverStart);
-        
-        // Calculate current cycle for reserve drivers (0-based)
-        const reserveDriverCycle = Math.floor(usedReserveDrivers.length / 20);
-        // Get reserve drivers used in the current cycle only
-        const currentCycleReserveDriverStart = reserveDriverCycle * 20;
-        const finalUsedReserveDrivers = usedReserveDrivers.slice(currentCycleReserveDriverStart);
+
+        // Debug log: show finalUsedTeams after slicing
+        console.log('finalUsedTeams:', finalUsedTeams);
 
         res.json({
             usedMainDrivers: finalUsedMainDrivers,
