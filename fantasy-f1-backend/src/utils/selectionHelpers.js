@@ -33,22 +33,23 @@ const checkDriverReuse = (pastSelections, driverName) => {
   const normalizedDriver = driverName.toLowerCase();
 
   // Get all unique drivers used in past selections
-  const uniqueDrivers = new Set();
+  const allUsedDrivers = [];
   pastSelections.forEach(selection => {
-    if (selection.mainDriver) uniqueDrivers.add(selection.mainDriver.toLowerCase());
-    if (selection.reserveDriver) uniqueDrivers.add(selection.reserveDriver.toLowerCase());
+    if (selection.mainDriver) allUsedDrivers.push(selection.mainDriver.toLowerCase());
+    if (selection.reserveDriver) allUsedDrivers.push(selection.reserveDriver.toLowerCase());
   });
+  const uniqueDrivers = [...new Set(allUsedDrivers)];
 
-  // If all 20 drivers have been used, reset the list
-  if (uniqueDrivers.size >= 20) {
-    return { canReuse: true };
-  }
+  // Implement cycle tracking logic (same as controller)
+  const driverCycle = Math.floor(uniqueDrivers.length / 20);
+  const currentCycleDriverStart = driverCycle * 20;
+  const currentCycleDrivers = uniqueDrivers.slice(currentCycleDriverStart);
 
-  // Check if driver has been used before
-  if (uniqueDrivers.has(normalizedDriver)) {
+  // Check if driver has been used in the current cycle
+  if (currentCycleDrivers.includes(normalizedDriver)) {
     return { 
       canReuse: false,
-      reason: `Driver ${driverName} has already been used. You must use all 20 drivers before reusing.`
+      reason: `Driver ${driverName} has already been used in this cycle. You must use all 20 drivers before reusing.`
     };
   }
 
@@ -70,21 +71,18 @@ const checkTeamReuse = (pastSelections, teamName) => {
   const normalizedTeam = teamName.toLowerCase();
 
   // Get all unique teams used in past selections
-  const uniqueTeams = new Set();
-  pastSelections.forEach(selection => {
-    if (selection.team) uniqueTeams.add(selection.team.toLowerCase());
-  });
+  const uniqueTeams = [...new Set(pastSelections.map(s => s.team).filter(Boolean))];
 
-  // If all 10 teams have been used, reset the list
-  if (uniqueTeams.size >= 10) {
-    return { canReuse: true };
-  }
+  // Implement cycle tracking logic (same as controller)
+  const teamCycle = Math.floor(uniqueTeams.length / 10);
+  const currentCycleTeamStart = teamCycle * 10;
+  const currentCycleTeams = uniqueTeams.slice(currentCycleTeamStart);
 
-  // Check if team has been used before
-  if (uniqueTeams.has(normalizedTeam)) {
+  // Check if team has been used in the current cycle
+  if (currentCycleTeams.some(team => team.toLowerCase() === normalizedTeam)) {
     return { 
       canReuse: false,
-      reason: `Team ${teamToDisplay.get(normalizedTeam)} has already been used. You must use all 10 teams before reusing.`
+      reason: `Team ${teamToDisplay.get(normalizedTeam)} has already been used in this cycle. You must use all 10 teams before reusing.`
     };
   }
 
