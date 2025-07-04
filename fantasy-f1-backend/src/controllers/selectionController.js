@@ -115,84 +115,28 @@ const getRaceSelections = async (req, res) => {
 };
 
 /**
- * Get used selections for a user
- * Updated to implement proper cycle tracking for teams and drivers
+ * Get used selections for a user (multi-list cycles)
  */
 const getUsedSelections = async (req, res) => {
     try {
-        const { leagueId, round, userId } = req.query;
-        const numericRound = parseInt(round);
-        const targetUserId = userId || req.user._id; // Use provided userId or current user's id
-
-        // If requesting another user's selections, verify admin status
-        if (userId && userId !== req.user._id.toString()) {
-            const league = await League.findById(leagueId);
-            if (!league) {
-                return res.status(404).json({ message: 'League not found' });
-            }
-
-            const isAdmin = league.owner?.toString() === req.user._id.toString() || 
-                          league.members.some(member => 
-                            member.user?.toString() === req.user._id.toString() && 
-                            member.isAdmin
-                          );
-
-            if (!isAdmin) {
-                return res.status(403).json({ message: 'Not authorized to view other users\' selections' });
-            }
+        const { leagueId, userId } = req.query;
+        const targetUserId = userId || req.user._id;
+        const usedSelection = await UsedSelection.findOne({ 
+            user: mongoose.Types.ObjectId(targetUserId), 
+            league: mongoose.Types.ObjectId(leagueId) 
+        });
+        let usedTeams = [];
+        let usedMainDrivers = [];
+        let usedReserveDrivers = [];
+        if (usedSelection) {
+            usedTeams = usedSelection.teamCycles[usedSelection.teamCycles.length - 1] || [];
+            usedMainDrivers = usedSelection.mainDriverCycles[usedSelection.mainDriverCycles.length - 1] || [];
+            usedReserveDrivers = usedSelection.reserveDriverCycles[usedSelection.reserveDriverCycles.length - 1] || [];
         }
-
-        // Convert user and league to ObjectId for correct MongoDB comparison
-        const userObjId = mongoose.Types.ObjectId(targetUserId);
-        const leagueObjId = mongoose.Types.ObjectId(leagueId);
-        console.log('Querying RaceSelection with:', { user: userObjId, league: leagueObjId, round: numericRound });
-
-        // Get all past selections for this user and league
-        const pastSelections = await RaceSelection.find({
-            user: userObjId,
-            league: leagueObjId,
-            round: { $lte: numericRound }
-        }).sort({ round: 1 });
-
-        // Debug log: show all rounds and teams
-        console.log('pastSelections:', pastSelections.map(s => (s && typeof s === 'object') ? { round: s.round, team: s.team } : s));
-
-        // Build the used lists from past selections
-        const usedMainDrivers = [...new Set(pastSelections.map(s => s.mainDriver).filter(Boolean))];
-        const usedReserveDrivers = [...new Set(pastSelections.map(s => s.reserveDriver).filter(Boolean))];
-        const usedTeams = [...new Set(pastSelections.map(s => s.team).filter(Boolean))];
-
-        // Debug log: show usedTeams before slicing
-        console.log('usedTeams:', usedTeams);
-
-        // Implement cycle tracking logic
-        // For teams: each cycle is 10 teams, for drivers: each cycle is 20 drivers
-        
-        // Calculate current cycle for teams (0-based)
-        const teamCycle = Math.floor(usedTeams.length / 10);
-        // Get teams used in the current cycle only
-        const currentCycleTeamStart = teamCycle * 10;
-        const finalUsedTeams = usedTeams.slice(currentCycleTeamStart);
-
-        // Debug log: show finalUsedTeams after slicing
-        console.log('finalUsedTeams:', finalUsedTeams);
-
-        // Calculate current cycle for main drivers (0-based)
-        const mainDriverCycle = Math.floor(usedMainDrivers.length / 20);
-        // Get main drivers used in the current cycle only
-        const currentCycleMainDriverStart = mainDriverCycle * 20;
-        const finalUsedMainDrivers = usedMainDrivers.slice(currentCycleMainDriverStart);
-        
-        // Calculate current cycle for reserve drivers (0-based)
-        const reserveDriverCycle = Math.floor(usedReserveDrivers.length / 20);
-        // Get reserve drivers used in the current cycle only
-        const currentCycleReserveDriverStart = reserveDriverCycle * 20;
-        const finalUsedReserveDrivers = usedReserveDrivers.slice(currentCycleReserveDriverStart);
-
         res.json({
-            usedMainDrivers: finalUsedMainDrivers,
-            usedReserveDrivers: finalUsedReserveDrivers,
-            usedTeams: finalUsedTeams
+            usedMainDrivers,
+            usedReserveDrivers,
+            usedTeams
         });
     } catch (error) {
         console.error('Error getting used selections:', error);
@@ -343,6 +287,16 @@ const saveSelections = async (req, res) => {
         }
 
         await selection.save();
+
+        // Update UsedSelection multi-list cycles
+        let usedSelection = await UsedSelection.findOne({ user: req.user._id, league: leagueId });
+        if (!usedSelection) {
+            usedSelection = new UsedSelection({ user: req.user._id, league: leagueId });
+        }
+        usedSelection.addUsedTeam(normalizedTeam);
+        usedSelection.addUsedMainDriver(normalizedMainDriver);
+        usedSelection.addUsedReserveDriver(normalizedReserveDriver);
+        await usedSelection.save();
 
         return res.json({
             message: 'Selections saved successfully',
