@@ -28,11 +28,11 @@ const usedSelectionSchema = new mongoose.Schema({
     default: [[]]
   },
   mainDriverCycles: {
-    type: [[String]], // Array of arrays of main driver names
+    type: [[String]], // Array of arrays of main driver short names
     default: [[]]
   },
   reserveDriverCycles: {
-    type: [[String]], // Array of arrays of reserve driver names
+    type: [[String]], // Array of arrays of reserve driver short names
     default: [[]]
   },
 }, { timestamps: true });
@@ -43,21 +43,21 @@ usedSelectionSchema.index({ user: 1, league: 1, round: 1 }, { unique: true });
 // Helper methods to check if a driver/team can be used
 usedSelectionSchema.methods.canUseMainDriver = function(driver) {
   if (!driver) return true;
-  const normalizedDriver = normalizeDriverName(driver);
+  const normalizedDriver = normalizeDriverName(driver); // always short name
   const currentCycle = this.mainDriverCycles[this.mainDriverCycles.length - 1];
   return !currentCycle.includes(normalizedDriver);
 };
 
 usedSelectionSchema.methods.canUseReserveDriver = function(driver) {
   if (!driver) return true;
-  const normalizedDriver = normalizeDriverName(driver);
+  const normalizedDriver = normalizeDriverName(driver); // always short name
   const currentCycle = this.reserveDriverCycles[this.reserveDriverCycles.length - 1];
   return !currentCycle.includes(normalizedDriver);
 };
 
 usedSelectionSchema.methods.canUseTeam = function(team) {
   if (!team) return true;
-  const normalizedTeam = normalizeTeamName(team);
+  const normalizedTeam = normalizeTeamName(team); // always canonical name
   const currentCycle = this.teamCycles[this.teamCycles.length - 1];
   return !currentCycle.includes(normalizedTeam);
 };
@@ -67,7 +67,7 @@ usedSelectionSchema.methods.addUsedMainDriver = function(driver) {
   console.log('[addUsedMainDriver] value received:', driver);
   if (!driver || driver === 'None') return;
   if (!isValidDriver(driver)) throw new Error('Invalid driver name');
-  const normalizedDriver = normalizeDriverName(driver);
+  const normalizedDriver = normalizeDriverName(driver); // always short name
   let currentCycle = this.mainDriverCycles[this.mainDriverCycles.length - 1];
   if (currentCycle.length >= 20) {
     this.mainDriverCycles.push([]);
@@ -83,7 +83,7 @@ usedSelectionSchema.methods.addUsedReserveDriver = function(driver) {
   console.log('[addUsedReserveDriver] value received:', driver);
   if (!driver || driver === 'None') return;
   if (!isValidDriver(driver)) throw new Error('Invalid driver name');
-  const normalizedDriver = normalizeDriverName(driver);
+  const normalizedDriver = normalizeDriverName(driver); // always short name
   let currentCycle = this.reserveDriverCycles[this.reserveDriverCycles.length - 1];
   if (currentCycle.length >= 20) {
     this.reserveDriverCycles.push([]);
@@ -99,7 +99,7 @@ usedSelectionSchema.methods.addUsedTeam = function(team) {
   console.log('[addUsedTeam] value received:', team);
   if (!team || team === 'None') return;
   if (!isValidTeam(team)) throw new Error('Invalid team name');
-  const normalizedTeam = normalizeTeamName(team);
+  const normalizedTeam = normalizeTeamName(team); // always canonical name
   let currentCycle = this.teamCycles[this.teamCycles.length - 1];
   if (currentCycle.length >= 10) {
     this.teamCycles.push([]);

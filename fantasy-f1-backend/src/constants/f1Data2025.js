@@ -110,6 +110,43 @@ const getTeamDrivers = (team) => {
     return F1_DRIVERS_2025.filter(d => d.team === normalized).map(d => d.name);
 };
 
+// Add robust normalization for drivers and teams
+
+// Build driver normalization map
+const driverNormalizationMap = {};
+F1_DRIVERS_2025.forEach(driver => {
+  driverNormalizationMap[driver.fullName.toLowerCase()] = driver.shortName;
+  driverNormalizationMap[driver.shortName.toLowerCase()] = driver.shortName;
+  if (driver.alternateNames) {
+    driver.alternateNames.forEach(name => {
+      driverNormalizationMap[name.toLowerCase()] = driver.shortName;
+    });
+  }
+});
+
+function normalizeDriverName(name) {
+  if (!name) return '';
+  const key = name.trim().toLowerCase();
+  return driverNormalizationMap[key] || name;
+}
+
+// Build team normalization map
+const teamNormalizationMap = {};
+F1_TEAMS_2025.forEach(team => {
+  teamNormalizationMap[team.name.toLowerCase()] = team.name;
+  if (team.alternateNames) {
+    team.alternateNames.forEach(name => {
+      teamNormalizationMap[name.toLowerCase()] = team.name;
+    });
+  }
+});
+
+function normalizeTeamName(name) {
+  if (!name) return '';
+  const key = name.trim().toLowerCase();
+  return teamNormalizationMap[key] || name;
+}
+
 module.exports = {
     F1_TEAMS_2025,
     F1_DRIVERS_2025,

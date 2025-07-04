@@ -10,14 +10,14 @@ class ScoringService {
      */
     calculateRacePoints(selection, raceResult) {
         const isSprintWeekend = raceResult.isSprintWeekend;
-        console.log('[ScoringService] Processing race result:', {
+        console.log('Processing race result:', {
             isSprintWeekend,
             mainDriver: selection.mainDriver,
             reserveDriver: selection.reserveDriver,
             team: selection.team,
-            raceResultsCount: raceResult.results?.length || 0,
-            sprintResultsCount: raceResult.sprintResults?.length || 0,
-            teamResultsCount: raceResult.teamResults?.length || 0
+            raceResults: raceResult.results,
+            sprintResults: raceResult.sprintResults,
+            teamResults: raceResult.teamResults
         });
         
         // Get main driver race points
@@ -42,12 +42,10 @@ class ScoringService {
 
         // Calculate team points
         const userTeam = normalizeTeamName(selection.team);
-        console.log('[ScoringService] Looking for team:', selection.team, 'normalized to:', userTeam);
-        console.log('[ScoringService] Available teams:', raceResult.teamResults?.map(t => ({ team: t.team, normalized: normalizeTeamName(t.team) })) || []);
         const teamResult = raceResult.teamResults?.find(t => 
             normalizeTeamName(t.team) === userTeam
         );
-        console.log('[ScoringService] Team result found:', teamResult);
+        console.log('Team result found:', teamResult);
 
         const teamRacePoints = teamResult?.racePoints || teamResult?.points || 0;
         const teamSprintPoints = isSprintWeekend ? (teamResult?.sprintPoints || 0) : 0;
