@@ -87,6 +87,7 @@ usedSelectionSchema.methods.addUsedMainDriver = function(driver) {
     if (currentCycle.length === 20) {
       this.mainDriverCycles.push([]); // Start new cycle immediately after 20th
       console.log('[addUsedMainDriver] 20 drivers used, new cycle started');
+      currentCycle = this.mainDriverCycles[this.mainDriverCycles.length - 1];
     }
   } else {
     console.log('[addUsedMainDriver] already in cycle, not adding');
@@ -104,6 +105,7 @@ usedSelectionSchema.methods.addUsedReserveDriver = function(driver) {
     currentCycle.push(normalizedDriver);
     if (currentCycle.length === 20) {
       this.reserveDriverCycles.push([]); // Start new cycle immediately after 20th
+      currentCycle = this.reserveDriverCycles[this.reserveDriverCycles.length - 1];
     }
   }
 };
@@ -119,6 +121,7 @@ usedSelectionSchema.methods.addUsedTeam = function(team) {
     currentCycle.push(normalizedTeam);
     if (currentCycle.length === 10) {
       this.teamCycles.push([]); // Start new cycle immediately after 10th
+      currentCycle = this.teamCycles[this.teamCycles.length - 1];
     }
   }
 };
