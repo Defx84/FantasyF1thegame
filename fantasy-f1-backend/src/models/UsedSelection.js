@@ -78,16 +78,16 @@ usedSelectionSchema.methods.addUsedMainDriver = function(driver) {
   if (!driver || driver === 'None') return;
   if (!isValidDriver(driver)) throw new Error('Invalid driver name');
   const normalizedDriver = normalizeDriverName(driver); // always short name
-  console.log('[addUsedMainDriver] normalized to:', normalizedDriver);
   let currentCycle = this.mainDriverCycles[this.mainDriverCycles.length - 1];
+  console.log('[addUsedMainDriver] normalized to:', normalizedDriver);
   console.log('[addUsedMainDriver] current cycle before:', currentCycle);
-  if (currentCycle.length >= 20) {
-    this.mainDriverCycles.push([]);
-    currentCycle = this.mainDriverCycles[this.mainDriverCycles.length - 1];
-  }
   if (!currentCycle.includes(normalizedDriver)) {
     currentCycle.push(normalizedDriver);
     console.log('[addUsedMainDriver] added to cycle. cycle after:', currentCycle);
+    if (currentCycle.length === 20) {
+      this.mainDriverCycles.push([]); // Start new cycle immediately after 20th
+      console.log('[addUsedMainDriver] 20 drivers used, new cycle started');
+    }
   } else {
     console.log('[addUsedMainDriver] already in cycle, not adding');
   }
@@ -100,12 +100,11 @@ usedSelectionSchema.methods.addUsedReserveDriver = function(driver) {
   if (!isValidDriver(driver)) throw new Error('Invalid driver name');
   const normalizedDriver = normalizeDriverName(driver); // always short name
   let currentCycle = this.reserveDriverCycles[this.reserveDriverCycles.length - 1];
-  if (currentCycle.length >= 20) {
-    this.reserveDriverCycles.push([]);
-    currentCycle = this.reserveDriverCycles[this.reserveDriverCycles.length - 1];
-  }
   if (!currentCycle.includes(normalizedDriver)) {
     currentCycle.push(normalizedDriver);
+    if (currentCycle.length === 20) {
+      this.reserveDriverCycles.push([]); // Start new cycle immediately after 20th
+    }
   }
 };
 
@@ -116,12 +115,11 @@ usedSelectionSchema.methods.addUsedTeam = function(team) {
   if (!isValidTeam(team)) throw new Error('Invalid team name');
   const normalizedTeam = normalizeTeamName(team); // always canonical name
   let currentCycle = this.teamCycles[this.teamCycles.length - 1];
-  if (currentCycle.length >= 10) {
-    this.teamCycles.push([]);
-    currentCycle = this.teamCycles[this.teamCycles.length - 1];
-  }
   if (!currentCycle.includes(normalizedTeam)) {
     currentCycle.push(normalizedTeam);
+    if (currentCycle.length === 10) {
+      this.teamCycles.push([]); // Start new cycle immediately after 10th
+    }
   }
 };
 
