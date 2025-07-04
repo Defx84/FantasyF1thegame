@@ -453,6 +453,16 @@ const adminOverrideSelection = async (req, res) => {
 
         await selection.save();
 
+        // Update UsedSelection multi-list cycles
+        let usedSelection = await UsedSelection.findOne({ user: userId, league: leagueId });
+        if (!usedSelection) {
+            usedSelection = new UsedSelection({ user: userId, league: leagueId });
+        }
+        usedSelection.addUsedTeam(team);
+        usedSelection.addUsedMainDriver(mainDriver);
+        usedSelection.addUsedReserveDriver(reserveDriver);
+        await usedSelection.save();
+
         // Always update league standings, regardless of assignPoints
         await leaderboardService.updateStandings(leagueId, raceId);
 

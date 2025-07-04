@@ -19,10 +19,6 @@ const usedSelectionSchema = new mongoose.Schema({
     ref: 'League',
     required: true
   },
-  round: {
-    type: Number,
-    required: true
-  },
   teamCycles: {
     type: [[String]], // Array of arrays of team names
     default: [[]]
@@ -37,8 +33,22 @@ const usedSelectionSchema = new mongoose.Schema({
   },
 }, { timestamps: true });
 
-// Create a compound index to ensure one selection per user/league/round
-usedSelectionSchema.index({ user: 1, league: 1, round: 1 }, { unique: true });
+// Create a compound index to ensure one selection per user/league
+usedSelectionSchema.index({ user: 1, league: 1 }, { unique: true });
+
+// Pre-save hook to ensure cycles are initialized
+usedSelectionSchema.pre('save', function(next) {
+  if (!this.teamCycles || this.teamCycles.length === 0) {
+    this.teamCycles = [[]];
+  }
+  if (!this.mainDriverCycles || this.mainDriverCycles.length === 0) {
+    this.mainDriverCycles = [[]];
+  }
+  if (!this.reserveDriverCycles || this.reserveDriverCycles.length === 0) {
+    this.reserveDriverCycles = [[]];
+  }
+  next();
+});
 
 // Helper methods to check if a driver/team can be used
 usedSelectionSchema.methods.canUseMainDriver = function(driver) {
@@ -68,13 +78,18 @@ usedSelectionSchema.methods.addUsedMainDriver = function(driver) {
   if (!driver || driver === 'None') return;
   if (!isValidDriver(driver)) throw new Error('Invalid driver name');
   const normalizedDriver = normalizeDriverName(driver); // always short name
+  console.log('[addUsedMainDriver] normalized to:', normalizedDriver);
   let currentCycle = this.mainDriverCycles[this.mainDriverCycles.length - 1];
+  console.log('[addUsedMainDriver] current cycle before:', currentCycle);
   if (currentCycle.length >= 20) {
     this.mainDriverCycles.push([]);
     currentCycle = this.mainDriverCycles[this.mainDriverCycles.length - 1];
   }
   if (!currentCycle.includes(normalizedDriver)) {
     currentCycle.push(normalizedDriver);
+    console.log('[addUsedMainDriver] added to cycle. cycle after:', currentCycle);
+  } else {
+    console.log('[addUsedMainDriver] already in cycle, not adding');
   }
 };
 
