@@ -10,6 +10,7 @@ const RaceCalendar = require('../models/RaceCalendar');
 const { initializeRaceSelections, initializeAllRaceSelections } = require('../utils/raceUtils');
 const ScoringService = require('../services/ScoringService');
 const LeaderboardService = require('../services/LeaderboardService');
+const mongoose = require('mongoose');
 
 // Initialize services
 const scoringService = new ScoringService();
@@ -141,10 +142,15 @@ const getUsedSelections = async (req, res) => {
             }
         }
 
+        // Convert user and league to ObjectId for correct MongoDB comparison
+        const userObjId = mongoose.Types.ObjectId(targetUserId);
+        const leagueObjId = mongoose.Types.ObjectId(leagueId);
+        console.log('Querying RaceSelection with:', { user: userObjId, league: leagueObjId, round: numericRound });
+
         // Get all past selections for this user and league
         const pastSelections = await RaceSelection.find({
-            user: targetUserId,
-            league: leagueId,
+            user: userObjId,
+            league: leagueObjId,
             round: { $lte: numericRound }
         }).sort({ round: 1 });
 

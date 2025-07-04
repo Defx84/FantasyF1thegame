@@ -11,9 +11,9 @@ const canReuseSelection = async (userId, leagueId, mainDriver, reserveDriver, te
   const usedSelection = await UsedSelection.findOne({ user: userId, league: leagueId });
   if (!usedSelection) return true;
 
-  const canReuseMainDriver = !mainDriver || mainDriver === 'None' || !usedSelection.usedMainDrivers.includes(mainDriver.toLowerCase());
-  const canReuseReserveDriver = !reserveDriver || reserveDriver === 'None' || !usedSelection.usedReserveDrivers.includes(reserveDriver.toLowerCase());
-  const canReuseTeam = !team || !usedSelection.usedTeams.includes(team.toLowerCase());
+  const canReuseMainDriver = !mainDriver || mainDriver === 'None' || usedSelection.canUseMainDriver(mainDriver);
+  const canReuseReserveDriver = !reserveDriver || reserveDriver === 'None' || usedSelection.canUseReserveDriver(reserveDriver);
+  const canReuseTeam = !team || usedSelection.canUseTeam(team);
 
   return canReuseMainDriver && canReuseReserveDriver && canReuseTeam;
 };
@@ -151,10 +151,7 @@ exports.assignLateJoinSelection = async (req, res) => {
     if (!usedSelection) {
       usedSelection = new UsedSelection({
         user: userId,
-        league: leagueId,
-        usedMainDrivers: [],
-        usedReserveDrivers: [],
-        usedTeams: []
+        league: leagueId
       });
     }
     usedSelection.addUsedMainDriver(driver);
