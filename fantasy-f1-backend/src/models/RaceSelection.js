@@ -147,61 +147,6 @@ raceSelectionSchema.pre('save', async function(next) {
   next();
 });
 
-// Update UsedSelection after saving
-raceSelectionSchema.post('save', async function(doc) {
-  try {
-    console.log('Post-save hook triggered for RaceSelection:', doc._id);
-    
-    // Check if the race is completed
-    const RaceResult = mongoose.model('RaceResult');
-    const raceResult = await RaceResult.findOne({ round: doc.round });
-    if (!raceResult || raceResult.status !== 'completed') {
-      console.log('Race not completed, skipping UsedSelection update');
-      return;
-    }
-
-    // Get the current selection
-    const selection = await RaceSelection.findById(doc._id)
-      .populate('mainDriver')
-      .populate('reserveDriver')
-      .populate('team')
-      .populate('race');
-
-    if (!selection) {
-      console.log('No selection found after populate');
-      return;
-    }
-
-    console.log('Selection found:', {
-      user: selection.user,
-      league: selection.league,
-      round: selection.race?.round,
-      mainDriver: selection.mainDriver,
-      reserveDriver: selection.reserveDriver,
-      team: selection.team
-    });
-
-    // Update or create UsedSelection for this specific round
-    const usedSelection = await UsedSelection.findOneAndUpdate(
-      {
-        user: selection.user,
-        league: selection.league,
-        round: selection.race.round
-      },
-      {
-        mainDriver: selection.mainDriver,
-        reserveDriver: selection.reserveDriver,
-        team: selection.team
-      },
-      { upsert: true, new: true }
-    );
-
-    console.log('UsedSelection created/updated:', usedSelection);
-  } catch (error) {
-    console.error('Error in RaceSelection post-save hook:', error);
-  }
-});
-
 const RaceSelection = mongoose.model('RaceSelection', raceSelectionSchema);
 
 module.exports = RaceSelection; 
