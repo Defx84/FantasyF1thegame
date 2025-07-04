@@ -17,6 +17,13 @@ const mongoose = require('mongoose');
 const scoringService = new ScoringService();
 const leaderboardService = new LeaderboardService();
 
+function toObjectId(id) {
+  if (!id) return undefined;
+  return (typeof id === 'string' || id instanceof String)
+    ? new mongoose.Types.ObjectId(id)
+    : id;
+}
+
 /**
  * Get selections for a race
  */
@@ -123,8 +130,8 @@ const getUsedSelections = async (req, res) => {
         const { leagueId, userId } = req.query;
         const targetUserId = userId || req.user._id;
         const usedSelection = await UsedSelection.findOne({ 
-            user: mongoose.Types.ObjectId(targetUserId), 
-            league: mongoose.Types.ObjectId(leagueId) 
+            user: toObjectId(targetUserId), 
+            league: toObjectId(leagueId) 
         });
         let usedTeams = [];
         let usedMainDrivers = [];
