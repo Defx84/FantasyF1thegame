@@ -77,6 +77,7 @@ usedSelectionSchema.methods.canUseTeam = function(team) {
 
 // Method to add a used main driver
 usedSelectionSchema.methods.addUsedMainDriver = function(driver) {
+  console.log('[addUsedMainDriver] value received:', driver);
   if (!driver || driver === 'None') return;
   if (!isValidDriver(driver)) throw new Error('Invalid driver name');
   const normalizedDriver = normalizeDriverName(driver);
@@ -92,6 +93,7 @@ usedSelectionSchema.methods.addUsedMainDriver = function(driver) {
 
 // Method to add a used reserve driver
 usedSelectionSchema.methods.addUsedReserveDriver = function(driver) {
+  console.log('[addUsedReserveDriver] value received:', driver);
   if (!driver || driver === 'None') return;
   if (!isValidDriver(driver)) throw new Error('Invalid driver name');
   const normalizedDriver = normalizeDriverName(driver);
@@ -107,6 +109,7 @@ usedSelectionSchema.methods.addUsedReserveDriver = function(driver) {
 
 // Method to add a used team
 usedSelectionSchema.methods.addUsedTeam = function(team) {
+  console.log('[addUsedTeam] value received:', team);
   if (!team || team === 'None') return;
   if (!isValidTeam(team)) throw new Error('Invalid team name');
   const normalizedTeam = normalizeTeamName(team);
