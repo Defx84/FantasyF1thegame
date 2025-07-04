@@ -361,7 +361,7 @@ const adminOverrideSelection = async (req, res) => {
         }
 
         // Check if selections can be reused
-        const usedSelection = await UsedSelection.findOne({ 
+        let usedSelection = await UsedSelection.findOne({ 
             user: userId,
             league: leagueId
         });
