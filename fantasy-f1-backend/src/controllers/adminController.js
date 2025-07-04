@@ -155,6 +155,7 @@ exports.assignLateJoinSelection = async (req, res) => {
       });
     }
     usedSelection.addUsedMainDriver(driver);
+    usedSelection.addUsedReserveDriver('None');
     usedSelection.addUsedTeam(team);
     await usedSelection.save();
 
