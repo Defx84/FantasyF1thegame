@@ -1,25 +1,12 @@
 const mongoose = require('mongoose');
-const { normalizeDriver, normalizeTeam, F1_DRIVERS_2025, F1_TEAMS_2025 } = require('../../shared/normalization');
-
-// Helper functions to match RaceSelection model
-function normalizeDriverName(name) {
-  return normalizeDriver(name);
-}
-
-function normalizeTeamName(name) {
-  return normalizeTeam(name);
-}
-
-// Validation functions
-function isValidDriver(name) {
-  if (!name || name === 'None') return true;
-  return F1_DRIVERS_2025.includes(normalizeDriver(name));
-}
-
-function isValidTeam(name) {
-  if (!name || name === 'None') return true;
-  return F1_TEAMS_2025.includes(normalizeTeam(name));
-}
+const { 
+  F1_DRIVERS_2025, 
+  F1_TEAMS_2025, 
+  isValidDriver, 
+  isValidTeam, 
+  normalizeDriverName, 
+  normalizeTeamName 
+} = require('../constants/f1Data2025');
 
 const usedSelectionSchema = new mongoose.Schema({
   user: {
@@ -127,24 +114,22 @@ usedSelectionSchema.methods.addUsedTeam = function(team) {
 usedSelectionSchema.methods.getAvailableMainDrivers = function() {
   const currentCycle = this.mainDriverCycles[this.mainDriverCycles.length - 1];
   if (currentCycle.length >= 20) return [];
-  return F1_DRIVERS_2025.filter(driver => !currentCycle.includes(normalizeDriverName(driver)));
+  return F1_DRIVERS_2025.map(d => d.shortName).filter(driver => !currentCycle.includes(driver));
 };
 
 // Method to get available drivers for reserve driver selection
 usedSelectionSchema.methods.getAvailableReserveDrivers = function() {
   const currentCycle = this.reserveDriverCycles[this.reserveDriverCycles.length - 1];
   if (currentCycle.length >= 20) return [];
-  return F1_DRIVERS_2025.filter(driver => !currentCycle.includes(normalizeDriverName(driver)));
+  return F1_DRIVERS_2025.map(d => d.shortName).filter(driver => !currentCycle.includes(driver));
 };
 
 // Method to get available teams
 usedSelectionSchema.methods.getAvailableTeams = function() {
   const currentCycle = this.teamCycles[this.teamCycles.length - 1];
   if (currentCycle.length >= 10) return [];
-  return F1_TEAMS_2025.filter(team => !currentCycle.includes(normalizeTeamName(team)));
+  return F1_TEAMS_2025.map(t => t.name).filter(team => !currentCycle.includes(team));
 };
-
-
 
 const UsedSelection = mongoose.model('UsedSelection', usedSelectionSchema);
 
