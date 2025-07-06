@@ -1,4 +1,3 @@
-// Frivolous change: trigger redeploy for debugging purposes
 const RaceSelection = require('../models/RaceSelection');
 const RaceResult = require('../models/RaceResult');
 const League = require('../models/League');
@@ -11,18 +10,10 @@ const RaceCalendar = require('../models/RaceCalendar');
 const { initializeRaceSelections, initializeAllRaceSelections } = require('../utils/raceUtils');
 const ScoringService = require('../services/ScoringService');
 const LeaderboardService = require('../services/LeaderboardService');
-const mongoose = require('mongoose');
 
 // Initialize services
 const scoringService = new ScoringService();
 const leaderboardService = new LeaderboardService();
-
-function toObjectId(id) {
-  if (!id) return undefined;
-  return (typeof id === 'string' || id instanceof String)
-    ? new mongoose.Types.ObjectId(id)
-    : id;
-}
 
 /**
  * Get selections for a race
@@ -123,28 +114,57 @@ const getRaceSelections = async (req, res) => {
 };
 
 /**
- * Get used selections for a user (multi-list cycles)
+ * Get used selections for a user
+ * Updated to implement reset logic for teams and drivers
  */
 const getUsedSelections = async (req, res) => {
     try {
-        const { leagueId, userId } = req.query;
-        const targetUserId = userId || req.user._id;
-        const usedSelection = await UsedSelection.findOne({ 
-            user: toObjectId(targetUserId), 
-            league: toObjectId(leagueId) 
-        });
-        let usedTeams = [];
-        let usedMainDrivers = [];
-        let usedReserveDrivers = [];
-        if (usedSelection) {
-            usedTeams = usedSelection.teamCycles[usedSelection.teamCycles.length - 1] || [];
-            usedMainDrivers = usedSelection.mainDriverCycles[usedSelection.mainDriverCycles.length - 1] || [];
-            usedReserveDrivers = usedSelection.reserveDriverCycles[usedSelection.reserveDriverCycles.length - 1] || [];
+        const { leagueId, round, userId } = req.query;
+        const numericRound = parseInt(round);
+        const targetUserId = userId || req.user._id; // Use provided userId or current user's id
+
+        // If requesting another user's selections, verify admin status
+        if (userId && userId !== req.user._id.toString()) {
+            const league = await League.findById(leagueId);
+            if (!league) {
+                return res.status(404).json({ message: 'League not found' });
+            }
+
+            const isAdmin = league.owner?.toString() === req.user._id.toString() || 
+                          league.members.some(member => 
+                            member.user?.toString() === req.user._id.toString() && 
+                            member.isAdmin
+                          );
+
+            if (!isAdmin) {
+                return res.status(403).json({ message: 'Not authorized to view other users\' selections' });
+            }
         }
+
+        // Get all past selections for this user and league
+        const pastSelections = await RaceSelection.find({
+            user: targetUserId,
+            league: leagueId,
+            round: { $lt: numericRound }
+        }).sort({ round: 1 });
+
+        // Build the used lists from past selections
+        const usedMainDrivers = [...new Set(pastSelections.map(s => s.mainDriver).filter(Boolean))];
+        const usedReserveDrivers = [...new Set(pastSelections.map(s => s.reserveDriver).filter(Boolean))];
+        const usedTeams = [...new Set(pastSelections.map(s => s.team).filter(Boolean))];
+
+        // Apply reset logic: if all drivers/teams have been used, reset the lists
+        // For teams: if 10 or more teams have been used, reset the list
+        const finalUsedTeams = usedTeams.length >= 10 ? [] : usedTeams;
+        
+        // For drivers: if 20 or more drivers have been used, reset the list
+        const finalUsedMainDrivers = usedMainDrivers.length >= 20 ? [] : usedMainDrivers;
+        const finalUsedReserveDrivers = usedReserveDrivers.length >= 20 ? [] : usedReserveDrivers;
+
         res.json({
-            usedMainDrivers,
-            usedReserveDrivers,
-            usedTeams
+            usedMainDrivers: finalUsedMainDrivers,
+            usedReserveDrivers: finalUsedReserveDrivers,
+            usedTeams: finalUsedTeams
         });
     } catch (error) {
         console.error('Error getting used selections:', error);
@@ -296,16 +316,6 @@ const saveSelections = async (req, res) => {
 
         await selection.save();
 
-        // Update UsedSelection multi-list cycles
-        let usedSelection = await UsedSelection.findOne({ user: req.user._id, league: leagueId });
-        if (!usedSelection) {
-            usedSelection = new UsedSelection({ user: req.user._id, league: leagueId });
-        }
-        usedSelection.addUsedTeam(normalizedTeam);
-        usedSelection.addUsedMainDriver(normalizedMainDriver);
-        usedSelection.addUsedReserveDriver(normalizedReserveDriver);
-        await usedSelection.save();
-
         return res.json({
             message: 'Selections saved successfully',
             selection
@@ -361,27 +371,8 @@ const adminOverrideSelection = async (req, res) => {
         }
 
         // Check if selections can be reused
-        let usedSelection = await UsedSelection.findOne({ 
-            user: userId,
-            league: leagueId
-        });
-
-        if (usedSelection) {
-            const canUseMainDriver = usedSelection.canUseMainDriver(mainDriver);
-            const canUseReserveDriver = usedSelection.canUseReserveDriver(reserveDriver);
-            const canUseTeam = usedSelection.canUseTeam(team);
-
-            if (!canUseMainDriver || !canUseReserveDriver || !canUseTeam) {
-                return res.status(400).json({
-                    error: 'One or more selections have already been used and cannot be reused yet',
-                    details: {
-                        mainDriver: !canUseMainDriver ? 'Already used' : null,
-                        reserveDriver: !canUseReserveDriver ? 'Already used' : null,
-                        team: !canUseTeam ? 'Already used' : null
-                    }
-                });
-            }
-        }
+        // Bypassing the 'already used' check for admin override
+        console.log('Bypassing used selection check for admin override');
 
         // Calculate points if assignPoints is true
         let points = 0;
@@ -452,15 +443,6 @@ const adminOverrideSelection = async (req, res) => {
         }
 
         await selection.save();
-
-        // Update UsedSelection multi-list cycles
-        if (!usedSelection) {
-            usedSelection = new UsedSelection({ user: userId, league: leagueId });
-        }
-        usedSelection.addUsedTeam(team);
-        usedSelection.addUsedMainDriver(mainDriver);
-        usedSelection.addUsedReserveDriver(reserveDriver);
-        await usedSelection.save();
 
         // Always update league standings, regardless of assignPoints
         await leaderboardService.updateStandings(leagueId, raceId);
