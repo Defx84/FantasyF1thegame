@@ -3,7 +3,7 @@ const rateLimit = require('express-rate-limit');
 // General rate limiter for all routes
 const generalLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
-  max: process.env.NODE_ENV === 'development' ? 1000 : 500, // Increased from 100 to 500
+  max: process.env.NODE_ENV === 'development' ? 1000 : 100, // More lenient in development
   message: JSON.stringify({ error: 'Too many requests from this IP, please try again later' }),
   standardHeaders: true,
   legacyHeaders: false
@@ -12,7 +12,7 @@ const generalLimiter = rateLimit({
 // Stricter limiter for auth routes
 const authLimiter = rateLimit({
   windowMs: 60 * 60 * 1000, // 1 hour
-  max: process.env.NODE_ENV === 'development' ? 100 : 200, // Increased from 50 to 200
+  max: process.env.NODE_ENV === 'development' ? 100 : 50, // Increased from 5 to 50
   message: JSON.stringify({ error: 'Too many auth attempts, please try again later' }),
   standardHeaders: true,
   legacyHeaders: false
