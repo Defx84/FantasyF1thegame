@@ -141,30 +141,37 @@ const getUsedSelections = async (req, res) => {
             }
         }
 
-        // Get all past selections for this user and league
-        const pastSelections = await RaceSelection.find({
+        // Get or create UsedSelection document for this user and league
+        let usedSelection = await UsedSelection.findOne({
             user: targetUserId,
-            league: leagueId,
-            round: { $lt: numericRound }
-        }).sort({ round: 1 });
+            league: leagueId
+        });
 
-        // Build the used lists from past selections
-        const usedMainDrivers = [...new Set(pastSelections.map(s => s.mainDriver).filter(Boolean))];
-        const usedReserveDrivers = [...new Set(pastSelections.map(s => s.reserveDriver).filter(Boolean))];
-        const usedTeams = [...new Set(pastSelections.map(s => s.team).filter(Boolean))];
+        if (!usedSelection) {
+            // Create new UsedSelection document if it doesn't exist
+            usedSelection = new UsedSelection({
+                user: targetUserId,
+                league: leagueId,
+                teamCycles: [[]],
+                mainDriverCycles: [[]],
+                reserveDriverCycles: [[]]
+            });
+            await usedSelection.save();
+        }
 
-        // Apply reset logic: if all drivers/teams have been used, reset the lists
-        // For teams: if 10 or more teams have been used, reset the list
-        const finalUsedTeams = usedTeams.length >= 10 ? [] : usedTeams;
-        
-        // For drivers: if 20 or more drivers have been used, reset the list
-        const finalUsedMainDrivers = usedMainDrivers.length >= 20 ? [] : usedMainDrivers;
-        const finalUsedReserveDrivers = usedReserveDrivers.length >= 20 ? [] : usedReserveDrivers;
+        // Get the current cycle's used items
+        const lastTeamCycleIndex = usedSelection.teamCycles.length - 1;
+        const lastMainDriverCycleIndex = usedSelection.mainDriverCycles.length - 1;
+        const lastReserveDriverCycleIndex = usedSelection.reserveDriverCycles.length - 1;
+
+        const usedTeams = usedSelection.teamCycles[lastTeamCycleIndex] || [];
+        const usedMainDrivers = usedSelection.mainDriverCycles[lastMainDriverCycleIndex] || [];
+        const usedReserveDrivers = usedSelection.reserveDriverCycles[lastReserveDriverCycleIndex] || [];
 
         res.json({
-            usedMainDrivers: finalUsedMainDrivers,
-            usedReserveDrivers: finalUsedReserveDrivers,
-            usedTeams: finalUsedTeams
+            usedMainDrivers: usedMainDrivers,
+            usedReserveDrivers: usedReserveDrivers,
+            usedTeams: usedTeams
         });
     } catch (error) {
         console.error('Error getting used selections:', error);
@@ -315,6 +322,29 @@ const saveSelections = async (req, res) => {
         }
 
         await selection.save();
+
+        // Update UsedSelection cycles
+        let usedSelection = await UsedSelection.findOne({
+            user: req.user._id,
+            league: leagueId
+        });
+
+        if (!usedSelection) {
+            usedSelection = new UsedSelection({
+                user: req.user._id,
+                league: leagueId,
+                teamCycles: [[]],
+                mainDriverCycles: [[]],
+                reserveDriverCycles: [[]]
+            });
+        }
+
+        // Add the selections to the current cycles
+        usedSelection.addUsedMainDriver(normalizedMainDriver);
+        usedSelection.addUsedReserveDriver(normalizedReserveDriver);
+        usedSelection.addUsedTeam(normalizedTeam);
+
+        await usedSelection.save();
 
         return res.json({
             message: 'Selections saved successfully',

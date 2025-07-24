@@ -1,11 +1,11 @@
 const mongoose = require('mongoose');
 const { 
-  F1_DRIVERS_2025, 
-  F1_TEAMS_2025, 
-  isValidDriver, 
-  isValidTeam, 
-  normalizeDriverName, 
-  normalizeTeamName 
+    F1_DRIVERS_2025,
+    F1_TEAMS_2025,
+    isValidDriver,
+    isValidTeam,
+    normalizeDriverName,
+    normalizeTeamName
 } = require('../constants/f1Data2025');
 
 const usedSelectionSchema = new mongoose.Schema({
@@ -75,7 +75,7 @@ usedSelectionSchema.methods.canUseTeam = function(team) {
 // Method to add a used main driver
 usedSelectionSchema.methods.addUsedMainDriver = function(driver) {
   console.log('[addUsedMainDriver] value received:', driver);
-  if (!driver || driver === 'None') return;
+    if (!driver || driver === 'None') return;
   if (!isValidDriver(driver)) throw new Error('Invalid driver name');
   const normalizedDriver = normalizeDriverName(driver); // always short name
   let currentCycle = this.mainDriverCycles[this.mainDriverCycles.length - 1];
@@ -97,7 +97,7 @@ usedSelectionSchema.methods.addUsedMainDriver = function(driver) {
 // Method to add a used reserve driver
 usedSelectionSchema.methods.addUsedReserveDriver = function(driver) {
   console.log('[addUsedReserveDriver] value received:', driver);
-  if (!driver || driver === 'None') return;
+    if (!driver || driver === 'None') return;
   if (!isValidDriver(driver)) throw new Error('Invalid driver name');
   const normalizedDriver = normalizeDriverName(driver); // always short name
   let currentCycle = this.reserveDriverCycles[this.reserveDriverCycles.length - 1];
@@ -113,7 +113,7 @@ usedSelectionSchema.methods.addUsedReserveDriver = function(driver) {
 // Method to add a used team
 usedSelectionSchema.methods.addUsedTeam = function(team) {
   console.log('[addUsedTeam] value received:', team);
-  if (!team || team === 'None') return;
+    if (!team || team === 'None') return;
   if (!isValidTeam(team)) throw new Error('Invalid team name');
   const normalizedTeam = normalizeTeamName(team); // always canonical name
   let currentCycle = this.teamCycles[this.teamCycles.length - 1];
