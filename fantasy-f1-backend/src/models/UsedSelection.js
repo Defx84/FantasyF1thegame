@@ -126,6 +126,55 @@ usedSelectionSchema.methods.addUsedTeam = function(team) {
   }
 };
 
+// Method to remove a used main driver
+usedSelectionSchema.methods.removeUsedMainDriver = function(driver) {
+  console.log('[removeUsedMainDriver] value received:', driver);
+  if (!driver || driver === 'None') return;
+  if (!isValidDriver(driver)) throw new Error('Invalid driver name');
+  const normalizedDriver = normalizeDriverName(driver); // always short name
+  let currentCycle = this.mainDriverCycles[this.mainDriverCycles.length - 1];
+  console.log('[removeUsedMainDriver] normalized to:', normalizedDriver);
+  console.log('[removeUsedMainDriver] current cycle before:', currentCycle);
+  
+  const index = currentCycle.indexOf(normalizedDriver);
+  if (index > -1) {
+    currentCycle.splice(index, 1); // Remove from array
+    console.log('[removeUsedMainDriver] removed from cycle. cycle after:', currentCycle);
+  } else {
+    console.log('[removeUsedMainDriver] not found in cycle, nothing to remove');
+  }
+};
+
+// Method to remove a used reserve driver
+usedSelectionSchema.methods.removeUsedReserveDriver = function(driver) {
+  console.log('[removeUsedReserveDriver] value received:', driver);
+  if (!driver || driver === 'None') return;
+  if (!isValidDriver(driver)) throw new Error('Invalid driver name');
+  const normalizedDriver = normalizeDriverName(driver); // always short name
+  let currentCycle = this.reserveDriverCycles[this.reserveDriverCycles.length - 1];
+  
+  const index = currentCycle.indexOf(normalizedDriver);
+  if (index > -1) {
+    currentCycle.splice(index, 1); // Remove from array
+    console.log('[removeUsedReserveDriver] removed from cycle');
+  }
+};
+
+// Method to remove a used team
+usedSelectionSchema.methods.removeUsedTeam = function(team) {
+  console.log('[removeUsedTeam] value received:', team);
+  if (!team || team === 'None') return;
+  if (!isValidTeam(team)) throw new Error('Invalid team name');
+  const normalizedTeam = normalizeTeamName(team); // always canonical name
+  let currentCycle = this.teamCycles[this.teamCycles.length - 1];
+  
+  const index = currentCycle.indexOf(normalizedTeam);
+  if (index > -1) {
+    currentCycle.splice(index, 1); // Remove from array
+    console.log('[removeUsedTeam] removed from cycle');
+  }
+};
+
 // Method to get available drivers for main driver selection
 usedSelectionSchema.methods.getAvailableMainDrivers = function() {
   const currentCycle = this.mainDriverCycles[this.mainDriverCycles.length - 1];

@@ -300,7 +300,15 @@ const saveSelections = async (req, res) => {
             user: req.user._id
         });
 
+        let oldSelections = null;
         if (selection) {
+            // Store old selections before updating
+            oldSelections = {
+                mainDriver: selection.mainDriver,
+                reserveDriver: selection.reserveDriver,
+                team: selection.team
+            };
+            
             // Update existing selection
             selection.mainDriver = normalizedMainDriver;
             selection.reserveDriver = normalizedReserveDriver;
@@ -339,7 +347,16 @@ const saveSelections = async (req, res) => {
             });
         }
 
-        // Add the selections to the current cycles
+        // If updating existing selection, remove old selections first
+        if (oldSelections) {
+            console.log(`[saveSelections] Removing old selections: ${oldSelections.mainDriver}, ${oldSelections.reserveDriver}, ${oldSelections.team}`);
+            usedSelection.removeUsedMainDriver(oldSelections.mainDriver);
+            usedSelection.removeUsedReserveDriver(oldSelections.reserveDriver);
+            usedSelection.removeUsedTeam(oldSelections.team);
+        }
+
+        // Add the new selections
+        console.log(`[saveSelections] Adding new selections: ${normalizedMainDriver}, ${normalizedReserveDriver}, ${normalizedTeam}`);
         usedSelection.addUsedMainDriver(normalizedMainDriver);
         usedSelection.addUsedReserveDriver(normalizedReserveDriver);
         usedSelection.addUsedTeam(normalizedTeam);

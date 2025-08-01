@@ -45,8 +45,35 @@ const NextRaceCountdown: React.FC = () => {
         setRaceData(data);
         if (data.hasUpcomingRace) {
           const now = Date.now();
-          const raceTime = new Date(data.race.startTime).getTime();
-          const timeUntil = raceTime - now;
+          
+          // For sprint weekends, prioritize sprint qualifying if it's the next event
+          let targetTime: number;
+          let eventType: string;
+          
+          if (data.isSprintWeekend && data.sprintQualifying) {
+            const sprintQualTime = new Date(data.sprintQualifying.startTime).getTime();
+            const raceTime = new Date(data.race.startTime).getTime();
+            
+            // Use sprint qualifying if it's the next event, otherwise use race
+            if (sprintQualTime > now) {
+              targetTime = sprintQualTime;
+              eventType = 'sprint qualifying';
+            } else if (raceTime > now) {
+              targetTime = raceTime;
+              eventType = 'race';
+            } else {
+              // Both events are in the past, use race time for display
+              targetTime = raceTime;
+              eventType = 'race';
+            }
+          } else {
+            // Regular weekend, use race time
+            targetTime = new Date(data.race.startTime).getTime();
+            eventType = 'race';
+          }
+          
+          const timeUntil = targetTime - now;
+          console.log(`Countdown target: ${eventType}, time until: ${timeUntil}ms`);
           setTimeLeft(calculateTimeLeft(timeUntil));
         }
       } catch (err) {
@@ -65,8 +92,29 @@ const NextRaceCountdown: React.FC = () => {
 
     const timer = setInterval(() => {
       const now = Date.now();
-      const raceTime = new Date(raceData.race.startTime).getTime();
-      const timeUntil = raceTime - now;
+      
+      // For sprint weekends, prioritize sprint qualifying if it's the next event
+      let targetTime: number;
+      
+      if (raceData.isSprintWeekend && raceData.sprintQualifying) {
+        const sprintQualTime = new Date(raceData.sprintQualifying.startTime).getTime();
+        const raceTime = new Date(raceData.race.startTime).getTime();
+        
+        // Use sprint qualifying if it's the next event, otherwise use race
+        if (sprintQualTime > now) {
+          targetTime = sprintQualTime;
+        } else if (raceTime > now) {
+          targetTime = raceTime;
+        } else {
+          // Both events are in the past, use race time for display
+          targetTime = raceTime;
+        }
+      } else {
+        // Regular weekend, use race time
+        targetTime = new Date(raceData.race.startTime).getTime();
+      }
+      
+      const timeUntil = targetTime - now;
       const newTimeLeft = calculateTimeLeft(timeUntil);
       setTimeLeft(newTimeLeft);
     }, 1000);

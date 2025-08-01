@@ -37,13 +37,39 @@ const DashboardRaceCountdown: React.FC = () => {
         const data = await getNextRaceTiming();
         setRaceData(data);
         if (data && data.race && data.race.startTime) {
-          const target = new Date(data.race.startTime).getTime();
           const now = Date.now();
+          
+          // For sprint weekends, prioritize sprint qualifying if it's the next event
+          let target: number;
+          let eventType: string;
+          
+          if (data.isSprintWeekend && data.sprintQualifying) {
+            const sprintQualTime = new Date(data.sprintQualifying.startTime).getTime();
+            const raceTime = new Date(data.race.startTime).getTime();
+            
+            // Use sprint qualifying if it's the next event, otherwise use race
+            if (sprintQualTime > now) {
+              target = sprintQualTime;
+              eventType = 'sprint qualifying';
+            } else if (raceTime > now) {
+              target = raceTime;
+              eventType = 'race';
+            } else {
+              // Both events are in the past, use race time for display
+              target = raceTime;
+              eventType = 'race';
+            }
+          } else {
+            // Regular weekend, use race time
+            target = new Date(data.race.startTime).getTime();
+            eventType = 'race';
+          }
+          
           // Debug logs for countdown issue
           console.log("DEBUG: Current time (local):", new Date());
           console.log("DEBUG: Current time (UTC):", new Date().toISOString());
-          console.log("DEBUG: Race start (from API):", data.race.startTime, "as Date:", new Date(data.race.startTime));
-          console.log("DEBUG: Milliseconds until race:", target - now);
+          console.log("DEBUG: Countdown target:", eventType, "time:", new Date(target).toISOString());
+          console.log("DEBUG: Milliseconds until event:", target - now);
           setTimeLeft(calculateTimeLeft(target));
         }
       } catch (err) {
@@ -57,7 +83,30 @@ const DashboardRaceCountdown: React.FC = () => {
 
   useEffect(() => {
     if (!raceData?.race?.startTime) return;
-    const target = new Date(raceData.race.startTime).getTime();
+    
+    const now = Date.now();
+    
+    // For sprint weekends, prioritize sprint qualifying if it's the next event
+    let target: number;
+    
+    if (raceData.isSprintWeekend && raceData.sprintQualifying) {
+      const sprintQualTime = new Date(raceData.sprintQualifying.startTime).getTime();
+      const raceTime = new Date(raceData.race.startTime).getTime();
+      
+      // Use sprint qualifying if it's the next event, otherwise use race
+      if (sprintQualTime > now) {
+        target = sprintQualTime;
+      } else if (raceTime > now) {
+        target = raceTime;
+      } else {
+        // Both events are in the past, use race time for display
+        target = raceTime;
+      }
+    } else {
+      // Regular weekend, use race time
+      target = new Date(raceData.race.startTime).getTime();
+    }
+    
     const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft(target));
     }, 1000);
