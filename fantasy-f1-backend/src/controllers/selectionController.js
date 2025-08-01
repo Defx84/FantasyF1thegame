@@ -474,6 +474,30 @@ const adminOverrideSelection = async (req, res) => {
 
         await selection.save();
 
+        // Update usage tracking
+        let usedSelection = await UsedSelection.findOne({
+            user: userId,
+            league: leagueId
+        });
+
+        if (!usedSelection) {
+            usedSelection = new UsedSelection({
+                user: userId,
+                league: leagueId,
+                teamCycles: [[]],
+                mainDriverCycles: [[]],
+                reserveDriverCycles: [[]]
+            });
+        }
+
+        // Add the selections to the current cycles
+        usedSelection.addUsedMainDriver(mainDriver);
+        usedSelection.addUsedReserveDriver(reserveDriver);
+        usedSelection.addUsedTeam(team);
+        await usedSelection.save();
+
+        console.log(`[Admin Override] Updated usage tracking for user ${userId} in league ${league.name}`);
+
         // Always update league standings, regardless of assignPoints
         await leaderboardService.updateStandings(leagueId, raceId);
 

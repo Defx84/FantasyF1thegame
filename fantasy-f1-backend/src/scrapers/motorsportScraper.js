@@ -66,8 +66,7 @@ async function discoverMotorsportSlugs(year = new Date().getFullYear()) {
       '--disable-accelerated-2d-canvas',
       '--disable-gpu',
       '--window-size=1920x1080'
-    ],
-    executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium' 
+    ]
   });
   const page = await browser.newPage();
 
@@ -128,8 +127,7 @@ async function scrapeMotorsportResultsByType(slug, type) {
                 '--disable-accelerated-2d-canvas',
                 '--disable-gpu',
                 '--window-size=1920x1080'
-            ],
-            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || '/usr/bin/chromium'
+            ]
         });
         const page = await browser.newPage();
         
@@ -313,7 +311,7 @@ async function triggerRaceUpdate(round, label) {
 async function shouldProcessRace(round, raceName) {
     try {
         const now = new Date();
-        const raceDate = ROUND_TO_RACE[round].raceStart;
+        const raceDate = ROUND_TO_RACE[round].date;
         
         // Check if race already has data in database
         const existingRace = await RaceResult.findOne({ round });
@@ -334,8 +332,8 @@ async function shouldProcessRace(round, raceName) {
             const raceData = {
                 round: parseInt(round),
                 raceName,
-                circuit: ROUND_TO_RACE[round].circuit,
-                raceStart: ROUND_TO_RACE[round].raceStart,
+                circuit: ROUND_TO_RACE[round].name,
+                raceStart: ROUND_TO_RACE[round].date,
                 qualifyingStart: ROUND_TO_RACE[round].qualifyingStart,
                 status: 'scheduled',
                 isSprintWeekend: ROUND_TO_RACE[round].isSprintWeekend || false,

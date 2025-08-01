@@ -328,6 +328,31 @@ exports.assignRealPointsToLeague = async (req, res) => {
         await selection.save();
         updatedCount++;
         console.log(`[Admin Points] Assigned ${pointsData.totalPoints} points to user ${member.username}`);
+
+        // Update usage tracking
+        const UsedSelection = require('../models/UsedSelection');
+        let usedSelection = await UsedSelection.findOne({
+            user: member._id,
+            league: leagueId
+        });
+
+        if (!usedSelection) {
+            usedSelection = new UsedSelection({
+                user: member._id,
+                league: leagueId,
+                teamCycles: [[]],
+                mainDriverCycles: [[]],
+                reserveDriverCycles: [[]]
+            });
+        }
+
+        // Add the selections to the current cycles
+        usedSelection.addUsedMainDriver(selection.mainDriver);
+        usedSelection.addUsedReserveDriver(selection.reserveDriver);
+        usedSelection.addUsedTeam(selection.team);
+        await usedSelection.save();
+
+        console.log(`[Admin Points] Updated usage tracking for user ${member.username} in league ${league.name}`);
       } else {
         console.log(`[Admin Points] Skipping user ${member.username} - points already assigned`);
       }

@@ -86,8 +86,8 @@ const ROUND_TO_RACE = {
     },
     14: {
         name: 'hungarian',
-        date: new Date('2025-07-20T13:00:00Z'),
-        qualifyingStart: new Date('2025-07-19T13:00:00Z'),
+        date: new Date('2025-08-03T13:00:00Z'),
+        qualifyingStart: new Date('2025-08-02T13:00:00Z'),
         hasSprint: false
     },
     15: {

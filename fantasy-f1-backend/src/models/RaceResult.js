@@ -355,6 +355,7 @@ raceResultSchema.post('save', async function(doc) {
     const scoringService = new (require('../services/ScoringService'))();
     const leaderboardService = new (require('../services/LeaderboardService'))();
     const PointsUpdateLog = require('./PointsUpdateLog');
+    const UsedSelection = require('./UsedSelection');
 
     // Find all leagues with selections for this round
     const leagues = await mongoose.model('League').find({}).distinct('_id');
@@ -440,6 +441,30 @@ raceResultSchema.post('save', async function(doc) {
           selection.assignedAt = new Date();
           await selection.save();
           updatedCount++;
+
+          // Update usage tracking
+          let usedSelection = await UsedSelection.findOne({
+            user: member._id,
+            league: leagueId
+          });
+
+          if (!usedSelection) {
+            usedSelection = new UsedSelection({
+              user: member._id,
+              league: leagueId,
+              teamCycles: [[]],
+              mainDriverCycles: [[]],
+              reserveDriverCycles: [[]]
+            });
+          }
+
+          // Add the selections to the current cycles
+          usedSelection.addUsedMainDriver(selection.mainDriver);
+          usedSelection.addUsedReserveDriver(selection.reserveDriver);
+          usedSelection.addUsedTeam(selection.team);
+          await usedSelection.save();
+
+          console.log(`[RaceResult Post-Save] Updated usage tracking for user ${member._id} in league ${league.name}`);
         }
       }
 
