@@ -6,5 +6,13 @@
   "bahrain": "bahrain-gp-653151",
   "saudi-arabia": "saudi-arabian-gp-653155",
   "saudi-arabian": "saudi-arabian-gp-653155",
-  "miami": "miami-gp-653159"
+  "miami": "miami-gp-653159",
+  "emilia-romagna": "emilia-romagna-gp-653163",
+  "monaco": "monaco-gp-653167",
+  "spanish": "spanish-gp-653171",
+  "canadian": "canadian-gp-653175",
+  "austrian": "austrian-gp-653179",
+  "british": "british-gp-653183",
+  "belgian": "belgian-gp-653187",
+  "hungarian": "hungarian-gp-653191"
 }
