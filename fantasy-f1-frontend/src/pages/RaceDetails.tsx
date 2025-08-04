@@ -327,64 +327,265 @@ const RaceDetails: React.FC = () => {
             </div>
 
             <div className="backdrop-blur-sm bg-white/[0.02] rounded-xl border border-white/5 overflow-visible relative">
-              <table className="w-full text-white">
-                <thead>
-                  <tr className="border-b border-white/10">
-                    <th className="p-4 text-left">Player</th>
-                    <th className="p-4 text-left">Main Driver</th>
-                    <th className="p-4 text-left">Reserve Driver</th>
-                    <th className="p-4 text-left">Team</th>
-                    <th className="p-4 text-left">Status</th>
-                    {isAdmin && <th className="p-2 md:p-4 text-left relative group">
-                      <span className="flex items-center">
-                        Actions
-                        <span
-                          className="ml-2 cursor-pointer text-blue-300 opacity-80 group-hover:opacity-100 min-h-[44px] min-w-[44px] flex items-center justify-center"
-                          onClick={e => { e.stopPropagation(); handleTooltipToggle(); }}
-                          tabIndex={0}
-                          onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleTooltipToggle(); }}
-                          role="button"
-                          aria-label="Show action legend"
-                        >
-                          <InfoIcon size={16} />
+              {/* Desktop Table View */}
+              <div className="hidden md:block">
+                <table className="w-full text-white">
+                  <thead>
+                    <tr className="border-b border-white/10">
+                      <th className="p-4 text-left">Player</th>
+                      <th className="p-4 text-left">Main Driver</th>
+                      <th className="p-4 text-left">Reserve Driver</th>
+                      <th className="p-4 text-left">Team</th>
+                      <th className="p-4 text-left">Status</th>
+                      {isAdmin && <th className="p-2 md:p-4 text-left relative group">
+                        <span className="flex items-center">
+                          Actions
+                          <span
+                            className="ml-2 cursor-pointer text-blue-300 opacity-80 group-hover:opacity-100 min-h-[44px] min-w-[44px] flex items-center justify-center"
+                            onClick={e => { e.stopPropagation(); handleTooltipToggle(); }}
+                            tabIndex={0}
+                            onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') handleTooltipToggle(); }}
+                            role="button"
+                            aria-label="Show action legend"
+                          >
+                            <InfoIcon size={16} />
+                          </span>
                         </span>
-                      </span>
-                      <div className={`z-50 ${showTooltip ? 'block' : 'hidden'} group-hover:block absolute bottom-0 left-1/2 -translate-x-1/2 w-64 bg-gray-900 text-white text-xs rounded-lg shadow-2xl border border-blue-400 p-3 text-center font-semibold pointer-events-none mt-2`} style={{ fontSize: '0.95rem', padding: '0.85rem' }}>
-                        <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-blue-400"></div>
-                        <div className="mb-1"><span className="font-bold text-red-400">Edit</span>: Edit and assign a selection to a user</div>
-                        <div className="mb-1"><span className="font-bold text-green-400">Real Points</span>: Assign and calculate points from the real race</div>
-                        <div><span className="font-bold text-yellow-400">0 Points</span>: Assign 0 points for a missed deadline</div>
-                      </div>
-                    </th>}
-                  </tr>
-                </thead>
-                <tbody>
-                  {(() => {
-                    if (!Array.isArray(leagueMembers) || leagueMembers.length === 0) {
-                      return (
-                        <tr>
-                          <td colSpan={6} className="p-4 text-center text-gray-500">
-                            No league members found
-                          </td>
-                        </tr>
-                      );
-                    }
-
-                    return leagueMembers.map(member => {
-                      if (!member.id) {
-                        console.warn("Member is missing ID!", member);
+                        <div className={`z-50 ${showTooltip ? 'block' : 'hidden'} group-hover:block absolute bottom-0 left-1/2 -translate-x-1/2 w-64 bg-gray-900 text-white text-xs rounded-lg shadow-2xl border border-blue-400 p-3 text-center font-semibold pointer-events-none mt-2`} style={{ fontSize: '0.95rem', padding: '0.85rem' }}>
+                          <div className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-blue-400"></div>
+                          <div className="mb-1"><span className="font-bold text-red-400">Edit</span>: Edit and assign a selection to a user</div>
+                          <div className="mb-1"><span className="font-bold text-green-400">Real Points</span>: Assign and calculate points from the real race</div>
+                          <div><span className="font-bold text-yellow-400">0 Points</span>: Assign 0 points for a missed deadline</div>
+                        </div>
+                      </th>}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(() => {
+                      if (!Array.isArray(leagueMembers) || leagueMembers.length === 0) {
+                        return (
+                          <tr>
+                            <td colSpan={6} className="p-4 text-center text-gray-500">
+                              No league members found
+                            </td>
+                          </tr>
+                        );
                       }
-                      
-                      const selection = selections.find(s => s.userId === member.id);
-                      const isEditing = !!editForms[member.id];
 
-                      return (
-                        <tr key={member.id} className="border-b border-white/10 hover:bg-white/5">
-                          <td className="p-4">{member.username}</td>
-                          <td className="p-4">
+                      return leagueMembers.map(member => {
+                        if (!member.id) {
+                          console.warn("Member is missing ID!", member);
+                        }
+                        
+                        const selection = selections.find(s => s.userId === member.id);
+                        const isEditing = !!editForms[member.id];
+
+                        return (
+                          <tr key={member.id} className="border-b border-white/10 hover:bg-white/5">
+                            <td className="p-4">{member.username}</td>
+                            <td className="p-4">
+                              {isEditing ? (
+                                <select
+                                  className="w-full bg-gray-800 text-white border border-gray-700 rounded p-2"
+                                  value={editForms[member.id]?.mainDriver || ''}
+                                  onChange={(e) => {
+                                    const newValue = e.target.value;
+                                    setEditForms(prev => ({
+                                      ...prev,
+                                      [member.id]: {
+                                        ...prev[member.id],
+                                        mainDriver: newValue
+                                      }
+                                    }));
+                                  }}
+                                >
+                                  <option value="">-</option>
+                                  {availableDrivers.map(driver => {
+                                    const isUsed = isDriverUsed(member.id, driver, 'main');
+                                    return (
+                                      <option 
+                                        key={driver} 
+                                        value={driver}
+                                        disabled={isUsed}
+                                        style={{ 
+                                          color: isUsed ? '#666' : 'inherit',
+                                          textDecoration: isUsed ? 'line-through' : 'none'
+                                        }}
+                                      >
+                                        {driver} {isUsed ? '(Used)' : ''}
+                                      </option>
+                                    );
+                                  })}
+                                </select>
+                              ) : (
+                                selection?.mainDriver ? normalizeDriver(selection.mainDriver) : '-'
+                              )}
+                            </td>
+                            <td className="p-4">
+                              {isEditing ? (
+                                <select
+                                  className="w-full bg-gray-800 text-white border border-gray-700 rounded p-2"
+                                  value={editForms[member.id]?.reserveDriver || ''}
+                                  onChange={(e) => {
+                                    const newValue = e.target.value;
+                                    setEditForms(prev => ({
+                                      ...prev,
+                                      [member.id]: {
+                                        ...prev[member.id],
+                                        reserveDriver: newValue
+                                      }
+                                    }));
+                                  }}
+                                >
+                                  <option value="">-</option>
+                                  {availableDrivers.map(driver => {
+                                    const isUsed = isDriverUsed(member.id, driver, 'reserve');
+                                    return (
+                                      <option 
+                                        key={driver} 
+                                        value={driver}
+                                        disabled={isUsed}
+                                        style={{ 
+                                          color: isUsed ? '#666' : 'inherit',
+                                          textDecoration: isUsed ? 'line-through' : 'none'
+                                        }}
+                                      >
+                                        {driver} {isUsed ? '(Used)' : ''}
+                                      </option>
+                                    );
+                                  })}
+                                </select>
+                              ) : (
+                                selection?.reserveDriver ? normalizeDriver(selection.reserveDriver) : '-'
+                              )}
+                            </td>
+                            <td className="p-4">
+                              {isEditing ? (
+                                <select
+                                  className="w-full bg-gray-800 text-white border border-gray-700 rounded p-2"
+                                  value={editForms[member.id]?.team || ''}
+                                  onChange={(e) => {
+                                    const newValue = e.target.value;
+                                    setEditForms(prev => ({
+                                      ...prev,
+                                      [member.id]: {
+                                        ...prev[member.id],
+                                        team: newValue
+                                      }
+                                    }));
+                                  }}
+                                >
+                                  <option value="">-</option>
+                                  {availableTeams.map(team => {
+                                    const isUsed = isTeamUsed(member.id, team);
+                                    return (
+                                      <option 
+                                        key={team} 
+                                        value={team}
+                                        disabled={isUsed}
+                                        style={{ 
+                                          color: isUsed ? '#666' : 'inherit',
+                                          textDecoration: isUsed ? 'line-through' : 'none'
+                                        }}
+                                      >
+                                        {team} {isUsed ? '(Used)' : ''}
+                                      </option>
+                                    );
+                                  })}
+                                </select>
+                              ) : (
+                                selection?.team ? normalizeTeam(selection.team) : '-'
+                              )}
+                            </td>
+                            <td className="p-4">
+                              {selection?.isAdminAssigned ? (
+                                <span className="flex items-center text-yellow-500">
+                                  <IconWrapper icon={FaUserShield} className="mr-1" />
+                                  Admin Assigned
+                                </span>
+                              ) : '-'}
+                            </td>
+                            {isAdmin && (
+                              <td className="p-2 md:p-4">
+                                {isEditing ? (
+                                  <div className="flex flex-col space-y-2 md:flex-row md:space-x-2 md:space-y-0">
+                                    <button
+                                      onClick={() => handleSave(member.id, true)}
+                                      className="flex items-center gap-2 px-3 py-2 min-w-[44px] min-h-[44px] justify-center text-sm bg-green-600 hover:bg-green-700 rounded text-white"
+                                    >
+                                      <IconWrapper icon={FaCheck} /> Real points
+                                    </button>
+                                    <button
+                                      onClick={() => handleSave(member.id, false)}
+                                      className="flex items-center gap-2 px-3 py-2 min-w-[44px] min-h-[44px] justify-center text-sm bg-yellow-600 hover:bg-yellow-700 rounded text-white"
+                                    >
+                                      <IconWrapper icon={FaCheck} /> 0 points
+                                    </button>
+                                    <button
+                                      onClick={() => handleCancel(member.id)}
+                                      className="flex items-center gap-2 px-3 py-2 min-w-[44px] min-h-[44px] justify-center text-sm bg-gray-600 hover:bg-gray-700 rounded text-white"
+                                    >
+                                      <IconWrapper icon={FaTimes} /> Cancel
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <button
+                                    onClick={() => handleEdit(member)}
+                                    className="flex items-center gap-2 px-3 py-2 min-w-[44px] min-h-[44px] justify-center text-sm bg-red-600 hover:bg-red-700 rounded text-white"
+                                  >
+                                    <IconWrapper icon={FaEdit} /> Edit
+                                  </button>
+                                )}
+                              </td>
+                            )}
+                          </tr>
+                        );
+                      });
+                    })()}
+                  </tbody>
+                </table>
+              </div>
+
+              {/* Mobile Card View */}
+              <div className="md:hidden p-4 space-y-4">
+                {(() => {
+                  if (!Array.isArray(leagueMembers) || leagueMembers.length === 0) {
+                    return (
+                      <div className="text-center text-gray-500 py-8">
+                        No league members found
+                      </div>
+                    );
+                  }
+
+                  return leagueMembers.map(member => {
+                    if (!member.id) {
+                      console.warn("Member is missing ID!", member);
+                    }
+                    
+                    const selection = selections.find(s => s.userId === member.id);
+                    const isEditing = !!editForms[member.id];
+
+                    return (
+                      <div key={member.id} className="bg-white/[0.05] rounded-lg p-4 border border-white/10">
+                        {/* Player Name Header */}
+                        <div className="flex items-center justify-between mb-3">
+                          <h3 className="text-lg font-semibold text-white">{member.username}</h3>
+                          {selection?.isAdminAssigned && (
+                            <span className="flex items-center text-yellow-500 text-sm">
+                              <IconWrapper icon={FaUserShield} className="mr-1" />
+                              Admin
+                            </span>
+                          )}
+                        </div>
+
+                        {/* Selections */}
+                        <div className="space-y-3">
+                          {/* Main Driver */}
+                          <div className="flex flex-col">
+                            <label className="text-sm font-medium text-white/70 mb-1">Main Driver</label>
                             {isEditing ? (
                               <select
-                                className="w-full bg-gray-800 text-white border border-gray-700 rounded p-2"
+                                className="w-full bg-gray-800 text-white border border-gray-700 rounded p-2 text-sm"
                                 value={editForms[member.id]?.mainDriver || ''}
                                 onChange={(e) => {
                                   const newValue = e.target.value;
@@ -416,13 +617,18 @@ const RaceDetails: React.FC = () => {
                                 })}
                               </select>
                             ) : (
-                              selection?.mainDriver ? normalizeDriver(selection.mainDriver) : '-'
+                              <span className="text-white text-sm">
+                                {selection?.mainDriver ? normalizeDriver(selection.mainDriver) : '-'}
+                              </span>
                             )}
-                          </td>
-                          <td className="p-4">
+                          </div>
+
+                          {/* Reserve Driver */}
+                          <div className="flex flex-col">
+                            <label className="text-sm font-medium text-white/70 mb-1">Reserve Driver</label>
                             {isEditing ? (
                               <select
-                                className="w-full bg-gray-800 text-white border border-gray-700 rounded p-2"
+                                className="w-full bg-gray-800 text-white border border-gray-700 rounded p-2 text-sm"
                                 value={editForms[member.id]?.reserveDriver || ''}
                                 onChange={(e) => {
                                   const newValue = e.target.value;
@@ -454,13 +660,18 @@ const RaceDetails: React.FC = () => {
                                 })}
                               </select>
                             ) : (
-                              selection?.reserveDriver ? normalizeDriver(selection.reserveDriver) : '-'
+                              <span className="text-white text-sm">
+                                {selection?.reserveDriver ? normalizeDriver(selection.reserveDriver) : '-'}
+                              </span>
                             )}
-                          </td>
-                          <td className="p-4">
+                          </div>
+
+                          {/* Team */}
+                          <div className="flex flex-col">
+                            <label className="text-sm font-medium text-white/70 mb-1">Team</label>
                             {isEditing ? (
                               <select
-                                className="w-full bg-gray-800 text-white border border-gray-700 rounded p-2"
+                                className="w-full bg-gray-800 text-white border border-gray-700 rounded p-2 text-sm"
                                 value={editForms[member.id]?.team || ''}
                                 onChange={(e) => {
                                   const newValue = e.target.value;
@@ -492,56 +703,52 @@ const RaceDetails: React.FC = () => {
                                 })}
                               </select>
                             ) : (
-                              selection?.team ? normalizeTeam(selection.team) : '-'
-                            )}
-                          </td>
-                          <td className="p-4">
-                            {selection?.isAdminAssigned ? (
-                              <span className="flex items-center text-yellow-500">
-                                <IconWrapper icon={FaUserShield} className="mr-1" />
-                                Admin Assigned
+                              <span className="text-white text-sm">
+                                {selection?.team ? normalizeTeam(selection.team) : '-'}
                               </span>
-                            ) : '-'}
-                          </td>
-                          {isAdmin && (
-                            <td className="p-2 md:p-4">
-                              {isEditing ? (
-                                <div className="flex flex-col space-y-2 md:flex-row md:space-x-2 md:space-y-0">
-                                  <button
-                                    onClick={() => handleSave(member.id, true)}
-                                    className="flex items-center gap-2 px-3 py-2 min-w-[44px] min-h-[44px] justify-center text-sm bg-green-600 hover:bg-green-700 rounded text-white"
-                                  >
-                                    <IconWrapper icon={FaCheck} /> Real points
-                                  </button>
-                                  <button
-                                    onClick={() => handleSave(member.id, false)}
-                                    className="flex items-center gap-2 px-3 py-2 min-w-[44px] min-h-[44px] justify-center text-sm bg-yellow-600 hover:bg-yellow-700 rounded text-white"
-                                  >
-                                    <IconWrapper icon={FaCheck} /> 0 points
-                                  </button>
-                                  <button
-                                    onClick={() => handleCancel(member.id)}
-                                    className="flex items-center gap-2 px-3 py-2 min-w-[44px] min-h-[44px] justify-center text-sm bg-gray-600 hover:bg-gray-700 rounded text-white"
-                                  >
-                                    <IconWrapper icon={FaTimes} /> Cancel
-                                  </button>
-                                </div>
-                              ) : (
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Admin Actions */}
+                        {isAdmin && (
+                          <div className="mt-4 pt-3 border-t border-white/10">
+                            {isEditing ? (
+                              <div className="flex flex-col space-y-2">
                                 <button
-                                  onClick={() => handleEdit(member)}
-                                  className="flex items-center gap-2 px-3 py-2 min-w-[44px] min-h-[44px] justify-center text-sm bg-red-600 hover:bg-red-700 rounded text-white"
+                                  onClick={() => handleSave(member.id, true)}
+                                  className="flex items-center justify-center gap-2 px-4 py-2 text-sm bg-green-600 hover:bg-green-700 rounded text-white"
                                 >
-                                  <IconWrapper icon={FaEdit} /> Edit
+                                  <IconWrapper icon={FaCheck} /> Real points
                                 </button>
-                              )}
-                            </td>
-                          )}
-                        </tr>
-                      );
-                    });
-                  })()}
-                </tbody>
-              </table>
+                                <button
+                                  onClick={() => handleSave(member.id, false)}
+                                  className="flex items-center justify-center gap-2 px-4 py-2 text-sm bg-yellow-600 hover:bg-yellow-700 rounded text-white"
+                                >
+                                  <IconWrapper icon={FaCheck} /> 0 points
+                                </button>
+                                <button
+                                  onClick={() => handleCancel(member.id)}
+                                  className="flex items-center justify-center gap-2 px-4 py-2 text-sm bg-gray-600 hover:bg-gray-700 rounded text-white"
+                                >
+                                  <IconWrapper icon={FaTimes} /> Cancel
+                                </button>
+                              </div>
+                            ) : (
+                              <button
+                                onClick={() => handleEdit(member)}
+                                className="w-full flex items-center justify-center gap-2 px-4 py-2 text-sm bg-red-600 hover:bg-red-700 rounded text-white"
+                              >
+                                <IconWrapper icon={FaEdit} /> Edit
+                              </button>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    );
+                  });
+                })()}
+              </div>
             </div>
           </div>
         </div>
