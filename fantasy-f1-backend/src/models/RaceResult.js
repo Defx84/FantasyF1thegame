@@ -351,6 +351,31 @@ raceResultSchema.post('save', async function(doc) {
       teamResultsCount: doc.teamResults?.length || 0
     });
 
+    // ENHANCED SAFEGUARD: Check if race results are actually available
+    if (!doc.results || doc.results.length === 0) {
+      console.error(`[RaceResult Post-Save] ⚠️ Race ${doc.raceName} (round ${doc.round}) marked as completed but has no results! Skipping points assignment.`);
+      return;
+    }
+
+    if (!doc.teamResults || doc.teamResults.length === 0) {
+      console.error(`[RaceResult Post-Save] ⚠️ Race ${doc.raceName} (round ${doc.round}) marked as completed but has no team results! Skipping points assignment.`);
+      return;
+    }
+
+    // ENHANCED SAFEGUARD: Validate minimum expected results
+    const expectedDriverCount = 20; // F1 has 20 drivers
+    const expectedTeamCount = 10;   // F1 has 10 teams
+    
+    if (doc.results.length < expectedDriverCount) {
+      console.warn(`[RaceResult Post-Save] ⚠️ Race ${doc.raceName} (round ${doc.round}) has only ${doc.results.length} driver results (expected ${expectedDriverCount}). Results may be incomplete.`);
+    }
+    
+    if (doc.teamResults.length < expectedTeamCount) {
+      console.warn(`[RaceResult Post-Save] ⚠️ Race ${doc.raceName} (round ${doc.round}) has only ${doc.teamResults.length} team results (expected ${expectedTeamCount}). Results may be incomplete.`);
+    }
+
+    console.log(`[RaceResult Post-Save] ✅ Race data validation passed. Proceeding with points assignment.`);
+
     // Initialize services
     const scoringService = new (require('../services/ScoringService'))();
     const leaderboardService = new (require('../services/LeaderboardService'))();

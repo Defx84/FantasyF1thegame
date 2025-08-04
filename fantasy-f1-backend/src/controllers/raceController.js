@@ -279,6 +279,35 @@ const updateRaceResults = async (req, res) => {
             console.log(`${team.team}: Race ${team.racePoints}, Sprint ${team.sprintPoints}, Total ${team.totalPoints}`);
         });
 
+        // ENHANCED SAFEGUARD: Validate race results before setting status to completed
+        if (!raceResults || raceResults.length === 0) {
+            console.error(`[Race Update] ⚠️ Cannot set race to completed - no race results provided for round ${round}`);
+            return res.status(400).json({ 
+                error: 'Cannot complete race without race results' 
+            });
+        }
+
+        if (!calculatedTeamResults || calculatedTeamResults.length === 0) {
+            console.error(`[Race Update] ⚠️ Cannot set race to completed - no team results calculated for round ${round}`);
+            return res.status(400).json({ 
+                error: 'Cannot complete race without team results' 
+            });
+        }
+
+        // Validate minimum expected results
+        const expectedDriverCount = 20; // F1 has 20 drivers
+        const expectedTeamCount = 10;   // F1 has 10 teams
+        
+        if (raceResults.length < expectedDriverCount) {
+            console.warn(`[Race Update] ⚠️ Race results may be incomplete: ${raceResults.length} drivers (expected ${expectedDriverCount})`);
+        }
+        
+        if (calculatedTeamResults.length < expectedTeamCount) {
+            console.warn(`[Race Update] ⚠️ Team results may be incomplete: ${calculatedTeamResults.length} teams (expected ${expectedTeamCount})`);
+        }
+
+        console.log(`[Race Update] ✅ Race data validation passed. Setting status to completed.`);
+
         // Update race result with all data
         const updateData = {
             results: raceResults,
