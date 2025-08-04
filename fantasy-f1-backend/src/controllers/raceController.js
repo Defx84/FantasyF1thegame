@@ -319,11 +319,14 @@ const updateRaceResults = async (req, res) => {
             for (const member of league.members) {
                 let selection = await RaceSelection.findOne({
                     user: member._id,
-                league: leagueId,
+                    league: leagueId,
                     race: updatedRace._id
                 });
                 if (!selection) continue;
-                if (!selection.pointBreakdown || selection.status === 'empty') {
+                
+                // FIXED: Handle both 'empty' and 'user-submitted' statuses for automation
+                if (!selection.pointBreakdown || selection.status === 'empty' || selection.status === 'user-submitted') {
+                    console.log(`[AutoAssign] Processing selection for user ${member.username} (status: ${selection.status})`);
                     const pointsData = scoringService.calculateRacePoints({
                         mainDriver: selection.mainDriver,
                         reserveDriver: selection.reserveDriver,
@@ -336,6 +339,9 @@ const updateRaceResults = async (req, res) => {
                     selection.assignedAt = new Date();
                     await selection.save();
                     updatedCount++;
+                    console.log(`[AutoAssign] Assigned ${pointsData.totalPoints} points to user ${member.username}`);
+                } else {
+                    console.log(`[AutoAssign] Skipping user ${member.username} - points already assigned (status: ${selection.status})`);
                 }
             }
             await leaderboardService.updateStandings(leagueId);

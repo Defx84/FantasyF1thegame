@@ -422,7 +422,13 @@ raceResultSchema.post('save', async function(doc) {
           selection.points !== pointsData.totalPoints || 
           JSON.stringify(selection.pointBreakdown) !== JSON.stringify(pointsData.breakdown);
 
-        if (pointsChanged) {
+        // FIXED: Handle both 'empty' and 'user-submitted' statuses for automation
+        const shouldUpdate = pointsChanged || 
+          !selection.pointBreakdown || 
+          selection.status === 'empty' || 
+          selection.status === 'user-submitted';
+
+        if (shouldUpdate) {
           // Log the points update
           await PointsUpdateLog.create({
             round: doc.round,
@@ -482,6 +488,13 @@ raceResultSchema.post('save', async function(doc) {
     }
   } catch (error) {
     console.error('[RaceResult Post-Save] Error assigning points:', error);
+    console.error('[RaceResult Post-Save] Error details:', {
+      raceName: doc.raceName,
+      round: doc.round,
+      status: doc.status,
+      errorMessage: error.message,
+      errorStack: error.stack
+    });
   }
 });
 

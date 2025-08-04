@@ -313,7 +313,7 @@ exports.assignRealPointsToLeague = async (req, res) => {
         continue;
       }
       // Only update if not already assigned real points
-      if (!selection.pointBreakdown || selection.status === 'empty') {
+      if (!selection.pointBreakdown || selection.status === 'empty' || selection.status === 'user-submitted') {
         console.log(`[Admin Points] Assigning points for user ${member.username} in league ${league.name} for round ${round}`);
         const pointsData = scoringService.calculateRacePoints({
           mainDriver: selection.mainDriver,
@@ -354,7 +354,7 @@ exports.assignRealPointsToLeague = async (req, res) => {
 
         console.log(`[Admin Points] Updated usage tracking for user ${member.username} in league ${league.name}`);
       } else {
-        console.log(`[Admin Points] Skipping user ${member.username} - points already assigned`);
+        console.log(`[Admin Points] Skipping user ${member.username} - points already assigned (status: ${selection.status})`);
       }
     }
     // Update leaderboard for the league
