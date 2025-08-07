@@ -33,44 +33,56 @@ class HelmetGenerator {
             <stop offset="0%" style="stop-color:#2a2a2a;stop-opacity:0.8" />
             <stop offset="100%" style="stop-color:#1a1a1a;stop-opacity:0.9" />
           </linearGradient>
+          <linearGradient id="shadowGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#000000;stop-opacity:0.3" />
+            <stop offset="100%" style="stop-color:#000000;stop-opacity:0.1" />
+          </linearGradient>
         </defs>
         
         <!-- Main helmet body - realistic aerodynamic shape -->
-        <path d="M 20 80 Q 20 60 30 50 Q 40 40 60 35 Q 80 30 100 30 Q 120 30 140 35 Q 160 40 170 50 Q 180 60 180 80 Q 180 100 170 110 Q 160 120 140 125 Q 120 130 100 130 Q 80 130 60 125 Q 40 120 30 110 Q 20 100 20 80 Z" 
+        <path d="M 15 85 Q 15 65 25 55 Q 35 45 55 40 Q 75 35 100 35 Q 125 35 145 40 Q 165 45 175 55 Q 185 65 185 85 Q 185 105 175 115 Q 165 125 145 130 Q 125 135 100 135 Q 75 135 55 130 Q 35 125 25 115 Q 15 105 15 85 Z" 
               fill="url(#helmetGradient)" stroke="#333" stroke-width="2"/>
         
+        <!-- Helmet shadow/depth -->
+        <path d="M 15 85 Q 15 65 25 55 Q 35 45 55 40 Q 75 35 100 35 Q 125 35 145 40 Q 165 45 175 55 Q 185 65 185 85" 
+              fill="url(#shadowGradient)" stroke="none"/>
+        
         <!-- Top ridge/vent structure -->
-        <path d="M 25 70 Q 35 65 50 60 Q 70 55 100 55 Q 130 55 150 60 Q 165 65 175 70" 
+        <path d="M 20 75 Q 30 70 45 65 Q 65 60 100 60 Q 135 60 155 65 Q 170 70 180 75" 
               fill="none" stroke="#555" stroke-width="3" opacity="0.7"/>
         
         <!-- Visor - large curved visor -->
-        <path d="M 35 75 Q 35 65 45 60 Q 55 55 70 55 Q 85 55 100 55 Q 115 55 130 55 Q 145 60 155 65 Q 165 70 165 80 Q 165 90 155 95 Q 145 100 130 100 Q 115 100 100 100 Q 85 100 70 100 Q 55 95 45 90 Q 35 85 35 75 Z" 
+        <path d="M 30 80 Q 30 70 40 65 Q 50 60 65 60 Q 80 60 100 60 Q 120 60 135 60 Q 150 65 160 70 Q 170 75 170 85 Q 170 95 160 100 Q 150 105 135 105 Q 120 105 100 105 Q 80 105 65 105 Q 50 100 40 95 Q 30 90 30 80 Z" 
               fill="url(#visorGradient)" stroke="#333" stroke-width="1"/>
         
+        <!-- Visor reflection -->
+        <path d="M 35 75 Q 45 70 60 70 Q 80 70 100 70 Q 120 70 140 70 Q 155 70 165 75" 
+              fill="none" stroke="#ffffff" stroke-width="1" opacity="0.3"/>
+        
         <!-- Visor pivot mechanism -->
-        <circle cx="155" cy="75" r="4" fill="#333" stroke="#666" stroke-width="1"/>
-        <circle cx="155" cy="75" r="2" fill="#666"/>
+        <circle cx="160" cy="80" r="5" fill="#333" stroke="#666" stroke-width="1"/>
+        <circle cx="160" cy="80" r="2.5" fill="#666"/>
         
         <!-- Chin bar with vents -->
-        <path d="M 20 80 Q 20 90 25 95 Q 30 100 40 105 Q 50 110 60 110 Q 70 110 80 105 Q 90 100 95 95 Q 100 90 100 80" 
+        <path d="M 15 85 Q 15 95 20 100 Q 25 105 35 110 Q 45 115 55 115 Q 65 115 75 110 Q 85 105 90 100 Q 95 95 95 85" 
               fill="url(#helmetGradient)" stroke="#333" stroke-width="1"/>
         
         <!-- Chin vents -->
-        <rect x="45" y="95" width="12" height="3" fill="#333" opacity="0.8"/>
-        <rect x="65" y="95" width="12" height="3" fill="#333" opacity="0.8"/>
+        <rect x="40" y="100" width="15" height="4" fill="#333" opacity="0.8"/>
+        <rect x="65" y="100" width="15" height="4" fill="#333" opacity="0.8"/>
         
         <!-- Side panel for number -->
-        <rect x="140" y="60" width="25" height="15" rx="3" fill="url(#helmetGradient)" stroke="#333" stroke-width="1"/>
+        <rect x="145" y="65" width="30" height="18" rx="4" fill="url(#helmetGradient)" stroke="#333" stroke-width="1"/>
         
         <!-- Rear spoiler extension -->
-        <path d="M 170 80 Q 175 85 180 90 Q 185 95 190 100 Q 195 105 200 110" 
+        <path d="M 175 85 Q 180 90 185 95 Q 190 100 195 105 Q 200 110 205 115" 
               fill="none" stroke="#333" stroke-width="2"/>
         
         <!-- Helmet pattern based on type -->
         ${this.generatePattern(helmetPattern, colors)}
         
         <!-- Helmet number in side panel -->
-        <text x="152.5" y="70" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="${colors.accent}">${helmetNumber}</text>
+        <text x="160" y="75" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="${colors.accent}">${helmetNumber}</text>
       </svg>
     `;
 
@@ -102,11 +114,11 @@ class HelmetGenerator {
   generateHorizontalStripes(colors) {
     return `
       <!-- Horizontal stripes -->
-      <path d="M 30 70 Q 40 70 50 70 Q 60 70 70 70 Q 80 70 90 70 Q 100 70 110 70 Q 120 70 130 70 Q 140 70 150 70" 
+      <path d="M 25 75 Q 35 75 45 75 Q 55 75 65 75 Q 75 75 85 75 Q 95 75 105 75 Q 115 75 125 75 Q 135 75 145 75 Q 155 75 165 75" 
             stroke="${colors.accent}" stroke-width="4" fill="none" opacity="0.8"/>
-      <path d="M 30 85 Q 40 85 50 85 Q 60 85 70 85 Q 80 85 90 85 Q 100 85 110 85 Q 120 85 130 85 Q 140 85 150 85" 
+      <path d="M 25 90 Q 35 90 45 90 Q 55 90 65 90 Q 75 90 85 90 Q 95 90 105 90 Q 115 90 125 90 Q 135 90 145 90 Q 155 90 165 90" 
             stroke="${colors.accent}" stroke-width="4" fill="none" opacity="0.8"/>
-      <path d="M 30 100 Q 40 100 50 100 Q 60 100 70 100 Q 80 100 90 100 Q 100 100 110 100 Q 120 100 130 100 Q 140 100 150 100" 
+      <path d="M 25 105 Q 35 105 45 105 Q 55 105 65 105 Q 75 105 85 105 Q 95 105 105 105 Q 115 105 125 105 Q 135 105 145 105 Q 155 105 165 105" 
             stroke="${colors.accent}" stroke-width="4" fill="none" opacity="0.8"/>
     `;
   }
@@ -117,11 +129,11 @@ class HelmetGenerator {
   generateVShapeStripes(colors) {
     return `
       <!-- V-shape converging stripes -->
-      <path d="M 30 70 Q 45 80 60 70 Q 75 80 90 70 Q 105 80 120 70 Q 135 80 150 70" 
+      <path d="M 25 75 Q 40 85 55 75 Q 70 85 85 75 Q 100 85 115 75 Q 130 85 145 75 Q 160 85 175 75" 
             stroke="${colors.accent}" stroke-width="4" fill="none" opacity="0.8"/>
-      <path d="M 35 85 Q 50 95 65 85 Q 80 95 95 85 Q 110 95 125 85 Q 140 95 155 85" 
+      <path d="M 30 90 Q 45 100 60 90 Q 75 100 90 90 Q 105 100 120 90 Q 135 100 150 90 Q 165 100 180 90" 
             stroke="${colors.accent}" stroke-width="4" fill="none" opacity="0.8"/>
-      <path d="M 40 100 Q 55 110 70 100 Q 85 110 100 100 Q 115 110 130 100 Q 145 110 160 100" 
+      <path d="M 35 105 Q 50 115 65 105 Q 80 115 95 105 Q 110 115 125 105 Q 140 115 155 105 Q 170 115 185 105" 
             stroke="${colors.accent}" stroke-width="4" fill="none" opacity="0.8"/>
     `;
   }
@@ -132,11 +144,11 @@ class HelmetGenerator {
   generateZigzagStripes(colors) {
     return `
       <!-- Zigzag lines -->
-      <path d="M 30 70 L 40 75 L 50 70 L 60 75 L 70 70 L 80 75 L 90 70 L 100 75 L 110 70 L 120 75 L 130 70 L 140 75 L 150 70" 
+      <path d="M 25 75 L 35 80 L 45 75 L 55 80 L 65 75 L 75 80 L 85 75 L 95 80 L 105 75 L 115 80 L 125 75 L 135 80 L 145 75 L 155 80 L 165 75" 
             stroke="${colors.accent}" stroke-width="4" fill="none" opacity="0.8"/>
-      <path d="M 30 85 L 40 90 L 50 85 L 60 90 L 70 85 L 80 90 L 90 85 L 100 90 L 110 85 L 120 90 L 130 85 L 140 90 L 150 85" 
+      <path d="M 25 90 L 35 95 L 45 90 L 55 95 L 65 90 L 75 95 L 85 90 L 95 95 L 105 90 L 115 95 L 125 90 L 135 95 L 145 90 L 155 95 L 165 90" 
             stroke="${colors.accent}" stroke-width="4" fill="none" opacity="0.8"/>
-      <path d="M 30 100 L 40 105 L 50 100 L 60 105 L 70 100 L 80 105 L 90 100 L 100 105 L 110 100 L 120 105 L 130 100 L 140 105 L 150 100" 
+      <path d="M 25 105 L 35 110 L 45 105 L 55 110 L 65 105 L 75 110 L 85 105 L 95 110 L 105 105 L 115 110 L 125 105 L 135 110 L 145 105 L 155 110 L 165 105" 
             stroke="${colors.accent}" stroke-width="4" fill="none" opacity="0.8"/>
     `;
   }

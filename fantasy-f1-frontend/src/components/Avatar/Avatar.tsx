@@ -61,8 +61,8 @@ const Avatar: React.FC<AvatarProps> = ({ userId, username, size = 64, className 
       <img
         src={helmetUrl || ''}
         alt={`${username}'s helmet`}
-        style={{ width: size, height: size }}
-        className="rounded-full border-2 border-gray-300"
+        style={{ width: size, height: size * 0.8 }} // Maintain aspect ratio for side profile
+        className="border-2 border-gray-300 rounded-lg"
         title={username}
       />
     </div>

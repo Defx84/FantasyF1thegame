@@ -62,8 +62,8 @@ const HelmetPreview: React.FC<HelmetPreviewProps> = ({
       <img
         src={svgDataUrl || ''}
         alt="Helmet preview"
-        style={{ width: size, height: size }}
-        className="rounded-full border-2 border-gray-300"
+        style={{ width: size, height: size * 0.8 }} // Maintain aspect ratio for side profile
+        className="border-2 border-gray-300 rounded-lg"
       />
     </div>
   );
