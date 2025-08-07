@@ -4,6 +4,7 @@ import IconWrapper from '../../utils/iconWrapper';
 import { avatarService, UserAvatar, AvatarUpdateRequest } from '../../services/avatarService';
 import Avatar from './Avatar';
 import HelmetPreview from './HelmetPreview';
+import { helmetTemplates } from './helmetTemplates';
 
 const AvatarTestingPanel: React.FC = () => {
   const [users, setUsers] = useState<UserAvatar[]>([]);
@@ -17,7 +18,7 @@ const AvatarTestingPanel: React.FC = () => {
 
   // Test configuration
   const [testConfig, setTestConfig] = useState<AvatarUpdateRequest>({
-    helmetPattern: 1,
+    helmetTemplateId: 1,
     helmetColors: {
       primary: '#FF0000',
       secondary: '#0000FF',
@@ -128,18 +129,19 @@ const AvatarTestingPanel: React.FC = () => {
          </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Pattern Selection */}
+          {/* Template Selection */}
           <div>
-            <label className="block text-sm text-white/70 mb-2">Pattern</label>
+            <label className="block text-sm text-white/70 mb-2">Template</label>
             <select
-              value={testConfig.helmetPattern || ''}
-              onChange={(e) => handleTestConfigChange('helmetPattern', parseInt(e.target.value))}
+              value={testConfig.helmetTemplateId || ''}
+              onChange={(e) => handleTestConfigChange('helmetTemplateId', parseInt(e.target.value))}
               className="w-full px-3 py-2 bg-white/20 border border-white/30 rounded text-white focus:outline-none focus:border-red-500"
             >
-              <option value="">No Pattern</option>
-              <option value="1">Pattern 1 - Horizontal</option>
-              <option value="2">Pattern 2 - V-Shape</option>
-              <option value="3">Pattern 3 - Zigzag</option>
+              {helmetTemplates.map(template => (
+                <option key={template.id} value={template.id}>
+                  {template.name} - {template.description}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -194,16 +196,16 @@ const AvatarTestingPanel: React.FC = () => {
         <div className="mt-6 p-4 bg-white/10 rounded-lg border border-white/20">
           <h4 className="text-sm font-semibold text-white/90 mb-3">Live Preview</h4>
           <div className="flex justify-center">
-                         <HelmetPreview 
-               helmetPattern={testConfig.helmetPattern || null}
-               helmetColors={{
-                 primary: testConfig.helmetColors?.primary || '#808080',
-                 secondary: testConfig.helmetColors?.secondary || '#808080',
-                 accent: testConfig.helmetColors?.accent || '#808080'
-               }}
-               helmetNumber={testConfig.helmetNumber || '-'}
-               size={120}
-             />
+            <HelmetPreview 
+              helmetTemplateId={testConfig.helmetTemplateId || 1}
+              helmetColors={{
+                primary: testConfig.helmetColors?.primary || '#808080',
+                secondary: testConfig.helmetColors?.secondary || '#808080',
+                accent: testConfig.helmetColors?.accent || '#808080'
+              }}
+              helmetNumber={testConfig.helmetNumber || '-'}
+              size={120}
+            />
           </div>
         </div>
       </div>
@@ -226,7 +228,7 @@ const AvatarTestingPanel: React.FC = () => {
                 <div>
                   <div className="text-white/90 font-semibold">{user.username}</div>
                   <div className="text-xs text-white/70">
-                    Pattern: {user.avatar.helmetPattern || 'None'} | 
+                    Template: {user.avatar.helmetTemplateId || 'None'} | 
                     Number: {user.avatar.helmetNumber} | 
                     Customized: {user.avatar.isCustomized ? 'Yes' : 'No'}
                   </div>

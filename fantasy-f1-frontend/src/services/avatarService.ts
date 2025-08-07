@@ -7,7 +7,7 @@ export interface HelmetColors {
 }
 
 export interface AvatarConfig {
-  helmetPattern: number | null;
+  helmetTemplateId: number | null;
   helmetColors: HelmetColors;
   helmetNumber: string;
   isCustomized: boolean;
@@ -20,7 +20,7 @@ export interface UserAvatar {
 }
 
 export interface AvatarUpdateRequest {
-  helmetPattern?: number;
+  helmetTemplateId?: number;
   helmetColors?: Partial<HelmetColors>;
   helmetNumber?: string;
 }

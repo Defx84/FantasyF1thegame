@@ -12,13 +12,13 @@ class HelmetGenerator {
   /**
    * Generate helmet SVG based on configuration
    * @param {Object} config - Helmet configuration
-   * @param {number} config.helmetPattern - Pattern type (1, 2, or 3)
+   * @param {number} config.helmetTemplateId - Template type (1, 2, or 3)
    * @param {Object} config.helmetColors - Color configuration
    * @param {string} config.helmetNumber - Number to display on helmet
    * @returns {string} SVG string
    */
   generateHelmetSVG(config) {
-    const { helmetPattern, helmetColors, helmetNumber } = config;
+    const { helmetTemplateId, helmetColors, helmetNumber } = config;
     const colors = { ...this.defaultColors, ...helmetColors };
 
     // Professional F1-style helmet design - side profile view
@@ -64,8 +64,8 @@ class HelmetGenerator {
         <!-- Rear spoiler extension -->
         <line x1="175" y1="85" x2="200" y2="110" stroke="#333" stroke-width="2"/>
         
-        <!-- Helmet pattern based on type -->
-        ${this.generatePattern(helmetPattern, colors)}
+        <!-- Helmet pattern based on template -->
+        ${this.generatePattern(helmetTemplateId, colors)}
         
         <!-- Helmet number in side panel -->
         <text x="160" y="75" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="${colors.accent}">${helmetNumber}</text>
@@ -76,13 +76,13 @@ class HelmetGenerator {
   }
 
   /**
-   * Generate pattern based on pattern type
-   * @param {number} patternType - Pattern type (1, 2, or 3)
+   * Generate pattern based on template type
+   * @param {number} templateId - Template type (1, 2, or 3)
    * @param {Object} colors - Color configuration
    * @returns {string} SVG pattern elements
    */
-  generatePattern(patternType, colors) {
-    switch (patternType) {
+  generatePattern(templateId, colors) {
+    switch (templateId) {
       case 1:
         return this.generateHorizontalStripes(colors);
       case 2:
@@ -163,7 +163,7 @@ class HelmetGenerator {
    */
   getDefaultHelmet() {
     return {
-      helmetPattern: null,
+      helmetTemplateId: null,
       helmetColors: this.defaultColors,
       helmetNumber: '-',
       isCustomized: false

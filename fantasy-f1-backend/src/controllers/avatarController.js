@@ -36,7 +36,7 @@ const getUserAvatar = async (req, res) => {
 const updateUserAvatar = async (req, res) => {
   try {
     const { userId } = req.params;
-    const { helmetPattern, helmetColors, helmetNumber } = req.body;
+    const { helmetTemplateId, helmetColors, helmetNumber } = req.body;
 
     // Only allow admins to update avatar data for now
     if (!req.user.isAppAdmin) {
@@ -46,8 +46,8 @@ const updateUserAvatar = async (req, res) => {
     }
 
     // Validate input
-    if (helmetPattern && ![1, 2, 3].includes(helmetPattern)) {
-      return res.status(400).json({ error: 'Invalid helmet pattern. Must be 1, 2, or 3.' });
+    if (helmetTemplateId && ![1, 2, 3].includes(helmetTemplateId)) {
+      return res.status(400).json({ error: 'Invalid helmet template. Must be 1, 2, or 3.' });
     }
 
     if (helmetNumber && (helmetNumber.length > 2 || !/^[A-Za-z0-9-]+$/.test(helmetNumber))) {
@@ -75,8 +75,8 @@ const updateUserAvatar = async (req, res) => {
 
     // Update avatar configuration
     const updateData = {};
-    if (helmetPattern !== undefined) {
-      updateData['avatar.helmetPattern'] = helmetPattern;
+    if (helmetTemplateId !== undefined) {
+      updateData['avatar.helmetTemplateId'] = helmetTemplateId;
     }
     if (helmetColors) {
       if (helmetColors.primary) updateData['avatar.helmetColors.primary'] = helmetColors.primary;

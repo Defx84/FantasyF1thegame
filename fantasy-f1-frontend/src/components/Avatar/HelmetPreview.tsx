@@ -3,7 +3,7 @@ import { HelmetColors } from '../../services/avatarService';
 import { helmetRenderer, HelmetConfig } from './helmetRenderer';
 
 interface HelmetPreviewProps {
-  helmetPattern: number | null;
+  helmetTemplateId: number;
   helmetColors: HelmetColors;
   helmetNumber: string;
   size?: number;
@@ -11,7 +11,7 @@ interface HelmetPreviewProps {
 }
 
 const HelmetPreview: React.FC<HelmetPreviewProps> = ({ 
-  helmetPattern, 
+  helmetTemplateId, 
   helmetColors, 
   helmetNumber, 
   size = 120,
@@ -23,7 +23,7 @@ const HelmetPreview: React.FC<HelmetPreviewProps> = ({
 
   useEffect(() => {
     generateHelmetSVG();
-  }, [helmetPattern, helmetColors, helmetNumber, size]);
+  }, [helmetTemplateId, helmetColors, helmetNumber, size]);
 
   const generateHelmetSVG = () => {
     setLoading(true);
@@ -31,7 +31,7 @@ const HelmetPreview: React.FC<HelmetPreviewProps> = ({
     try {
       // Use the new helmet renderer
       const config: HelmetConfig = {
-        helmetPattern,
+        helmetTemplateId,
         helmetColors,
         helmetNumber: helmetNumber || '-',
         size
