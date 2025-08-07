@@ -87,7 +87,7 @@ const AvatarTestingPanel: React.FC = () => {
     }));
   };
 
-  const handleColorChange = (colorKey: keyof typeof testConfig.helmetColors, value: string) => {
+  const handleColorChange = (colorKey: 'primary' | 'secondary' | 'accent', value: string) => {
     setTestConfig(prev => ({
       ...prev,
       helmetColors: {
