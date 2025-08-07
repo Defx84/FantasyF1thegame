@@ -122,10 +122,10 @@ const AvatarTestingPanel: React.FC = () => {
     <div className="space-y-6">
       {/* Test Configuration Panel */}
       <div className="bg-white/5 rounded-xl p-4 border border-white/10">
-        <h3 className="text-lg font-bold mb-4 text-white/90 flex items-center">
-          <IconWrapper icon={FaPalette} size={16} className="mr-2" />
-          Test Configuration
-        </h3>
+                 <h3 className="text-lg font-bold mb-4 text-white/90 flex items-center">
+           <IconWrapper icon={FaPalette} size={16} className="mr-2" />
+           Test Configuration (v1.1)
+         </h3>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {/* Pattern Selection */}
