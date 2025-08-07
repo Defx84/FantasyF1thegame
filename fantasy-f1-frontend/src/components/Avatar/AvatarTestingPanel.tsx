@@ -194,12 +194,12 @@ const AvatarTestingPanel: React.FC = () => {
         <div className="mt-6 p-4 bg-white/10 rounded-lg border border-white/20">
           <h4 className="text-sm font-semibold text-white/90 mb-3">Live Preview</h4>
           <div className="flex justify-center">
-            <HelmetPreview 
-              helmetPattern={testConfig.helmetPattern}
-              helmetColors={testConfig.helmetColors}
-              helmetNumber={testConfig.helmetNumber}
-              size={120}
-            />
+                         <HelmetPreview 
+               helmetPattern={testConfig.helmetPattern || null}
+               helmetColors={testConfig.helmetColors}
+               helmetNumber={testConfig.helmetNumber}
+               size={120}
+             />
           </div>
         </div>
       </div>
