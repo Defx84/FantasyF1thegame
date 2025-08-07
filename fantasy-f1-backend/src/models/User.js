@@ -63,6 +63,27 @@ const userSchema = new mongoose.Schema({
   lastLogin: {
     type: Date
   },
+  avatar: {
+    helmetPattern: {
+      type: Number,
+      enum: [1, 2, 3],
+      default: null
+    },
+    helmetColors: {
+      primary: { type: String, default: '#808080' },
+      secondary: { type: String, default: '#808080' },
+      accent: { type: String, default: '#808080' }
+    },
+    helmetNumber: {
+      type: String,
+      default: '-',
+      maxlength: 2
+    },
+    isCustomized: {
+      type: Boolean,
+      default: false
+    }
+  },
   leagueSelections: [{
     leagueId: {
       type: mongoose.Schema.Types.ObjectId,

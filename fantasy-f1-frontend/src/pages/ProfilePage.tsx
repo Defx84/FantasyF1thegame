@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { getUserLeagues, League, deleteLeague, abandonLeague } from '../services/leagueService';
-import { FaUser, FaEnvelope, FaTrophy, FaKey, FaArrowLeft, FaTrash, FaSignOutAlt, FaEye, FaSyncAlt } from 'react-icons/fa';
+import { FaUser, FaEnvelope, FaTrophy, FaKey, FaArrowLeft, FaTrash, FaSignOutAlt, FaEye, FaSyncAlt, FaPalette } from 'react-icons/fa';
 import IconWrapper from '../utils/iconWrapper';
 import { api } from '../services/api';
+import AvatarTestingPanel from '../components/Avatar/AvatarTestingPanel';
 
 const ProfilePage: React.FC = () => {
   const { user, logout, getToken } = useAuth();
@@ -407,6 +408,18 @@ const ProfilePage: React.FC = () => {
                   </div>
                 </div>
               )}
+
+              {/* Avatar Testing Section */}
+              <div className="mt-6 bg-white/5 rounded-xl p-4 border border-white/10">
+                <h3 className="text-lg font-bold mb-4 text-white/90 flex items-center">
+                  <IconWrapper icon={FaPalette} size={16} className="mr-2" />
+                  Avatar Testing (Admin Only)
+                </h3>
+                <div className="text-sm text-white/70 mb-4">
+                  Test the helmet customization feature. This section is only visible to admins.
+                </div>
+                <AvatarTestingPanel />
+              </div>
             </div>
             </div>
           )}

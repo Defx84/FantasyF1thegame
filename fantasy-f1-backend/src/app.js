@@ -87,6 +87,9 @@ app.use('/api/statistics', require('./routes/leagueStatisticsRoutes'));
 app.use('/api/league', require('./routes/leagueRoutes'));
 app.use('/api/selections', require('./routes/selectionRoutes'));
 
+// Avatar routes (admin-only for testing)
+app.use('/api/avatar', require('./routes/avatarRoutes'));
+
 // Error handling middleware
 app.use((err, req, res, next) => {
   console.error(err.stack);
