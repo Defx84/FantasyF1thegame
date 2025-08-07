@@ -201,7 +201,7 @@ const AvatarTestingPanel: React.FC = () => {
                  secondary: testConfig.helmetColors?.secondary || '#808080',
                  accent: testConfig.helmetColors?.accent || '#808080'
                }}
-               helmetNumber={testConfig.helmetNumber}
+               helmetNumber={testConfig.helmetNumber || '-'}
                size={120}
              />
           </div>
