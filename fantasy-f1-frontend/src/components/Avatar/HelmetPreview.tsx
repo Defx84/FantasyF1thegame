@@ -37,9 +37,8 @@ const HelmetPreview: React.FC<HelmetPreviewProps> = ({
         size
       };
       
-      // Temporarily use test helmet for debugging
-      const svg = helmetRenderer.generateTestHelmet();
-      console.log('Generated Test SVG:', svg); // Debug log
+      const svg = helmetRenderer.generateHelmetSVG(config);
+      console.log('Generated Helmet SVG:', svg); // Debug log
       setRawSvg(svg);
       
       const dataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
