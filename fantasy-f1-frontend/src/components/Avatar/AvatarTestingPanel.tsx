@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { FaUser, FaPalette, FaUndo, FaEye } from 'react-icons/fa';
+import { FaUser, FaPalette, FaUndo, FaEye, FaDownload } from 'react-icons/fa';
 import IconWrapper from '../../utils/iconWrapper';
 import { avatarService, UserAvatar, AvatarUpdateRequest } from '../../services/avatarService';
-import Avatar from './Avatar';
-import HelmetPreview from './HelmetPreview';
-import { helmetTemplates } from './helmetTemplates';
+import AvatarImage from './AvatarImage';
+import HelmetImageEditor from './HelmetImageEditor';
+import { helmetTemplates } from './HelmetImageEditor';
 
 const AvatarTestingPanel: React.FC = () => {
   const [users, setUsers] = useState<UserAvatar[]>([]);
@@ -15,6 +15,7 @@ const AvatarTestingPanel: React.FC = () => {
   const [updateError, setUpdateError] = useState<string | null>(null);
   const [updateSuccess, setUpdateSuccess] = useState<string | null>(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [generatedImageUrl, setGeneratedImageUrl] = useState<string | null>(null);
 
   // Test configuration
   const [testConfig, setTestConfig] = useState<AvatarUpdateRequest>({
@@ -196,7 +197,7 @@ const AvatarTestingPanel: React.FC = () => {
         <div className="mt-6 p-4 bg-white/10 rounded-lg border border-white/20">
           <h4 className="text-sm font-semibold text-white/90 mb-3">Live Preview</h4>
           <div className="flex justify-center">
-            <HelmetPreview 
+            <HelmetImageEditor 
               helmetTemplateId={testConfig.helmetTemplateId || 1}
               helmetColors={{
                 primary: testConfig.helmetColors?.primary || '#808080',
@@ -205,8 +206,23 @@ const AvatarTestingPanel: React.FC = () => {
               }}
               helmetNumber={testConfig.helmetNumber || '-'}
               size={120}
+              onImageGenerated={setGeneratedImageUrl}
             />
           </div>
+          
+          {/* Download Button */}
+          {generatedImageUrl && (
+            <div className="mt-4 flex justify-center">
+              <a
+                href={generatedImageUrl}
+                download={`helmet-${testConfig.helmetTemplateId}-${testConfig.helmetNumber}.png`}
+                className="flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 rounded text-white text-sm"
+              >
+                <IconWrapper icon={FaDownload} size={14} className="mr-2" />
+                Download Image
+              </a>
+            </div>
+          )}
         </div>
       </div>
 
@@ -223,8 +239,8 @@ const AvatarTestingPanel: React.FC = () => {
               key={user.id}
               className="flex items-center justify-between bg-white/10 p-3 rounded-lg border border-white/10"
             >
-                             <div className="flex items-center space-x-3">
-                 <Avatar key={`${user.id}-${refreshKey}`} userId={user.id} username={user.username} size={48} />
+                                           <div className="flex items-center space-x-3">
+                <AvatarImage key={`${user.id}-${refreshKey}`} userId={user.id} username={user.username} size={48} />
                 <div>
                   <div className="text-white/90 font-semibold">{user.username}</div>
                   <div className="text-xs text-white/70">

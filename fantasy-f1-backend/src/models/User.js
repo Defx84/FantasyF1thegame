@@ -79,6 +79,10 @@ const userSchema = new mongoose.Schema({
       default: '-',
       maxlength: 2
     },
+    imageData: {
+      type: String, // Base64 encoded image data
+      default: null
+    },
     isCustomized: {
       type: Boolean,
       default: false

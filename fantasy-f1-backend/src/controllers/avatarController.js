@@ -36,7 +36,7 @@ const getUserAvatar = async (req, res) => {
 const updateUserAvatar = async (req, res) => {
   try {
     const { userId } = req.params;
-    const { helmetTemplateId, helmetColors, helmetNumber } = req.body;
+    const { helmetTemplateId, helmetColors, helmetNumber, imageData } = req.body;
 
     // Only allow admins to update avatar data for now
     if (!req.user.isAppAdmin) {
@@ -85,6 +85,9 @@ const updateUserAvatar = async (req, res) => {
     }
     if (helmetNumber !== undefined) {
       updateData['avatar.helmetNumber'] = helmetNumber;
+    }
+    if (imageData) {
+      updateData['avatar.imageData'] = imageData;
     }
 
     // Mark as customized if any changes are made
