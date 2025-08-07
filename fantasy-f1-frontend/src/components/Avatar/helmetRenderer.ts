@@ -224,6 +224,30 @@ export class HelmetRenderer {
       `width="${width}" height="${height}"`
     );
   }
+
+  /**
+   * Generate a simple test helmet for debugging
+   */
+  generateTestHelmet(): string {
+    return `<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="160" viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="testGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF0000;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0000FF;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Simple test helmet shape -->
+  <ellipse cx="100" cy="80" rx="80" ry="50" fill="url(#testGradient)" stroke="#333" stroke-width="3"/>
+  
+  <!-- Test visor -->
+  <ellipse cx="100" cy="75" rx="60" ry="25" fill="#2a2a2a" stroke="#333" stroke-width="2"/>
+  
+  <!-- Test number -->
+  <text x="100" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="20" font-weight="bold" fill="#FFFF00">44</text>
+</svg>`;
+  }
 }
 
 export const helmetRenderer = new HelmetRenderer(); 

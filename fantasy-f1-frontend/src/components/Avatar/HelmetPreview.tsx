@@ -18,6 +18,7 @@ const HelmetPreview: React.FC<HelmetPreviewProps> = ({
   className = '' 
 }) => {
   const [svgDataUrl, setSvgDataUrl] = useState<string | null>(null);
+  const [rawSvg, setRawSvg] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -36,7 +37,11 @@ const HelmetPreview: React.FC<HelmetPreviewProps> = ({
         size
       };
       
-      const svg = helmetRenderer.generateHelmetSVG(config);
+      // Temporarily use test helmet for debugging
+      const svg = helmetRenderer.generateTestHelmet();
+      console.log('Generated Test SVG:', svg); // Debug log
+      setRawSvg(svg);
+      
       const dataUrl = `data:image/svg+xml;base64,${btoa(svg)}`;
       setSvgDataUrl(dataUrl);
     } catch (error) {
@@ -53,6 +58,19 @@ const HelmetPreview: React.FC<HelmetPreviewProps> = ({
         style={{ width: size, height: size }}
       >
         <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-gray-600"></div>
+      </div>
+    );
+  }
+
+  // Debug: Show raw SVG for troubleshooting
+  if (rawSvg) {
+    return (
+      <div className={`inline-block ${className}`}>
+        <div 
+          dangerouslySetInnerHTML={{ __html: rawSvg }}
+          style={{ width: size, height: size * 0.8 }}
+          className="border-2 border-gray-300 rounded-lg"
+        />
       </div>
     );
   }
