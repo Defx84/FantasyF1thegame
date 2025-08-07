@@ -36,29 +36,6 @@ export class HelmetRenderer {
   }
 
   /**
-   * Generate helmet SVG with custom colors, patterns, and number
-   */
-  generateHelmetSVG(config: HelmetConfig): string {
-    const { helmetPattern, helmetColors, helmetNumber, size = 200 } = config;
-    
-    // Apply colors to the template
-    let svg = this.applyColors(this.baseTemplate, helmetColors);
-    
-    // Add patterns
-    svg = this.addPatterns(svg, helmetPattern, helmetColors.accent);
-    
-    // Add number
-    svg = this.addNumber(svg, helmetNumber, helmetColors.accent);
-    
-    // Resize if needed
-    if (size !== 200) {
-      svg = this.resizeSVG(svg, size);
-    }
-    
-    return svg;
-  }
-
-  /**
    * Apply colors to the helmet template
    */
   private applyColors(svg: string, colors: HelmetColors): string {
