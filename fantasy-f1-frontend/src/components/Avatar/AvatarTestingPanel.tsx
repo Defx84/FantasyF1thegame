@@ -196,7 +196,7 @@ const AvatarTestingPanel: React.FC = () => {
           <div className="flex justify-center">
                          <HelmetPreview 
                helmetPattern={testConfig.helmetPattern || null}
-               helmetColors={testConfig.helmetColors}
+               helmetColors={testConfig.helmetColors || { primary: '#808080', secondary: '#808080', accent: '#808080' }}
                helmetNumber={testConfig.helmetNumber}
                size={120}
              />
