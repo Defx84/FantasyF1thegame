@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="200" height="160" viewBox="0 0 200 160" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- Gradient definitions will be dynamically applied -->
+    <linearGradient id="helmetGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#808080;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#808080;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="visorGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2a2a2a;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#1a1a1a;stop-opacity:0.9" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Main helmet body - realistic aerodynamic shape -->
+  <path d="M 20 80 Q 20 60 30 50 Q 40 40 60 35 Q 80 30 100 30 Q 120 30 140 35 Q 160 40 170 50 Q 180 60 180 80 Q 180 100 170 110 Q 160 120 140 125 Q 120 130 100 130 Q 80 130 60 125 Q 40 120 30 110 Q 20 100 20 80 Z" 
+        fill="url(#helmetGradient)" stroke="#333" stroke-width="2"/>
+  
+  <!-- Top ridge/vent structure -->
+  <path d="M 25 70 Q 35 65 50 60 Q 70 55 100 55 Q 130 55 150 60 Q 165 65 175 70" 
+        fill="none" stroke="#555" stroke-width="3" opacity="0.7"/>
+  
+  <!-- Visor - large curved visor -->
+  <path d="M 35 75 Q 35 65 45 60 Q 55 55 70 55 Q 85 55 100 55 Q 115 55 130 55 Q 145 60 155 65 Q 165 70 165 80 Q 165 90 155 95 Q 145 100 130 100 Q 115 100 100 100 Q 85 100 70 100 Q 55 95 45 90 Q 35 85 35 75 Z" 
+        fill="url(#visorGradient)" stroke="#333" stroke-width="1"/>
+  
+  <!-- Visor pivot mechanism -->
+  <circle cx="155" cy="75" r="4" fill="#333" stroke="#666" stroke-width="1"/>
+  <circle cx="155" cy="75" r="2" fill="#666"/>
+  
+  <!-- Chin bar with vents -->
+  <path d="M 20 80 Q 20 90 25 95 Q 30 100 40 105 Q 50 110 60 110 Q 70 110 80 105 Q 90 100 95 95 Q 100 90 100 80" 
+        fill="url(#helmetGradient)" stroke="#333" stroke-width="1"/>
+  
+  <!-- Chin vents -->
+  <rect x="45" y="95" width="12" height="3" fill="#333" opacity="0.8"/>
+  <rect x="65" y="95" width="12" height="3" fill="#333" opacity="0.8"/>
+  
+  <!-- Side panel for number -->
+  <rect x="140" y="60" width="25" height="15" rx="3" fill="url(#helmetGradient)" stroke="#333" stroke-width="1"/>
+  
+  <!-- Rear spoiler extension -->
+  <path d="M 170 80 Q 175 85 180 90 Q 185 95 190 100 Q 195 105 200 110" 
+        fill="none" stroke="#333" stroke-width="2"/>
+  
+  <!-- Pattern area (will be dynamically generated) -->
+  <g id="pattern-area">
+    <!-- Patterns will be inserted here -->
+  </g>
+  
+  <!-- Number display (will be dynamically generated) -->
+  <g id="number-display">
+    <!-- Numbers will be inserted here -->
+  </g>
+</svg> 
