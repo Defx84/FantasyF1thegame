@@ -3,6 +3,7 @@ import { FaUser, FaPalette, FaUndo, FaEye } from 'react-icons/fa';
 import IconWrapper from '../../utils/iconWrapper';
 import { avatarService, UserAvatar, AvatarUpdateRequest } from '../../services/avatarService';
 import Avatar from './Avatar';
+import HelmetPreview from './HelmetPreview';
 
 const AvatarTestingPanel: React.FC = () => {
   const [users, setUsers] = useState<UserAvatar[]>([]);
@@ -12,6 +13,7 @@ const AvatarTestingPanel: React.FC = () => {
   const [updating, setUpdating] = useState(false);
   const [updateError, setUpdateError] = useState<string | null>(null);
   const [updateSuccess, setUpdateSuccess] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Test configuration
   const [testConfig, setTestConfig] = useState<AvatarUpdateRequest>({
@@ -51,8 +53,9 @@ const AvatarTestingPanel: React.FC = () => {
       await avatarService.updateUserAvatar(userId, testConfig);
       setUpdateSuccess('Avatar updated successfully!');
       
-      // Refresh users list
+      // Refresh users list and force avatar refresh
       await loadUsers();
+      setRefreshKey(prev => prev + 1);
     } catch (err: any) {
       console.error('Error updating avatar:', err);
       setUpdateError(err.response?.data?.error || 'Failed to update avatar');
@@ -70,8 +73,9 @@ const AvatarTestingPanel: React.FC = () => {
       await avatarService.resetUserAvatar(userId);
       setUpdateSuccess('Avatar reset to default!');
       
-      // Refresh users list
+      // Refresh users list and force avatar refresh
       await loadUsers();
+      setRefreshKey(prev => prev + 1);
     } catch (err: any) {
       console.error('Error resetting avatar:', err);
       setUpdateError(err.response?.data?.error || 'Failed to reset avatar');
@@ -185,6 +189,19 @@ const AvatarTestingPanel: React.FC = () => {
             className="w-20 h-10 bg-white/20 border border-white/30 rounded cursor-pointer"
           />
         </div>
+
+        {/* Live Preview */}
+        <div className="mt-6 p-4 bg-white/10 rounded-lg border border-white/20">
+          <h4 className="text-sm font-semibold text-white/90 mb-3">Live Preview</h4>
+          <div className="flex justify-center">
+            <HelmetPreview 
+              helmetPattern={testConfig.helmetPattern}
+              helmetColors={testConfig.helmetColors}
+              helmetNumber={testConfig.helmetNumber}
+              size={120}
+            />
+          </div>
+        </div>
       </div>
 
       {/* Users List */}
@@ -200,8 +217,8 @@ const AvatarTestingPanel: React.FC = () => {
               key={user.id}
               className="flex items-center justify-between bg-white/10 p-3 rounded-lg border border-white/10"
             >
-              <div className="flex items-center space-x-3">
-                <Avatar userId={user.id} username={user.username} size={48} />
+                             <div className="flex items-center space-x-3">
+                 <Avatar key={`${user.id}-${refreshKey}`} userId={user.id} username={user.username} size={48} />
                 <div>
                   <div className="text-white/90 font-semibold">{user.username}</div>
                   <div className="text-xs text-white/70">
