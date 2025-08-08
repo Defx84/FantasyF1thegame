@@ -138,37 +138,15 @@ const HelmetImageEditor: React.FC<HelmetImageEditorProps> = ({
     
     ctx.save();
     
-    // Create a mask that only covers the actual helmet pixels (not the background)
-    ctx.globalCompositeOperation = 'source-in';
-    
-    // Draw the helmet shape as a mask
-    const centerX = offsetX + helmetWidth / 2;
-    const centerY = offsetY + helmetHeight / 2;
-    const radiusX = helmetWidth * 0.4;
-    const radiusY = helmetHeight * 0.3;
-    
-    // Create helmet body mask (excluding visor)
-    ctx.beginPath();
-    ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
-    
-    // Exclude visor area
-    const visorRadiusX = radiusX * 0.8;
-    const visorRadiusY = radiusY * 0.6;
-    const visorCenterY = centerY - radiusY * 0.1;
-    ctx.moveTo(centerX + visorRadiusX, visorCenterY);
-    ctx.ellipse(centerX, visorCenterY, visorRadiusX, visorRadiusY, 0, 0, 2 * Math.PI, true);
-    
-    ctx.fill();
-    
-    // Now apply colors to different sections based on your scheme
+    // Simple approach: use multiply blend mode to tint the helmet
+    // This will only affect non-white areas of the helmet template
     ctx.globalCompositeOperation = 'multiply';
     
-    // Section 1: Main helmet body (primary color)
+    // Apply primary color to the entire helmet area
     ctx.fillStyle = primary;
     ctx.fillRect(offsetX, offsetY, helmetWidth, helmetHeight);
     
-    // Section 2: Pattern/stripes (secondary color)
-    // This will be applied to the pattern areas marked as "2" in your scheme
+    // Apply secondary color to pattern areas
     ctx.globalCompositeOperation = 'multiply';
     ctx.fillStyle = secondary;
     
@@ -205,9 +183,14 @@ const HelmetImageEditor: React.FC<HelmetImageEditorProps> = ({
         break;
     }
     
-    // Section 3: Accent areas (accent color)
+    // Apply accent color to number panel area
     ctx.globalCompositeOperation = 'multiply';
     ctx.fillStyle = accent;
+    
+    const centerX = offsetX + helmetWidth / 2;
+    const centerY = offsetY + helmetHeight / 2;
+    const radiusX = helmetWidth * 0.4;
+    const radiusY = helmetHeight * 0.3;
     
     // Apply accent color to specific areas (like the number panel background)
     const panelWidth = helmetWidth * 0.08;
