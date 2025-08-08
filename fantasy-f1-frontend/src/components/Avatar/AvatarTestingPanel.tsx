@@ -22,8 +22,8 @@ const AvatarTestingPanel: React.FC = () => {
     helmetTemplateId: 1,
     helmetColors: {
       primary: '#FF0000',
-      secondary: '#0000FF',
-      accent: '#FFFF00'
+      secondary: '#FF0000', // Same as primary for simplicity
+      accent: '#FF0000'     // Same as primary for simplicity
     },
     helmetNumber: '44'
   });
@@ -159,38 +159,23 @@ const AvatarTestingPanel: React.FC = () => {
             />
           </div>
 
-          {/* Primary Color */}
+          {/* Helmet Color */}
           <div>
-            <label className="block text-sm text-white/70 mb-2">Primary Color</label>
+            <label className="block text-sm text-white/70 mb-2">Helmet Color</label>
             <input
               type="color"
               value={testConfig.helmetColors?.primary || '#FF0000'}
-              onChange={(e) => handleColorChange('primary', e.target.value)}
+              onChange={(e) => {
+                const color = e.target.value;
+                handleTestConfigChange('helmetColors', {
+                  primary: color,
+                  secondary: color,
+                  accent: color
+                });
+              }}
               className="w-full h-10 bg-white/20 border border-white/30 rounded cursor-pointer"
             />
           </div>
-
-          {/* Secondary Color */}
-          <div>
-            <label className="block text-sm text-white/70 mb-2">Secondary Color</label>
-            <input
-              type="color"
-              value={testConfig.helmetColors?.secondary || '#0000FF'}
-              onChange={(e) => handleColorChange('secondary', e.target.value)}
-              className="w-full h-10 bg-white/20 border border-white/30 rounded cursor-pointer"
-            />
-          </div>
-        </div>
-
-        {/* Accent Color */}
-        <div className="mt-4">
-          <label className="block text-sm text-white/70 mb-2">Accent Color</label>
-          <input
-            type="color"
-            value={testConfig.helmetColors?.accent || '#FFFF00'}
-            onChange={(e) => handleColorChange('accent', e.target.value)}
-            className="w-20 h-10 bg-white/20 border border-white/30 rounded cursor-pointer"
-          />
         </div>
 
         {/* Live Preview */}

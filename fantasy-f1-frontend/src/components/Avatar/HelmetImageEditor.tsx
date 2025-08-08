@@ -126,23 +126,13 @@ const HelmetImageEditor: React.FC<HelmetImageEditorProps> = ({
   };
 
   const applyColorOverlays = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    // Create gradient overlays for the helmet colors
-    const { primary, secondary, accent } = helmetColors;
+    // Use only the primary color for simplicity
+    const { primary } = helmetColors;
 
-    // Create a gradient overlay for the main helmet colors
-    const colorGradient = ctx.createLinearGradient(0, 0, width, height);
-    colorGradient.addColorStop(0, primary + '80'); // 80 = 50% opacity
-    colorGradient.addColorStop(0.5, secondary + '80');
-    colorGradient.addColorStop(1, primary + '80');
-    
-    // Apply color overlay using multiply blend mode
+    // Create a mask to only apply color to the helmet area
+    // We'll use a simple approach: apply color overlay with reduced opacity
     ctx.globalCompositeOperation = 'multiply';
-    ctx.fillStyle = colorGradient;
-    ctx.fillRect(0, 0, width, height);
-
-    // Apply accent color to highlights and details
-    ctx.globalCompositeOperation = 'overlay';
-    ctx.fillStyle = accent + '40'; // 40 = 25% opacity
+    ctx.fillStyle = primary + '60'; // 60 = 37.5% opacity
     ctx.fillRect(0, 0, width, height);
 
     // Reset composite operation
@@ -244,13 +234,29 @@ const HelmetImageEditor: React.FC<HelmetImageEditorProps> = ({
   const addNumber = (ctx: CanvasRenderingContext2D, width: number, height: number) => {
     if (!helmetNumber || helmetNumber === '-') return;
 
-    // Position for the number (side panel area)
-    const x = width * 0.825; // 82.5% from left
-    const y = height * 0.46; // 46% from top
+    // Template-specific number positioning
+    let x, y;
+    switch (helmetTemplateId) {
+      case 1: // Classic Stripes
+        x = width * 0.82;
+        y = height * 0.45;
+        break;
+      case 2: // V-Shape Design
+        x = width * 0.85;
+        y = height * 0.48;
+        break;
+      case 3: // Zigzag Lightning
+        x = width * 0.83;
+        y = height * 0.47;
+        break;
+      default:
+        x = width * 0.825;
+        y = height * 0.46;
+    }
 
     // Set text properties
     ctx.font = `bold ${Math.max(12, width * 0.08)}px Arial, sans-serif`;
-    ctx.fillStyle = helmetColors.accent;
+    ctx.fillStyle = '#FFFFFF'; // White text for better visibility
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
