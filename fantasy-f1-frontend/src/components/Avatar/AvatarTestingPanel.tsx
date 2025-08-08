@@ -2,9 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { FaUser, FaPalette, FaUndo, FaEye, FaDownload } from 'react-icons/fa';
 import IconWrapper from '../../utils/iconWrapper';
 import { avatarService, UserAvatar, AvatarUpdateRequest } from '../../services/avatarService';
-import AvatarImage from './AvatarImage';
-import HelmetImageEditor from './HelmetImageEditor';
-import { helmetTemplates } from './HelmetImageEditor';
+import CallingCard from './CallingCard';
 
 const AvatarTestingPanel: React.FC = () => {
   const [users, setUsers] = useState<UserAvatar[]>([]);
@@ -19,12 +17,7 @@ const AvatarTestingPanel: React.FC = () => {
 
   // Test configuration
   const [testConfig, setTestConfig] = useState<AvatarUpdateRequest>({
-    helmetTemplateId: 1,
-    helmetColors: {
-      primary: '#FF0000',   // Red for main helmet body
-      secondary: '#00FF00', // Green for patterns/stripes
-      accent: '#0000FF'     // Blue for accent areas
-    },
+    helmetPresetId: 1,
     helmetNumber: '44'
   });
 
@@ -93,15 +86,7 @@ const AvatarTestingPanel: React.FC = () => {
     }));
   };
 
-  const handleColorChange = (colorKey: 'primary' | 'secondary' | 'accent', value: string) => {
-    setTestConfig(prev => ({
-      ...prev,
-      helmetColors: {
-        ...prev.helmetColors!,
-        [colorKey]: value
-      }
-    }));
-  };
+
 
   if (loading) {
     return (
@@ -129,20 +114,20 @@ const AvatarTestingPanel: React.FC = () => {
            Test Configuration (v1.1)
          </h3>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
-          {/* Template Selection */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Helmet Preset Selection */}
           <div>
-            <label className="block text-sm text-white/70 mb-2">Template</label>
+            <label className="block text-sm text-white/70 mb-2">Helmet Preset</label>
             <select
-              value={testConfig.helmetTemplateId || ''}
-              onChange={(e) => handleTestConfigChange('helmetTemplateId', parseInt(e.target.value))}
+              value={testConfig.helmetPresetId || ''}
+              onChange={(e) => handleTestConfigChange('helmetPresetId', parseInt(e.target.value))}
               className="w-full px-3 py-2 bg-white/20 border border-white/30 rounded text-white focus:outline-none focus:border-red-500"
             >
-              {helmetTemplates.map(template => (
-                <option key={template.id} value={template.id}>
-                  {template.name}
-                </option>
-              ))}
+              <option value={1}>Preset 1</option>
+              <option value={2}>Preset 2</option>
+              <option value={3}>Preset 3</option>
+              <option value={4}>Preset 4</option>
+              <option value={5}>Preset 5</option>
             </select>
           </div>
 
@@ -158,71 +143,18 @@ const AvatarTestingPanel: React.FC = () => {
               className="w-full px-3 py-2 bg-white/20 border border-white/30 rounded text-white placeholder-white/50 focus:outline-none focus:border-red-500"
             />
           </div>
-
-          {/* Primary Color */}
-          <div>
-            <label className="block text-sm text-white/70 mb-2">Primary Color</label>
-            <input
-              type="color"
-              value={testConfig.helmetColors?.primary || '#FF0000'}
-              onChange={(e) => handleColorChange('primary', e.target.value)}
-              className="w-full h-10 bg-white/20 border border-white/30 rounded cursor-pointer"
-            />
-          </div>
-
-          {/* Secondary Color */}
-          <div>
-            <label className="block text-sm text-white/70 mb-2">Secondary Color</label>
-            <input
-              type="color"
-              value={testConfig.helmetColors?.secondary || '#00FF00'}
-              onChange={(e) => handleColorChange('secondary', e.target.value)}
-              className="w-full h-10 bg-white/20 border border-white/30 rounded cursor-pointer"
-            />
-          </div>
-
-          {/* Accent Color */}
-          <div>
-            <label className="block text-sm text-white/70 mb-2">Accent Color</label>
-            <input
-              type="color"
-              value={testConfig.helmetColors?.accent || '#0000FF'}
-              onChange={(e) => handleColorChange('accent', e.target.value)}
-              className="w-full h-10 bg-white/20 border border-white/30 rounded cursor-pointer"
-            />
-          </div>
         </div>
 
         {/* Live Preview */}
         <div className="mt-6 p-4 bg-white/10 rounded-lg border border-white/20">
           <h4 className="text-sm font-semibold text-white/90 mb-3">Live Preview</h4>
           <div className="flex justify-center">
-            <HelmetImageEditor 
-              helmetTemplateId={testConfig.helmetTemplateId || 1}
-              helmetColors={{
-                primary: testConfig.helmetColors?.primary || '#808080',
-                secondary: testConfig.helmetColors?.secondary || '#808080',
-                accent: testConfig.helmetColors?.accent || '#808080'
-              }}
+            <CallingCard 
+              helmetPresetId={testConfig.helmetPresetId || 1}
               helmetNumber={testConfig.helmetNumber || '-'}
               size={200}
-              onImageGenerated={setGeneratedImageUrl}
             />
           </div>
-          
-          {/* Download Button */}
-          {generatedImageUrl && (
-            <div className="mt-4 flex justify-center">
-              <a
-                href={generatedImageUrl}
-                download={`helmet-${testConfig.helmetTemplateId}-${testConfig.helmetNumber}.png`}
-                className="flex items-center px-3 py-1.5 bg-green-600 hover:bg-green-700 rounded text-white text-xs"
-              >
-                <IconWrapper icon={FaDownload} size={12} className="mr-1" />
-                Download
-              </a>
-            </div>
-          )}
         </div>
       </div>
 
@@ -240,11 +172,11 @@ const AvatarTestingPanel: React.FC = () => {
               className="flex items-center justify-between bg-white/10 p-3 rounded-lg border border-white/10"
             >
                                            <div className="flex items-center space-x-3">
-                <AvatarImage key={`${user.id}-${refreshKey}`} userId={user.id} username={user.username} size={48} />
+                <CallingCard key={`${user.id}-${refreshKey}`} helmetPresetId={user.avatar.helmetPresetId || 1} helmetNumber={user.avatar.helmetNumber} size={48} />
                 <div>
                   <div className="text-white/90 font-semibold">{user.username}</div>
                   <div className="text-xs text-white/70">
-                    Template: {user.avatar.helmetTemplateId || 'None'} | 
+                    Preset: {user.avatar.helmetPresetId || 'None'} | 
                     Number: {user.avatar.helmetNumber} | 
                     Customized: {user.avatar.isCustomized ? 'Yes' : 'No'}
                   </div>

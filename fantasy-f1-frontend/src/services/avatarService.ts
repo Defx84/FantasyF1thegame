@@ -1,14 +1,7 @@
 import { api } from './api';
 
-export interface HelmetColors {
-  primary: string;
-  secondary: string;
-  accent: string;
-}
-
 export interface AvatarConfig {
-  helmetTemplateId: number | null;
-  helmetColors: HelmetColors;
+  helmetPresetId: number | null;
   helmetNumber: string;
   isCustomized: boolean;
 }
@@ -20,8 +13,7 @@ export interface UserAvatar {
 }
 
 export interface AvatarUpdateRequest {
-  helmetTemplateId?: number;
-  helmetColors?: Partial<HelmetColors>;
+  helmetPresetId?: number;
   helmetNumber?: string;
 }
 

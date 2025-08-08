@@ -36,7 +36,7 @@ const getUserAvatar = async (req, res) => {
 const updateUserAvatar = async (req, res) => {
   try {
     const { userId } = req.params;
-    const { helmetTemplateId, helmetColors, helmetNumber, imageData } = req.body;
+    const { helmetPresetId, helmetNumber } = req.body;
 
     // Only allow admins to update avatar data for now
     if (!req.user.isAppAdmin) {
@@ -46,26 +46,12 @@ const updateUserAvatar = async (req, res) => {
     }
 
     // Validate input
-    if (helmetTemplateId && ![1, 2, 3].includes(helmetTemplateId)) {
-      return res.status(400).json({ error: 'Invalid helmet template. Must be 1, 2, or 3.' });
+    if (helmetPresetId && ![1, 2, 3, 4, 5].includes(helmetPresetId)) {
+      return res.status(400).json({ error: 'Invalid helmet preset. Must be 1, 2, 3, 4, or 5.' });
     }
 
     if (helmetNumber && (helmetNumber.length > 2 || !/^[A-Za-z0-9-]+$/.test(helmetNumber))) {
       return res.status(400).json({ error: 'Invalid helmet number. Must be 1-2 characters, letters, numbers, or dash only.' });
-    }
-
-    // Validate colors (basic hex validation)
-    if (helmetColors) {
-      const colorRegex = /^#[0-9A-Fa-f]{6}$/;
-      if (helmetColors.primary && !colorRegex.test(helmetColors.primary)) {
-        return res.status(400).json({ error: 'Invalid primary color format. Use hex format (e.g., #FF0000).' });
-      }
-      if (helmetColors.secondary && !colorRegex.test(helmetColors.secondary)) {
-        return res.status(400).json({ error: 'Invalid secondary color format. Use hex format (e.g., #FF0000).' });
-      }
-      if (helmetColors.accent && !colorRegex.test(helmetColors.accent)) {
-        return res.status(400).json({ error: 'Invalid accent color format. Use hex format (e.g., #FF0000).' });
-      }
     }
 
     const user = await User.findById(userId);
@@ -75,19 +61,11 @@ const updateUserAvatar = async (req, res) => {
 
     // Update avatar configuration
     const updateData = {};
-    if (helmetTemplateId !== undefined) {
-      updateData['avatar.helmetTemplateId'] = helmetTemplateId;
-    }
-    if (helmetColors) {
-      if (helmetColors.primary) updateData['avatar.helmetColors.primary'] = helmetColors.primary;
-      if (helmetColors.secondary) updateData['avatar.helmetColors.secondary'] = helmetColors.secondary;
-      if (helmetColors.accent) updateData['avatar.helmetColors.accent'] = helmetColors.accent;
+    if (helmetPresetId !== undefined) {
+      updateData['avatar.helmetPresetId'] = helmetPresetId;
     }
     if (helmetNumber !== undefined) {
       updateData['avatar.helmetNumber'] = helmetNumber;
-    }
-    if (imageData) {
-      updateData['avatar.imageData'] = imageData;
     }
 
     // Mark as customized if any changes are made

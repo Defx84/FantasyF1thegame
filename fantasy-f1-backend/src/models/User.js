@@ -64,24 +64,15 @@ const userSchema = new mongoose.Schema({
     type: Date
   },
   avatar: {
-    helmetTemplateId: {
+    helmetPresetId: {
       type: Number,
-      enum: [1, 2, 3],
+      enum: [1, 2, 3, 4, 5],
       default: null
-    },
-    helmetColors: {
-      primary: { type: String, default: '#808080' },
-      secondary: { type: String, default: '#808080' },
-      accent: { type: String, default: '#808080' }
     },
     helmetNumber: {
       type: String,
       default: '-',
       maxlength: 2
-    },
-    imageData: {
-      type: String, // Base64 encoded image data
-      default: null
     },
     isCustomized: {
       type: Boolean,
