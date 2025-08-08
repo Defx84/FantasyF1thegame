@@ -21,9 +21,9 @@ const AvatarTestingPanel: React.FC = () => {
   const [testConfig, setTestConfig] = useState<AvatarUpdateRequest>({
     helmetTemplateId: 1,
     helmetColors: {
-      primary: '#FF0000',
-      secondary: '#FF0000', // Same as primary for simplicity
-      accent: '#FF0000'     // Same as primary for simplicity
+      primary: '#FF0000',   // Red for main helmet body
+      secondary: '#00FF00', // Green for patterns/stripes
+      accent: '#0000FF'     // Blue for accent areas
     },
     helmetNumber: '44'
   });
@@ -129,7 +129,7 @@ const AvatarTestingPanel: React.FC = () => {
            Test Configuration (v1.1)
          </h3>
         
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* Template Selection */}
           <div>
             <label className="block text-sm text-white/70 mb-2">Template</label>
@@ -140,7 +140,7 @@ const AvatarTestingPanel: React.FC = () => {
             >
               {helmetTemplates.map(template => (
                 <option key={template.id} value={template.id}>
-                  {template.name} - {template.description}
+                  {template.name}
                 </option>
               ))}
             </select>
@@ -159,20 +159,35 @@ const AvatarTestingPanel: React.FC = () => {
             />
           </div>
 
-          {/* Helmet Color */}
+          {/* Primary Color */}
           <div>
-            <label className="block text-sm text-white/70 mb-2">Helmet Color</label>
+            <label className="block text-sm text-white/70 mb-2">Primary Color</label>
             <input
               type="color"
               value={testConfig.helmetColors?.primary || '#FF0000'}
-              onChange={(e) => {
-                const color = e.target.value;
-                handleTestConfigChange('helmetColors', {
-                  primary: color,
-                  secondary: color,
-                  accent: color
-                });
-              }}
+              onChange={(e) => handleColorChange('primary', e.target.value)}
+              className="w-full h-10 bg-white/20 border border-white/30 rounded cursor-pointer"
+            />
+          </div>
+
+          {/* Secondary Color */}
+          <div>
+            <label className="block text-sm text-white/70 mb-2">Secondary Color</label>
+            <input
+              type="color"
+              value={testConfig.helmetColors?.secondary || '#00FF00'}
+              onChange={(e) => handleColorChange('secondary', e.target.value)}
+              className="w-full h-10 bg-white/20 border border-white/30 rounded cursor-pointer"
+            />
+          </div>
+
+          {/* Accent Color */}
+          <div>
+            <label className="block text-sm text-white/70 mb-2">Accent Color</label>
+            <input
+              type="color"
+              value={testConfig.helmetColors?.accent || '#0000FF'}
+              onChange={(e) => handleColorChange('accent', e.target.value)}
               className="w-full h-10 bg-white/20 border border-white/30 rounded cursor-pointer"
             />
           </div>

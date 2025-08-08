@@ -134,20 +134,87 @@ const HelmetImageEditor: React.FC<HelmetImageEditorProps> = ({
   };
 
   const applyHelmetColoring = (ctx: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number, helmetWidth: number, helmetHeight: number, offsetX: number, offsetY: number) => {
-    const { primary } = helmetColors;
+    const { primary, secondary, accent } = helmetColors;
     
     ctx.save();
     
-    // Use 'multiply' blend mode to actually tint the helmet pixels
-    // This will multiply the color values, effectively tinting the helmet
+    // Create a mask that only covers the actual helmet pixels (not the background)
+    ctx.globalCompositeOperation = 'source-in';
+    
+    // Draw the helmet shape as a mask
+    const centerX = offsetX + helmetWidth / 2;
+    const centerY = offsetY + helmetHeight / 2;
+    const radiusX = helmetWidth * 0.4;
+    const radiusY = helmetHeight * 0.3;
+    
+    // Create helmet body mask (excluding visor)
+    ctx.beginPath();
+    ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
+    
+    // Exclude visor area
+    const visorRadiusX = radiusX * 0.8;
+    const visorRadiusY = radiusY * 0.6;
+    const visorCenterY = centerY - radiusY * 0.1;
+    ctx.moveTo(centerX + visorRadiusX, visorCenterY);
+    ctx.ellipse(centerX, visorCenterY, visorRadiusX, visorRadiusY, 0, 0, 2 * Math.PI, true);
+    
+    ctx.fill();
+    
+    // Now apply colors to different sections based on your scheme
     ctx.globalCompositeOperation = 'multiply';
     
-    // Create a solid color overlay that will tint the helmet
+    // Section 1: Main helmet body (primary color)
     ctx.fillStyle = primary;
-    
-    // Apply the color to the entire helmet area
-    // The multiply blend mode will only affect non-white areas of the helmet
     ctx.fillRect(offsetX, offsetY, helmetWidth, helmetHeight);
+    
+    // Section 2: Pattern/stripes (secondary color)
+    // This will be applied to the pattern areas marked as "2" in your scheme
+    ctx.globalCompositeOperation = 'multiply';
+    ctx.fillStyle = secondary;
+    
+    // Apply to pattern areas based on template
+    switch (helmetTemplateId) {
+      case 1: // Classic Stripes - horizontal stripes
+        for (let i = 0; i < 3; i++) {
+          const y = offsetY + helmetHeight * (0.3 + i * 0.15);
+          ctx.fillRect(offsetX + helmetWidth * 0.1, y, helmetWidth * 0.6, helmetHeight * 0.02);
+        }
+        break;
+      case 2: // V-Shape Design
+        ctx.beginPath();
+        ctx.moveTo(offsetX + helmetWidth * 0.2, offsetY + helmetHeight * 0.25);
+        ctx.lineTo(offsetX + helmetWidth * 0.5, offsetY + helmetHeight * 0.5);
+        ctx.lineTo(offsetX + helmetWidth * 0.8, offsetY + helmetHeight * 0.25);
+        ctx.lineWidth = helmetHeight * 0.03;
+        ctx.strokeStyle = secondary;
+        ctx.stroke();
+        break;
+      case 3: // Zigzag Lightning
+        ctx.beginPath();
+        ctx.moveTo(offsetX + helmetWidth * 0.2, offsetY + helmetHeight * 0.3);
+        for (let i = 0; i < 4; i++) {
+          const x = offsetX + helmetWidth * (0.2 + i * 0.2);
+          const y1 = offsetY + helmetHeight * (0.3 + (i % 2) * 0.1);
+          const y2 = offsetY + helmetHeight * (0.3 + ((i + 1) % 2) * 0.1);
+          ctx.lineTo(x, y1);
+          ctx.lineTo(x + helmetWidth * 0.1, y2);
+        }
+        ctx.lineWidth = helmetHeight * 0.02;
+        ctx.strokeStyle = secondary;
+        ctx.stroke();
+        break;
+    }
+    
+    // Section 3: Accent areas (accent color)
+    ctx.globalCompositeOperation = 'multiply';
+    ctx.fillStyle = accent;
+    
+    // Apply accent color to specific areas (like the number panel background)
+    const panelWidth = helmetWidth * 0.08;
+    const panelHeight = helmetHeight * 0.06;
+    const panelX = centerX + radiusX * 0.6;
+    const panelY = centerY - radiusY * 0.1;
+    ctx.fillRect(panelX, panelY, panelWidth, panelHeight);
     
     // Reset composite operation
     ctx.globalCompositeOperation = 'source-over';
