@@ -103,10 +103,11 @@ const HelmetImageEditor: React.FC<HelmetImageEditorProps> = ({
         const offsetX = (canvas.width - scaledWidth) / 2;
         const offsetY = (canvas.height - scaledHeight) / 2;
         
+        // First, draw the base helmet image
         ctx.drawImage(image, offsetX, offsetY, scaledWidth, scaledHeight);
         
-        // Apply color only to the helmet area using better masking
-        applyColorMask(ctx, canvas.width, canvas.height, scaledWidth, scaledHeight, offsetX, offsetY);
+        // Now apply color tinting to actually color the helmet pixels
+        applyHelmetColoring(ctx, canvas.width, canvas.height, scaledWidth, scaledHeight, offsetX, offsetY);
       } else {
         // Fallback to drawn helmet
         drawPlaceholderHelmet(ctx, canvas.width, canvas.height);
@@ -132,48 +133,24 @@ const HelmetImageEditor: React.FC<HelmetImageEditorProps> = ({
     }
   };
 
-  const applyColorMask = (ctx: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number, helmetWidth: number, helmetHeight: number, offsetX: number, offsetY: number) => {
+  const applyHelmetColoring = (ctx: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number, helmetWidth: number, helmetHeight: number, offsetX: number, offsetY: number) => {
     const { primary } = helmetColors;
     
-    // Create a mask for the helmet area (excluding visor and number panel)
     ctx.save();
     
-    // Create a path that covers the helmet but excludes the visor area
-    ctx.beginPath();
+    // Use 'multiply' blend mode to actually tint the helmet pixels
+    // This will multiply the color values, effectively tinting the helmet
+    ctx.globalCompositeOperation = 'multiply';
     
-    // Main helmet body (elliptical shape)
-    const centerX = offsetX + helmetWidth / 2;
-    const centerY = offsetY + helmetHeight / 2;
-    const radiusX = helmetWidth * 0.4;
-    const radiusY = helmetHeight * 0.3;
-    
-    ctx.ellipse(centerX, centerY, radiusX, radiusY, 0, 0, 2 * Math.PI);
-    
-    // Exclude visor area (smaller ellipse)
-    const visorRadiusX = radiusX * 0.8;
-    const visorRadiusY = radiusY * 0.6;
-    const visorCenterY = centerY - radiusY * 0.1;
-    
-    ctx.moveTo(centerX + visorRadiusX, visorCenterY);
-    ctx.ellipse(centerX, visorCenterY, visorRadiusX, visorRadiusY, 0, 0, 2 * Math.PI, true);
-    
-    // Exclude number panel area (small rectangle on the side)
-    const panelWidth = helmetWidth * 0.08;
-    const panelHeight = helmetHeight * 0.06;
-    const panelX = centerX + radiusX * 0.6;
-    const panelY = centerY - radiusY * 0.1;
-    
-    ctx.rect(panelX, panelY, panelWidth, panelHeight);
-    
-    // Apply the mask
-    ctx.clip();
-    
-    // Apply solid color fill to the helmet body (like in your example)
-    ctx.globalCompositeOperation = 'source-over';
+    // Create a solid color overlay that will tint the helmet
     ctx.fillStyle = primary;
-    ctx.fillRect(0, 0, canvasWidth, canvasHeight);
+    
+    // Apply the color to the entire helmet area
+    // The multiply blend mode will only affect non-white areas of the helmet
+    ctx.fillRect(offsetX, offsetY, helmetWidth, helmetHeight);
     
     // Reset composite operation
+    ctx.globalCompositeOperation = 'source-over';
     ctx.restore();
   };
 
