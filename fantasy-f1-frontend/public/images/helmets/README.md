@@ -3,9 +3,9 @@
 This directory should contain 3 professional F1 helmet template images:
 
 ## Required Files:
-- `template-1.png` - Classic Stripes (3 horizontal diagonal stripes)
-- `template-2.png` - V-Shape Design (3 stripes converging in V-shape)
-- `template-3.png` - Zigzag Lightning (3 zigzag lightning-like stripes)
+- `Template-1.png` - Classic Stripes (3 horizontal diagonal stripes)
+- `Template-2.png` - V-Shape Design (3 stripes converging in V-shape)
+- `Template-3.png` - Zigzag Lightning (3 zigzag lightning-like stripes)
 
 ## Image Specifications:
 - **Format**: PNG with transparency

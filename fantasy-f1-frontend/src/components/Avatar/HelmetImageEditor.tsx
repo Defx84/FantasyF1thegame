@@ -22,19 +22,19 @@ const helmetTemplates: HelmetTemplate[] = [
     id: 1,
     name: "Classic Stripes",
     description: "Three horizontal diagonal stripes",
-    imageUrl: "/images/helmets/template-1.png" // We'll add these images later
+    imageUrl: "/images/helmets/Template-1.png"
   },
   {
     id: 2,
     name: "V-Shape Design", 
     description: "Three stripes converging in V-shape",
-    imageUrl: "/images/helmets/template-2.png"
+    imageUrl: "/images/helmets/Template-2.png"
   },
   {
     id: 3,
     name: "Zigzag Lightning",
     description: "Three zigzag lightning-like stripes", 
-    imageUrl: "/images/helmets/template-3.png"
+    imageUrl: "/images/helmets/Template-3.png"
   }
 ];
 
