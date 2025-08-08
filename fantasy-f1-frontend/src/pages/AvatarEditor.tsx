@@ -4,6 +4,7 @@ import { FaChevronLeft, FaChevronRight, FaSave, FaTimes, FaUser } from 'react-ic
 import IconWrapper from '../utils/iconWrapper';
 import { avatarService, AvatarUpdateRequest } from '../services/avatarService';
 import CallingCard from '../components/Avatar/CallingCard';
+import AppLayout from '../components/AppLayout';
 
 const AvatarEditor: React.FC = () => {
   const navigate = useNavigate();
@@ -67,38 +68,39 @@ const AvatarEditor: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex flex-col">
-      {/* Header */}
-      <div className="bg-black/50 backdrop-blur-sm border-b border-white/20 p-4">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <IconWrapper icon={FaUser} size={24} className="text-red-500" />
-            <h1 className="text-2xl font-bold text-white">Edit Your Avatar</h1>
-          </div>
-          
-          <div className="flex items-center space-x-3">
-            <button
-              onClick={handleCancel}
-              className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors flex items-center space-x-2"
-            >
-              <IconWrapper icon={FaTimes} size={16} />
-              <span>Cancel</span>
-            </button>
+    <AppLayout>
+      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex flex-col">
+        {/* Header */}
+        <div className="bg-black/50 backdrop-blur-sm border-b border-white/20 p-4">
+          <div className="max-w-4xl mx-auto flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <IconWrapper icon={FaUser} size={24} className="text-red-500" />
+              <h1 className="text-2xl font-bold text-white">Edit Your Avatar</h1>
+            </div>
             
-            <button
-              onClick={handleSave}
-              disabled={saving}
-              className="px-6 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-800 text-white rounded-lg transition-colors flex items-center space-x-2"
-            >
-              <IconWrapper icon={FaSave} size={16} />
-              <span>{saving ? 'Saving...' : 'Save Avatar'}</span>
-            </button>
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={handleCancel}
+                className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors flex items-center space-x-2"
+              >
+                <IconWrapper icon={FaTimes} size={16} />
+                <span>Cancel</span>
+              </button>
+              
+              <button
+                onClick={handleSave}
+                disabled={saving}
+                className="px-6 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-800 text-white rounded-lg transition-colors flex items-center space-x-2"
+              >
+                <IconWrapper icon={FaSave} size={16} />
+                <span>{saving ? 'Saving...' : 'Save Avatar'}</span>
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col items-center justify-center p-8">
+        {/* Main Content */}
+        <div className="flex-1 flex flex-col items-center justify-center p-8">
         <div className="max-w-4xl w-full">
           {/* Helmet Display Section */}
           <div className="text-center mb-8">
@@ -174,10 +176,10 @@ const AvatarEditor: React.FC = () => {
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+                 </div>
+       </div>
+     </AppLayout>
+   );
+ };
 
 export default AvatarEditor;

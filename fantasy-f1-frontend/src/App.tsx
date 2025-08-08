@@ -127,10 +127,10 @@ const App: React.FC = () => {
           <Route path="/forgot-password" element={<ForgotPassword />} />
           <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/dashboard" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
+          <Route path="/avatar-editor" element={<PrivateRoute><AvatarEditor /></PrivateRoute>} />
           <Route element={<AppLayout><></></AppLayout>}>
           <Route path="/rules" element={<Rules />} />
           <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
-          <Route path="/avatar-editor" element={<PrivateRoute><AvatarEditor /></PrivateRoute>} />
             <Route path="/statistics" element={<PrivateRoute><Statistics /></PrivateRoute>} />
           <Route path="/league/:id" element={<PrivateRoute><LeagueDetails /></PrivateRoute>} />
           <Route path="/league/:leagueId/race/next/selections" element={<PrivateRoute><NextRaceSelections /></PrivateRoute>} />
