@@ -80,9 +80,27 @@ const HelmetImageEditor: React.FC<HelmetImageEditorProps> = ({
         throw new Error(`Template ${helmetTemplateId} not found`);
       }
 
-      // For now, we'll draw a placeholder helmet since we don't have the base images yet
-      // In the future, this will load the actual template images
-      drawPlaceholderHelmet(ctx, canvas.width, canvas.height);
+      // Load the base helmet template image
+      const image = new Image();
+      image.crossOrigin = 'anonymous';
+      
+      await new Promise((resolve, reject) => {
+        image.onload = resolve;
+        image.onerror = () => {
+          console.warn(`Failed to load helmet template ${helmetTemplateId}, using fallback`);
+          drawPlaceholderHelmet(ctx, canvas.width, canvas.height);
+          resolve();
+        };
+        image.src = template.imageUrl;
+      });
+
+      // If image loaded successfully, draw it
+      if (image.complete && image.naturalWidth > 0) {
+        ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+      } else {
+        // Fallback to drawn helmet
+        drawPlaceholderHelmet(ctx, canvas.width, canvas.height);
+      }
 
       // Apply color overlays
       applyColorOverlays(ctx, canvas.width, canvas.height);
@@ -111,18 +129,20 @@ const HelmetImageEditor: React.FC<HelmetImageEditorProps> = ({
     // Create gradient overlays for the helmet colors
     const { primary, secondary, accent } = helmetColors;
 
-    // Primary color overlay (main helmet body)
-    const primaryGradient = ctx.createLinearGradient(0, 0, width, height);
-    primaryGradient.addColorStop(0, primary + '40'); // 40 = 25% opacity
-    primaryGradient.addColorStop(1, secondary + '40');
+    // Create a gradient overlay for the main helmet colors
+    const colorGradient = ctx.createLinearGradient(0, 0, width, height);
+    colorGradient.addColorStop(0, primary + '80'); // 80 = 50% opacity
+    colorGradient.addColorStop(0.5, secondary + '80');
+    colorGradient.addColorStop(1, primary + '80');
     
+    // Apply color overlay using multiply blend mode
     ctx.globalCompositeOperation = 'multiply';
-    ctx.fillStyle = primaryGradient;
+    ctx.fillStyle = colorGradient;
     ctx.fillRect(0, 0, width, height);
 
-    // Accent color overlay (for patterns and details)
+    // Apply accent color to highlights and details
     ctx.globalCompositeOperation = 'overlay';
-    ctx.fillStyle = accent + '60'; // 60 = 37.5% opacity
+    ctx.fillStyle = accent + '40'; // 40 = 25% opacity
     ctx.fillRect(0, 0, width, height);
 
     // Reset composite operation
