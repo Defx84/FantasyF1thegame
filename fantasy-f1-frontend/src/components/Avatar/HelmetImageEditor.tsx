@@ -96,8 +96,8 @@ const HelmetImageEditor: React.FC<HelmetImageEditorProps> = ({
 
       // If image loaded successfully, process it properly
       if (image.complete && image.naturalWidth > 0) {
-        // Draw the helmet larger to fill more of the box
-        const scale = 1.2; // Make helmet 20% larger
+        // Draw the helmet much larger to fill the preview area
+        const scale = 1.8; // Make helmet 80% larger to fill the white box
         const scaledWidth = canvas.width * scale;
         const scaledHeight = canvas.height * scale;
         const offsetX = (canvas.width - scaledWidth) / 2;
@@ -105,7 +105,7 @@ const HelmetImageEditor: React.FC<HelmetImageEditorProps> = ({
         
         ctx.drawImage(image, offsetX, offsetY, scaledWidth, scaledHeight);
         
-        // Apply color only to the helmet area using masking
+        // Apply color only to the helmet area using better masking
         applyColorMask(ctx, canvas.width, canvas.height, scaledWidth, scaledHeight, offsetX, offsetY);
       } else {
         // Fallback to drawn helmet
@@ -135,18 +135,7 @@ const HelmetImageEditor: React.FC<HelmetImageEditorProps> = ({
   const applyColorMask = (ctx: CanvasRenderingContext2D, canvasWidth: number, canvasHeight: number, helmetWidth: number, helmetHeight: number, offsetX: number, offsetY: number) => {
     const { primary } = helmetColors;
     
-    // Create a temporary canvas to work with the helmet area
-    const tempCanvas = document.createElement('canvas');
-    const tempCtx = tempCanvas.getContext('2d');
-    if (!tempCtx) return;
-    
-    tempCanvas.width = canvasWidth;
-    tempCanvas.height = canvasHeight;
-    
-    // Copy the current canvas content to temp canvas
-    tempCtx.drawImage(ctx.canvas, 0, 0);
-    
-    // Create a mask for the helmet area (excluding visor)
+    // Create a mask for the helmet area (excluding visor and number panel)
     ctx.save();
     
     // Create a path that covers the helmet but excludes the visor area
@@ -168,16 +157,23 @@ const HelmetImageEditor: React.FC<HelmetImageEditorProps> = ({
     ctx.moveTo(centerX + visorRadiusX, visorCenterY);
     ctx.ellipse(centerX, visorCenterY, visorRadiusX, visorRadiusY, 0, 0, 2 * Math.PI, true);
     
+    // Exclude number panel area (small rectangle on the side)
+    const panelWidth = helmetWidth * 0.08;
+    const panelHeight = helmetHeight * 0.06;
+    const panelX = centerX + radiusX * 0.6;
+    const panelY = centerY - radiusY * 0.1;
+    
+    ctx.rect(panelX, panelY, panelWidth, panelHeight);
+    
     // Apply the mask
     ctx.clip();
     
-    // Apply color overlay only to the masked area
-    ctx.globalCompositeOperation = 'multiply';
-    ctx.fillStyle = primary + '80'; // 80 = 50% opacity
+    // Apply solid color fill to the helmet body (like in your example)
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = primary;
     ctx.fillRect(0, 0, canvasWidth, canvasHeight);
     
     // Reset composite operation
-    ctx.globalCompositeOperation = 'source-over';
     ctx.restore();
   };
 
@@ -277,7 +273,7 @@ const HelmetImageEditor: React.FC<HelmetImageEditorProps> = ({
     if (!helmetNumber || helmetNumber === '-') return;
 
     // Calculate helmet position (same as in applyColorMask)
-    const scale = 1.2;
+    const scale = 1.8;
     const scaledWidth = width * scale;
     const scaledHeight = height * scale;
     const offsetX = (width - scaledWidth) / 2;
@@ -307,15 +303,15 @@ const HelmetImageEditor: React.FC<HelmetImageEditorProps> = ({
     }
 
     // Set text properties
-    const fontSize = Math.max(14, scaledWidth * 0.06);
+    const fontSize = Math.max(16, scaledWidth * 0.04);
     ctx.font = `bold ${fontSize}px Arial, sans-serif`;
-    ctx.fillStyle = '#FFFFFF'; // White text for better visibility
+    ctx.fillStyle = '#000000'; // Black text for better visibility on white panel
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
 
     // Add text shadow for better visibility
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
-    ctx.shadowBlur = 3;
+    ctx.shadowColor = 'rgba(255, 255, 255, 0.8)';
+    ctx.shadowBlur = 2;
     ctx.shadowOffsetX = 1;
     ctx.shadowOffsetY = 1;
 

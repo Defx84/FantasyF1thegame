@@ -190,7 +190,7 @@ const AvatarTestingPanel: React.FC = () => {
                 accent: testConfig.helmetColors?.accent || '#808080'
               }}
               helmetNumber={testConfig.helmetNumber || '-'}
-              size={120}
+              size={200}
               onImageGenerated={setGeneratedImageUrl}
             />
           </div>
@@ -201,10 +201,10 @@ const AvatarTestingPanel: React.FC = () => {
               <a
                 href={generatedImageUrl}
                 download={`helmet-${testConfig.helmetTemplateId}-${testConfig.helmetNumber}.png`}
-                className="flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 rounded text-white text-sm"
+                className="flex items-center px-3 py-1.5 bg-green-600 hover:bg-green-700 rounded text-white text-xs"
               >
-                <IconWrapper icon={FaDownload} size={14} className="mr-2" />
-                Download Image
+                <IconWrapper icon={FaDownload} size={12} className="mr-1" />
+                Download
               </a>
             </div>
           )}
