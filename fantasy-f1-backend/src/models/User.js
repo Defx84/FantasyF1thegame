@@ -64,11 +64,11 @@ const userSchema = new mongoose.Schema({
     type: Date
   },
   avatar: {
-    helmetPresetId: {
-      type: Number,
-      enum: [1, 2, 3, 4, 5],
-      default: null
-    },
+            helmetPresetId: {
+          type: Number,
+          enum: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22],
+          default: null
+        },
     helmetNumber: {
       type: String,
       default: '-',

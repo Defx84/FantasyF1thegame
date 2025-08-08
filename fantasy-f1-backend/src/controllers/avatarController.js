@@ -46,8 +46,8 @@ const updateUserAvatar = async (req, res) => {
     }
 
     // Validate input
-    if (helmetPresetId && ![1, 2, 3, 4, 5].includes(helmetPresetId)) {
-      return res.status(400).json({ error: 'Invalid helmet preset. Must be 1, 2, 3, 4, or 5.' });
+    if (helmetPresetId && ![1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22].includes(helmetPresetId)) {
+      return res.status(400).json({ error: 'Invalid helmet preset. Must be between 1 and 22.' });
     }
 
     if (helmetNumber && (helmetNumber.length > 2 || !/^[A-Za-z0-9-]+$/.test(helmetNumber))) {

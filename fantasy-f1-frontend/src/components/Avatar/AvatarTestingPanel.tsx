@@ -92,9 +92,9 @@ const AvatarTestingPanel: React.FC = () => {
       let newPreset;
       
       if (direction === 'prev') {
-        newPreset = currentPreset > 1 ? currentPreset - 1 : 5;
+        newPreset = currentPreset > 1 ? currentPreset - 1 : 22;
       } else {
-        newPreset = currentPreset < 5 ? currentPreset + 1 : 1;
+        newPreset = currentPreset < 22 ? currentPreset + 1 : 1;
       }
       
       return {
