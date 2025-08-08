@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { FaUser, FaPalette, FaUndo, FaEye, FaDownload } from 'react-icons/fa';
+import { FaUser, FaPalette, FaUndo, FaEye, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import IconWrapper from '../../utils/iconWrapper';
 import { avatarService, UserAvatar, AvatarUpdateRequest } from '../../services/avatarService';
 import CallingCard from './CallingCard';
@@ -86,6 +86,24 @@ const AvatarTestingPanel: React.FC = () => {
     }));
   };
 
+  const handleHelmetChange = (direction: 'prev' | 'next') => {
+    setTestConfig(prev => {
+      const currentPreset = prev.helmetPresetId || 1;
+      let newPreset;
+      
+      if (direction === 'prev') {
+        newPreset = currentPreset > 1 ? currentPreset - 1 : 5;
+      } else {
+        newPreset = currentPreset < 5 ? currentPreset + 1 : 1;
+      }
+      
+      return {
+        ...prev,
+        helmetPresetId: newPreset
+      };
+    });
+  };
+
 
 
   if (loading) {
@@ -118,17 +136,27 @@ const AvatarTestingPanel: React.FC = () => {
           {/* Helmet Preset Selection */}
           <div>
             <label className="block text-sm text-white/70 mb-2">Helmet Preset</label>
-            <select
-              value={testConfig.helmetPresetId || ''}
-              onChange={(e) => handleTestConfigChange('helmetPresetId', parseInt(e.target.value))}
-              className="w-full px-3 py-2 bg-white/20 border border-white/30 rounded text-white focus:outline-none focus:border-red-500"
-            >
-              <option value={1}>Preset 1</option>
-              <option value={2}>Preset 2</option>
-              <option value={3}>Preset 3</option>
-              <option value={4}>Preset 4</option>
-              <option value={5}>Preset 5</option>
-            </select>
+            <div className="flex items-center space-x-3">
+              <button
+                onClick={() => handleHelmetChange('prev')}
+                className="p-2 bg-white/20 border border-white/30 rounded text-white hover:bg-white/30 transition-colors"
+                title="Previous helmet"
+              >
+                <IconWrapper icon={FaChevronLeft} size={16} />
+              </button>
+              
+              <div className="flex-1 text-center">
+                <span className="text-white font-semibold">Preset {testConfig.helmetPresetId || 1}</span>
+              </div>
+              
+              <button
+                onClick={() => handleHelmetChange('next')}
+                className="p-2 bg-white/20 border border-white/30 rounded text-white hover:bg-white/30 transition-colors"
+                title="Next helmet"
+              >
+                <IconWrapper icon={FaChevronRight} size={16} />
+              </button>
+            </div>
           </div>
 
           {/* Helmet Number */}
