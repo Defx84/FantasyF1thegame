@@ -84,8 +84,8 @@ const HelmetImageEditor: React.FC<HelmetImageEditorProps> = ({
       const image = new Image();
       image.crossOrigin = 'anonymous';
       
-      await new Promise((resolve, reject) => {
-        image.onload = resolve;
+      await new Promise<void>((resolve, reject) => {
+        image.onload = () => resolve();
         image.onerror = () => {
           console.warn(`Failed to load helmet template ${helmetTemplateId}, using fallback`);
           drawPlaceholderHelmet(ctx, canvas.width, canvas.height);
