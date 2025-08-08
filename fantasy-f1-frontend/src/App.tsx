@@ -14,6 +14,7 @@ import RaceDetails from './pages/RaceDetails';
 import Standings from './pages/Standings';
 import GridPage from './pages/GridPage';
 import ProfilePage from './pages/ProfilePage';
+import AvatarEditor from './pages/AvatarEditor';
 import Rules from './pages/Rules';
 import Statistics from './pages/Statistics';
 import Info from './pages/Info';
@@ -129,6 +130,7 @@ const App: React.FC = () => {
           <Route element={<AppLayout><></></AppLayout>}>
           <Route path="/rules" element={<Rules />} />
           <Route path="/profile" element={<PrivateRoute><ProfilePage /></PrivateRoute>} />
+          <Route path="/avatar-editor" element={<PrivateRoute><AvatarEditor /></PrivateRoute>} />
             <Route path="/statistics" element={<PrivateRoute><Statistics /></PrivateRoute>} />
           <Route path="/league/:id" element={<PrivateRoute><LeagueDetails /></PrivateRoute>} />
           <Route path="/league/:leagueId/race/next/selections" element={<PrivateRoute><NextRaceSelections /></PrivateRoute>} />

@@ -6,6 +6,7 @@ import { FaUser, FaEnvelope, FaTrophy, FaKey, FaArrowLeft, FaTrash, FaSignOutAlt
 import IconWrapper from '../utils/iconWrapper';
 import { api } from '../services/api';
 import AvatarTestingPanel from '../components/Avatar/AvatarTestingPanel';
+import AvatarImage from '../components/Avatar/AvatarImage';
 
 const ProfilePage: React.FC = () => {
   const { user, logout, getToken } = useAuth();
@@ -173,6 +174,16 @@ const ProfilePage: React.FC = () => {
           {/* Profile Header */}
           <div className="backdrop-blur-lg bg-white/2 rounded-2xl p-8 mb-8 border border-white/10 shadow-xl">
             <h1 className="text-3xl font-bold mb-6 text-white/90">Profile</h1>
+            
+            {/* Avatar Display */}
+            <div className="flex justify-center mb-6">
+              <AvatarImage 
+                userId={user.id} 
+                username={user.username} 
+                size={120} 
+              />
+            </div>
+            
             {/* User Details */}
             <div className="space-y-4">
               <div className="flex items-center gap-3">
@@ -190,8 +201,15 @@ const ProfilePage: React.FC = () => {
                 </div>
               </div>
             </div>
-            {/* Reset Password Button */}
+            {/* Profile Actions */}
             <div className="mt-8 flex flex-col gap-4">
+              <button
+                onClick={() => navigate('/avatar-editor')}
+                className="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow text-white font-semibold"
+              >
+                <IconWrapper icon={FaPalette} size={18} className="mr-2" />
+                Edit Avatar
+              </button>
               <button
                 onClick={() => navigate('/reset-password')}
                 className="flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors shadow text-white font-semibold"
