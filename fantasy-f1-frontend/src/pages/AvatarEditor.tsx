@@ -5,25 +5,23 @@ import IconWrapper from '../utils/iconWrapper';
 import { avatarService, AvatarUpdateRequest } from '../services/avatarService';
 import CallingCard from '../components/Avatar/CallingCard';
 import AppLayout from '../components/AppLayout';
+import { useAuth } from '../context/AuthContext';
 
 const AvatarEditor: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [currentPreset, setCurrentPreset] = useState(1);
   const [helmetNumber, setHelmetNumber] = useState('');
   const [saving, setSaving] = useState(false);
-  const [userId, setUserId] = useState<string | null>(null);
   const [showHelmetModal, setShowHelmetModal] = useState(false);
   const [showGallery, setShowGallery] = useState(false);
 
   useEffect(() => {
-    // Get current user ID from localStorage or context
-    const currentUserId = localStorage.getItem('userId');
-    if (currentUserId) {
-      setUserId(currentUserId);
-      // Load current avatar settings
-      loadCurrentAvatar(currentUserId);
+    // Load current avatar settings when user is available
+    if (user?.id) {
+      loadCurrentAvatar(user.id);
     }
-  }, []);
+  }, [user]);
 
   const loadCurrentAvatar = async (uid: string) => {
     try {
@@ -46,7 +44,7 @@ const AvatarEditor: React.FC = () => {
   };
 
   const handleSave = async () => {
-    if (!userId) return;
+    if (!user?.id) return;
 
     setSaving(true);
     try {
@@ -55,7 +53,7 @@ const AvatarEditor: React.FC = () => {
         helmetNumber: helmetNumber || '-'
       };
 
-      await avatarService.updateUserAvatar(userId, updateData);
+      await avatarService.updateUserAvatar(user.id, updateData);
       navigate('/profile'); // Return to profile page
     } catch (error) {
       console.error('Error saving avatar:', error);
