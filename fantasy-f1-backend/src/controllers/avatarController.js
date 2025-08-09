@@ -8,12 +8,8 @@ const getUserAvatar = async (req, res) => {
   try {
     const { userId } = req.params;
     
-    // Users can only access their own avatar (admins can access any)
-    if (!req.user.isAppAdmin && req.user.id !== userId) {
-      return res.status(403).json({ 
-        error: 'Access denied. You can only access your own avatar.' 
-      });
-    }
+    // Anyone can view avatars (for standings, leaderboards, etc.)
+    // Only editing/updating requires ownership or admin privileges
 
     const user = await User.findById(userId).select('avatar username');
     if (!user) {
@@ -98,12 +94,8 @@ const getHelmetImage = async (req, res) => {
     const { userId } = req.params;
     const { size = 128 } = req.query;
 
-    // Users can only access their own helmet image (admins can access any)
-    if (!req.user.isAppAdmin && req.user.id !== userId) {
-      return res.status(403).json({ 
-        error: 'Access denied. You can only access your own helmet image.' 
-      });
-    }
+    // Anyone can view helmet images (for standings, leaderboards, etc.)
+    // Only editing/updating requires ownership or admin privileges
 
     const user = await User.findById(userId).select('avatar');
     if (!user) {
