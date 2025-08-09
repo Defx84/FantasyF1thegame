@@ -100,25 +100,7 @@ const AvatarEditor: React.FC = () => {
       <div className="fixed inset-0 bg-black bg-opacity-30 z-0" />
 
       <div className="min-h-screen flex flex-col relative z-10">
-        {/* Save/Cancel buttons - floating */}
-        <div className="fixed top-20 right-4 z-40 flex items-center space-x-3">
-          <button
-            onClick={handleCancel}
-            className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors flex items-center space-x-2 shadow-lg backdrop-blur-sm"
-          >
-            <IconWrapper icon={FaTimes} size={16} />
-            <span>Cancel</span>
-          </button>
-          
-          <button
-            onClick={handleSave}
-            disabled={saving}
-            className="px-6 py-2 bg-red-600 hover:bg-red-700 disabled:bg-red-800 text-white rounded-lg transition-colors flex items-center space-x-2 shadow-lg backdrop-blur-sm"
-          >
-            <IconWrapper icon={FaSave} size={16} />
-            <span>{saving ? 'Saving...' : 'Save Avatar'}</span>
-          </button>
-        </div>
+
 
         {/* Main Content */}
         <div className="flex-1 flex flex-col items-center justify-center p-4 pt-16 min-h-screen">
@@ -164,9 +146,8 @@ const AvatarEditor: React.FC = () => {
             </div>
           </div>
 
-          {/* Helmet Preview and Number Input Side by Side */}
-          <div className="flex flex-col lg:flex-row items-center justify-center gap-6 mb-4">
-            {/* Helmet Preview */}
+          {/* Helmet Preview - Centered */}
+          <div className="flex justify-center mb-6">
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/20 relative">
               <div className="flex justify-center">
                 <img
@@ -197,37 +178,48 @@ const AvatarEditor: React.FC = () => {
                 </div>
               )}
             </div>
+          </div>
 
-            {/* Number Input Section */}
-            <div className="w-full max-w-xs">
-              <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-                <label className="block text-base font-semibold text-white mb-3 text-center">
-                  Choose Your Number
-                </label>
-                
-                <div className="flex items-center space-x-3">
-                  <input
-                    type="text"
-                    value={helmetNumber}
-                    onChange={(e) => handleNumberChange(e.target.value)}
-                    placeholder="01"
-                    maxLength={2}
-                    className="flex-1 px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-white text-center text-lg font-bold placeholder-white/50 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-                  />
-                  
-                  <button
-                    onClick={() => setHelmetNumber('')}
-                    className="px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors text-sm"
-                  >
-                    Clear
-                  </button>
-                </div>
-                
-                <div className="mt-2 text-center text-white/70 text-xs">
-                  Enter numbers 1-99<br/>(formatted as 01, 02, etc.)
-                </div>
+          {/* Number Input Section - Smaller and Centered */}
+          <div className="flex justify-center mb-8">
+            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/20 w-48">
+              <label className="block text-sm font-semibold text-white mb-2 text-center">
+                Choose Your Number
+              </label>
+              
+              <input
+                type="text"
+                value={helmetNumber}
+                onChange={(e) => handleNumberChange(e.target.value)}
+                placeholder="01"
+                maxLength={2}
+                className="w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-white text-center text-lg font-bold placeholder-white/50 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+              />
+              
+              <div className="mt-1 text-center text-white/70 text-xs">
+                Numbers 1-99
               </div>
             </div>
+          </div>
+
+          {/* Action Buttons - Bottom */}
+          <div className="flex justify-center space-x-4">
+            <button
+              onClick={handleCancel}
+              className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors flex items-center space-x-2"
+            >
+              <IconWrapper icon={FaTimes} size={16} />
+              <span>Cancel</span>
+            </button>
+            
+            <button
+              onClick={handleSave}
+              disabled={saving}
+              className="px-8 py-3 bg-red-600 hover:bg-red-700 disabled:bg-red-800 text-white rounded-lg transition-colors flex items-center space-x-2"
+            >
+              <IconWrapper icon={FaSave} size={16} />
+              <span>{saving ? 'Saving...' : 'Save Avatar'}</span>
+            </button>
           </div>
         </div>
         </div>
