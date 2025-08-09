@@ -31,17 +31,17 @@ const getUserAvatar = async (req, res) => {
 };
 
 /**
- * Update user's avatar configuration (admin only for now)
+ * Update user's avatar configuration
  */
 const updateUserAvatar = async (req, res) => {
   try {
     const { userId } = req.params;
     const { helmetPresetId, helmetNumber } = req.body;
 
-    // Only allow admins to update avatar data for now
-    if (!req.user.isAppAdmin) {
+    // Users can only update their own avatar (admins can update any)
+    if (!req.user.isAppAdmin && req.user.id !== userId) {
       return res.status(403).json({ 
-        error: 'Access denied. Avatar feature is admin-only for testing.' 
+        error: 'Access denied. You can only update your own avatar.' 
       });
     }
 
@@ -157,10 +157,10 @@ const resetUserAvatar = async (req, res) => {
   try {
     const { userId } = req.params;
 
-    // Only allow admins to reset avatar data for now
-    if (!req.user.isAppAdmin) {
+    // Users can only reset their own avatar (admins can reset any)
+    if (!req.user.isAppAdmin && req.user.id !== userId) {
       return res.status(403).json({ 
-        error: 'Access denied. Avatar feature is admin-only for testing.' 
+        error: 'Access denied. You can only reset your own avatar.' 
       });
     }
 
