@@ -146,8 +146,9 @@ const AvatarEditor: React.FC = () => {
             </div>
           </div>
 
-          {/* Helmet Preview - Centered */}
-          <div className="flex justify-center mb-6">
+          {/* Helmet Preview and Number Input Side by Side */}
+          <div className="flex justify-center items-center gap-8 mb-8">
+            {/* Helmet Preview */}
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/20 relative">
               <div className="flex justify-center">
                 <img
@@ -178,10 +179,8 @@ const AvatarEditor: React.FC = () => {
                 </div>
               )}
             </div>
-          </div>
 
-          {/* Number Input Section - Smaller and Centered */}
-          <div className="flex justify-center mb-8">
+            {/* Number Input Section - Side by Side */}
             <div className="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/20 w-48">
               <label className="block text-sm font-semibold text-white mb-2 text-center">
                 Choose Your Number
