@@ -46,7 +46,7 @@ const updateUserAvatar = async (req, res) => {
     }
 
     // Validate input
-    if (helmetPresetId && (helmetPresetId < 1 || helmetPresetId > 30)) {
+    if (helmetPresetId !== undefined && (helmetPresetId < 1 || helmetPresetId > 30)) {
       return res.status(400).json({ error: 'Invalid helmet preset. Must be between 1 and 30.' });
     }
 
