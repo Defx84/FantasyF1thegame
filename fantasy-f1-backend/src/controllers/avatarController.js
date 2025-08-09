@@ -8,10 +8,10 @@ const getUserAvatar = async (req, res) => {
   try {
     const { userId } = req.params;
     
-    // Only allow admins to access avatar data for now
-    if (!req.user.isAppAdmin) {
+    // Users can only access their own avatar (admins can access any)
+    if (!req.user.isAppAdmin && req.user.id !== userId) {
       return res.status(403).json({ 
-        error: 'Access denied. Avatar feature is admin-only for testing.' 
+        error: 'Access denied. You can only access your own avatar.' 
       });
     }
 
@@ -98,10 +98,10 @@ const getHelmetImage = async (req, res) => {
     const { userId } = req.params;
     const { size = 128 } = req.query;
 
-    // Only allow admins to access helmet images for now
-    if (!req.user.isAppAdmin) {
+    // Users can only access their own helmet image (admins can access any)
+    if (!req.user.isAppAdmin && req.user.id !== userId) {
       return res.status(403).json({ 
-        error: 'Access denied. Avatar feature is admin-only for testing.' 
+        error: 'Access denied. You can only access your own helmet image.' 
       });
     }
 
