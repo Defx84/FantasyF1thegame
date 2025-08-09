@@ -12,6 +12,7 @@ const AvatarEditor: React.FC = () => {
   const [helmetNumber, setHelmetNumber] = useState('');
   const [saving, setSaving] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
+  const [showHelmetModal, setShowHelmetModal] = useState(false);
 
   useEffect(() => {
     // Get current user ID from localStorage or context
@@ -151,8 +152,12 @@ const AvatarEditor: React.FC = () => {
 
           {/* Helmet Preview and Number Input - Responsive Layout */}
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-8 mb-6 sm:mb-8">
-            {/* Helmet Preview */}
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-3 sm:p-4 border border-white/20 relative">
+            {/* Helmet Preview - Clickable */}
+            <div 
+              className="bg-white/5 backdrop-blur-sm rounded-2xl p-3 sm:p-4 border border-white/20 relative cursor-pointer hover:bg-white/10 transition-all duration-200 hover:scale-105 active:scale-95 touch-manipulation"
+              onClick={() => setShowHelmetModal(true)}
+              title="Click to view full size"
+            >
               <div className="flex justify-center">
                 <img
                   src={`/images/helmets/preset-${currentPreset}.png`}
@@ -181,6 +186,13 @@ const AvatarEditor: React.FC = () => {
                   </div>
                 </div>
               )}
+              
+              {/* Tap indicator */}
+              <div className="absolute top-2 left-2 opacity-60">
+                <div className="bg-black/20 backdrop-blur-sm rounded-full px-2 py-1">
+                  <span className="text-white text-xs">👆 Tap to enlarge</span>
+                </div>
+              </div>
             </div>
 
             {/* Number Input Section - Mobile Optimized */}
@@ -228,6 +240,72 @@ const AvatarEditor: React.FC = () => {
         </div>
         </div>
       </div>
+
+      {/* Helmet Modal - Full Screen View */}
+      {showHelmetModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            onClick={() => setShowHelmetModal(false)}
+          />
+          
+          {/* Modal Content */}
+          <div className="relative bg-white/10 backdrop-blur-lg rounded-3xl p-6 border border-white/20 max-w-md w-full">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowHelmetModal(false)}
+              className="absolute top-4 right-4 p-2 bg-black/20 hover:bg-black/40 rounded-full text-white transition-colors touch-manipulation"
+              title="Close"
+            >
+              <IconWrapper icon={FaTimes} size={20} />
+            </button>
+            
+            {/* Header */}
+            <div className="text-center mb-4">
+              <h3 className="text-xl font-bold text-white">Helmet {currentPreset}</h3>
+              <p className="text-white/70 text-sm">Full Size Preview</p>
+            </div>
+            
+            {/* Large Helmet Image */}
+            <div className="flex justify-center mb-4 relative">
+              <img
+                src={`/images/helmets/preset-${currentPreset}.png`}
+                alt={`Helmet Preset ${currentPreset}`}
+                className="w-72 h-72 object-contain"
+                onError={(e) => {
+                  const target = e.target as HTMLImageElement;
+                  target.style.display = 'none';
+                  target.parentElement!.innerHTML = `
+                    <div class="flex items-center justify-center w-72 h-72 text-white/40">
+                      <div class="text-center">
+                        <div class="text-6xl mb-4">🏁</div>
+                        <div class="text-lg">Helmet ${currentPreset}</div>
+                      </div>
+                    </div>
+                  `;
+                }}
+              />
+              
+              {/* Large Number Badge */}
+              {helmetNumber && helmetNumber !== '' && (
+                <div className="absolute bottom-8 right-8">
+                  <div className="bg-blue-600 text-white rounded-full w-16 h-16 flex items-center justify-center text-lg font-bold shadow-lg border-4 border-white">
+                    {helmetNumber}
+                  </div>
+                </div>
+              )}
+            </div>
+            
+            {/* Info */}
+            <div className="text-center">
+              <p className="text-white/80 text-sm">
+                {helmetNumber ? `Your number: ${helmetNumber}` : 'No number selected'}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </AppLayout>
    );
  };
