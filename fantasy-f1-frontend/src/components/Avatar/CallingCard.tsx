@@ -13,7 +13,10 @@ const CallingCard: React.FC<CallingCardProps> = ({
   size = 200,
   className = ''
 }) => {
-  const helmetImageUrl = `/images/helmets/preset-${helmetPresetId.toString().padStart(2, '0')}.png`;
+  // Handle the naming convention: preset-00.png has zero padding, but preset-1.png to preset-9.png don't
+  const helmetImageUrl = helmetPresetId === 0 
+    ? `/images/helmets/preset-00.png`
+    : `/images/helmets/preset-${helmetPresetId}.png`;
   
   // For small sizes (like in lists), use a square aspect ratio
   const isSmall = size <= 60;
