@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaUser, FaEnvelope, FaLock, FaTrophy, FaChartLine, FaCar } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import TermsModal from '../components/TermsModal';
+import Footer from '../components/Footer';
 
 // Move FeatureBox outside Signup
 const FeatureBox: React.FC<{ icon: React.FC<{ size?: number; className?: string }>; title: string; description: string }> = ({ icon: Icon, title, description }) => (
@@ -275,6 +276,7 @@ const Signup: React.FC = () => {
         onClose={() => setShowPrivacyModal(false)}
         type="privacy"
       />
+      <Footer />
     </>
   );
 };

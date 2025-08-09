@@ -7,6 +7,7 @@ import { createLeague, joinLeague, getUserLeagues, League } from '../services/le
 import DashboardRaceCountdown from '../components/DashboardRaceCountdown';
 import BulletinBoard from '../components/BulletinBoard';
 import AvatarImage from '../components/Avatar/AvatarImage';
+import Footer from '../components/Footer';
 
 const TypedInstagramIcon = FaInstagram as unknown as React.FC<{ size?: number; className?: string }>;
 
@@ -409,6 +410,7 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     </>
   );

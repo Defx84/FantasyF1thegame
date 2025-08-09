@@ -6,6 +6,7 @@ import { avatarService, AvatarUpdateRequest } from '../services/avatarService';
 import CallingCard from '../components/Avatar/CallingCard';
 import AppLayout from '../components/AppLayout';
 import { useAuth } from '../context/AuthContext';
+import Footer from '../components/Footer';
 
 const AvatarEditor: React.FC = () => {
   const navigate = useNavigate();

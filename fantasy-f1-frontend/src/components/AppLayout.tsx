@@ -4,6 +4,7 @@ import { FaBars, FaArrowLeft, FaUser, FaHome, FaUsers, FaSignOutAlt, FaTimes } f
 import { useAuth } from '../context/AuthContext';
 import { getUserLeagues, League } from '../services/leagueService';
 import OverlayLoader from './OverlayLoader';
+import Footer from './Footer';
 
 const EXCLUDED_PATHS = ['/', '/dashboard', '/welcome'];
 
@@ -153,9 +154,12 @@ const AppLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
       )}
 
       {/* Main content */}
-      <div className="pt-16">
-        {children}
-        <Outlet />
+      <div className="pt-16 min-h-screen flex flex-col">
+        <div className="flex-1">
+          {children}
+          <Outlet />
+        </div>
+        <Footer />
       </div>
     </div>
   );

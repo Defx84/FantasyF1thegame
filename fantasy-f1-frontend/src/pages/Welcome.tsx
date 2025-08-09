@@ -2,6 +2,7 @@ import React, { useState, memo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEnvelope, FaLock, FaTrophy, FaChartLine, FaCar, FaInstagram } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
+import Footer from '../components/Footer';
 
 const TypedEnvelopeIcon = FaEnvelope as unknown as React.FC<{ size?: number; className?: string }>;
 const TypedLockIcon = FaLock as unknown as React.FC<{ size?: number; className?: string }>;
@@ -213,6 +214,7 @@ const Welcome: React.FC = () => {
             </div>
           </div>
         </div>
+        <Footer />
       </div>
     </>
   );
