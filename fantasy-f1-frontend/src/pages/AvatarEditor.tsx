@@ -88,17 +88,41 @@ const AvatarEditor: React.FC = () => {
 
   const handleNumberInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value;
-    // Allow user to completely replace the value by handling selection/overwrite
-    if (value === '' || /^\d{1,2}$/.test(value)) {
-      const numericValue = value.replace(/\D/g, '');
-      if (numericValue === '') {
-        setHelmetNumber('');
+    
+    // Allow empty input
+    if (value === '') {
+      setHelmetNumber('');
+      return;
+    }
+    
+    // Only allow numeric input, max 2 digits
+    const numericValue = value.replace(/\D/g, '').slice(0, 2);
+    
+    if (numericValue === '') {
+      setHelmetNumber('');
+      return;
+    }
+    
+    const num = parseInt(numericValue);
+    
+    // Allow numbers 1-99
+    if (num >= 1 && num <= 99) {
+      // For single digit, don't auto-format to 0X until user finishes typing
+      // For double digit, use as-is
+      if (numericValue.length === 1) {
+        setHelmetNumber(numericValue); // Store as "1", "2", etc.
       } else {
-        const num = parseInt(numericValue);
-        if (num >= 1 && num <= 99) {
-          const formatted = num < 10 ? `0${num}` : num.toString();
-          setHelmetNumber(formatted);
-        }
+        setHelmetNumber(numericValue); // Store as "15", "99", etc.
+      }
+    }
+  };
+
+  const handleNumberBlur = () => {
+    // Format with leading zero only when user finishes editing (onBlur)
+    if (helmetNumber && helmetNumber.length === 1) {
+      const num = parseInt(helmetNumber);
+      if (num >= 1 && num <= 9) {
+        setHelmetNumber(`0${num}`);
       }
     }
   };
@@ -231,6 +255,7 @@ const AvatarEditor: React.FC = () => {
                 pattern="[0-9]*"
                 value={helmetNumber}
                 onChange={handleNumberInputChange}
+                onBlur={handleNumberBlur}
                 onFocus={(e) => e.target.select()} // Select all text when focused for easy replacement
                 placeholder="01"
                 maxLength={2}
