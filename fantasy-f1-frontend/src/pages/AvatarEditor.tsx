@@ -164,8 +164,9 @@ const AvatarEditor: React.FC = () => {
             </div>
           </div>
 
-          {/* Helmet Preview */}
-          <div className="flex justify-center mb-4">
+          {/* Helmet Preview and Number Input Side by Side */}
+          <div className="flex flex-col lg:flex-row items-center justify-center gap-6 mb-4">
+            {/* Helmet Preview */}
             <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/20 relative">
               <div className="flex justify-center">
                 <img
@@ -196,35 +197,35 @@ const AvatarEditor: React.FC = () => {
                 </div>
               )}
             </div>
-          </div>
 
-          {/* Number Input Section */}
-          <div className="max-w-md mx-auto">
-            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-              <label className="block text-base font-semibold text-white mb-3 text-center">
-                Choose Your Number
-              </label>
-              
-              <div className="flex items-center space-x-4">
-                <input
-                  type="text"
-                  value={helmetNumber}
-                  onChange={(e) => handleNumberChange(e.target.value)}
-                  placeholder="01"
-                  maxLength={2}
-                  className="flex-1 px-4 py-2 bg-white/20 border border-white/30 rounded-lg text-white text-center text-lg font-bold placeholder-white/50 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
-                />
+            {/* Number Input Section */}
+            <div className="w-full max-w-xs">
+              <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/20">
+                <label className="block text-base font-semibold text-white mb-3 text-center">
+                  Choose Your Number
+                </label>
                 
-                <button
-                  onClick={() => setHelmetNumber('')}
-                  className="px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors text-sm"
-                >
-                  Clear
-                </button>
-              </div>
-              
-              <div className="mt-2 text-center text-white/70 text-xs">
-                Enter numbers 1-99 (formatted as 01, 02, etc.)
+                <div className="flex items-center space-x-3">
+                  <input
+                    type="text"
+                    value={helmetNumber}
+                    onChange={(e) => handleNumberChange(e.target.value)}
+                    placeholder="01"
+                    maxLength={2}
+                    className="flex-1 px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-white text-center text-lg font-bold placeholder-white/50 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                  />
+                  
+                  <button
+                    onClick={() => setHelmetNumber('')}
+                    className="px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors text-sm"
+                  >
+                    Clear
+                  </button>
+                </div>
+                
+                <div className="mt-2 text-center text-white/70 text-xs">
+                  Enter numbers 1-99<br/>(formatted as 01, 02, etc.)
+                </div>
               </div>
             </div>
           </div>
