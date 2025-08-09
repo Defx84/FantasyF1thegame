@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Player } from '../types/player';
 import { getTimeUntilLock, formatTimeLeft } from '../utils/raceUtils';
+import AvatarImage from '../components/Avatar/AvatarImage';
 
 interface GridPageProps {
   players: Player[];
@@ -74,7 +75,15 @@ const GridPage: React.FC<GridPageProps> = ({ players, raceData, leaderboard, cur
                 } ${isLastOdd ? 'col-start-2' : ''}`}
             >
               <div className="flex items-center justify-between mb-2">
-                <h2 className="text-xl font-semibold text-white truncate">{player.username}</h2>
+                <div className="flex items-center">
+                  <AvatarImage 
+                    userId={player.id} 
+                    username={player.username} 
+                    size={40} 
+                    className="mr-3" 
+                  />
+                  <h2 className="text-xl font-semibold text-white truncate">{player.username}</h2>
+                </div>
                 <div
                   className={`w-4 h-4 rounded-full flex-shrink-0 ${
                     player.selectionMade ? 'bg-green-500' : 'bg-red-500'

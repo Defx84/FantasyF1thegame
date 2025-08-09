@@ -13,8 +13,8 @@ const CallingCard: React.FC<CallingCardProps> = ({
   size = 200,
   className = ''
 }) => {
-  const helmetImageUrl = `/images/helmets/preset-${helmetPresetId}.png`;
-  
+  const helmetImageUrl = `/images/helmets/preset-${helmetPresetId.toString().padStart(2, '0')}.png`;
+
   return (
     <div 
       className={`relative inline-block ${className}`}

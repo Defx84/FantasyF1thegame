@@ -53,15 +53,13 @@ const GridPageWrapper: React.FC = () => {
           const leagueStandings = await getLeagueStandings(leagueId, new Date().getFullYear());
           console.log('League standings:', leagueStandings);
 
-          // Get all league members from standings
-          const members = leagueStandings.driverStandings.map(standing => standing.user.username);
-
-          // Transform selections data into player format
-          const players = members.map(username => {
-            const userSelection = raceSelections.selections.find(s => s.username === username);
+          // Transform selections data into player format using league standings
+          const players = leagueStandings.driverStandings.map(standing => {
+            const userSelection = raceSelections.selections.find(s => s.username === standing.user.username);
             
             return {
-              username,
+              id: standing.user._id,
+              username: standing.user.username,
               selectionMade: !!(
                 userSelection?.mainDriver &&
                 userSelection?.reserveDriver &&

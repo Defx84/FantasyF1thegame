@@ -61,8 +61,8 @@ const AvatarImage: React.FC<AvatarImageProps> = ({
     );
   }
 
-  // If user has a customized avatar, show the calling card
-  if (avatarData?.isCustomized && avatarData?.helmetPresetId) {
+  // If user has a customized avatar (preset 1-30), show the calling card
+  if (avatarData?.isCustomized && avatarData?.helmetPresetId && avatarData.helmetPresetId > 0) {
     return (
       <CallingCard
         helmetPresetId={avatarData.helmetPresetId}
@@ -73,14 +73,14 @@ const AvatarImage: React.FC<AvatarImageProps> = ({
     );
   }
 
-  // Default avatar (grey helmet with dash)
+  // Default avatar (preset-00 with dash)
   return (
-    <div 
-      className={`bg-gray-400 rounded-lg flex items-center justify-center ${className}`}
-      style={{ width: size, height: size * 0.8 }}
-    >
-      <span className="text-white font-bold text-xs">-</span>
-    </div>
+    <CallingCard
+      helmetPresetId={0}
+      helmetNumber="-"
+      size={size}
+      className={className}
+    />
   );
 };
 

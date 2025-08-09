@@ -7,6 +7,7 @@ import { F1_DRIVERS_2025, F1_TEAMS_2025 } from '../constants/f1Data2025';
 import { adminOverrideSelection, getUsedSelections, UsedSelections } from '../services/selectionService';
 import { normalizeDriver, normalizeTeam } from '../utils/normalization';
 import type { FC } from 'react';
+import AvatarImage from '../components/Avatar/AvatarImage';
 
 interface Selection {
   _id: string;
@@ -382,7 +383,17 @@ const RaceDetails: React.FC = () => {
 
                         return (
                           <tr key={member.id} className="border-b border-white/10 hover:bg-white/5">
-                            <td className="p-4">{member.username}</td>
+                            <td className="p-4">
+                              <div className="flex items-center">
+                                <AvatarImage 
+                                  userId={member.id} 
+                                  username={member.username} 
+                                  size={32} 
+                                  className="mr-2" 
+                                />
+                                {member.username}
+                              </div>
+                            </td>
                             <td className="p-4">
                               {isEditing ? (
                                 <select
@@ -569,7 +580,15 @@ const RaceDetails: React.FC = () => {
                       <div key={member.id} className="bg-white/[0.05] rounded-lg p-4 border border-white/10">
                         {/* Player Name Header */}
                         <div className="flex items-center justify-between mb-3">
-                          <h3 className="text-lg font-semibold text-white">{member.username}</h3>
+                          <div className="flex items-center">
+                            <AvatarImage 
+                              userId={member.id} 
+                              username={member.username} 
+                              size={32} 
+                              className="mr-3" 
+                            />
+                            <h3 className="text-lg font-semibold text-white">{member.username}</h3>
+                          </div>
                           {selection?.isAdminAssigned && (
                             <span className="flex items-center text-yellow-500 text-sm">
                               <IconWrapper icon={FaUserShield} className="mr-1" />

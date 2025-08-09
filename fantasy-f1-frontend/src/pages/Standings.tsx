@@ -6,6 +6,7 @@ import IconWrapper from '../utils/iconWrapper';
 import { api } from '../services/api';
 import { F1_DRIVERS_2025 } from '../constants/f1Data2025';
 import { getTeamColor } from '../constants/teamColors';
+import AvatarImage from '../components/Avatar/AvatarImage';
 
 interface RaceResult {
   round: number;
@@ -215,6 +216,12 @@ const Standings: React.FC = () => {
         >
           <div className="flex items-center">
             <span className="text-2xl font-bold mr-4 text-white/90">{index + 1}</span>
+            <AvatarImage 
+              userId={standing.user._id} 
+              username={standing.user.username} 
+              size={48} 
+              className="mr-3" 
+            />
             <div>
               <div className="text-lg font-semibold text-white/90">{standing.user.username}</div>
               <div className="text-sm text-white/60">Total Points: {driverPoints}</div>
@@ -291,6 +298,12 @@ const Standings: React.FC = () => {
         >
           <div className="flex items-center">
             <span className="text-2xl font-bold mr-4 text-white/90">{index + 1}</span>
+            <AvatarImage 
+              userId={standing.user._id} 
+              username={standing.user.username} 
+              size={48} 
+              className="mr-3" 
+            />
             <div>
               <div className="text-lg font-semibold text-white/90">{standing.user.username}</div>
               <div className="text-sm text-white/60">Total Points: {standing.totalPoints}</div>
