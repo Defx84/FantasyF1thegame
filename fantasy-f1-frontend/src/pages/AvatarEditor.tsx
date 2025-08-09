@@ -67,6 +67,23 @@ const AvatarEditor: React.FC = () => {
     navigate('/profile');
   };
 
+  const handleNumberChange = (value: string) => {
+    // Only allow numbers, max 2 digits, format as 01, 02, etc. or 1, 2, etc.
+    const numericValue = value.replace(/\D/g, ''); // Remove non-digits
+    
+    if (numericValue === '') {
+      setHelmetNumber('');
+      return;
+    }
+    
+    const num = parseInt(numericValue);
+    if (num < 1 || num > 99) return; // Only allow 1-99
+    
+    // Format as 01, 02, etc. for single digits, or 10, 11, etc. for double digits
+    const formatted = num < 10 ? `0${num}` : num.toString();
+    setHelmetNumber(formatted);
+  };
+
   return (
     <AppLayout>
       <div 
@@ -79,7 +96,7 @@ const AvatarEditor: React.FC = () => {
         }}
       >
         {/* Background Overlay */}
-        <div className="fixed inset-0 bg-black bg-opacity-30 z-0" />
+        <div className="absolute inset-0 bg-black bg-opacity-30 z-0" />
         {/* Save/Cancel buttons - floating */}
         <div className="fixed top-20 right-4 z-40 flex items-center space-x-3">
           <button
@@ -101,63 +118,63 @@ const AvatarEditor: React.FC = () => {
         </div>
 
         {/* Main Content */}
-        <div className="relative z-10 flex-1 flex flex-col items-center justify-center p-8 pt-16">
-        <div className="max-w-4xl w-full">
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center p-4 pt-16 min-h-screen">
+        <div className="max-w-4xl w-full h-full flex flex-col justify-center">
           {/* Page Title */}
-          <div className="text-center mb-12">
-            <div className="flex items-center justify-center space-x-3 mb-6">
-              <IconWrapper icon={FaUser} size={32} className="text-red-500" />
-              <h1 className="text-5xl font-bold text-white">Choose Your Avatar</h1>
+          <div className="text-center mb-6">
+            <div className="flex items-center justify-center space-x-3 mb-4">
+              <IconWrapper icon={FaUser} size={24} className="text-red-500" />
+              <h1 className="text-3xl font-bold text-white">Choose Your Avatar</h1>
             </div>
           </div>
           
           {/* Helmet Display Section */}
-          <div className="text-center mb-8">
-            <h2 className="text-4xl font-bold text-white mb-8">Helmet {currentPreset}</h2>
+          <div className="text-center mb-6">
+            <h2 className="text-2xl font-bold text-white mb-6">Helmet {currentPreset}</h2>
             
             {/* Navigation Arrows */}
-            <div className="flex items-center justify-center space-x-8 mb-8">
+            <div className="flex items-center justify-center space-x-6 mb-6">
               <button
                 onClick={() => handleHelmetChange('prev')}
-                className="p-4 bg-white/10 hover:bg-white/20 border border-white/30 rounded-full text-white transition-all duration-200 hover:scale-110"
+                className="p-3 bg-white/10 hover:bg-white/20 border border-white/30 rounded-full text-white transition-all duration-200 hover:scale-110"
                 title="Previous helmet"
               >
-                <IconWrapper icon={FaChevronLeft} size={32} />
+                <IconWrapper icon={FaChevronLeft} size={24} />
               </button>
               
               <div className="text-center">
-                <div className="text-6xl font-bold text-white mb-2">
+                <div className="text-4xl font-bold text-white mb-1">
                   {currentPreset}
                 </div>
-                <div className="text-white/70 text-sm">
+                <div className="text-white/70 text-xs">
                   of 22 helmets
                 </div>
               </div>
               
               <button
                 onClick={() => handleHelmetChange('next')}
-                className="p-4 bg-white/10 hover:bg-white/20 border border-white/30 rounded-full text-white transition-all duration-200 hover:scale-110"
+                className="p-3 bg-white/10 hover:bg-white/20 border border-white/30 rounded-full text-white transition-all duration-200 hover:scale-110"
                 title="Next helmet"
               >
-                <IconWrapper icon={FaChevronRight} size={32} />
+                <IconWrapper icon={FaChevronRight} size={24} />
               </button>
             </div>
           </div>
 
           {/* Helmet Preview */}
-          <div className="flex justify-center mb-12">
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-8 border border-white/20">
+          <div className="flex justify-center mb-8">
+            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
               <CallingCard
                 helmetPresetId={currentPreset}
                 helmetNumber={helmetNumber || '-'}
-                size={400}
+                size={300}
               />
             </div>
           </div>
 
           {/* Number Input Section */}
           <div className="max-w-md mx-auto">
-            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-6 border border-white/20">
+            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/20">
               <label className="block text-lg font-semibold text-white mb-4 text-center">
                 Choose Your Number
               </label>
@@ -166,22 +183,22 @@ const AvatarEditor: React.FC = () => {
                 <input
                   type="text"
                   value={helmetNumber}
-                  onChange={(e) => setHelmetNumber(e.target.value)}
-                  placeholder="44"
+                  onChange={(e) => handleNumberChange(e.target.value)}
+                  placeholder="01"
                   maxLength={2}
-                  className="flex-1 px-4 py-3 bg-white/20 border border-white/30 rounded-lg text-white text-center text-xl font-bold placeholder-white/50 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                  className="flex-1 px-4 py-2 bg-white/20 border border-white/30 rounded-lg text-white text-center text-lg font-bold placeholder-white/50 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
                 />
                 
                 <button
                   onClick={() => setHelmetNumber('')}
-                  className="px-4 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
+                  className="px-3 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors text-sm"
                 >
                   Clear
                 </button>
               </div>
               
-              <div className="mt-4 text-center text-white/70 text-sm">
-                Enter 1-2 characters (letters, numbers, or dash)
+              <div className="mt-3 text-center text-white/70 text-xs">
+                Enter numbers 1-99 (formatted as 01, 02, etc.)
               </div>
             </div>
           </div>
