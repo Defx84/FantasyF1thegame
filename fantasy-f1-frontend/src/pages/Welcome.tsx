@@ -64,7 +64,7 @@ const Welcome: React.FC = () => {
       />
 
       {/* Content wrapper */}
-      <div className="relative min-h-screen flex">
+      <div className="relative min-h-screen flex flex-col md:flex-row">
         {/* Semi-transparent overlay */}
         <div className="absolute inset-0 bg-black bg-opacity-30" />
 
@@ -214,6 +214,10 @@ const Welcome: React.FC = () => {
             </div>
           </div>
         </div>
+      </div>
+      
+      {/* Footer - positioned outside main flex container for proper mobile display */}
+      <div className="relative z-10">
         <Footer />
       </div>
     </>
