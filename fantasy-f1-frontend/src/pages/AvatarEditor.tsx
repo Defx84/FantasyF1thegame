@@ -106,29 +106,31 @@ const AvatarEditor: React.FC = () => {
         <div className="flex-1 flex flex-col items-center justify-center p-4 pt-16 min-h-screen">
         <div className="max-w-4xl w-full h-full flex flex-col justify-center">
           {/* Page Title */}
-          <div className="text-center mb-4">
-            <div className="flex items-center justify-center space-x-3 mb-2">
-              <IconWrapper icon={FaUser} size={20} className="text-red-500" />
-              <h1 className="text-2xl font-bold text-white">Choose Your Avatar</h1>
+          <div className="text-center mb-3 sm:mb-4">
+            <div className="flex items-center justify-center space-x-2 sm:space-x-3 mb-2">
+              <IconWrapper icon={FaUser} size={18} className="text-red-500 sm:hidden" />
+              <IconWrapper icon={FaUser} size={20} className="text-red-500 hidden sm:block" />
+              <h1 className="text-xl sm:text-2xl font-bold text-white">Choose Your Avatar</h1>
             </div>
           </div>
           
           {/* Helmet Display Section */}
-          <div className="text-center mb-4">
-            <h2 className="text-xl font-bold text-white mb-4">Helmet {currentPreset}</h2>
+          <div className="text-center mb-3 sm:mb-4">
+            <h2 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">Helmet {currentPreset}</h2>
             
             {/* Navigation Arrows */}
-            <div className="flex items-center justify-center space-x-6 mb-4">
+            <div className="flex items-center justify-center space-x-4 sm:space-x-6 mb-3 sm:mb-4">
               <button
                 onClick={() => handleHelmetChange('prev')}
-                className="p-3 bg-white/10 hover:bg-white/20 border border-white/30 rounded-full text-white transition-all duration-200 hover:scale-110"
+                className="p-3 sm:p-4 bg-white/10 hover:bg-white/20 active:bg-white/30 border border-white/30 rounded-full text-white transition-all duration-200 hover:scale-110 active:scale-95 touch-manipulation"
                 title="Previous helmet"
               >
-                <IconWrapper icon={FaChevronLeft} size={24} />
+                <IconWrapper icon={FaChevronLeft} size={20} className="sm:hidden" />
+                <IconWrapper icon={FaChevronLeft} size={24} className="hidden sm:block" />
               </button>
               
-              <div className="text-center">
-                <div className="text-4xl font-bold text-white mb-1">
+              <div className="text-center min-w-0 flex-shrink-0">
+                <div className="text-2xl sm:text-4xl font-bold text-white mb-1">
                   {currentPreset}
                 </div>
                 <div className="text-white/70 text-xs">
@@ -138,31 +140,32 @@ const AvatarEditor: React.FC = () => {
               
               <button
                 onClick={() => handleHelmetChange('next')}
-                className="p-3 bg-white/10 hover:bg-white/20 border border-white/30 rounded-full text-white transition-all duration-200 hover:scale-110"
+                className="p-3 sm:p-4 bg-white/10 hover:bg-white/20 active:bg-white/30 border border-white/30 rounded-full text-white transition-all duration-200 hover:scale-110 active:scale-95 touch-manipulation"
                 title="Next helmet"
               >
-                <IconWrapper icon={FaChevronRight} size={24} />
+                <IconWrapper icon={FaChevronRight} size={20} className="sm:hidden" />
+                <IconWrapper icon={FaChevronRight} size={24} className="hidden sm:block" />
               </button>
             </div>
           </div>
 
-          {/* Helmet Preview and Number Input Side by Side */}
-          <div className="flex justify-center items-center gap-8 mb-8">
+          {/* Helmet Preview and Number Input - Responsive Layout */}
+          <div className="flex flex-col sm:flex-row justify-center items-center gap-4 sm:gap-8 mb-6 sm:mb-8">
             {/* Helmet Preview */}
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/20 relative">
+            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-3 sm:p-4 border border-white/20 relative">
               <div className="flex justify-center">
                 <img
                   src={`/images/helmets/preset-${currentPreset}.png`}
                   alt={`Helmet Preset ${currentPreset}`}
-                  className="w-48 h-48 object-contain"
+                  className="w-36 h-36 sm:w-48 sm:h-48 object-contain"
                   onError={(e) => {
                     const target = e.target as HTMLImageElement;
                     target.style.display = 'none';
                     target.parentElement!.innerHTML = `
-                      <div class="flex items-center justify-center w-48 h-48 text-white/40">
+                      <div class="flex items-center justify-center w-36 h-36 sm:w-48 sm:h-48 text-white/40">
                         <div class="text-center">
-                          <div class="text-4xl mb-2">🏁</div>
-                          <div class="text-sm">Helmet ${currentPreset}</div>
+                          <div class="text-3xl sm:text-4xl mb-2">🏁</div>
+                          <div class="text-xs sm:text-sm">Helmet ${currentPreset}</div>
                         </div>
                       </div>
                     `;
@@ -172,27 +175,29 @@ const AvatarEditor: React.FC = () => {
               
               {/* Number Badge */}
               {helmetNumber && helmetNumber !== '' && (
-                <div className="absolute bottom-6 right-6">
-                  <div className="bg-blue-600 text-white rounded-full w-10 h-10 flex items-center justify-center text-sm font-bold shadow-lg border-2 border-white">
+                <div className="absolute bottom-4 right-4 sm:bottom-6 sm:right-6">
+                  <div className="bg-blue-600 text-white rounded-full w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-xs sm:text-sm font-bold shadow-lg border-2 border-white">
                     {helmetNumber}
                   </div>
                 </div>
               )}
             </div>
 
-            {/* Number Input Section - Side by Side */}
-            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/20 w-48">
-              <label className="block text-sm font-semibold text-white mb-2 text-center">
+            {/* Number Input Section - Mobile Optimized */}
+            <div className="bg-white/5 backdrop-blur-sm rounded-xl p-3 border border-white/20 w-40 sm:w-48">
+              <label className="block text-xs sm:text-sm font-semibold text-white mb-2 text-center">
                 Choose Your Number
               </label>
               
               <input
                 type="text"
+                inputMode="numeric"
+                pattern="[0-9]*"
                 value={helmetNumber}
                 onChange={(e) => handleNumberChange(e.target.value)}
                 placeholder="01"
                 maxLength={2}
-                className="w-full px-3 py-2 bg-white/20 border border-white/30 rounded-lg text-white text-center text-lg font-bold placeholder-white/50 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20"
+                className="w-full px-3 py-2 sm:py-3 bg-white/20 border border-white/30 rounded-lg text-white text-center text-lg sm:text-xl font-bold placeholder-white/50 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 touch-manipulation"
               />
               
               <div className="mt-1 text-center text-white/70 text-xs">
@@ -201,11 +206,11 @@ const AvatarEditor: React.FC = () => {
             </div>
           </div>
 
-          {/* Action Buttons - Bottom */}
-          <div className="flex justify-center space-x-4">
+          {/* Action Buttons - Mobile Optimized */}
+          <div className="flex flex-col sm:flex-row justify-center space-y-3 sm:space-y-0 sm:space-x-4 px-4 sm:px-0">
             <button
               onClick={handleCancel}
-              className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors flex items-center space-x-2"
+              className="w-full sm:w-auto px-6 py-3 sm:py-3 bg-gray-600 hover:bg-gray-700 active:bg-gray-800 text-white rounded-lg transition-colors flex items-center justify-center space-x-2 text-base font-medium touch-manipulation"
             >
               <IconWrapper icon={FaTimes} size={16} />
               <span>Cancel</span>
@@ -214,7 +219,7 @@ const AvatarEditor: React.FC = () => {
             <button
               onClick={handleSave}
               disabled={saving}
-              className="px-8 py-3 bg-red-600 hover:bg-red-700 disabled:bg-red-800 text-white rounded-lg transition-colors flex items-center space-x-2"
+              className="w-full sm:w-auto px-8 py-3 sm:py-3 bg-red-600 hover:bg-red-700 active:bg-red-800 disabled:bg-red-800 text-white rounded-lg transition-colors flex items-center justify-center space-x-2 text-base font-medium touch-manipulation"
             >
               <IconWrapper icon={FaSave} size={16} />
               <span>{saving ? 'Saving...' : 'Save Avatar'}</span>
