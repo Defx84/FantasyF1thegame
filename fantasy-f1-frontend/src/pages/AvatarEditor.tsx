@@ -124,19 +124,19 @@ const AvatarEditor: React.FC = () => {
         <div className="flex-1 flex flex-col items-center justify-center p-4 pt-16 min-h-screen">
         <div className="max-w-4xl w-full h-full flex flex-col justify-center">
           {/* Page Title */}
-          <div className="text-center mb-6">
-            <div className="flex items-center justify-center space-x-3 mb-4">
-              <IconWrapper icon={FaUser} size={24} className="text-red-500" />
-              <h1 className="text-3xl font-bold text-white">Choose Your Avatar</h1>
+          <div className="text-center mb-4">
+            <div className="flex items-center justify-center space-x-3 mb-2">
+              <IconWrapper icon={FaUser} size={20} className="text-red-500" />
+              <h1 className="text-2xl font-bold text-white">Choose Your Avatar</h1>
             </div>
           </div>
           
           {/* Helmet Display Section */}
-          <div className="text-center mb-6">
-            <h2 className="text-2xl font-bold text-white mb-6">Helmet {currentPreset}</h2>
+          <div className="text-center mb-4">
+            <h2 className="text-xl font-bold text-white mb-4">Helmet {currentPreset}</h2>
             
             {/* Navigation Arrows */}
-            <div className="flex items-center justify-center space-x-6 mb-6">
+            <div className="flex items-center justify-center space-x-6 mb-4">
               <button
                 onClick={() => handleHelmetChange('prev')}
                 className="p-3 bg-white/10 hover:bg-white/20 border border-white/30 rounded-full text-white transition-all duration-200 hover:scale-110"
@@ -165,20 +165,43 @@ const AvatarEditor: React.FC = () => {
           </div>
 
           {/* Helmet Preview */}
-          <div className="flex justify-center mb-8">
-            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-6 border border-white/20">
-              <CallingCard
-                helmetPresetId={currentPreset}
-                helmetNumber={helmetNumber || '-'}
-                size={300}
-              />
+          <div className="flex justify-center mb-4">
+            <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-4 border border-white/20 relative">
+              <div className="flex justify-center">
+                <img
+                  src={`/images/helmets/preset-${currentPreset}.png`}
+                  alt={`Helmet Preset ${currentPreset}`}
+                  className="w-48 h-48 object-contain"
+                  onError={(e) => {
+                    const target = e.target as HTMLImageElement;
+                    target.style.display = 'none';
+                    target.parentElement!.innerHTML = `
+                      <div class="flex items-center justify-center w-48 h-48 text-white/40">
+                        <div class="text-center">
+                          <div class="text-4xl mb-2">🏁</div>
+                          <div class="text-sm">Helmet ${currentPreset}</div>
+                        </div>
+                      </div>
+                    `;
+                  }}
+                />
+              </div>
+              
+              {/* Number Badge */}
+              {helmetNumber && helmetNumber !== '' && (
+                <div className="absolute bottom-6 right-6">
+                  <div className="bg-blue-600 text-white rounded-full w-10 h-10 flex items-center justify-center text-sm font-bold shadow-lg border-2 border-white">
+                    {helmetNumber}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
           {/* Number Input Section */}
           <div className="max-w-md mx-auto">
             <div className="bg-white/5 backdrop-blur-sm rounded-xl p-4 border border-white/20">
-              <label className="block text-lg font-semibold text-white mb-4 text-center">
+              <label className="block text-base font-semibold text-white mb-3 text-center">
                 Choose Your Number
               </label>
               
@@ -200,7 +223,7 @@ const AvatarEditor: React.FC = () => {
                 </button>
               </div>
               
-              <div className="mt-3 text-center text-white/70 text-xs">
+              <div className="mt-2 text-center text-white/70 text-xs">
                 Enter numbers 1-99 (formatted as 01, 02, etc.)
               </div>
             </div>
