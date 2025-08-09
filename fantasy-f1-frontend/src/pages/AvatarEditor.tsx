@@ -39,9 +39,9 @@ const AvatarEditor: React.FC = () => {
 
   const handleHelmetChange = (direction: 'prev' | 'next') => {
     if (direction === 'prev') {
-      setCurrentPreset(prev => prev > 1 ? prev - 1 : 22);
+      setCurrentPreset(prev => prev > 1 ? prev - 1 : 30);
     } else {
-      setCurrentPreset(prev => prev < 22 ? prev + 1 : 1);
+      setCurrentPreset(prev => prev < 30 ? prev + 1 : 1);
     }
   };
 
@@ -159,7 +159,7 @@ const AvatarEditor: React.FC = () => {
                   {currentPreset}
                 </div>
                 <div className="text-white/70 text-xs">
-                  of 22 helmets
+                  of 30 helmets
                 </div>
               </div>
               
@@ -355,12 +355,12 @@ const AvatarEditor: React.FC = () => {
             {/* Header */}
             <div className="text-center mb-6">
               <h3 className="text-2xl font-bold text-white">Helmet Gallery</h3>
-              <p className="text-white/70 text-sm">Choose from 22 available helmets</p>
+              <p className="text-white/70 text-sm">Choose from 30 available helmets</p>
             </div>
             
             {/* Gallery Grid */}
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {Array.from({ length: 22 }, (_, i) => i + 1).map((presetId) => (
+              {Array.from({ length: 30 }, (_, i) => i + 1).map((presetId) => (
                 <div
                   key={presetId}
                   className={`relative bg-white/5 backdrop-blur-sm rounded-xl p-3 border transition-all duration-200 cursor-pointer hover:scale-105 hover:bg-white/10 ${
