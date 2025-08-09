@@ -185,9 +185,10 @@ const AvatarEditor: React.FC = () => {
               </div>
             </div>
           </div>
-                 </div>
-       </div>
-     </AppLayout>
+        </div>
+        </div>
+      </div>
+    </AppLayout>
    );
  };
 
