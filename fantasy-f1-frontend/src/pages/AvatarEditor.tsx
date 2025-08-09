@@ -13,6 +13,7 @@ const AvatarEditor: React.FC = () => {
   const [saving, setSaving] = useState(false);
   const [userId, setUserId] = useState<string | null>(null);
   const [showHelmetModal, setShowHelmetModal] = useState(false);
+  const [showGallery, setShowGallery] = useState(false);
 
   useEffect(() => {
     // Get current user ID from localStorage or context
@@ -85,6 +86,23 @@ const AvatarEditor: React.FC = () => {
     setHelmetNumber(formatted);
   };
 
+  const handleNumberInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    // Allow user to completely replace the value by handling selection/overwrite
+    if (value === '' || /^\d{1,2}$/.test(value)) {
+      const numericValue = value.replace(/\D/g, '');
+      if (numericValue === '') {
+        setHelmetNumber('');
+      } else {
+        const num = parseInt(numericValue);
+        if (num >= 1 && num <= 99) {
+          const formatted = num < 10 ? `0${num}` : num.toString();
+          setHelmetNumber(formatted);
+        }
+      }
+    }
+  };
+
   return (
     <AppLayout>
       {/* Background Image */}
@@ -117,7 +135,13 @@ const AvatarEditor: React.FC = () => {
           
           {/* Helmet Display Section */}
           <div className="text-center mb-3 sm:mb-4">
-            <h2 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">Helmet {currentPreset}</h2>
+            <button
+              onClick={() => setShowGallery(true)}
+              className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4 hover:text-red-400 transition-colors cursor-pointer"
+              title="View all helmets"
+            >
+              Gallery 📖
+            </button>
             
             {/* Navigation Arrows */}
             <div className="flex items-center justify-center space-x-4 sm:space-x-6 mb-3 sm:mb-4">
@@ -187,8 +211,8 @@ const AvatarEditor: React.FC = () => {
                 </div>
               )}
               
-              {/* Tap indicator */}
-              <div className="absolute top-2 left-2 opacity-60">
+              {/* Tap indicator - Bottom */}
+              <div className="absolute bottom-2 left-2 opacity-60">
                 <div className="bg-black/20 backdrop-blur-sm rounded-full px-2 py-1">
                   <span className="text-white text-xs">👆 Tap to enlarge</span>
                 </div>
@@ -206,7 +230,8 @@ const AvatarEditor: React.FC = () => {
                 inputMode="numeric"
                 pattern="[0-9]*"
                 value={helmetNumber}
-                onChange={(e) => handleNumberChange(e.target.value)}
+                onChange={handleNumberInputChange}
+                onFocus={(e) => e.target.select()} // Select all text when focused for easy replacement
                 placeholder="01"
                 maxLength={2}
                 className="w-full px-3 py-2 sm:py-3 bg-white/20 border border-white/30 rounded-lg text-white text-center text-lg sm:text-xl font-bold placeholder-white/50 focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/20 touch-manipulation"
@@ -302,6 +327,86 @@ const AvatarEditor: React.FC = () => {
               <p className="text-white/80 text-sm">
                 {helmetNumber ? `Your number: ${helmetNumber}` : 'No number selected'}
               </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Gallery Modal - All Helmets */}
+      {showGallery && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          {/* Backdrop */}
+          <div 
+            className="absolute inset-0 bg-black/80 backdrop-blur-sm"
+            onClick={() => setShowGallery(false)}
+          />
+          
+          {/* Modal Content */}
+          <div className="relative bg-white/10 backdrop-blur-lg rounded-3xl p-6 border border-white/20 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+            {/* Close Button */}
+            <button
+              onClick={() => setShowGallery(false)}
+              className="absolute top-4 right-4 p-2 bg-black/20 hover:bg-black/40 rounded-full text-white transition-colors touch-manipulation z-10"
+              title="Close"
+            >
+              <IconWrapper icon={FaTimes} size={20} />
+            </button>
+            
+            {/* Header */}
+            <div className="text-center mb-6">
+              <h3 className="text-2xl font-bold text-white">Helmet Gallery</h3>
+              <p className="text-white/70 text-sm">Choose from 22 available helmets</p>
+            </div>
+            
+            {/* Gallery Grid */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+              {Array.from({ length: 22 }, (_, i) => i + 1).map((presetId) => (
+                <div
+                  key={presetId}
+                  className={`relative bg-white/5 backdrop-blur-sm rounded-xl p-3 border transition-all duration-200 cursor-pointer hover:scale-105 hover:bg-white/10 ${
+                    currentPreset === presetId 
+                      ? 'border-red-500 bg-red-500/10' 
+                      : 'border-white/20'
+                  }`}
+                  onClick={() => {
+                    setCurrentPreset(presetId);
+                    setShowGallery(false);
+                  }}
+                  title={`Select Helmet ${presetId}`}
+                >
+                  <img
+                    src={`/images/helmets/preset-${presetId}.png`}
+                    alt={`Helmet ${presetId}`}
+                    className="w-full aspect-square object-contain"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.style.display = 'none';
+                      target.parentElement!.innerHTML = `
+                        <div class="flex items-center justify-center w-full aspect-square text-white/40">
+                          <div class="text-center">
+                            <div class="text-2xl mb-1">🏁</div>
+                            <div class="text-xs">${presetId}</div>
+                          </div>
+                        </div>
+                      `;
+                    }}
+                  />
+                  
+                  {/* Helmet Number */}
+                  <div className="text-center mt-2">
+                    <span className="text-white text-xs font-medium">#{presetId}</span>
+                  </div>
+                  
+                  {/* Selected Indicator */}
+                  {currentPreset === presetId && (
+                    <div className="absolute top-2 right-2">
+                      <div className="bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center text-xs">
+                        ✓
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
             </div>
           </div>
         </div>
