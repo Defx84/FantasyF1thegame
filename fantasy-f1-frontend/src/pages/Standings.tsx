@@ -219,7 +219,7 @@ const Standings: React.FC = () => {
             <AvatarImage 
               userId={standing.user._id} 
               username={standing.user.username} 
-              size={48} 
+              size={56} 
               className="mr-3" 
             />
             <div>
@@ -301,7 +301,7 @@ const Standings: React.FC = () => {
             <AvatarImage 
               userId={standing.user._id} 
               username={standing.user.username} 
-              size={48} 
+              size={56} 
               className="mr-3" 
             />
             <div>

@@ -70,20 +70,13 @@ const GridPage: React.FC<GridPageProps> = ({ players, raceData, leaderboard, cur
             return (
             <div
               key={player.username}
-              className={`backdrop-blur-sm bg-white/[0.02] hover:bg-white/[0.05] border border-white/5 rounded-xl shadow-lg p-6 transition-all duration-300 ${
+              className={`backdrop-blur-sm bg-white/[0.02] hover:bg-white/[0.05] border border-white/5 rounded-xl shadow-lg p-4 transition-all duration-300 ${
                 index % 2 === 0 ? 'translate-y-8' : ''
                 } ${isLastOdd ? 'col-start-2' : ''}`}
             >
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center">
-                  <AvatarImage 
-                    userId={player.id} 
-                    username={player.username} 
-                    size={40} 
-                    className="mr-3" 
-                  />
-                  <h2 className="text-xl font-semibold text-white truncate">{player.username}</h2>
-                </div>
+              {/* Top section with status indicator and username */}
+              <div className="flex items-center justify-between mb-3">
+                <h2 className="text-lg font-semibold text-white truncate flex-1">{player.username}</h2>
                 <div
                   className={`w-4 h-4 rounded-full flex-shrink-0 ${
                     player.selectionMade ? 'bg-green-500' : 'bg-red-500'
@@ -91,18 +84,30 @@ const GridPage: React.FC<GridPageProps> = ({ players, raceData, leaderboard, cur
                 />
               </div>
 
+              {/* Large Avatar Section */}
+              <div className="flex justify-center mb-4">
+                <AvatarImage 
+                  userId={player.id} 
+                  username={player.username} 
+                  size={120} 
+                  className="shadow-lg" 
+                />
+              </div>
+
+              {/* Selections section - compact */}
               {showSelections && player.selectionMade && (
-                <div className="space-y-2 text-white">
+                <div className="space-y-1 text-white text-sm">
                   <div className="truncate">
-                    <span className="font-medium">Main Driver:</span>{' '}
-                    {player.selections?.mainDriver}
+                    <span className="font-medium text-white/80">Main:</span>{' '}
+                    <span className="text-white">{player.selections?.mainDriver}</span>
                   </div>
                   <div className="truncate">
-                    <span className="font-medium">Reserve Driver:</span>{' '}
-                    {player.selections?.reserveDriver}
+                    <span className="font-medium text-white/80">Reserve:</span>{' '}
+                    <span className="text-white">{player.selections?.reserveDriver}</span>
                   </div>
                   <div className="truncate">
-                    <span className="font-medium">Team:</span> {player.selections?.team}
+                    <span className="font-medium text-white/80">Team:</span>{' '}
+                    <span className="text-white">{player.selections?.team}</span>
                   </div>
                 </div>
               )}

@@ -388,8 +388,8 @@ const RaceDetails: React.FC = () => {
                                 <AvatarImage 
                                   userId={member.id} 
                                   username={member.username} 
-                                  size={32} 
-                                  className="mr-2" 
+                                  size={40} 
+                                  className="mr-3" 
                                 />
                                 {member.username}
                               </div>
@@ -584,7 +584,7 @@ const RaceDetails: React.FC = () => {
                             <AvatarImage 
                               userId={member.id} 
                               username={member.username} 
-                              size={32} 
+                              size={48} 
                               className="mr-3" 
                             />
                             <h3 className="text-lg font-semibold text-white">{member.username}</h3>
