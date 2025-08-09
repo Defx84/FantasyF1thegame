@@ -30,10 +30,11 @@ const AvatarImage: React.FC<AvatarImageProps> = ({
 
       // Get user's avatar configuration
       const response = await avatarService.getUserAvatar(userId);
+      console.log(`Avatar data for ${username} (${userId}):`, response.avatar);
       setAvatarData(response.avatar);
       setLoading(false);
     } catch (err) {
-      console.error('Error loading avatar data:', err);
+      console.error(`Error loading avatar data for ${username} (${userId}):`, err);
       setError('Failed to load avatar');
       setLoading(false);
     }
@@ -64,6 +65,7 @@ const AvatarImage: React.FC<AvatarImageProps> = ({
 
   // If user has a customized avatar (preset 1-30), show the calling card
   if (avatarData?.isCustomized && avatarData?.helmetPresetId && avatarData.helmetPresetId > 0) {
+    console.log(`Rendering custom avatar for ${username}: preset=${avatarData.helmetPresetId}, number=${avatarData.helmetNumber}`);
     return (
       <CallingCard
         helmetPresetId={avatarData.helmetPresetId}
@@ -73,6 +75,8 @@ const AvatarImage: React.FC<AvatarImageProps> = ({
       />
     );
   }
+
+  console.log(`Rendering default avatar for ${username}. Avatar data:`, avatarData);
 
   // Default avatar (preset-00 with dash) - also handles helmetPresetId = 0
   return (
