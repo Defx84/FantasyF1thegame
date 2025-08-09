@@ -208,7 +208,7 @@ const ProfilePage: React.FC = () => {
                 className="flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow text-white font-semibold"
               >
                 <IconWrapper icon={FaPalette} size={18} className="mr-2" />
-                Edit Avatar
+                Choose Your Avatar
               </button>
               <button
                 onClick={() => navigate('/reset-password')}

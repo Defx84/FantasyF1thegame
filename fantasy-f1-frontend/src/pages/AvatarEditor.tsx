@@ -69,7 +69,17 @@ const AvatarEditor: React.FC = () => {
 
   return (
     <AppLayout>
-      <div className="min-h-screen bg-gradient-to-br from-gray-900 via-blue-900 to-gray-900 flex flex-col">
+      <div 
+        className="min-h-screen flex flex-col relative"
+        style={{
+          backgroundImage: 'url("/profile.webp")',
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+        }}
+      >
+        {/* Background Overlay */}
+        <div className="fixed inset-0 bg-black bg-opacity-30 z-0" />
         {/* Save/Cancel buttons - floating */}
         <div className="fixed top-20 right-4 z-40 flex items-center space-x-3">
           <button
@@ -91,13 +101,13 @@ const AvatarEditor: React.FC = () => {
         </div>
 
         {/* Main Content */}
-        <div className="flex-1 flex flex-col items-center justify-center p-8 pt-16">
+        <div className="relative z-10 flex-1 flex flex-col items-center justify-center p-8 pt-16">
         <div className="max-w-4xl w-full">
           {/* Page Title */}
           <div className="text-center mb-12">
             <div className="flex items-center justify-center space-x-3 mb-6">
               <IconWrapper icon={FaUser} size={32} className="text-red-500" />
-              <h1 className="text-5xl font-bold text-white">Edit Your Avatar</h1>
+              <h1 className="text-5xl font-bold text-white">Choose Your Avatar</h1>
             </div>
           </div>
           
