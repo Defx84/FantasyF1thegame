@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import { createLeague, joinLeague, getUserLeagues, League } from '../services/leagueService';
 import DashboardRaceCountdown from '../components/DashboardRaceCountdown';
 import BulletinBoard from '../components/BulletinBoard';
+import AvatarImage from '../components/Avatar/AvatarImage';
 
 const TypedInstagramIcon = FaInstagram as unknown as React.FC<{ size?: number; className?: string }>;
 
@@ -139,8 +140,15 @@ const Dashboard: React.FC = () => {
               onClick={() => navigate('/profile')}
               className="flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors text-white font-semibold shadow"
             >
-              <IconWrapper icon={FaUser} size={16} className="text-white" />
-              <span className="ml-2">
+              {user?.id && (
+                <AvatarImage 
+                  userId={user.id} 
+                  username={user.username} 
+                  size={32} 
+                  className="mr-2" 
+                />
+              )}
+              <span className="ml-1">
                 {user?.username || 'User'}
               </span>
             </button>

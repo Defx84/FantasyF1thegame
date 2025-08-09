@@ -50,14 +50,15 @@ const AvatarImage: React.FC<AvatarImageProps> = ({
     );
   }
 
-  if (error) {
+  // Always show default avatar on error or if no avatar data
+  if (error || !avatarData) {
     return (
-      <div 
-        className={`bg-red-100 border border-red-400 text-red-700 rounded-lg flex items-center justify-center text-xs ${className}`}
-        style={{ width: size, height: size * 0.8 }}
-      >
-        Error
-      </div>
+      <CallingCard
+        helmetPresetId={0}
+        helmetNumber="-"
+        size={size}
+        className={className}
+      />
     );
   }
 
@@ -73,7 +74,7 @@ const AvatarImage: React.FC<AvatarImageProps> = ({
     );
   }
 
-  // Default avatar (preset-00 with dash)
+  // Default avatar (preset-00 with dash) - also handles helmetPresetId = 0
   return (
     <CallingCard
       helmetPresetId={0}
