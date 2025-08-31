@@ -92,14 +92,14 @@ const ROUND_TO_RACE = {
     },
     15: {
         name: 'dutch',
-        date: new Date('2025-08-24T13:00:00Z'),
-        qualifyingStart: new Date('2025-08-23T13:00:00Z'),
+        date: new Date('2025-08-31T13:00:00Z'),
+        qualifyingStart: new Date('2025-08-30T13:00:00Z'),
         hasSprint: false
     },
     16: {
         name: 'italian',
-        date: new Date('2025-08-31T13:00:00Z'),
-        qualifyingStart: new Date('2025-08-30T13:00:00Z'),
+        date: new Date('2025-09-07T13:00:00Z'),
+        qualifyingStart: new Date('2025-09-06T13:00:00Z'),
         hasSprint: false
     },
     17: {
