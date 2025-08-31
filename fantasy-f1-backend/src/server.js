@@ -14,7 +14,7 @@ const {
     initializeScraperSystem,
     runScraper
 } = require('./scrapers/motorsportScraper');
-const { cleanupExpiredTokens } = require('./utils/tokenUtils');
+const { cleanupExpiredTokens } = require('./utils/tokenUtils.js');
 const { ROUND_TO_RACE } = require('./constants/roundMapping');
 const RaceResult = require('./models/RaceResult');
 const League = require('./models/League');
@@ -36,9 +36,14 @@ async function shouldProcessRace(round, raceName) {
         }
         
         // Check if we have a valid slug for this race
-        const slugs = await loadSlugsFromFile();
-        if (!slugs[raceName]) {
-            console.log(`⏭️ Skipping ${raceName} (round ${round}) - No valid slug found`);
+        try {
+            const slugs = await loadSlugsFromFile();
+            if (!slugs[raceName]) {
+                console.log(`⏭️ Skipping ${raceName} (round ${round}) - No valid slug found`);
+                return false;
+            }
+        } catch (error) {
+            console.log(`⏭️ Skipping ${raceName} (round ${round}) - Error loading slugs: ${error.message}`);
             return false;
         }
         
@@ -191,6 +196,18 @@ app.listen(port, async () => {
                 console.log('✅ Scheduled Dutch GP scraper completed successfully');
             } catch (error) {
                 console.error('❌ Error during scheduled Dutch GP scraper:', error);
+                console.log('🔄 Will retry in 5 minutes...');
+                
+                // Retry after 5 minutes
+                setTimeout(async () => {
+                    try {
+                        console.log('🔄 Retrying Dutch GP scraper...');
+                        await runScraper();
+                        console.log('✅ Retry successful!');
+                    } catch (retryError) {
+                        console.error('❌ Retry failed:', retryError);
+                    }
+                }, 5 * 60 * 1000);
             }
         }, {
             timezone: 'Europe/London'
