@@ -73,6 +73,9 @@ router.post('/scrape-missing-races', async (req, res) => {
     }
 });
 
+// Manual scraper trigger for specific race
+router.post('/trigger-scraper', adminController.triggerManualScraper);
+
 // Assign real points to all users in a league for a given round
 router.post('/assign-real-points-league', adminController.assignRealPointsToLeague);
 

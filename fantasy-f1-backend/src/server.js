@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const cron = require('node-cron');
 const { generalLimiter, authLimiter, sensitiveLimiter } = require('./middleware/rateLimiter');
 const { 
     discoverMotorsportSlugs, 
@@ -13,6 +14,7 @@ const {
     initializeScraperSystem,
     runScraper
 } = require('./scrapers/motorsportScraper');
+const { cleanupExpiredTokens } = require('./utils/tokenUtils');
 const { ROUND_TO_RACE } = require('./constants/roundMapping');
 const RaceResult = require('./models/RaceResult');
 const League = require('./models/League');
@@ -169,6 +171,30 @@ app.listen(port, async () => {
         // Run scraper immediately
         console.log('🏎 Running initial race results update...');
         await runScraper();
+        
+        // Schedule token cleanup (run daily at 2 AM)
+        cron.schedule('0 2 * * *', async () => {
+            console.log('🧹 Running scheduled token cleanup...');
+            try {
+                const cleanedCount = await cleanupExpiredTokens();
+                console.log(`✅ Cleaned up ${cleanedCount} expired tokens`);
+            } catch (error) {
+                console.error('❌ Error during token cleanup:', error);
+            }
+        });
+        
+        // Schedule one-time scraper run for Dutch GP at 19:05 UK time
+        cron.schedule('5 19 31 8 *', async () => {
+            console.log('🏎 Running scheduled Dutch GP scraper at 19:05 UK time...');
+            try {
+                await runScraper();
+                console.log('✅ Scheduled Dutch GP scraper completed successfully');
+            } catch (error) {
+                console.error('❌ Error during scheduled Dutch GP scraper:', error);
+            }
+        }, {
+            timezone: 'Europe/London'
+        });
         
         console.log('✅ Server initialization complete');
     } catch (error) {

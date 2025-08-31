@@ -365,4 +365,74 @@ exports.assignRealPointsToLeague = async (req, res) => {
     console.error('Error in assignRealPointsToLeague:', error);
     res.status(500).json({ message: 'Error assigning real points to league', error: error.message });
   }
+};
+
+// Manually trigger scraper for a specific race
+exports.triggerManualScraper = async (req, res) => {
+  try {
+    const { round, raceName } = req.body;
+    
+    if (!round || !raceName) {
+      return res.status(400).json({ 
+        message: 'round and raceName are required' 
+      });
+    }
+
+    // Check if user is an admin (you can add more specific admin checks here)
+    if (!req.user) {
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+
+    console.log(`[Manual Scraper] Admin ${req.user.username} triggered scraper for ${raceName} (round ${round})`);
+
+    // Import scraper functions
+    const { runScraper, scrapeMotorsportResultsByType, loadSlugsFromFile } = require('../scrapers/motorsportScraper');
+    
+    // Load slugs to get the correct slug for the race
+    const slugs = await loadSlugsFromFile();
+    const slug = slugs[raceName];
+    
+    if (!slug) {
+      return res.status(400).json({ 
+        message: `No slug found for race: ${raceName}`,
+        availableRaces: Object.keys(slugs)
+      });
+    }
+
+    console.log(`[Manual Scraper] Found slug: ${slug} for ${raceName}`);
+
+    // Run the scraper
+    console.log(`[Manual Scraper] Starting scraper for ${raceName}...`);
+    await runScraper();
+    
+    console.log(`[Manual Scraper] Scraper completed for ${raceName}`);
+
+    // Get updated race result
+    const RaceResult = require('../models/RaceResult');
+    const updatedRace = await RaceResult.findOne({ round });
+    
+    if (updatedRace) {
+      console.log(`[Manual Scraper] Race ${raceName} updated:`, {
+        status: updatedRace.status,
+        resultsCount: updatedRace.results?.length || 0,
+        lastUpdated: updatedRace.lastUpdated
+      });
+    }
+
+    res.json({ 
+      message: `Manual scraper triggered successfully for ${raceName} (round ${round})`,
+      race: updatedRace ? {
+        status: updatedRace.status,
+        resultsCount: updatedRace.results?.length || 0,
+        lastUpdated: updatedRace.lastUpdated
+      } : null
+    });
+
+  } catch (error) {
+    console.error('Error in triggerManualScraper:', error);
+    res.status(500).json({ 
+      message: 'Error triggering manual scraper', 
+      error: error.message 
+    });
+  }
 }; 
