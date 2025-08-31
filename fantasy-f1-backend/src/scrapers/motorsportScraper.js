@@ -57,8 +57,10 @@ async function saveSlugsToFile(slugs) {
 
 async function discoverMotorsportSlugs(year = new Date().getFullYear()) {
   console.log(`\n🔍 Discovering slugs for year ${year}...`);
-  const browser = await puppeteer.launch({ 
-    headless: "new", 
+  
+  // Puppeteer configuration for Docker environment
+  const puppeteerOptions = {
+    headless: "new",
     args: [
       '--no-sandbox',
       '--disable-setuid-sandbox',
@@ -67,7 +69,36 @@ async function discoverMotorsportSlugs(year = new Date().getFullYear()) {
       '--disable-gpu',
       '--window-size=1920x1080'
     ]
-  });
+  };
+  
+  // Try to find Chrome executable in common Docker locations
+  const possiblePaths = [
+    '/usr/bin/google-chrome',
+    '/usr/bin/chromium-browser',
+    '/usr/bin/chromium',
+    '/usr/bin/chrome',
+    process.env.CHROME_BIN
+  ].filter(Boolean);
+  
+  for (const path of possiblePaths) {
+    try {
+      const fs = require('fs');
+      if (fs.existsSync(path)) {
+        puppeteerOptions.executablePath = path;
+        console.log(`✅ Using Chrome executable: ${path}`);
+        break;
+      }
+    } catch (error) {
+      console.log(`⚠️ Could not check path: ${path}`);
+    }
+  }
+  
+  // If no Chrome found, try to use system default
+  if (!puppeteerOptions.executablePath) {
+    console.log('⚠️ No Chrome executable found, trying system default...');
+  }
+  
+  const browser = await puppeteer.launch(puppeteerOptions);
   const page = await browser.newPage();
 
   try {
@@ -118,7 +149,8 @@ async function discoverMotorsportSlugs(year = new Date().getFullYear()) {
 async function scrapeMotorsportResultsByType(slug, type) {
     let browser;
     try {
-        browser = await puppeteer.launch({ 
+        // Puppeteer configuration for Docker environment
+        const puppeteerOptions = {
             headless: "new",
             args: [
                 '--no-sandbox',
@@ -128,7 +160,36 @@ async function scrapeMotorsportResultsByType(slug, type) {
                 '--disable-gpu',
                 '--window-size=1920x1080'
             ]
-        });
+        };
+        
+        // Try to find Chrome executable in common Docker locations
+        const possiblePaths = [
+            '/usr/bin/google-chrome',
+            '/usr/bin/chromium-browser',
+            '/usr/bin/chromium',
+            '/usr/bin/chrome',
+            process.env.CHROME_BIN
+        ].filter(Boolean);
+        
+        for (const path of possiblePaths) {
+            try {
+                const fs = require('fs');
+                if (fs.existsSync(path)) {
+                    puppeteerOptions.executablePath = path;
+                    console.log(`✅ Using Chrome executable: ${path}`);
+                    break;
+                }
+            } catch (error) {
+                console.log(`⚠️ Could not check path: ${path}`);
+            }
+        }
+        
+        // If no Chrome found, try to use system default
+        if (!puppeteerOptions.executablePath) {
+            console.log('⚠️ No Chrome executable found, trying system default...');
+        }
+        
+        browser = await puppeteer.launch(puppeteerOptions);
         const page = await browser.newPage();
         
         // Set a longer timeout for page operations
@@ -431,11 +492,19 @@ async function runScraper() {
 async function initializeScraperSystem() {
     console.log('\n🚀 Initializing scraper system...');
     
-    // Initialize slug system
-    await initializeSlugSystem();
-    
-    // Start race result scheduling
-    scheduleRaceResultScraping();
+    try {
+        // Initialize slug system
+        await initializeSlugSystem();
+        
+        // Start race result scheduling
+        scheduleRaceResultScraping();
+        
+        console.log('✅ Scraper system initialized successfully');
+    } catch (error) {
+        console.error('❌ Error initializing scraper system:', error.message);
+        console.log('⚠️ Scraper system disabled - server will continue without scraping functionality');
+        console.log('💡 To enable scraping, ensure Chrome/Chromium is installed in the container');
+    }
 }
 
 // Initialize slug system
