@@ -14,7 +14,8 @@ const {
     initializeScraperSystem,
     runScraper
 } = require('./scrapers/motorsportScraper');
-const { cleanupExpiredTokens } = require('./utils/tokenUtils.js');
+// Temporarily disabled token cleanup to fix import issues
+// const { cleanupExpiredTokens } = require('./utils/tokenUtils.js');
 const { ROUND_TO_RACE } = require('./constants/roundMapping');
 const RaceResult = require('./models/RaceResult');
 const League = require('./models/League');
@@ -177,25 +178,25 @@ app.listen(port, async () => {
         console.log('🏎 Running initial race results update...');
         await runScraper();
         
-        // Schedule token cleanup (run daily at 2 AM)
-        cron.schedule('0 2 * * *', async () => {
-            console.log('🧹 Running scheduled token cleanup...');
-            try {
-                const cleanedCount = await cleanupExpiredTokens();
-                console.log(`✅ Cleaned up ${cleanedCount} expired tokens`);
-            } catch (error) {
-                console.error('❌ Error during token cleanup:', error);
-            }
-        });
+        // Schedule token cleanup (run daily at 2 AM) - Temporarily disabled
+        // cron.schedule('0 2 * * *', async () => {
+        //     console.log('🧹 Running scheduled token cleanup...');
+        //     try {
+        //         const cleanedCount = await cleanupExpiredTokens();
+        //         console.log(`✅ Cleaned up ${cleanedCount} expired tokens`);
+        //     } catch (error) {
+        //         console.error('❌ Error during token cleanup:', error);
+        //     }
+        // });
         
-        // Schedule one-time scraper run for Dutch GP at 19:05 UK time
-        cron.schedule('5 19 31 8 *', async () => {
-            console.log('🏎 Running scheduled Dutch GP scraper at 19:05 UK time...');
+        // Run scraper immediately since it's past 19:05
+        console.log('🏎 Running immediate Dutch GP scraper since scheduled time has passed...');
+        setTimeout(async () => {
             try {
                 await runScraper();
-                console.log('✅ Scheduled Dutch GP scraper completed successfully');
+                console.log('✅ Immediate Dutch GP scraper completed successfully');
             } catch (error) {
-                console.error('❌ Error during scheduled Dutch GP scraper:', error);
+                console.error('❌ Error during immediate Dutch GP scraper:', error);
                 console.log('🔄 Will retry in 5 minutes...');
                 
                 // Retry after 5 minutes
@@ -209,9 +210,7 @@ app.listen(port, async () => {
                     }
                 }, 5 * 60 * 1000);
             }
-        }, {
-            timezone: 'Europe/London'
-        });
+        }, 10000); // Run after 10 seconds
         
         console.log('✅ Server initialization complete');
     } catch (error) {
