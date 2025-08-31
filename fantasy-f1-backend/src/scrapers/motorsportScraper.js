@@ -261,13 +261,22 @@ async function scrapeMotorsportResultsByType(slug, type) {
             });
         });
 
-        // Calculate team points
-        const teamResults = calculateTeamPoints(results);
+        // Normalize team names to match our constants
+        const { normalizeTeamName } = require('../constants/f1Data2025');
+        const normalizedResults = results.map(result => ({
+            ...result,
+            team: normalizeTeamName(result.team) || result.team
+        }));
+
+        // Calculate team points using normalized team names
+        const teamResults = calculateTeamPoints(normalizedResults);
         
         return {
-            results,
+            results: normalizedResults,
             teamResults
         };
+
+
     } catch (error) {
         console.error(`❌ Error scraping ${type} results:`, error);
         throw error;

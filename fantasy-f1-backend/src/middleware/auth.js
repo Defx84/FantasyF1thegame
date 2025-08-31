@@ -1,12 +1,18 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const League = require('../models/League');
+const { verifyToken } = require('../utils/tokenUtils');
 
 const auth = async (req, res, next) => {
   console.log('Auth middleware - Starting authentication check');
   try {
     console.log('Auth middleware - Headers:', req.headers);
-    const token = req.headers.authorization?.split(' ')[1];
+    console.log('Auth middleware - Cookies:', req.cookies);
+    
+    // Check for token in Authorization header first, then cookies
+    const headerToken = req.headers.authorization?.split(' ')[1];
+    const cookieToken = req.cookies.accessToken;
+    const token = headerToken || cookieToken;
     
     if (!token) {
       console.log('Auth middleware - No token found');
@@ -25,7 +31,9 @@ const auth = async (req, res, next) => {
     }
 
     console.log('Auth middleware - Verifying token');
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    
+    // Use the new verifyToken function that checks blacklist
+    const decoded = await verifyToken(token, process.env.JWT_SECRET);
     console.log('Auth middleware - Decoded token:', decoded);
 
     const user = await User.findById(decoded.userId);

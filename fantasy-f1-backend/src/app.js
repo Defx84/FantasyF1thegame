@@ -4,6 +4,7 @@ const mongoose = require('mongoose');
 const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
+const cookieParser = require('cookie-parser');
 const { generalLimiter, authLimiter, sensitiveLimiter } = require('./middleware/rateLimiter');
 const { initializeScraperSystem, runScraper } = require('./scrapers/motorsportScraper');
 
@@ -14,6 +15,7 @@ app.set('trust proxy', 1);
 
 // Middleware
 app.use(helmet());
+app.use(cookieParser()); // Add cookie parser
 const allowedOrigins = [
     'http://localhost:3000',
     'http://localhost:3001',
@@ -32,7 +34,7 @@ app.use(cors({
       return callback(new Error('Not allowed by CORS'), false);
     }
   },
-  credentials: true,
+  credentials: true, // Important for cookies
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));

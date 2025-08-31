@@ -1,17 +1,23 @@
-const User = require('../models/User');
+const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { sendEmail } = require('../utils/email');
+const User = require('../models/User');
 const League = require('../models/League');
+const { sendEmail } = require('../utils/email');
+const { generateTokens, addToBlacklist, verifyToken } = require('../utils/tokenUtils');
 
-// Generate JWT token
-const generateTokens = (userId) => {
-  const accessToken = jwt.sign({ userId }, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES_IN
-  });
-  
-  const refreshToken = jwt.sign({ userId }, process.env.JWT_REFRESH_SECRET, {
-    expiresIn: process.env.JWT_REFRESH_EXPIRES_IN
-  });
+// Generate tokens helper function (keeping for backward compatibility)
+const generateTokensHelper = (userId) => {
+  const accessToken = jwt.sign(
+    { userId },
+    process.env.JWT_SECRET,
+    { expiresIn: '15m' }
+  );
+
+  const refreshToken = jwt.sign(
+    { userId },
+    process.env.JWT_REFRESH_SECRET,
+    { expiresIn: '7d' }
+  );
 
   return { accessToken, refreshToken };
 };
@@ -115,14 +121,29 @@ const login = async (req, res) => {
     // Generate tokens
     const { accessToken, refreshToken } = generateTokens(user._id);
 
+    // Set httpOnly cookies
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+      sameSite: 'strict',
+      maxAge: 15 * 60 * 1000, // 15 minutes
+      path: '/'
+    });
+
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      path: '/api/auth/refresh'
+    });
+
     res.json({
       user: {
         id: user._id,
         username: user.username,
         email: user.email
-      },
-      accessToken,
-      refreshToken
+      }
     });
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -133,12 +154,16 @@ const login = async (req, res) => {
 const refreshToken = async (req, res) => {
   try {
     const { refreshToken } = req.body;
+    const cookieRefreshToken = req.cookies.refreshToken;
 
-    if (!refreshToken) {
+    // Use cookie token if body token not provided
+    const tokenToUse = refreshToken || cookieRefreshToken;
+
+    if (!tokenToUse) {
       return res.status(401).json({ error: 'Refresh token is required' });
     }
 
-    const decoded = jwt.verify(refreshToken, process.env.JWT_REFRESH_SECRET);
+    const decoded = jwt.verify(tokenToUse, process.env.JWT_REFRESH_SECRET);
     const user = await User.findById(decoded.userId);
 
     if (!user) {
@@ -148,7 +173,23 @@ const refreshToken = async (req, res) => {
     // Generate new access token
     const { accessToken } = generateTokens(user._id);
 
-    res.json({ accessToken });
+    // Set new httpOnly cookie
+    res.cookie('accessToken', accessToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+      maxAge: 15 * 60 * 1000, // 15 minutes
+      path: '/'
+    });
+
+    res.json({ 
+      message: 'Token refreshed successfully',
+      user: {
+        id: user._id,
+        username: user.username,
+        email: user.email
+      }
+    });
   } catch (error) {
     res.status(401).json({ error: 'Invalid refresh token' });
   }
@@ -159,28 +200,56 @@ const logout = async (req, res) => {
   try {
     // Get the token from the request
     const token = req.headers.authorization?.split(' ')[1];
+    const cookieToken = req.cookies.accessToken;
     
-    if (!token) {
+    const tokenToUse = token || cookieToken;
+    
+    if (!tokenToUse) {
       return res.status(401).json({ error: 'No token provided' });
     }
 
     try {
       // Verify the token to ensure it's valid
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(tokenToUse, process.env.JWT_SECRET);
       
-      // In a production environment, you would:
-      // 1. Store the token in a blacklist (Redis/MongoDB)
-      // 2. Set an expiration time equal to the token's original expiration
-      // 3. Check the blacklist during token verification
+      // Add token to blacklist
+      await addToBlacklist(tokenToUse, decoded.userId);
       
-      // For now, we'll just verify the token and return success
+      // Clear httpOnly cookies
+      res.clearCookie('accessToken', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        path: '/'
+      });
+      
+      res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        path: '/api/auth/refresh'
+      });
+      
       res.json({ 
         message: 'Logged out successfully',
         tokenInvalidated: true 
       });
     } catch (error) {
-      // If token verification fails, it might be expired or invalid
-      // We'll still return success since the user is effectively logged out
+      // If token verification fails, still clear cookies
+      res.clearCookie('accessToken', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        path: '/'
+      });
+      
+      res.clearCookie('refreshToken', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'strict',
+        path: '/api/auth/refresh'
+      });
+      
       res.json({ 
         message: 'Logged out successfully',
         tokenInvalidated: true 
