@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { api } from '../services/api';
 
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
 
@@ -34,11 +35,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     // Check for existing session
     const checkSession = async () => {
       try {
-        const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
-          credentials: 'include', // Important for cookies
-        });
-        if (response.ok) {
-          const userData = await response.json();
+        const response = await api.get('/api/auth/me');
+        if (response.status === 200) {
+          const userData = response.data;
           setUser(userData.user);
         }
       } catch (error) {
@@ -52,18 +51,16 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = async (email: string, password: string) => {
-    const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', // Important for cookies
-      body: JSON.stringify({ email, password }),
+    const response = await api.post('/api/auth/login', {
+      email,
+      password
     });
 
-    if (!response.ok) {
+    if (response.status !== 200) {
       throw new Error('Login failed');
     }
 
-    const data = await response.json();
+    const data = response.data;
     
     // Store token in localStorage for cross-domain compatibility
     if (data.accessToken) {
@@ -75,12 +72,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const logout = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/auth/logout`, {
-        method: 'POST',
-        credentials: 'include', // Important for cookies
-      });
-
-      if (!response.ok) {
+      const response = await api.post('/api/auth/logout');
+      if (response.status !== 200) {
         throw new Error('Logout failed');
       }
     } catch (error) {
@@ -96,15 +89,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signup = async (username: string, email: string, password: string, termsAccepted: boolean) => {
-    const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include', // Important for cookies
-      body: JSON.stringify({ username, email, password, termsAccepted }),
+    const response = await api.post('/api/auth/register', {
+      username,
+      email,
+      password,
+      termsAccepted
     });
 
-    if (!response.ok) {
-      const errorData = await response.json();
+    if (response.status !== 201) {
+      const errorData = response.data;
       throw new Error(errorData.error || 'Signup failed');
     }
 

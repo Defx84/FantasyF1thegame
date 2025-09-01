@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { FaEnvelope } from 'react-icons/fa';
-import { IconType } from 'react-icons'; // ✅ Import IconType
+import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
+import IconWrapper from '../utils/iconWrapper';
+import { api } from '../services/api';
 
 // Define types for form fields
 interface FormData {
@@ -13,7 +14,7 @@ interface FormData {
 
 // Define types for IconWrapper props
 interface IconWrapperProps {
-  icon: IconType; // ✅ Correct type
+  icon: React.ElementType; // ✅ Correct type
   size?: number;
   className?: string;
 }
@@ -50,18 +51,14 @@ const ResetPassword: React.FC = () => {
       setLoading(true);
       setError('');
 
-      const response = await fetch(process.env.REACT_APP_API_BASE_URL + '/api/auth/reset-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          token,
-          email: data.email,
-          password: data.password,
-        }),
+      const response = await api.post('/api/auth/reset-password', {
+        token,
+        email: data.email,
+        password: data.password,
       });
 
-      if (!response.ok) {
-        const errorData = await response.json();
+      if (response.status !== 200) {
+        const errorData = response.data;
         throw new Error(errorData.message || 'Failed to reset password.');
       }
 
