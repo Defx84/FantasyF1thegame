@@ -14,7 +14,7 @@ const isRaceLocked = (qualifyingTime) => {
   
   const lockTime = subMinutes(new Date(qualifyingTime), 5);
   const currentTime = new Date();
-  
+
   return currentTime >= lockTime;
 };
 
@@ -23,6 +23,7 @@ const isRaceLocked = (qualifyingTime) => {
  * @param {Array} pastSelections - Array of past selection objects
  * @param {string} driverName - Name of the driver to check
  * @returns {Object} - { canReuse: boolean, reason?: string }
+ * Updated: Added trivial change to help with git operations
  */
 const checkDriverReuse = (pastSelections, driverName) => {
   if (!pastSelections || pastSelections.length === 0) {

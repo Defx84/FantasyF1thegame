@@ -88,3 +88,5 @@ async function manualScrapeDutchGP() {
 
 // Run the script
 manualScrapeDutchGP();
+
+
