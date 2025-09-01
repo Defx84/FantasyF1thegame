@@ -3,11 +3,10 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const League = require('../models/League');
 const { sendEmail } = require('../utils/email');
-// Temporarily removed tokenUtils import to fix authentication issues
-// const { generateTokens, addToBlacklist, verifyToken } = require('../utils/tokenUtils');
+const { generateTokens, addToBlacklist, verifyToken } = require('../utils/tokenUtils');
 
 // Generate tokens helper function (keeping for backward compatibility)
-const generateTokens = (userId) => {
+const generateTokensHelper = (userId) => {
   const accessToken = jwt.sign(
     { userId },
     process.env.JWT_SECRET,
@@ -21,18 +20,6 @@ const generateTokens = (userId) => {
   );
 
   return { accessToken, refreshToken };
-};
-
-// Add to blacklist helper function (temporarily simplified)
-const addToBlacklist = async (token, userId) => {
-  try {
-    // Temporarily simplified - just log the blacklist attempt
-    console.log(`Token blacklist requested for user ${userId} (blacklist functionality temporarily disabled)`);
-    return true;
-  } catch (error) {
-    console.error('Error in addToBlacklist:', error);
-    return false;
-  }
 };
 
 // Register new user
@@ -137,20 +124,18 @@ const login = async (req, res) => {
     // Set httpOnly cookies
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      secure: false, // Temporarily disable secure to fix cookie issues
-      sameSite: 'lax', // Change from 'strict' to 'lax' for better compatibility
+      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
+      sameSite: 'strict',
       maxAge: 15 * 60 * 1000, // 15 minutes
-      path: '/',
-      domain: undefined // Let browser set the domain automatically
+      path: '/'
     });
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: false, // Temporarily disable secure to fix cookie issues
-      sameSite: 'lax', // Change from 'strict' to 'lax' for better compatibility
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      path: '/api/auth/refresh',
-      domain: undefined // Let browser set the domain automatically
+      path: '/api/auth/refresh'
     });
 
     res.json({
@@ -158,7 +143,9 @@ const login = async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email
-      }
+      },
+      accessToken, // Include accessToken for cross-domain compatibility
+      refreshToken // Include refreshToken for cross-domain compatibility
     });
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -191,11 +178,10 @@ const refreshToken = async (req, res) => {
     // Set new httpOnly cookie
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      secure: false, // Temporarily disable secure to fix cookie issues
-      sameSite: 'lax', // Change from 'strict' to 'lax' for better compatibility
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
       maxAge: 15 * 60 * 1000, // 15 minutes
-      path: '/',
-      domain: undefined // Let browser set the domain automatically
+      path: '/'
     });
 
     res.json({ 
