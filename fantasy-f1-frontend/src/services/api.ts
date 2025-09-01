@@ -9,30 +9,89 @@ const api: AxiosInstance = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
+  withCredentials: true, // Important for httpOnly cookies
 });
 
-// Add a request interceptor to include the auth token
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+// Track if we're currently refreshing
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value?: any) => void;
+  reject: (reason?: any) => void;
+}> = [];
+
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach(({ resolve, reject }) => {
+    if (error) {
+      reject(error);
+    } else {
+      resolve(token);
     }
-    return config;
-  },
-  (error) => {
+  });
+  
+  failedQueue = [];
+};
+
+// Add a response interceptor to handle errors and token refresh
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        // If we're already refreshing, queue this request
+        return new Promise((resolve, reject) => {
+          failedQueue.push({ resolve, reject });
+        }).then(() => {
+          return api(originalRequest);
+        }).catch((err) => {
+          return Promise.reject(err);
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        // Try to refresh the token
+        const response = await axios.post(
+          `${process.env.REACT_APP_API_BASE_URL}/api/auth/refresh`,
+          {},
+          { withCredentials: true }
+        );
+
+        if (response.status === 200) {
+          processQueue(null, response.data.accessToken);
+          return api(originalRequest);
+        }
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        // Token refresh failed, redirect to login
+        window.location.href = '/';
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
+    }
+
     return Promise.reject(error);
   }
 );
 
-// Add a response interceptor to handle errors
-api.interceptors.response.use(
-  (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      localStorage.removeItem('token');
-      window.location.href = '/login';
+// Add a request interceptor to include the JWT token in headers
+api.interceptors.request.use(
+  (config) => {
+    // Get token from localStorage
+    const token = localStorage.getItem('accessToken');
+    
+    if (token) {
+      // Add Authorization header with Bearer token
+      config.headers.Authorization = `Bearer ${token}`;
     }
+    
+    return config;
+  },
+  (error) => {
     return Promise.reject(error);
   }
 );

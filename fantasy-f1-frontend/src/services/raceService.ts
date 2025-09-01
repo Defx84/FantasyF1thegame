@@ -35,9 +35,9 @@ export const TEAM_COLORS: Record<string, string> = {
   'Aston Martin': '#358C75', // Green
   'Alpine': '#FF87BC', // Pink
   'Haas F1 Team': '#B6BABD', // Grey
-  'Racing Bulls': '#6692FF', // Blue
+  'RB': '#6692FF', // Blue
   'Williams': '#64C4FF', // Light Blue
-  'Kick Sauber': '#52E252' // Green
+  'Stake F1 Team Kick Sauber': '#00FF87' // Bright Green
 };
 
 export const DRIVER_TEAMS: Record<string, string> = {
@@ -62,15 +62,15 @@ export const DRIVER_TEAMS: Record<string, string> = {
   // Haas F1 Team
   'Esteban Ocon': 'Haas F1 Team',
   'Oliver Bearman': 'Haas F1 Team',
-  // Racing Bulls
-  'Liam Lawson': 'Racing Bulls',
-  'Isack Hadjar': 'Racing Bulls',
+  // RB
+  'Liam Lawson': 'RB',
+  'Isack Hadjar': 'RB',
   // Williams
   'Alexander Albon': 'Williams',
   'Carlos Sainz': 'Williams',
-  // Kick Sauber
-  'Nico Hulkenberg': 'Kick Sauber',
-  'Gabriel Bortoleto': 'Kick Sauber'
+  // Stake F1 Team Kick Sauber
+  'Nico Hulkenberg': 'Stake F1 Team Kick Sauber',
+  'Gabriel Bortoleto': 'Stake F1 Team Kick Sauber'
 };
 
 export const getNextRaceTiming = async (): Promise<RaceTiming> => {

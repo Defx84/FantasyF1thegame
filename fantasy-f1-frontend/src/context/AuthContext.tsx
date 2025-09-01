@@ -1,47 +1,40 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000';
+
 interface User {
   id: string;
   username: string;
   email: string;
-  isAppAdmin?: boolean;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  logout: () => void;
+  logout: () => Promise<void>;
   signup: (username: string, email: string, password: string, termsAccepted: boolean) => Promise<{ success: boolean; message: string }>;
   getToken: () => string | null;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
-
-console.log('REACT_APP_API_BASE_URL:', process.env.REACT_APP_API_BASE_URL);
-
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const getToken = () => localStorage.getItem('token');
+  const getToken = () => {
+    // For httpOnly cookies, we can't access them from JavaScript
+    // The token will be automatically sent with requests
+    return null;
+  };
 
   useEffect(() => {
     // Check for existing session
     const checkSession = async () => {
-      const token = getToken();
-      if (!token) {
-        setLoading(false);
-        return;
-      }
-
       try {
         const response = await fetch(`${API_BASE_URL}/api/auth/me`, {
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
+          credentials: 'include', // Important for cookies
         });
         if (response.ok) {
           const userData = await response.json();
@@ -61,6 +54,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', // Important for cookies
       body: JSON.stringify({ email, password }),
     });
 
@@ -69,31 +63,31 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
 
     const data = await response.json();
-    localStorage.setItem('token', data.accessToken);
+    
+    // Store token in localStorage for cross-domain compatibility
+    if (data.accessToken) {
+      localStorage.setItem('accessToken', data.accessToken);
+    }
+    
     setUser(data.user);
   };
 
   const logout = async () => {
     try {
-      const token = getToken();
-      if (token) {
-        const response = await fetch(`${API_BASE_URL}/api/auth/logout`, {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-          },
-        });
+      const response = await fetch(`${API_BASE_URL}/api/auth/logout`, {
+        method: 'POST',
+        credentials: 'include', // Keep for compatibility
+      });
 
-        if (!response.ok) {
-          throw new Error('Logout failed');
-        }
+      if (!response.ok) {
+        throw new Error('Logout failed');
       }
     } catch (error) {
       console.error('Error during logout:', error);
     } finally {
-      // Clear all auth-related data
-      localStorage.removeItem('token');
+      // Clear user state and localStorage token
       setUser(null);
+      localStorage.removeItem('accessToken');
       
       // Redirect to welcome page
       window.location.href = '/';
@@ -104,6 +98,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const response = await fetch(`${API_BASE_URL}/api/auth/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', // Important for cookies
       body: JSON.stringify({ username, email, password, termsAccepted }),
     });
 
