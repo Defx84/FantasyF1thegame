@@ -12,25 +12,9 @@ interface FormData {
   confirmPassword: string;
 }
 
-// Define types for IconWrapper props
-interface IconWrapperProps {
-  icon: React.ElementType; // ✅ Correct type
-  size?: number;
-  className?: string;
-}
 
-// IconWrapper component
-const IconWrapper: React.FC<IconWrapperProps> = ({ icon: Icon, size = 24, className = '' }) => {
-  if (!Icon) return null;
 
-  const TypedIcon = Icon as unknown as React.FC<{ size?: number; className?: string }>;
 
-  return (
-    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-      <TypedIcon size={size} className={`text-gray-400 ${className}`} />
-    </div>
-  );
-};
 
 // ResetPassword page component
 const ResetPassword: React.FC = () => {
