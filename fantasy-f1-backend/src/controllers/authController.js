@@ -137,18 +137,20 @@ const login = async (req, res) => {
     // Set httpOnly cookies
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-      sameSite: 'strict',
+      secure: false, // Temporarily disable secure to fix cookie issues
+      sameSite: 'lax', // Change from 'strict' to 'lax' for better compatibility
       maxAge: 15 * 60 * 1000, // 15 minutes
-      path: '/'
+      path: '/',
+      domain: undefined // Let browser set the domain automatically
     });
 
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: false, // Temporarily disable secure to fix cookie issues
+      sameSite: 'lax', // Change from 'strict' to 'lax' for better compatibility
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-      path: '/api/auth/refresh'
+      path: '/api/auth/refresh',
+      domain: undefined // Let browser set the domain automatically
     });
 
     res.json({
@@ -189,10 +191,11 @@ const refreshToken = async (req, res) => {
     // Set new httpOnly cookie
     res.cookie('accessToken', accessToken, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'strict',
+      secure: false, // Temporarily disable secure to fix cookie issues
+      sameSite: 'lax', // Change from 'strict' to 'lax' for better compatibility
       maxAge: 15 * 60 * 1000, // 15 minutes
-      path: '/'
+      path: '/',
+      domain: undefined // Let browser set the domain automatically
     });
 
     res.json({ 
