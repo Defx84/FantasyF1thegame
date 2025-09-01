@@ -66,8 +66,9 @@ api.interceptors.response.use(
         }
       } catch (refreshError) {
         processQueue(refreshError, null);
-        // Token refresh failed, redirect to login
-        window.location.href = '/';
+        // Don't redirect automatically - let components handle auth failures
+        // This prevents infinite loops
+        console.log('Token refresh failed, authentication required');
         return Promise.reject(refreshError);
       } finally {
         isRefreshing = false;

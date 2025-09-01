@@ -24,6 +24,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [sessionChecked, setSessionChecked] = useState(false); // Prevent multiple session checks
 
   const getToken = () => {
     // For httpOnly cookies, we can't access them from JavaScript
@@ -32,9 +33,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    // Check for existing session
+    // Check for existing session only once
+    if (sessionChecked) return;
+    
     const checkSession = async () => {
       try {
+        setSessionChecked(true); // Mark as checked to prevent loops
         const response = await api.get('/api/auth/me');
         if (response.status === 200) {
           const userData = response.data;
@@ -42,13 +46,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       } catch (error) {
         console.error('Session check failed:', error);
+        // Don't redirect or refresh - just log the error
+        // This prevents infinite loops
       } finally {
         setLoading(false);
       }
     };
 
     checkSession();
-  }, []);
+  }, [sessionChecked]);
 
   const login = async (email: string, password: string) => {
     const response = await api.post('/api/auth/login', {
