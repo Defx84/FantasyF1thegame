@@ -6,6 +6,7 @@ interface User {
   id: string;
   username: string;
   email: string;
+  isAppAdmin?: boolean; // Add optional isAppAdmin property
 }
 
 interface AuthContextType {
@@ -76,7 +77,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const response = await fetch(`${API_BASE_URL}/api/auth/logout`, {
         method: 'POST',
-        credentials: 'include', // Keep for compatibility
+        credentials: 'include', // Important for cookies
       });
 
       if (!response.ok) {
