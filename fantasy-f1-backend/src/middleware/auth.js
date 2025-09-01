@@ -1,7 +1,8 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const League = require('../models/League');
-const { verifyToken } = require('../utils/tokenUtils');
+// Temporarily removed tokenUtils import to fix authentication issues
+// const { verifyToken } = require('../utils/tokenUtils');
 
 const auth = async (req, res, next) => {
   console.log('Auth middleware - Starting authentication check');
@@ -32,8 +33,8 @@ const auth = async (req, res, next) => {
 
     console.log('Auth middleware - Verifying token');
     
-    // Use the new verifyToken function that checks blacklist
-    const decoded = await verifyToken(token, process.env.JWT_SECRET);
+    // Temporarily use standard JWT verification instead of tokenUtils
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log('Auth middleware - Decoded token:', decoded);
 
     const user = await User.findById(decoded.userId);
