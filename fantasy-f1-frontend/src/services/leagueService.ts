@@ -67,11 +67,6 @@ export interface LeagueSelections {
   [username: string]: LeagueSelection;
 }
 
-const getAuthHeader = () => {
-  const token = localStorage.getItem('token');
-  return token ? { 'Authorization': `Bearer ${token}` } : {};
-};
-
 export const createLeague = async (leagueData: {
   name: string;
   description?: string;
@@ -119,9 +114,7 @@ export const getUserLeagues = async (): Promise<League[]> => {
 
 export const getLeagueSelections = async (leagueId: string): Promise<LeagueSelections> => {
   try {
-    const response = await api.get(`${API_URL}/${leagueId}/selections`, {
-      headers: getAuthHeader()
-    });
+    const response = await api.get(`${API_URL}/${leagueId}/selections`);
     return response.data;
   } catch (error) {
     throw error;
@@ -139,9 +132,7 @@ export const getLeagueStandings = async (leagueId: string, season: number): Prom
 
 export const deleteLeague = async (leagueId: string): Promise<void> => {
   try {
-    await api.delete(`${API_URL}/${leagueId}`, {
-      headers: getAuthHeader()
-    });
+    await api.delete(`${API_URL}/${leagueId}`);
   } catch (error) {
     throw error;
   }
@@ -150,9 +141,7 @@ export const deleteLeague = async (leagueId: string): Promise<void> => {
 // Abandon a league (user leaves league and deletes their data)
 export const abandonLeague = async (leagueId: string): Promise<void> => {
   try {
-    await api.post(`${API_URL}/${leagueId}/abandon`, {}, {
-      headers: getAuthHeader()
-    });
+    await api.post(`${API_URL}/${leagueId}/abandon`);
   } catch (error) {
     throw error;
   }

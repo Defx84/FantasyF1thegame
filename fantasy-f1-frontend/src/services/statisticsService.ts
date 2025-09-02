@@ -1,4 +1,4 @@
-import { API_BASE_URL } from '../config';
+import { api } from './api';
 
 export interface UserStatistics {
   totalPoints: number;
@@ -41,33 +41,26 @@ export interface DriverTeamStatistics {
 }
 
 export const fetchUserStatistics = async (userId: string, leagueId?: string): Promise<UserStatistics> => {
-  let url = `${API_BASE_URL}/api/statistics/user/${userId}`;
+  let url = `/api/statistics/user/${userId}`;
   if (leagueId) {
-    url = `${API_BASE_URL}/api/statistics/league/${leagueId}/user/${userId}`;
+    url = `/api/statistics/league/${leagueId}/user/${userId}`;
   }
-  const response = await fetch(url, {
-    headers: {
-      'Authorization': `Bearer ${localStorage.getItem('token')}`,
-    },
-  });
   
-  if (!response.ok) {
+  const response = await api.get(url);
+  
+  if (response.status !== 200) {
     throw new Error('Failed to fetch user statistics');
   }
   
-  return response.json();
+  return response.data;
 };
 
 export const fetchDriverTeamStatistics = async (): Promise<DriverTeamStatistics> => {
-  const response = await fetch(`${API_BASE_URL}/api/statistics/driver-team`, {
-    headers: {
-      'Authorization': `Bearer ${localStorage.getItem('token')}`,
-    },
-  });
+  const response = await api.get('/api/statistics/driver-team');
   
-  if (!response.ok) {
+  if (response.status !== 200) {
     throw new Error('Failed to fetch driver and team statistics');
   }
   
-  return response.json();
+  return response.data;
 }; 
