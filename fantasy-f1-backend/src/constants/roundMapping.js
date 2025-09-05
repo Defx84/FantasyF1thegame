@@ -88,30 +88,32 @@ const ROUND_TO_RACE = {
         name: 'hungarian',
         date: new Date('2025-08-03T13:00:00Z'),
         qualifyingStart: new Date('2025-08-02T13:00:00Z'),
-        hasSprint: false
+        hasSprint: true,
+        sprintQualifyingStart: new Date('2025-08-01T13:00:00Z'),
+        sprintStart: new Date('2025-08-02T13:00:00Z')
     },
     15: {
         name: 'dutch',
-        date: new Date('2025-08-24T13:00:00Z'),
-        qualifyingStart: new Date('2025-08-23T13:00:00Z'),
-        hasSprint: false
-    },
-    16: {
-        name: 'italian',
         date: new Date('2025-08-31T13:00:00Z'),
         qualifyingStart: new Date('2025-08-30T13:00:00Z'),
         hasSprint: false
     },
+    16: {
+        name: 'italian',
+        date: new Date('2025-09-07T13:00:00Z'),
+        qualifyingStart: new Date('2025-09-06T13:00:00Z'),
+        hasSprint: false
+    },
     17: {
         name: 'azerbaijan',
-        date: new Date('2025-09-14T11:00:00Z'),
-        qualifyingStart: new Date('2025-09-13T11:00:00Z'),
+        date: new Date('2025-09-21T12:00:00Z'),
+        qualifyingStart: new Date('2025-09-20T12:00:00Z'),
         hasSprint: false
     },
     18: {
         name: 'singapore',
-        date: new Date('2025-09-21T13:00:00Z'),
-        qualifyingStart: new Date('2025-09-20T13:00:00Z'),
+        date: new Date('2025-10-05T12:00:00Z'),
+        qualifyingStart: new Date('2025-10-04T12:00:00Z'),
         hasSprint: false
     },
     19: {
@@ -138,8 +140,8 @@ const ROUND_TO_RACE = {
     },
     22: {
         name: 'las-vegas',
-        date: new Date('2025-11-23T06:00:00Z'),
-        qualifyingStart: new Date('2025-11-22T06:00:00Z'),
+        date: new Date('2025-11-22T06:00:00Z'),
+        qualifyingStart: new Date('2025-11-21T06:00:00Z'),
         hasSprint: false
     },
     23: {
