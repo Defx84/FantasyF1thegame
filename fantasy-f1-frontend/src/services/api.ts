@@ -89,7 +89,7 @@ api.interceptors.request.use(
     // Get token from localStorage
     const token = localStorage.getItem('accessToken');
     
-    if (token) {
+    if (token && token !== 'null' && token !== 'undefined' && token.trim() !== '') {
       // Add Authorization header with Bearer token
       config.headers.Authorization = `Bearer ${token}`;
       console.log('[API] Sending token for request:', config.url);
@@ -97,7 +97,9 @@ api.interceptors.request.use(
       console.log('[API] Token type:', typeof token);
       console.log('[API] Token length:', token ? token.length : 0);
     } else {
-      console.warn('[API] No access token found in localStorage for request:', config.url);
+      console.warn('[API] No valid access token found in localStorage for request:', config.url);
+      console.warn('[API] Token value was:', token);
+      console.warn('[API] Token type:', typeof token);
     }
     
     return config;
