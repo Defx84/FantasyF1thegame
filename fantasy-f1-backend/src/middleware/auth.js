@@ -32,6 +32,9 @@ const auth = async (req, res, next) => {
     }
 
     console.log('Auth middleware - Verifying token');
+    console.log('Auth middleware - Token value:', token);
+    console.log('Auth middleware - Token type:', typeof token);
+    console.log('Auth middleware - Token length:', token ? token.length : 0);
     
     // Temporarily use standard JWT verification instead of tokenUtils
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
