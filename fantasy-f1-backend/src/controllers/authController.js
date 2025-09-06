@@ -126,7 +126,7 @@ const login = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production', // HTTPS only in production
       sameSite: 'strict',
-      maxAge: 15 * 60 * 1000, // 15 minutes
+      maxAge: 2 * 60 * 60 * 1000, // 2 hours
       path: '/'
     });
 
@@ -180,7 +180,7 @@ const refreshToken = async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'strict',
-      maxAge: 15 * 60 * 1000, // 15 minutes
+      maxAge: 2 * 60 * 60 * 1000, // 2 hours
       path: '/'
     });
 
