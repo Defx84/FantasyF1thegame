@@ -36,6 +36,19 @@ const auth = async (req, res, next) => {
     console.log('Auth middleware - Token type:', typeof token);
     console.log('Auth middleware - Token length:', token ? token.length : 0);
     
+    // Check if token is valid before verification
+    if (!token || typeof token !== 'string' || token.trim() === '') {
+      console.log('Auth middleware - Invalid token format');
+      return res.status(401).json({ message: 'Invalid token format' });
+    }
+    
+    // Check if token looks like a JWT (has 3 parts separated by dots)
+    const tokenParts = token.split('.');
+    if (tokenParts.length !== 3) {
+      console.log('Auth middleware - Token does not have 3 parts:', tokenParts.length);
+      return res.status(401).json({ message: 'Invalid token format' });
+    }
+    
     // Temporarily use standard JWT verification instead of tokenUtils
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     console.log('Auth middleware - Decoded token:', decoded);
