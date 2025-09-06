@@ -15,6 +15,12 @@ const auth = async (req, res, next) => {
     const cookieToken = req.cookies.accessToken;
     const token = headerToken || cookieToken;
     
+    // Handle case where token might be 'null' or 'undefined' string
+    if (token === 'null' || token === 'undefined' || token === '') {
+      console.log('Auth middleware - Token is null/undefined/empty string');
+      return res.status(401).json({ message: 'Authentication required' });
+    }
+    
     if (!token) {
       console.log('Auth middleware - No token found');
       return res.status(401).json({ message: 'Authentication required' });
