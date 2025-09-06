@@ -413,7 +413,7 @@ const NextRaceSelections: React.FC = () => {
     setSwitcherooLoading(true);
     setSwitcherooError(null);
     try {
-      const accessToken = localStorage.getItem('token');
+      const accessToken = localStorage.getItem('accessToken');
       const res = await fetch(`${API_BASE_URL}/api/switcheroo/remaining?leagueId=${leagueId}`,
         {
           headers: {
