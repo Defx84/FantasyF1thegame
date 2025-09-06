@@ -92,6 +92,10 @@ api.interceptors.request.use(
     if (token) {
       // Add Authorization header with Bearer token
       config.headers.Authorization = `Bearer ${token}`;
+      console.log('[API] Sending token for request:', config.url);
+      console.log('[API] Token value:', token);
+      console.log('[API] Token type:', typeof token);
+      console.log('[API] Token length:', token ? token.length : 0);
     } else {
       console.warn('[API] No access token found in localStorage for request:', config.url);
     }
