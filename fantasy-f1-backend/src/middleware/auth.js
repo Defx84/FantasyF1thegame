@@ -32,6 +32,8 @@ const auth = async (req, res, next) => {
     }
 
     console.log('Auth middleware - Verifying token');
+    console.log('Auth middleware - Token length:', token.length);
+    console.log('Auth middleware - Token starts with:', token.substring(0, 20) + '...');
     
     // Temporarily use standard JWT verification instead of tokenUtils
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -49,6 +51,12 @@ const auth = async (req, res, next) => {
     next();
   } catch (error) {
     console.error('Authentication error:', error);
+    console.error('JWT Error details:', {
+      name: error.name,
+      message: error.message,
+      expiredAt: error.expiredAt,
+      tokenLength: token ? token.length : 0
+    });
     return res.status(401).json({ message: 'Invalid token' });
   }
 };
