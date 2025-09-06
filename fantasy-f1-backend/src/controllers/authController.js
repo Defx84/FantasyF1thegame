@@ -186,6 +186,7 @@ const refreshToken = async (req, res) => {
 
     res.json({ 
       message: 'Token refreshed successfully',
+      accessToken, // Include the new access token
       user: {
         id: user._id,
         username: user.username,

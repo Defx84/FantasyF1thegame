@@ -61,6 +61,10 @@ api.interceptors.response.use(
         );
 
         if (response.status === 200) {
+          // Store the new token in localStorage
+          if (response.data.accessToken) {
+            localStorage.setItem('accessToken', response.data.accessToken);
+          }
           processQueue(null, response.data.accessToken);
           return api(originalRequest);
         }
@@ -88,6 +92,8 @@ api.interceptors.request.use(
     if (token) {
       // Add Authorization header with Bearer token
       config.headers.Authorization = `Bearer ${token}`;
+    } else {
+      console.warn('[API] No access token found in localStorage for request:', config.url);
     }
     
     return config;
