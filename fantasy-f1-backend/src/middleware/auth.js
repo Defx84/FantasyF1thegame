@@ -25,6 +25,9 @@ const auth = async (req, res, next) => {
       console.log('Auth middleware - No token found');
       return res.status(401).json({ message: 'Authentication required' });
     }
+    
+    console.log('Auth middleware - Token found:', token.substring(0, 20) + '...');
+    console.log('Auth middleware - Token length:', token.length);
 
     // Skip verification in test environment
     if (process.env.NODE_ENV === 'test') {
