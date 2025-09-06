@@ -31,14 +31,14 @@ app.use(cors({
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
-app.use(express.json());
-app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
-
-// Debug endpoint to test if changes are deployed
+// Debug endpoint to test if changes are deployed (before rate limiting)
 app.get('/api/debug', (req, res) => {
   console.log('=== DEBUG ENDPOINT CALLED ===');
   res.json({ message: 'Debug endpoint working', timestamp: new Date().toISOString() });
 });
+
+app.use(express.json());
+app.use(morgan(process.env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 
 // Apply general rate limiting to all routes
 app.use(generalLimiter);
