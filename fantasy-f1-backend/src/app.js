@@ -26,18 +26,7 @@ const allowedOrigins = [
 ];
 
 app.use(cors({
-  origin: function (origin, callback) {
-    console.log('CORS check - Origin:', origin);
-    console.log('CORS check - Allowed origins:', allowedOrigins);
-    if (!origin) return callback(null, true);
-    if (allowedOrigins.includes(origin)) {
-      console.log('CORS check - Origin allowed');
-      return callback(null, true);
-    } else {
-      console.log('CORS check - Origin rejected:', origin);
-      return callback(new Error('Not allowed by CORS'), false);
-    }
-  },
+  origin: true, // Allow all origins temporarily for debugging
   credentials: true, // Important for cookies
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization']
