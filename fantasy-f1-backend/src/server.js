@@ -20,7 +20,7 @@ const { ROUND_TO_RACE } = require('./constants/roundMapping');
 const RaceResult = require('./models/RaceResult');
 const League = require('./models/League');
 const User = require('./models/User');
-const { processRawResults, calculateTeamPoints, updatePlayerPoints, updateChampionshipStandings } = require('./utils/scoringUtils');
+const { processRawResults, calculateTeamPoints } = require('./utils/scoringUtils');
 
 const app = require('./app');
 
@@ -109,6 +109,7 @@ async function saveRaceResults(round, raceName, raceResults, sprintResults) {
             teamResults,
             sprintResults: processedSprintResults,
             sprintTeamResults,
+            status: 'completed', // CRITICAL: Set status to completed to trigger post-save hook
             lastUpdated: new Date()
         };
 
@@ -118,7 +119,8 @@ async function saveRaceResults(round, raceName, raceResults, sprintResults) {
             { upsert: true, new: true }
         );
 
-        console.log(`💾 Saved results for ${raceName} (round ${round}) to database`);
+        console.log(`💾 Saved results for ${raceName} (round ${round}) to database with status: ${race.status}`);
+        console.log(`🎯 Post-save hook should now trigger automatic points calculation for all users`);
         return race;
     } catch (error) {
         console.error(`❌ Error saving results for ${raceName}:`, error);
@@ -146,12 +148,8 @@ async function processRace(round, raceName, slug) {
             }
         }
 
-        // Save results to database
+        // Save results to database (this will trigger automatic points calculation via post-save hook)
         const savedRace = await saveRaceResults(round, raceName, raceResults, sprintResults);
-
-        // Update player points and championship standings
-        await updatePlayerPoints(savedRace);
-        await updateChampionshipStandings();
 
         console.log(`✅ Finished processing ${raceName}`);
     } catch (error) {
