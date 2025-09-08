@@ -1,49 +1,50 @@
-const axios = require('axios');
+const { Resend } = require('resend');
 
-// Vercel function URL for sending emails
-const VERCEL_EMAIL_URL = process.env.VERCEL_EMAIL_URL || 'https://thefantasyf1game.com/api/send-email';
+const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Send email function using Vercel + Resend
+// Send email function using Resend directly
 const sendEmail = async ({ to, subject, text, html }) => {
   try {
-    const response = await axios.post(VERCEL_EMAIL_URL, {
-      to,
-      subject,
-      text,
-      html,
-      from: 'The Fantasy F1 Game <onboarding@resend.dev>'
+    console.log('📧 Sending email via Resend to:', to);
+    
+    const data = await resend.emails.send({
+      from: 'The Fantasy F1 Game <onboarding@resend.dev>',
+      to: [to],
+      subject: subject,
+      html: html,
+      text: text || html.replace(/<[^>]*>/g, ''), // Strip HTML for text version
     });
 
-    console.log('✅ Email sent successfully');
-    return response.data;
+    console.log('✅ Email sent successfully via Resend:', data.id);
+    return data;
   } catch (error) {
     console.error('❌ Email error:', error.message);
     throw error;
   }
 };
 
-// Test email connection (now tests Vercel function)
+// Test email connection (now tests Resend directly)
 const testEmailConnection = async () => {
   try {
-    console.log('🔧 Testing Vercel email function...');
+    console.log('🔧 Testing Resend connection...');
     
-    // Send a test email to verify the function works
-    const testResponse = await axios.post(VERCEL_EMAIL_URL, {
-      to: 'test@example.com', // This will fail but we can check if the function is accessible
+    // Send a test email to verify Resend works
+    const testResponse = await resend.emails.send({
+      from: 'The Fantasy F1 Game <onboarding@resend.dev>',
+      to: ['test@example.com'], // This will fail but we can check if Resend is accessible
       subject: 'Test Connection',
       html: '<p>This is a test email to verify the connection.</p>',
-      from: 'The Fantasy F1 Game <onboarding@resend.dev>'
     });
 
-    console.log('✅ Vercel email function is accessible');
+    console.log('✅ Resend connection successful');
     return true;
   } catch (error) {
-    if (error.response?.status === 400) {
-      // Expected error for invalid email, but function is accessible
-      console.log('✅ Vercel email function is accessible (got expected validation error)');
+    if (error.message.includes('Invalid email')) {
+      // Expected error for invalid email, but Resend is accessible
+      console.log('✅ Resend connection successful (got expected validation error)');
       return true;
     }
-    console.error('❌ Vercel email function failed:', error.message);
+    console.error('❌ Resend connection failed:', error.message);
     return false;
   }
 };
