@@ -22,19 +22,29 @@ const transporter = nodemailer.createTransport({
   logger: process.env.NODE_ENV === 'development'
 });
 
-// Send email function
+// Send email function with timeout
 const sendEmail = async ({ to, subject, text, html }) => {
   try {
     console.log('📧 Sending email to:', to);
+    console.log('📧 Email subject:', subject);
+    console.log('📧 Email from:', process.env.EMAIL_FROM);
     
-    const info = await transporter.sendMail({
+    // Add timeout wrapper to prevent hanging
+    const emailPromise = transporter.sendMail({
       from: process.env.EMAIL_FROM,
       to,
       subject,
       text,
       html
     });
-
+    
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error('Email sending timeout after 30 seconds')), 30000);
+    });
+    
+    console.log('📧 About to call transporter.sendMail...');
+    const info = await Promise.race([emailPromise, timeoutPromise]);
+    
     console.log('✅ Email sent successfully');
     return info;
   } catch (error) {
