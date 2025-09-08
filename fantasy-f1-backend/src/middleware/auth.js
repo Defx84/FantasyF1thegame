@@ -5,11 +5,7 @@ const League = require('../models/League');
 // const { verifyToken } = require('../utils/tokenUtils');
 
 const auth = async (req, res, next) => {
-  console.log('Auth middleware - Starting authentication check');
   try {
-    console.log('Auth middleware - Headers:', req.headers);
-    console.log('Auth middleware - Cookies:', req.cookies);
-    
     // Check for token in Authorization header first, then cookies
     const headerToken = req.headers.authorization?.split(' ')[1];
     const cookieToken = req.cookies.accessToken;
@@ -17,17 +13,12 @@ const auth = async (req, res, next) => {
     
     // Handle case where token might be 'null' or 'undefined' string
     if (token === 'null' || token === 'undefined' || token === '') {
-      console.log('Auth middleware - Token is null/undefined/empty string');
       return res.status(401).json({ message: 'Authentication required' });
     }
     
     if (!token) {
-      console.log('Auth middleware - No token found');
       return res.status(401).json({ message: 'Authentication required' });
     }
-    
-    console.log('Auth middleware - Token found:', token.substring(0, 20) + '...');
-    console.log('Auth middleware - Token length:', token.length);
 
     // Skip verification in test environment
     if (process.env.NODE_ENV === 'test') {
@@ -40,17 +31,9 @@ const auth = async (req, res, next) => {
       return next();
     }
 
-    console.log('Auth middleware - Verifying token');
-    console.log('Auth middleware - Token value:', token);
-    console.log('Auth middleware - Token type:', typeof token);
-    console.log('Auth middleware - Token length:', token ? token.length : 0);
-    
-    // Use standard JWT verification (simplified like authMiddleware.js)
+    // Use standard JWT verification
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    console.log('Auth middleware - Decoded token:', decoded);
-
     const user = await User.findById(decoded.userId);
-    console.log('Auth middleware - Found user:', user ? user._id : 'not found');
 
     if (!user) {
       return res.status(401).json({ message: 'User not found' });
