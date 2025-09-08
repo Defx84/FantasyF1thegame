@@ -263,22 +263,28 @@ async function sendTestReminder(userId) {
     
     console.log(`📧 Found user: ${user.username}`);
     
-    // Use EXACT same format as working signup email
+    // Use EXACT same content as working signup email to test if it's a content issue
     console.log(`📧 About to call sendEmail...`);
     
     await sendEmail({
       to: user.email,
-      subject: '[TEST] TheFantasyF1Game Test Email',
-      text: `Hi ${user.username},\n\nThis is a test email from TheFantasyF1Game reminder system!\n\nIf you're receiving this email, it means the reminder system is working correctly.\n\nThis is just a test - no action required!\n\nVisit TheFantasyF1Game: https://thefantasyf1game.com\n\nFollow us on Instagram → @thefantasyf1game\n\n— TheFantasyF1Game Team`,
+      subject: '🏁 Welcome to TheFantasyF1Game — Your Race Starts Now!',
+      text: `Hi ${user.username},\n\nWelcome to TheFantasyF1Game — where Formula 1 passion meets strategy and competition.\nYou're officially on the grid, and it's time to prove your skills.\n\nEach race weekend, you'll choose your Main Driver, Reserve Driver, and Team. Will you play it safe or go bold for big points? The podium awaits.\n\n🔥 What's next?\n- Join or create a league with friends\n- Lock in your race selections before qualifying\n- Track your points and chase the title\n\n🏎️ For updates, tips, and behind-the-scenes action:\nFollow us on Instagram → @thefantasyf1game\n\nThanks for joining the race.\nStart your engines — the championship is calling. (click here to join)\n\n— TheFantasyF1Game Team`,
       html: `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa; border-radius: 10px;">
-      <h2 style="color: #dc2626; text-align: center;">🧪 Test Email from TheFantasyF1Game</h2>
+      <h2 style="color: #dc2626; text-align: center;">🏁 Welcome to TheFantasyF1Game — Your Race Starts Now!</h2>
       <p>Hi <b>${user.username}</b>,</p>
-      <p>This is a test email from TheFantasyF1Game reminder system!</p>
-      <p>If you're receiving this email, it means the reminder system is working correctly.</p>
-      <p>This is just a test - no action required!</p>
-      <p style="margin-top:2em;">Visit <a href="https://thefantasyf1game.com" target="_blank">TheFantasyF1Game</a></p>
-      <p>Follow us on Instagram → <a href="https://instagram.com/thefantasyf1game" target="_blank">@thefantasyf1game</a></p>
+      <p>Welcome to <b>TheFantasyF1Game</b> — where Formula 1 passion meets strategy and competition.<br />You're officially on the grid, and it's time to prove your skills.</p>
+      <p>Each race weekend, you'll choose your Main Driver, Reserve Driver, and Team. Will you play it safe or go bold for big points? The podium awaits.</p>
+      <h3>🔥 What's next?</h3>
+      <ul style="font-size: 1.1em;">
+        <li>Join or create a league with friends</li>
+        <li>Lock in your race selections before qualifying</li>
+        <li>Track your points and chase the title</li>
+      </ul>
+      <p>🏎️ For updates, tips, and behind-the-scenes action:<br />
+      Follow us on Instagram → <a href="https://instagram.com/thefantasyf1game" target="_blank">@thefantasyf1game</a></p>
+      <p style="margin-top:2em;">Thanks for joining the race.<br />Start your engines — the championship is calling. <a href="https://thefantasyf1game.com" target="_blank">(click here to join)</a></p>
       <p><b>— TheFantasyF1Game Team</b></p>
     </div>
   `
