@@ -32,7 +32,7 @@ const sendEmail = async ({ to, subject, text, html }) => {
     console.log('📧 SMTP Config - From:', process.env.EMAIL_FROM);
     
     const info = await transporter.sendMail({
-      from: process.env.EMAIL_FROM, // Revert to original working configuration
+      from: 'thefantasyf1game@gmail.com', // Must match the SMTP user for Gmail authentication
       to,
       subject,
       text,
