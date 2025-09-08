@@ -52,12 +52,20 @@ const sendEmail = async ({ to, subject, text, html }) => {
 const testEmailConnection = async () => {
   try {
     console.log('🔧 Testing email connection...');
+    console.log('📧 SMTP Configuration Check:');
+    console.log('  - Host:', process.env.EMAIL_HOST);
+    console.log('  - Port:', process.env.EMAIL_PORT);
+    console.log('  - Secure:', process.env.EMAIL_PORT === '465');
+    console.log('  - User:', process.env.EMAIL_USER);
+    console.log('  - From:', process.env.EMAIL_FROM);
+    console.log('  - Pass:', process.env.EMAIL_PASS ? '***SET***' : '***NOT SET***');
     
     await transporter.verify();
     console.log('✅ Email connection verified');
     return true;
   } catch (error) {
     console.error('❌ Email connection failed:', error.message);
+    console.error('❌ Full error:', error);
     return false;
   }
 };
