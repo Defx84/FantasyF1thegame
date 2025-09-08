@@ -87,6 +87,7 @@ app.use('/api/announcements', require('./routes/announcementRoutes'));
 app.use('/api/statistics', require('./routes/leagueStatisticsRoutes'));
 app.use('/api/league', require('./routes/leagueRoutes'));
 app.use('/api/selections', require('./routes/selectionRoutes'));
+app.use('/api/users', require('./routes/userRoutes'));
 
 // Avatar routes (admin-only for testing)
 app.use('/api/avatar', require('./routes/avatarRoutes'));

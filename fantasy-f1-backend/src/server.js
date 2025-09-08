@@ -21,6 +21,7 @@ const RaceResult = require('./models/RaceResult');
 const League = require('./models/League');
 const User = require('./models/User');
 const { processRawResults, calculateTeamPoints } = require('./utils/scoringUtils');
+const { sendReminderEmails } = require('./services/reminderService');
 
 const app = require('./app');
 
@@ -186,6 +187,17 @@ app.listen(port, async () => {
         //         console.error('❌ Error during token cleanup:', error);
         //     }
         // });
+        
+        // Schedule reminder emails (run daily at 10 AM UK time)
+        cron.schedule('0 10 * * *', async () => {
+            console.log('🔔 Running scheduled reminder emails...');
+            try {
+                const result = await sendReminderEmails();
+                console.log(`✅ Reminder emails sent: ${result.sent}, skipped: ${result.skipped}`);
+            } catch (error) {
+                console.error('❌ Error during reminder emails:', error);
+            }
+        });
         
         // Run scraper immediately since it's past 19:05
         console.log('🏎 Running immediate Dutch GP scraper since scheduled time has passed...');

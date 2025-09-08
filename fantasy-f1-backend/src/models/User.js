@@ -96,6 +96,14 @@ const userSchema = new mongoose.Schema({
       team: Number
     }
   }],
+  emailRemindersEnabled: {
+    type: Boolean,
+    default: true
+  },
+  lastReminderSent: {
+    type: Date,
+    default: null
+  }
 }, {
   timestamps: true
 });
