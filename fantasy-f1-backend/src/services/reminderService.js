@@ -263,15 +263,29 @@ async function sendTestReminder(userId) {
     
     console.log(`📧 Found user: ${user.username}`);
     
-    const subject = `[TEST] TheFantasyF1Game Reminder System Test`;
-    const html = generateTestEmailHTML(user.username);
-    const text = generateTestEmailText(user.username);
+    // Use EXACT same format as working signup email
+    const subject = `[TEST] TheFantasyF1Game Test Email`;
+    const text = `Hi ${user.username},\n\nThis is a test email from TheFantasyF1Game reminder system!\n\nIf you're receiving this email, it means the reminder system is working correctly.\n\nThis is just a test - no action required!\n\nVisit TheFantasyF1Game: https://thefantasyf1game.com\n\nFollow us on Instagram → @thefantasyf1game\n\n— TheFantasyF1Game Team`;
+    const html = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa; border-radius: 10px;">
+      <h2 style="color: #dc2626; text-align: center;">🧪 Test Email from TheFantasyF1Game</h2>
+      <p>Hi <b>${user.username}</b>,</p>
+      <p>This is a test email from TheFantasyF1Game reminder system!</p>
+      <p>If you're receiving this email, it means the reminder system is working correctly.</p>
+      <p>This is just a test - no action required!</p>
+      <p style="margin-top:2em;">Visit <a href="https://thefantasyf1game.com" target="_blank">TheFantasyF1Game</a></p>
+      <p>Follow us on Instagram → <a href="https://instagram.com/thefantasyf1game" target="_blank">@thefantasyf1game</a></p>
+      <p><b>— TheFantasyF1Game Team</b></p>
+    </div>
+  `;
+    
+    console.log(`📧 About to call sendEmail...`);
     
     await sendEmail({
       to: user.email,
       subject,
-      html,
-      text
+      text,
+      html
     });
     
     console.log(`✅ Test reminder sent to ${user.username}`);
