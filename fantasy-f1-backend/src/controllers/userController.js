@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const { sendTestReminder } = require('../services/reminderService');
+const { testEmailConnection } = require('../utils/email');
 
 // Get user preferences
 const getUserPreferences = async (req, res) => {
@@ -146,10 +147,35 @@ const getAllUsers = async (req, res) => {
   }
 };
 
+// Test email connection (admin only)
+const testEmailConnectionEndpoint = async (req, res) => {
+  try {
+    // Check if user is app admin
+    if (!req.user.isAppAdmin) {
+      return res.status(403).json({ error: 'Admin access required' });
+    }
+    
+    const isConnected = await testEmailConnection();
+    
+    res.json({
+      message: isConnected ? 'Email connection successful' : 'Email connection failed',
+      connected: isConnected
+    });
+    
+  } catch (error) {
+    console.error('Error testing email connection:', error);
+    res.status(500).json({ 
+      error: 'Failed to test email connection',
+      details: error.message 
+    });
+  }
+};
+
 module.exports = {
   getUserPreferences,
   updateEmailReminders,
   getUserProfile,
   sendTestReminderEmail,
-  getAllUsers
+  getAllUsers,
+  testEmailConnectionEndpoint
 };

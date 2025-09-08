@@ -8,7 +8,18 @@ const transporter = nodemailer.createTransport({
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS
-  }
+  },
+  // Add timeout and connection settings
+  connectionTimeout: 60000, // 60 seconds
+  greetingTimeout: 30000,   // 30 seconds
+  socketTimeout: 60000,     // 60 seconds
+  // Add retry logic
+  pool: true,
+  maxConnections: 5,
+  maxMessages: 100,
+  // Add debug info
+  debug: process.env.NODE_ENV === 'development',
+  logger: process.env.NODE_ENV === 'development'
 });
 
 // Send email function
@@ -38,6 +49,25 @@ const sendEmail = async ({ to, subject, text, html }) => {
   }
 };
 
+// Test email connection
+const testEmailConnection = async () => {
+  try {
+    console.log('🔧 Testing email connection...');
+    console.log('🔧 Host:', process.env.EMAIL_HOST);
+    console.log('🔧 Port:', process.env.EMAIL_PORT);
+    console.log('🔧 User:', process.env.EMAIL_USER);
+    console.log('🔧 From:', process.env.EMAIL_FROM);
+    
+    await transporter.verify();
+    console.log('✅ Email connection verified successfully');
+    return true;
+  } catch (error) {
+    console.error('❌ Email connection failed:', error);
+    return false;
+  }
+};
+
 module.exports = {
-  sendEmail
+  sendEmail,
+  testEmailConnection
 }; 
