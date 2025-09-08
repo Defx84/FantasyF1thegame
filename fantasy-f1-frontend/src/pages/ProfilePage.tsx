@@ -33,6 +33,7 @@ const ProfilePage: React.FC = () => {
   const [allUsers, setAllUsers] = useState<any[]>([]);
   const [selectedTestUser, setSelectedTestUser] = useState<string>('');
   const [testReminderLoading, setTestReminderLoading] = useState<boolean>(false);
+  const [testConnectionLoading, setTestConnectionLoading] = useState<boolean>(false);
 
   useEffect(() => {
     const fetchLeagues = async () => {
@@ -224,6 +225,21 @@ const ProfilePage: React.FC = () => {
     }
   };
 
+  const handleTestEmailConnection = async () => {
+    setTestConnectionLoading(true);
+    setReminderError(null);
+    setReminderSuccess(null);
+    
+    try {
+      const response = await api.get('/api/users/test-email-connection');
+      setReminderSuccess('Email connection test completed! Check the server logs for details.');
+    } catch (error: any) {
+      setReminderError(error.response?.data?.error || 'Failed to test email connection');
+    } finally {
+      setTestConnectionLoading(false);
+    }
+  };
+
   if (!user) {
     return null; // This shouldn't happen due to PrivateRoute, but just in case
   }
@@ -347,6 +363,18 @@ const ProfilePage: React.FC = () => {
                   >
                     {testReminderLoading ? 'Sending...' : 'Send Test Reminder'}
                   </button>
+                </div>
+                
+                {/* Test Email Connection Button */}
+                <div className="mt-4">
+                  <button
+                    onClick={handleTestEmailConnection}
+                    disabled={testConnectionLoading}
+                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded text-sm font-medium transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    {testConnectionLoading ? 'Testing...' : 'Test Email Connection'}
+                  </button>
+                  <p className="text-xs text-gray-300 mt-1">Check SMTP configuration and connection</p>
                 </div>
               </div>
             )}
