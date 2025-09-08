@@ -26,6 +26,10 @@ const transporter = nodemailer.createTransport({
 const sendEmail = async ({ to, subject, text, html }) => {
   try {
     console.log('📧 Sending email to:', to);
+    console.log('📧 SMTP Config - Host:', process.env.EMAIL_HOST);
+    console.log('📧 SMTP Config - Port:', process.env.EMAIL_PORT);
+    console.log('📧 SMTP Config - User:', process.env.EMAIL_USER);
+    console.log('📧 SMTP Config - From:', process.env.EMAIL_FROM);
     
     const info = await transporter.sendMail({
       from: process.env.EMAIL_FROM, // Revert to original working configuration
@@ -39,6 +43,7 @@ const sendEmail = async ({ to, subject, text, html }) => {
     return info;
   } catch (error) {
     console.error('❌ Email error:', error.message);
+    console.error('❌ Email error details:', error);
     throw error;
   }
 };
