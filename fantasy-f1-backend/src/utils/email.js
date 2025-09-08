@@ -31,7 +31,7 @@ const sendEmail = async ({ to, subject, text, html }) => {
     
     // Add timeout wrapper to prevent hanging
     const emailPromise = transporter.sendMail({
-      from: process.env.EMAIL_FROM,
+      from: 'thefantasyf1game@gmail.com', // Use actual Gmail address instead of env variable
       to,
       subject,
       text,
