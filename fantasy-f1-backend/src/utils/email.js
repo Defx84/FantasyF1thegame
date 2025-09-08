@@ -28,7 +28,7 @@ const sendEmail = async ({ to, subject, text, html }) => {
     console.log('📧 Sending email to:', to);
     
     const info = await transporter.sendMail({
-      from: 'thefantasyf1game@gmail.com', // Use actual Gmail address instead of env variable
+      from: process.env.EMAIL_FROM, // Revert to original working configuration
       to,
       subject,
       text,
