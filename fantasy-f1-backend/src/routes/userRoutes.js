@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { authenticateToken } = require('../middleware/auth');
+const { auth } = require('../middleware/auth');
 const { getUserPreferences, updateEmailReminders, getUserProfile, sendTestReminderEmail, getAllUsers } = require('../controllers/userController');
 
 // All routes require authentication
-router.use(authenticateToken);
+router.use(auth);
 
 // GET /api/users/profile - Get user profile
 router.get('/profile', getUserProfile);
