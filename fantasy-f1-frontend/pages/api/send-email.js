@@ -2,6 +2,7 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
+// Email sending API route for Vercel
 export default async function handler(req, res) {
   // Only allow POST requests
   if (req.method !== 'POST') {
