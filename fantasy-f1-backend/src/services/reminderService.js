@@ -216,36 +216,18 @@ async function sendReminderEmails() {
   }
 }
 
-// Generate simple test email template
+// Generate simple test email template (matching working signup email style)
 function generateTestEmailHTML(username) {
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa; border-radius: 10px;">
-      <!-- Banner -->
-      <img src="https://thefantasyf1game.com/email-banner.png" 
-           alt="TheFantasyF1Game" 
-           style="max-width: 100%; height: auto; display: block; margin: 0 auto 20px; border-radius: 8px;">
-      
-      <!-- Content -->
-      <h2 style="color: #dc2626; text-align: center;">Hi ${username},</h2>
-      
-      <p style="font-size: 16px; line-height: 1.6;">This is a test email from TheFantasyF1Game reminder system!</p>
-      
-      <p style="font-size: 16px; line-height: 1.6;">If you're receiving this email, it means the reminder system is working correctly.</p>
-      
-      <div style="text-align: center; margin: 30px 0;">
-        <a href="https://thefantasyf1game.com" 
-           style="background: #dc2626; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">
-          Visit TheFantasyF1Game
-        </a>
-      </div>
-      
-      <p style="font-size: 16px; line-height: 1.6;">This is just a test - no action required!</p>
-      
-      <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
-      
-      <p style="font-size: 14px; color: #666; line-height: 1.5;">
-        Follow us on Instagram at <a href="https://instagram.com/thefantasyf1game" style="color: #dc2626; text-decoration: none;">@thefantasyf1game</a>
-      </p>
+      <h2 style="color: #dc2626; text-align: center;">🧪 Test Email from TheFantasyF1Game</h2>
+      <p>Hi <b>${username}</b>,</p>
+      <p>This is a test email from TheFantasyF1Game reminder system!</p>
+      <p>If you're receiving this email, it means the reminder system is working correctly.</p>
+      <p>This is just a test - no action required!</p>
+      <p style="margin-top:2em;">Visit <a href="https://thefantasyf1game.com" target="_blank">TheFantasyF1Game</a></p>
+      <p>Follow us on Instagram → <a href="https://instagram.com/thefantasyf1game" target="_blank">@thefantasyf1game</a></p>
+      <p><b>— TheFantasyF1Game Team</b></p>
     </div>
   `;
 }

@@ -104,17 +104,26 @@ const sendTestReminderEmail = async (req, res) => {
       return res.status(400).json({ error: 'userId is required' });
     }
     
-    const result = await sendTestReminder(userId);
-    
-    res.json({
-      message: 'Test reminder email sent successfully',
-      result
-    });
+    // Try to send test reminder, but don't fail if it doesn't work (like signup email)
+    try {
+      const result = await sendTestReminder(userId);
+      res.json({
+        message: 'Test reminder email sent successfully',
+        result
+      });
+    } catch (emailError) {
+      console.error('Failed to send test reminder email:', emailError);
+      res.json({
+        message: 'Test reminder email failed to send',
+        error: emailError.message,
+        result: { success: false }
+      });
+    }
     
   } catch (error) {
-    console.error('❌ Test reminder error:', error.message);
+    console.error('❌ Test reminder endpoint error:', error.message);
     res.status(500).json({ 
-      error: 'Failed to send test reminder',
+      error: 'Failed to process test reminder request',
       details: error.message 
     });
   }
