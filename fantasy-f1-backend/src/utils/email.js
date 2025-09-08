@@ -6,9 +6,6 @@ const VERCEL_EMAIL_URL = process.env.VERCEL_EMAIL_URL || 'https://thefantasyf1ga
 // Send email function using Vercel + Resend
 const sendEmail = async ({ to, subject, text, html }) => {
   try {
-    console.log('📧 Sending email via Vercel function to:', to);
-    console.log('📧 Subject:', subject);
-    
     const response = await axios.post(VERCEL_EMAIL_URL, {
       to,
       subject,
@@ -17,11 +14,10 @@ const sendEmail = async ({ to, subject, text, html }) => {
       from: 'The Fantasy F1 Game <noreply@thefantasyf1game.com>'
     });
 
-    console.log('✅ Email sent successfully via Vercel:', response.data);
+    console.log('✅ Email sent successfully');
     return response.data;
   } catch (error) {
     console.error('❌ Email error:', error.message);
-    console.error('❌ Email error details:', error.response?.data || error);
     throw error;
   }
 };
@@ -30,7 +26,6 @@ const sendEmail = async ({ to, subject, text, html }) => {
 const testEmailConnection = async () => {
   try {
     console.log('🔧 Testing Vercel email function...');
-    console.log('📧 Vercel Function URL:', VERCEL_EMAIL_URL);
     
     // Send a test email to verify the function works
     const testResponse = await axios.post(VERCEL_EMAIL_URL, {
@@ -49,7 +44,6 @@ const testEmailConnection = async () => {
       return true;
     }
     console.error('❌ Vercel email function failed:', error.message);
-    console.error('❌ Full error:', error.response?.data || error);
     return false;
   }
 };
