@@ -1,71 +1,55 @@
-const nodemailer = require('nodemailer');
+const axios = require('axios');
 
-// Create reusable transporter
-const transporter = nodemailer.createTransport({
-  host: process.env.EMAIL_HOST,
-  port: process.env.EMAIL_PORT,
-  secure: process.env.EMAIL_PORT === '465',
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS
-  },
-  // Add timeout and connection settings
-  connectionTimeout: 10000, // 10 seconds (reduced for faster failure)
-  greetingTimeout: 10000,   // 10 seconds
-  socketTimeout: 10000,     // 10 seconds
-  // Add retry logic
-  pool: true,
-  maxConnections: 5,
-  maxMessages: 100,
-  // Add debug info
-  debug: process.env.NODE_ENV === 'development',
-  logger: process.env.NODE_ENV === 'development'
-});
+// Vercel function URL for sending emails
+const VERCEL_EMAIL_URL = process.env.VERCEL_EMAIL_URL || 'https://thefantasyf1game.com/api/send-email';
 
-// Send email function (reverted to original working version)
+// Send email function using Vercel + Resend
 const sendEmail = async ({ to, subject, text, html }) => {
   try {
-    console.log('📧 Sending email to:', to);
-    console.log('📧 SMTP Config - Host:', process.env.EMAIL_HOST);
-    console.log('📧 SMTP Config - Port:', process.env.EMAIL_PORT);
-    console.log('📧 SMTP Config - User:', process.env.EMAIL_USER);
-    console.log('📧 SMTP Config - From: thefantasyf1game@gmail.com (actual address being used)');
+    console.log('📧 Sending email via Vercel function to:', to);
+    console.log('📧 Subject:', subject);
     
-    const info = await transporter.sendMail({
-      from: 'thefantasyf1game@gmail.com', // Must match the SMTP user for Gmail authentication
+    const response = await axios.post(VERCEL_EMAIL_URL, {
       to,
       subject,
       text,
-      html
+      html,
+      from: 'The Fantasy F1 Game <noreply@thefantasyf1game.com>'
     });
 
-    console.log('✅ Email sent successfully');
-    return info;
+    console.log('✅ Email sent successfully via Vercel:', response.data);
+    return response.data;
   } catch (error) {
     console.error('❌ Email error:', error.message);
-    console.error('❌ Email error details:', error);
+    console.error('❌ Email error details:', error.response?.data || error);
     throw error;
   }
 };
 
-// Test email connection
+// Test email connection (now tests Vercel function)
 const testEmailConnection = async () => {
   try {
-    console.log('🔧 Testing email connection...');
-    console.log('📧 SMTP Configuration Check:');
-    console.log('  - Host:', process.env.EMAIL_HOST);
-    console.log('  - Port:', process.env.EMAIL_PORT);
-    console.log('  - Secure:', process.env.EMAIL_PORT === '465');
-    console.log('  - User:', process.env.EMAIL_USER);
-    console.log('  - From:', process.env.EMAIL_FROM);
-    console.log('  - Pass:', process.env.EMAIL_PASS ? '***SET***' : '***NOT SET***');
+    console.log('🔧 Testing Vercel email function...');
+    console.log('📧 Vercel Function URL:', VERCEL_EMAIL_URL);
     
-    await transporter.verify();
-    console.log('✅ Email connection verified');
+    // Send a test email to verify the function works
+    const testResponse = await axios.post(VERCEL_EMAIL_URL, {
+      to: 'test@example.com', // This will fail but we can check if the function is accessible
+      subject: 'Test Connection',
+      html: '<p>This is a test email to verify the connection.</p>',
+      from: 'The Fantasy F1 Game <noreply@thefantasyf1game.com>'
+    });
+
+    console.log('✅ Vercel email function is accessible');
     return true;
   } catch (error) {
-    console.error('❌ Email connection failed:', error.message);
-    console.error('❌ Full error:', error);
+    if (error.response?.status === 400) {
+      // Expected error for invalid email, but function is accessible
+      console.log('✅ Vercel email function is accessible (got expected validation error)');
+      return true;
+    }
+    console.error('❌ Vercel email function failed:', error.message);
+    console.error('❌ Full error:', error.response?.data || error);
     return false;
   }
 };
@@ -73,4 +57,4 @@ const testEmailConnection = async () => {
 module.exports = {
   sendEmail,
   testEmailConnection
-}; 
+};
