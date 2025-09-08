@@ -2,21 +2,16 @@ import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// Email sending API route for Vercel
-export default async function handler(req, res) {
-  // Only allow POST requests
-  if (req.method !== 'POST') {
-    return res.status(405).json({ error: 'Method not allowed' });
-  }
-
+// Email sending API route for Vercel (App Router)
+export async function POST(request) {
   try {
-    const { to, subject, html, text, from } = req.body;
+    const { to, subject, html, text, from } = await request.json();
 
     // Validate required fields
     if (!to || !subject || !html) {
-      return res.status(400).json({ 
+      return Response.json({ 
         error: 'Missing required fields: to, subject, html' 
-      });
+      }, { status: 400 });
     }
 
     // Send email using Resend
@@ -29,7 +24,7 @@ export default async function handler(req, res) {
     });
 
     console.log('✅ Email sent successfully:', data);
-    res.status(200).json({ 
+    return Response.json({ 
       success: true, 
       messageId: data.id,
       message: 'Email sent successfully' 
@@ -37,9 +32,14 @@ export default async function handler(req, res) {
 
   } catch (error) {
     console.error('❌ Email sending failed:', error);
-    res.status(500).json({ 
+    return Response.json({ 
       error: 'Failed to send email',
       details: error.message 
-    });
+    }, { status: 500 });
   }
+}
+
+// Handle other methods
+export async function GET() {
+  return Response.json({ error: 'Method not allowed' }, { status: 405 });
 }
