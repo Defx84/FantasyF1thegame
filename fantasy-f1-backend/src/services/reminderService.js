@@ -227,10 +227,34 @@ async function sendTestReminder(userId) {
       throw new Error('User not found');
     }
     
+    console.log(`📧 Found user: ${user.username} (${user.email})`);
+    
     // Get a sample race (or create a mock race for testing)
     const race = await RaceCalendar.findOne({}).sort({ round: -1 });
     if (!race) {
-      throw new Error('No race found in database for testing');
+      console.log('⚠️ No race found in database, creating mock race for testing');
+      // Create a mock race for testing
+      const mockRace = {
+        raceName: 'Test Grand Prix',
+        circuit: 'Test Circuit',
+        country: 'Test Country',
+        qualifyingStart: new Date(Date.now() + 24 * 60 * 60 * 1000) // Tomorrow
+      };
+      console.log(`📧 Sending test email to ${user.username} (${user.email}) for mock race: ${mockRace.raceName}`);
+      
+      const subject = `[TEST] ${mockRace.raceName} ${getCountryFlag(mockRace.country)}`;
+      const html = generateEmailHTML(user.username, mockRace);
+      const text = generateEmailText(user.username, mockRace);
+      
+      await sendEmail({
+        to: user.email,
+        subject,
+        html,
+        text
+      });
+      
+      console.log(`✅ Test reminder sent successfully to ${user.username}`);
+      return { success: true, user: user.username, email: user.email, race: mockRace.raceName };
     }
     
     console.log(`📧 Sending test email to ${user.username} (${user.email}) for race: ${race.raceName}`);

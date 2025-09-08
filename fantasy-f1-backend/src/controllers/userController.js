@@ -90,18 +90,27 @@ const getUserProfile = async (req, res) => {
 // Send test reminder email (admin only - for testing purposes)
 const sendTestReminderEmail = async (req, res) => {
   try {
+    console.log('🔧 Test reminder endpoint called');
+    console.log('🔧 User:', req.user);
+    console.log('🔧 Request body:', req.body);
+    
     // Check if user is app admin
     if (!req.user.isAppAdmin) {
+      console.log('❌ User is not app admin');
       return res.status(403).json({ error: 'Admin access required' });
     }
     
     const { userId } = req.body;
+    console.log('🔧 UserId from request:', userId);
     
     if (!userId) {
+      console.log('❌ No userId provided');
       return res.status(400).json({ error: 'userId is required' });
     }
     
+    console.log('🔧 Calling sendTestReminder with userId:', userId);
     const result = await sendTestReminder(userId);
+    console.log('🔧 Test reminder result:', result);
     
     res.json({
       message: 'Test reminder email sent successfully',
@@ -109,7 +118,7 @@ const sendTestReminderEmail = async (req, res) => {
     });
     
   } catch (error) {
-    console.error('Error sending test reminder:', error);
+    console.error('❌ Error sending test reminder:', error);
     res.status(500).json({ 
       error: 'Failed to send test reminder',
       details: error.message 
