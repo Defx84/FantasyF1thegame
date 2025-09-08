@@ -20,7 +20,7 @@ export default async function handler(req, res) {
 
     // Send email using Resend
     const data = await resend.emails.send({
-      from: from || 'The Fantasy F1 Game <noreply@thefantasyf1game.com>',
+      from: from || 'The Fantasy F1 Game <onboarding@resend.dev>',
       to: [to],
       subject: subject,
       html: html,

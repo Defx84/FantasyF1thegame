@@ -11,7 +11,7 @@ const sendEmail = async ({ to, subject, text, html }) => {
       subject,
       text,
       html,
-      from: 'The Fantasy F1 Game <noreply@thefantasyf1game.com>'
+      from: 'The Fantasy F1 Game <onboarding@resend.dev>'
     });
 
     console.log('✅ Email sent successfully');
@@ -32,7 +32,7 @@ const testEmailConnection = async () => {
       to: 'test@example.com', // This will fail but we can check if the function is accessible
       subject: 'Test Connection',
       html: '<p>This is a test email to verify the connection.</p>',
-      from: 'The Fantasy F1 Game <noreply@thefantasyf1game.com>'
+      from: 'The Fantasy F1 Game <onboarding@resend.dev>'
     });
 
     console.log('✅ Vercel email function is accessible');
