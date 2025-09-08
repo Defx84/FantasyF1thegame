@@ -10,9 +10,9 @@ const transporter = nodemailer.createTransport({
     pass: process.env.EMAIL_PASS
   },
   // Add timeout and connection settings
-  connectionTimeout: 60000, // 60 seconds
-  greetingTimeout: 30000,   // 30 seconds
-  socketTimeout: 60000,     // 60 seconds
+  connectionTimeout: 10000, // 10 seconds (reduced for faster failure)
+  greetingTimeout: 10000,   // 10 seconds
+  socketTimeout: 10000,     // 10 seconds
   // Add retry logic
   pool: true,
   maxConnections: 5,
