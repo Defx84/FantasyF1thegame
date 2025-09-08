@@ -27,7 +27,7 @@ const sendEmail = async ({ to, subject, text, html }) => {
   try {
     console.log('📧 Sending email to:', to);
     console.log('📧 Email subject:', subject);
-    console.log('📧 Email from:', process.env.EMAIL_FROM);
+    console.log('📧 Email from: thefantasyf1game@gmail.com');
     
     // Add timeout wrapper to prevent hanging
     const emailPromise = transporter.sendMail({
