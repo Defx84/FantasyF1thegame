@@ -15,7 +15,8 @@ const sendEmail = async ({ to, subject, text, html }) => {
       text: text || html.replace(/<[^>]*>/g, ''), // Strip HTML for text version
     });
 
-    console.log('✅ Email sent successfully via Resend:', data.id);
+    console.log('✅ Email sent successfully via Resend:', data);
+    console.log('📧 Full Resend response:', JSON.stringify(data, null, 2));
     return data;
   } catch (error) {
     console.error('❌ Email error:', error.message);
