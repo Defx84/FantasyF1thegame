@@ -216,6 +216,58 @@ async function sendReminderEmails() {
   }
 }
 
+// Generate simple test email template
+function generateTestEmailHTML(username) {
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa; border-radius: 10px;">
+      <!-- Banner -->
+      <img src="https://thefantasyf1game.com/email-banner.png" 
+           alt="TheFantasyF1Game" 
+           style="max-width: 100%; height: auto; display: block; margin: 0 auto 20px; border-radius: 8px;">
+      
+      <!-- Content -->
+      <h2 style="color: #dc2626; text-align: center;">Hi ${username},</h2>
+      
+      <p style="font-size: 16px; line-height: 1.6;">This is a test email from TheFantasyF1Game reminder system!</p>
+      
+      <p style="font-size: 16px; line-height: 1.6;">If you're receiving this email, it means the reminder system is working correctly.</p>
+      
+      <div style="text-align: center; margin: 30px 0;">
+        <a href="https://thefantasyf1game.com" 
+           style="background: #dc2626; color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; font-size: 16px; display: inline-block;">
+          Visit TheFantasyF1Game
+        </a>
+      </div>
+      
+      <p style="font-size: 16px; line-height: 1.6;">This is just a test - no action required!</p>
+      
+      <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+      
+      <p style="font-size: 14px; color: #666; line-height: 1.5;">
+        Follow us on Instagram at <a href="https://instagram.com/thefantasyf1game" style="color: #dc2626; text-decoration: none;">@thefantasyf1game</a>
+      </p>
+    </div>
+  `;
+}
+
+function generateTestEmailText(username) {
+  return `
+Hi ${username},
+
+This is a test email from TheFantasyF1Game reminder system!
+
+If you're receiving this email, it means the reminder system is working correctly.
+
+Visit TheFantasyF1Game: https://thefantasyf1game.com
+
+This is just a test - no action required!
+
+---
+
+Follow us on Instagram at @thefantasyf1game
+  `;
+}
+
 // Send test reminder to a specific user (for testing purposes)
 async function sendTestReminder(userId) {
   try {
@@ -228,40 +280,13 @@ async function sendTestReminder(userId) {
     }
     
     console.log(`📧 Found user: ${user.username} (${user.email})`);
+    console.log(`📧 Preparing to send test email...`);
     
-    // Get a sample race (or create a mock race for testing)
-    const race = await RaceCalendar.findOne({}).sort({ round: -1 });
-    if (!race) {
-      console.log('⚠️ No race found in database, creating mock race for testing');
-      // Create a mock race for testing
-      const mockRace = {
-        raceName: 'Test Grand Prix',
-        circuit: 'Test Circuit',
-        country: 'Test Country',
-        qualifyingStart: new Date(Date.now() + 24 * 60 * 60 * 1000) // Tomorrow
-      };
-      console.log(`📧 Sending test email to ${user.username} (${user.email}) for mock race: ${mockRace.raceName}`);
-      
-      const subject = `[TEST] ${mockRace.raceName} ${getCountryFlag(mockRace.country)}`;
-      const html = generateEmailHTML(user.username, mockRace);
-      const text = generateEmailText(user.username, mockRace);
-      
-      await sendEmail({
-        to: user.email,
-        subject,
-        html,
-        text
-      });
-      
-      console.log(`✅ Test reminder sent successfully to ${user.username}`);
-      return { success: true, user: user.username, email: user.email, race: mockRace.raceName };
-    }
+    const subject = `[TEST] TheFantasyF1Game Reminder System Test`;
+    const html = generateTestEmailHTML(user.username);
+    const text = generateTestEmailText(user.username);
     
-    console.log(`📧 Sending test email to ${user.username} (${user.email}) for race: ${race.raceName}`);
-    
-    const subject = `[TEST] ${race.raceName} ${getCountryFlag(race.country)}`;
-    const html = generateEmailHTML(user.username, race);
-    const text = generateEmailText(user.username, race);
+    console.log(`📧 Calling sendEmail function...`);
     
     await sendEmail({
       to: user.email,
@@ -271,7 +296,7 @@ async function sendTestReminder(userId) {
     });
     
     console.log(`✅ Test reminder sent successfully to ${user.username}`);
-    return { success: true, user: user.username, email: user.email, race: race.raceName };
+    return { success: true, user: user.username, email: user.email, race: 'Test Email' };
     
   } catch (error) {
     console.error('❌ Error sending test reminder:', error);
