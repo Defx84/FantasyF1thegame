@@ -25,12 +25,7 @@ const transporter = nodemailer.createTransport({
 // Send email function
 const sendEmail = async ({ to, subject, text, html }) => {
   try {
-    console.log('📧 Email service - Starting to send email');
-    console.log('📧 Email service - To:', to);
-    console.log('📧 Email service - Subject:', subject);
-    console.log('📧 Email service - From:', process.env.EMAIL_FROM);
-    console.log('📧 Email service - Host:', process.env.EMAIL_HOST);
-    console.log('📧 Email service - Port:', process.env.EMAIL_PORT);
+    console.log('📧 Sending email to:', to);
     
     const info = await transporter.sendMail({
       from: process.env.EMAIL_FROM,
@@ -40,11 +35,10 @@ const sendEmail = async ({ to, subject, text, html }) => {
       html
     });
 
-    console.log('✅ Email sent successfully:', info.messageId);
+    console.log('✅ Email sent successfully');
     return info;
   } catch (error) {
-    console.error('❌ Error sending email:', error);
-    console.error('❌ Error details:', error.message);
+    console.error('❌ Email error:', error.message);
     throw error;
   }
 };
@@ -53,16 +47,12 @@ const sendEmail = async ({ to, subject, text, html }) => {
 const testEmailConnection = async () => {
   try {
     console.log('🔧 Testing email connection...');
-    console.log('🔧 Host:', process.env.EMAIL_HOST);
-    console.log('🔧 Port:', process.env.EMAIL_PORT);
-    console.log('🔧 User:', process.env.EMAIL_USER);
-    console.log('🔧 From:', process.env.EMAIL_FROM);
     
     await transporter.verify();
-    console.log('✅ Email connection verified successfully');
+    console.log('✅ Email connection verified');
     return true;
   } catch (error) {
-    console.error('❌ Email connection failed:', error);
+    console.error('❌ Email connection failed:', error.message);
     return false;
   }
 };

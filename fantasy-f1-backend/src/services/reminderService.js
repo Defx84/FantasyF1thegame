@@ -279,14 +279,11 @@ async function sendTestReminder(userId) {
       throw new Error('User not found');
     }
     
-    console.log(`📧 Found user: ${user.username} (${user.email})`);
-    console.log(`📧 Preparing to send test email...`);
+    console.log(`📧 Found user: ${user.username}`);
     
     const subject = `[TEST] TheFantasyF1Game Reminder System Test`;
     const html = generateTestEmailHTML(user.username);
     const text = generateTestEmailText(user.username);
-    
-    console.log(`📧 Calling sendEmail function...`);
     
     await sendEmail({
       to: user.email,
@@ -295,11 +292,11 @@ async function sendTestReminder(userId) {
       text
     });
     
-    console.log(`✅ Test reminder sent successfully to ${user.username}`);
+    console.log(`✅ Test reminder sent to ${user.username}`);
     return { success: true, user: user.username, email: user.email, race: 'Test Email' };
     
   } catch (error) {
-    console.error('❌ Error sending test reminder:', error);
+    console.error('❌ Test reminder error:', error.message);
     throw error;
   }
 }
