@@ -1,22 +1,30 @@
-const { Resend } = require('resend');
+const { MailerSend } = require('mailersend');
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const mailerSend = new MailerSend({
+  apiKey: process.env.MAILERSEND_API_KEY,
+});
 
-// Send email function using Resend directly
+// Send email function using MailerSend
 const sendEmail = async ({ to, subject, text, html }) => {
   try {
-    console.log('📧 Sending email via Resend to:', to);
+    console.log('📧 Sending email via MailerSend to:', to);
     
-    const data = await resend.emails.send({
-      from: 'The Fantasy F1 Game <onboarding@resend.dev>',
-      to: [to],
+    const data = await mailerSend.email.send({
+      from: {
+        email: 'noreply@thefantasyf1game.com',
+        name: 'The Fantasy F1 Game'
+      },
+      to: [
+        {
+          email: to
+        }
+      ],
       subject: subject,
       html: html,
       text: text || html.replace(/<[^>]*>/g, ''), // Strip HTML for text version
     });
 
-    console.log('✅ Email sent successfully via Resend:', data);
-    console.log('📧 Full Resend response:', JSON.stringify(data, null, 2));
+    console.log('✅ Email sent successfully via MailerSend:', data);
     return data;
   } catch (error) {
     console.error('❌ Email error:', error.message);
@@ -24,28 +32,35 @@ const sendEmail = async ({ to, subject, text, html }) => {
   }
 };
 
-// Test email connection (now tests Resend directly)
+// Test email connection (now tests MailerSend directly)
 const testEmailConnection = async () => {
   try {
-    console.log('🔧 Testing Resend connection...');
+    console.log('🔧 Testing MailerSend connection...');
     
-    // Send a test email to verify Resend works
-    const testResponse = await resend.emails.send({
-      from: 'The Fantasy F1 Game <onboarding@resend.dev>',
-      to: ['test@example.com'], // This will fail but we can check if Resend is accessible
+    // Send a test email to verify MailerSend works
+    const testResponse = await mailerSend.email.send({
+      from: {
+        email: 'noreply@thefantasyf1game.com',
+        name: 'The Fantasy F1 Game'
+      },
+      to: [
+        {
+          email: 'test@example.com'
+        }
+      ],
       subject: 'Test Connection',
       html: '<p>This is a test email to verify the connection.</p>',
     });
 
-    console.log('✅ Resend connection successful');
+    console.log('✅ MailerSend connection successful');
     return true;
   } catch (error) {
-    if (error.message.includes('Invalid email')) {
-      // Expected error for invalid email, but Resend is accessible
-      console.log('✅ Resend connection successful (got expected validation error)');
+    if (error.message.includes('Invalid email') || error.message.includes('validation')) {
+      // Expected error for invalid email, but MailerSend is accessible
+      console.log('✅ MailerSend connection successful (got expected validation error)');
       return true;
     }
-    console.error('❌ Resend connection failed:', error.message);
+    console.error('❌ MailerSend connection failed:', error.message);
     return false;
   }
 };
