@@ -1,6 +1,8 @@
-import { Resend } from 'resend';
+import { MailerSend } from 'mailersend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+const mailerSend = new MailerSend({
+  apiKey: process.env.MAILERSEND_API_KEY,
+});
 
 // Email sending API route for Vercel (App Router)
 export async function POST(request) {
@@ -14,10 +16,17 @@ export async function POST(request) {
       }, { status: 400 });
     }
 
-    // Send email using Resend
-    const data = await resend.emails.send({
-      from: from || 'The Fantasy F1 Game <onboarding@resend.dev>',
-      to: [to],
+    // Send email using MailerSend
+    const data = await mailerSend.email.send({
+      from: from || {
+        email: 'noreply@thefantasyf1game.com',
+        name: 'The Fantasy F1 Game'
+      },
+      to: [
+        {
+          email: to
+        }
+      ],
       subject: subject,
       html: html,
       text: text || html.replace(/<[^>]*>/g, ''), // Strip HTML for text version
@@ -26,7 +35,7 @@ export async function POST(request) {
     console.log('✅ Email sent successfully:', data);
     return Response.json({ 
       success: true, 
-      messageId: data.id,
+      messageId: data.message_id,
       message: 'Email sent successfully' 
     });
 
