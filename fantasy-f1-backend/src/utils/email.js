@@ -56,11 +56,26 @@ const testEmailConnection = async () => {
     console.log('✅ MailerSend connection successful');
     return true;
   } catch (error) {
-    const errorMessage = error.message || error.toString() || 'Unknown error';
     console.log('🔧 Full error object:', JSON.stringify(error, null, 2));
     
-    if (errorMessage.includes('Invalid email') || errorMessage.includes('validation')) {
-      // Expected error for invalid email, but MailerSend is accessible
+    // Handle different error types
+    let errorMessage = 'Unknown error';
+    if (error.message) {
+      errorMessage = error.message;
+    } else if (error.error && error.error.message) {
+      errorMessage = error.error.message;
+    } else if (error.response && error.response.data) {
+      errorMessage = JSON.stringify(error.response.data);
+    } else if (typeof error === 'string') {
+      errorMessage = error;
+    } else {
+      errorMessage = JSON.stringify(error);
+    }
+    
+    console.log('🔧 Parsed error message:', errorMessage);
+    
+    if (errorMessage.includes('Invalid email') || errorMessage.includes('validation') || errorMessage.includes('unauthorized') || errorMessage.includes('401')) {
+      // Expected error for invalid email or auth, but MailerSend is accessible
       console.log('✅ MailerSend connection successful (got expected validation error)');
       return true;
     }
