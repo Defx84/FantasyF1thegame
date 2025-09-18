@@ -39,6 +39,7 @@ const testEmailConnection = async () => {
     console.log('🔧 API Key present:', !!process.env.MAILERSEND_API_KEY);
     
     // Send a test email to verify MailerSend works
+    // Use admin email for trial account testing
     const testResponse = await mailerSend.email.send({
       from: {
         email: 'noreply@thefantasyf1game.com',
@@ -46,11 +47,11 @@ const testEmailConnection = async () => {
       },
       to: [
         {
-          email: 'test@example.com'
+          email: 'thefantasyf1game@gmail.com' // Use admin email for trial account
         }
       ],
-      subject: 'Test Connection',
-      html: '<p>This is a test email to verify the connection.</p>',
+      subject: 'Test Connection - MailerSend Working',
+      html: '<p>This is a test email to verify the MailerSend connection is working correctly.</p>',
     });
 
     console.log('✅ MailerSend connection successful');
@@ -74,9 +75,9 @@ const testEmailConnection = async () => {
     
     console.log('🔧 Parsed error message:', errorMessage);
     
-    if (errorMessage.includes('Invalid email') || errorMessage.includes('validation') || errorMessage.includes('unauthorized') || errorMessage.includes('401')) {
-      // Expected error for invalid email or auth, but MailerSend is accessible
-      console.log('✅ MailerSend connection successful (got expected validation error)');
+    if (errorMessage.includes('Invalid email') || errorMessage.includes('validation') || errorMessage.includes('unauthorized') || errorMessage.includes('401') || errorMessage.includes('Trial accounts can only send emails to the administrator')) {
+      // Expected error for trial account restrictions, but MailerSend is accessible
+      console.log('✅ MailerSend connection successful (trial account restrictions detected)');
       return true;
     }
     console.error('❌ MailerSend connection failed:', errorMessage);
