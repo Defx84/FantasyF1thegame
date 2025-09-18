@@ -36,6 +36,7 @@ const sendEmail = async ({ to, subject, text, html }) => {
 const testEmailConnection = async () => {
   try {
     console.log('🔧 Testing MailerSend connection...');
+    console.log('🔧 API Key present:', !!process.env.MAILERSEND_API_KEY);
     
     // Send a test email to verify MailerSend works
     const testResponse = await mailerSend.email.send({
@@ -55,12 +56,15 @@ const testEmailConnection = async () => {
     console.log('✅ MailerSend connection successful');
     return true;
   } catch (error) {
-    if (error.message.includes('Invalid email') || error.message.includes('validation')) {
+    const errorMessage = error.message || error.toString() || 'Unknown error';
+    console.log('🔧 Full error object:', JSON.stringify(error, null, 2));
+    
+    if (errorMessage.includes('Invalid email') || errorMessage.includes('validation')) {
       // Expected error for invalid email, but MailerSend is accessible
       console.log('✅ MailerSend connection successful (got expected validation error)');
       return true;
     }
-    console.error('❌ MailerSend connection failed:', error.message);
+    console.error('❌ MailerSend connection failed:', errorMessage);
     return false;
   }
 };
