@@ -141,6 +141,20 @@ async function getTomorrowsRace() {
   return races.length > 0 ? races[0] : null;
 }
 
+// Get the next available race (for testing purposes)
+async function getNextRace() {
+  const now = new Date();
+  
+  const race = await RaceCalendar.findOne({
+    $or: [
+      { qualifyingStart: { $gte: now } },
+      { sprintQualifyingStart: { $gte: now } }
+    ]
+  }).sort({ qualifyingStart: 1 }); // Get the earliest upcoming race
+  
+  return race;
+}
+
 // Send reminder emails to all opted-in users
 async function sendReminderEmails() {
   try {
@@ -263,35 +277,35 @@ async function sendTestReminder(userId) {
     
     console.log(`📧 Found user: ${user.username}`);
     
-    // Use EXACT same content as working signup email to test if it's a content issue
-    console.log(`📧 About to call sendEmail...`);
+    // Get the next available race for testing
+    const race = await getNextRace();
+    if (!race) {
+      throw new Error('No upcoming race found for testing');
+    }
+    
+    console.log(`🏁 Using race for test: ${race.raceName} at ${race.circuit}`);
+    
+    // Use the actual race reminder template
+    const subject = `${race.raceName} ${getCountryFlag(race.country)}`;
+    const html = generateEmailHTML(user.username, race);
+    const text = generateEmailText(user.username, race);
     
     await sendEmail({
-      to: user.email, // Send to actual user email now that account is upgraded
-      subject: '🏁 Test Reminder - TheFantasyF1Game',
-      text: `Hi ${user.username},\n\nWelcome to TheFantasyF1Game — where Formula 1 passion meets strategy and competition.\nYou're officially on the grid, and it's time to prove your skills.\n\nEach race weekend, you'll choose your Main Driver, Reserve Driver, and Team. Will you play it safe or go bold for big points? The podium awaits.\n\n🔥 What's next?\n- Join or create a league with friends\n- Lock in your race selections before qualifying\n- Track your points and chase the title\n\n🏎️ For updates, tips, and behind-the-scenes action:\nFollow us on Instagram → @thefantasyf1game\n\nThanks for joining the race.\nStart your engines — the championship is calling. (click here to join)\n\n— TheFantasyF1Game Team`,
-      html: `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa; border-radius: 10px;">
-      <h2 style="color: #dc2626; text-align: center;">🏁 Welcome to TheFantasyF1Game — Your Race Starts Now!</h2>
-      <p>Hi <b>${user.username}</b>,</p>
-      <p>Welcome to <b>TheFantasyF1Game</b> — where Formula 1 passion meets strategy and competition.<br />You're officially on the grid, and it's time to prove your skills.</p>
-      <p>Each race weekend, you'll choose your Main Driver, Reserve Driver, and Team. Will you play it safe or go bold for big points? The podium awaits.</p>
-      <h3>🔥 What's next?</h3>
-      <ul style="font-size: 1.1em;">
-        <li>Join or create a league with friends</li>
-        <li>Lock in your race selections before qualifying</li>
-        <li>Track your points and chase the title</li>
-      </ul>
-      <p>🏎️ For updates, tips, and behind-the-scenes action:<br />
-      Follow us on Instagram → <a href="https://instagram.com/thefantasyf1game" target="_blank">@thefantasyf1game</a></p>
-      <p style="margin-top:2em;">Thanks for joining the race.<br />Start your engines — the championship is calling. <a href="https://thefantasyf1game.com" target="_blank">(click here to join)</a></p>
-      <p><b>— TheFantasyF1Game Team</b></p>
-    </div>
-  `
+      to: user.email,
+      subject: `[TEST] ${subject}`,
+      html: html,
+      text: text
     });
     
-    console.log(`✅ Test reminder sent to ${user.username}`);
-    return { success: true, user: user.username, email: user.email, race: 'Test Email' };
+    console.log(`✅ Test reminder sent to ${user.username} for ${race.raceName}`);
+    return { 
+      success: true, 
+      user: user.username, 
+      email: user.email, 
+      race: race.raceName,
+      circuit: race.circuit,
+      country: race.country
+    };
     
   } catch (error) {
     console.error('❌ Test reminder error:', error.message);
@@ -302,6 +316,7 @@ async function sendTestReminder(userId) {
 module.exports = {
   sendReminderEmails,
   getTomorrowsRace,
+  getNextRace,
   getCountryFlag,
   sendTestReminder
 };
