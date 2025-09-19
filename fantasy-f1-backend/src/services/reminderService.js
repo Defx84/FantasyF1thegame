@@ -267,7 +267,7 @@ async function sendTestReminder(userId) {
     console.log(`📧 About to call sendEmail...`);
     
     await sendEmail({
-      to: 'thefantasyf1game@gmail.com', // Use allowed email for testing
+      to: user.email, // Send to actual user email now that account is upgraded
       subject: '🏁 Test Reminder - TheFantasyF1Game',
       text: `Hi ${user.username},\n\nWelcome to TheFantasyF1Game — where Formula 1 passion meets strategy and competition.\nYou're officially on the grid, and it's time to prove your skills.\n\nEach race weekend, you'll choose your Main Driver, Reserve Driver, and Team. Will you play it safe or go bold for big points? The podium awaits.\n\n🔥 What's next?\n- Join or create a league with friends\n- Lock in your race selections before qualifying\n- Track your points and chase the title\n\n🏎️ For updates, tips, and behind-the-scenes action:\nFollow us on Instagram → @thefantasyf1game\n\nThanks for joining the race.\nStart your engines — the championship is calling. (click here to join)\n\n— TheFantasyF1Game Team`,
       html: `
