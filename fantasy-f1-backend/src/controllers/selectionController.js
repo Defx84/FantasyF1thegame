@@ -302,11 +302,11 @@ const saveSelections = async (req, res) => {
 
         let oldSelections = null;
         if (selection) {
-            // Store old selections before updating
+            // Store old selections before updating - NORMALIZE THEM to ensure proper removal
             oldSelections = {
-                mainDriver: selection.mainDriver,
-                reserveDriver: selection.reserveDriver,
-                team: selection.team
+                mainDriver: normalizeDriver(selection.mainDriver),
+                reserveDriver: normalizeDriver(selection.reserveDriver),
+                team: normalizeTeam(selection.team)
             };
             
             // Update existing selection
@@ -457,6 +457,7 @@ const adminOverrideSelection = async (req, res) => {
             race: raceId
         });
 
+        let oldSelections = null;
         if (!selection) {
             // Create new selection
             selection = new RaceSelection({
@@ -476,6 +477,13 @@ const adminOverrideSelection = async (req, res) => {
                 pointBreakdown
             });
         } else {
+            // Store old selections before updating - NORMALIZE THEM to ensure proper removal
+            oldSelections = {
+                mainDriver: normalizeDriver(selection.mainDriver),
+                reserveDriver: normalizeDriver(selection.reserveDriver),
+                team: normalizeTeam(selection.team)
+            };
+            
             // Update existing selection
             selection.mainDriver = mainDriver;
             selection.reserveDriver = reserveDriver;
@@ -507,7 +515,16 @@ const adminOverrideSelection = async (req, res) => {
             });
         }
 
+        // If updating existing selection, remove old selections first
+        if (oldSelections) {
+            console.log(`[adminOverrideSelection] Removing old selections: ${oldSelections.mainDriver}, ${oldSelections.reserveDriver}, ${oldSelections.team}`);
+            usedSelection.removeUsedMainDriver(oldSelections.mainDriver);
+            usedSelection.removeUsedReserveDriver(oldSelections.reserveDriver);
+            usedSelection.removeUsedTeam(oldSelections.team);
+        }
+
         // Add the selections to the current cycles
+        console.log(`[adminOverrideSelection] Adding new selections: ${mainDriver}, ${reserveDriver}, ${team}`);
         usedSelection.addUsedMainDriver(mainDriver);
         usedSelection.addUsedReserveDriver(reserveDriver);
         usedSelection.addUsedTeam(team);
