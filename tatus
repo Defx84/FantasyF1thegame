@@ -1,5 +1,1 @@
-[33mdbfbc81[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Fix API base URL to match production domain - resolves blank page after login
-[33ma92e3d4[m Fix driver team mapping and race dates - Update team colors and driver mappings in frontend - Correct Dutch GP and Italian GP dates in roundMapping - Add trivial change to selectionHelpers - Fix various script files
-[33m5cb5c7c[m Fix driver team mapping and color coding issues
-[33m64625b7[m Fix Puppeteer configuration for Docker environment - Add Chrome executable path detection for Docker containers - Add fallback options if Chrome not found - Add error handling to prevent scraper crashes - Server should now start even without Chrome available
-[33m7383397[m Fix server crash by removing problematic tokenUtils import - Temporarily disable token cleanup functionality - Change scheduled scraper to run immediately (past 19:05) - Server should now start without crashing
+[33mfcb60f6[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m Update reminder email schedule to 4 PM UK time
