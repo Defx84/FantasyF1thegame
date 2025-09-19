@@ -196,7 +196,13 @@ const Standings: React.FC = () => {
   // Helper to get team for a driver
   const getDriverTeam = (driverName?: string) => {
     if (!driverName) return undefined;
-    const driver = F1_DRIVERS_2025.find(d => d.name === driverName || d.shortName === driverName || d.alternateNames.includes(driverName));
+    // Normalize the driver name for comparison (handle case sensitivity and formatting)
+    const normalizedName = driverName.toLowerCase().trim();
+    const driver = F1_DRIVERS_2025.find(d => 
+      d.name.toLowerCase() === normalizedName || 
+      d.shortName.toLowerCase() === normalizedName || 
+      d.alternateNames.some(alt => alt.toLowerCase() === normalizedName)
+    );
     return driver?.team;
   };
 
