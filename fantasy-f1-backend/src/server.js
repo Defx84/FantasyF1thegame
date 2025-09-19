@@ -188,9 +188,9 @@ app.listen(port, async () => {
         //     }
         // });
         
-        // Schedule reminder emails (run daily at 12 PM UK time)
-        cron.schedule('0 12 * * *', async () => {
-            console.log('🔔 Running scheduled reminder emails...');
+        // Schedule reminder emails (run daily at 4 PM UK time)
+        cron.schedule('0 16 * * *', async () => {
+            console.log('🔔 Running scheduled reminder emails at 4 PM UK time...');
             try {
                 const result = await sendReminderEmails();
                 console.log(`✅ Reminder emails sent: ${result.sent}, skipped: ${result.skipped}`);
