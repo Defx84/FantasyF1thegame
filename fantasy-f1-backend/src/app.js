@@ -85,7 +85,7 @@ app.use('/api/race', require('./routes/raceRoutes'));
 app.use('/api/health', require('./routes/healthRoutes'));
 app.use('/api/announcements', require('./routes/announcementRoutes'));
 app.use('/api/statistics', require('./routes/leagueStatisticsRoutes'));
-app.use('/api/league', require('./routes/leagueRoutes'));
+app.use('/api/leagues', require('./routes/leagueRoutes'));
 app.use('/api/selections', require('./routes/selectionRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
 
