@@ -95,13 +95,14 @@ const OpponentsBriefing: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen w-full overflow-y-auto"
+      className="min-h-screen w-full overflow-y-auto relative"
       style={{
-        backgroundImage: 'url(/Briefing page.png)',
+        background: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%), url("/Briefing page.png")',
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
         backgroundAttachment: 'fixed',
+        minHeight: '100vh',
       }}
     >
       {/* Glassmorphic Header */}
