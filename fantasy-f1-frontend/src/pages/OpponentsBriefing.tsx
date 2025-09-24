@@ -6,6 +6,8 @@ import { api } from '../services/api';
 import IconWrapper from '../utils/iconWrapper';
 import AvatarImage from '../components/Avatar/AvatarImage';
 import briefingBackground from '../assets/briefing-background.png';
+import { getTeamColor } from '../constants/teamColors';
+import { F1_DRIVERS_2025 } from '../constants/f1Data2025';
 
 interface Opponent {
   id: string;
@@ -103,6 +105,14 @@ const OpponentsBriefing: React.FC = () => {
       'Stake F1 Team Kick Sauber': '#EF4444'
     };
     return teamColors[teamName] || '#6B7280';
+  };
+
+  const getDriverColor = (driverName: string): string => {
+    const driver = F1_DRIVERS_2025.find(d => d.name === driverName);
+    if (driver) {
+      return getTeamColor(driver.team);
+    }
+    return '#6B7280'; // Default color if driver not found
   };
 
   if (loading) {
@@ -243,7 +253,8 @@ const OpponentsBriefing: React.FC = () => {
                         {opponent.remainingSelections.mainDrivers.map((driver, index) => (
                           <div
                             key={index}
-                            className="px-2 py-1 bg-white/10 border border-white/20 text-white text-xs text-center"
+                            className="px-2 py-1 border border-white/20 text-white text-xs text-center"
+                            style={{ backgroundColor: getDriverColor(driver) + '40' }}
                           >
                             {driver}
                           </div>
@@ -261,7 +272,8 @@ const OpponentsBriefing: React.FC = () => {
                         {opponent.remainingSelections.reserveDrivers.map((driver, index) => (
                           <div
                             key={index}
-                            className="px-2 py-1 bg-white/10 border border-white/20 text-white text-xs text-center"
+                            className="px-2 py-1 border border-white/20 text-white text-xs text-center"
+                            style={{ backgroundColor: getDriverColor(driver) + '40' }}
                           >
                             {driver}
                           </div>
