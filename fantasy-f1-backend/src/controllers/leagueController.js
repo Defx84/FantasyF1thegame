@@ -361,6 +361,33 @@ const getLeagueOpponents = async (req, res) => {
             league: id
         }).populate('user', 'username');
         
+        // Get current race selections to exclude them (maintain secrecy)
+        const currentRaceSelections = await RaceSelection.find({
+            league: id,
+            round: currentRound
+        }).populate('user', 'username');
+        
+        console.log(`[Opponents] Current round: ${currentRound}`);
+        console.log(`[Opponents] Current race selections count: ${currentRaceSelections.length}`);
+        
+        // Create a map of current race selections to exclude them
+        const currentRaceSelectionsMap = {};
+        currentRaceSelections.forEach(selection => {
+            if (selection.user && selection.user._id) {
+                const userId = selection.user._id.toString();
+                if (!currentRaceSelectionsMap[userId]) {
+                    currentRaceSelectionsMap[userId] = {
+                        mainDriver: null,
+                        reserveDriver: null,
+                        team: null
+                    };
+                }
+                if (selection.mainDriver) currentRaceSelectionsMap[userId].mainDriver = selection.mainDriver;
+                if (selection.reserveDriver) currentRaceSelectionsMap[userId].reserveDriver = selection.reserveDriver;
+                if (selection.team) currentRaceSelectionsMap[userId].team = selection.team;
+            }
+        });
+        
         // Create a map of used selections by user
         const usedSelectionsMap = {};
         usedSelections.forEach(usedSelection => {
@@ -380,9 +407,24 @@ const getLeagueOpponents = async (req, res) => {
             }
             
             // Get used drivers and teams from the CURRENT cycle (last one)
-            const currentMainDriverCycle = usedSelection.mainDriverCycles[usedSelection.mainDriverCycles.length - 1] || [];
-            const currentReserveDriverCycle = usedSelection.reserveDriverCycles[usedSelection.reserveDriverCycles.length - 1] || [];
-            const currentTeamCycle = usedSelection.teamCycles[usedSelection.teamCycles.length - 1] || [];
+            let currentMainDriverCycle = usedSelection.mainDriverCycles[usedSelection.mainDriverCycles.length - 1] || [];
+            let currentReserveDriverCycle = usedSelection.reserveDriverCycles[usedSelection.reserveDriverCycles.length - 1] || [];
+            let currentTeamCycle = usedSelection.teamCycles[usedSelection.teamCycles.length - 1] || [];
+            
+            // Remove current race selections to maintain secrecy
+            const currentRaceSelection = currentRaceSelectionsMap[userId];
+            if (currentRaceSelection) {
+                // Remove current race selections from the cycles
+                currentMainDriverCycle = currentMainDriverCycle.filter(driver => driver !== currentRaceSelection.mainDriver);
+                currentReserveDriverCycle = currentReserveDriverCycle.filter(driver => driver !== currentRaceSelection.reserveDriver);
+                currentTeamCycle = currentTeamCycle.filter(team => team !== currentRaceSelection.team);
+                
+                console.log(`[Opponents] Removed current race selections for user ${userId}:`, {
+                    mainDriver: currentRaceSelection.mainDriver,
+                    reserveDriver: currentRaceSelection.reserveDriver,
+                    team: currentRaceSelection.team
+                });
+            }
             
             usedSelectionsMap[userId] = {
                 mainDrivers: currentMainDriverCycle,
