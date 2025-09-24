@@ -95,7 +95,7 @@ const OpponentsBriefing: React.FC = () => {
 
   return (
     <div
-      className="min-h-screen w-full fixed inset-0 overflow-y-auto"
+      className="min-h-screen w-full overflow-y-auto"
       style={{
         backgroundImage: 'url(/Briefing page.png)',
         backgroundSize: 'cover',
@@ -106,9 +106,9 @@ const OpponentsBriefing: React.FC = () => {
     >
       {/* Glassmorphic Header */}
       <div className="flex flex-col items-center pt-16">
-        <div className="w-full max-w-3xl px-8 py-6 rounded-2xl shadow-xl bg-transparent backdrop-blur-lg border border-white/5 mb-10">
-          <h1 className="text-4xl font-bold text-red-600 drop-shadow mb-1">🎯 Opponents Briefing</h1>
-          <p className="text-lg text-white font-medium drop-shadow">Strategic intelligence on your league rivals</p>
+        <div className="w-full max-w-3xl px-8 py-6 rounded-2xl shadow-xl bg-black/30 backdrop-blur-lg border border-white/20 mb-10">
+          <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">🎯 Opponents Briefing</h1>
+          <p className="text-lg text-white font-medium drop-shadow-lg">Strategic intelligence on your league rivals</p>
         </div>
       </div>
 
@@ -118,7 +118,7 @@ const OpponentsBriefing: React.FC = () => {
           {opponents.map((opponent) => (
             <div
               key={opponent.id}
-              className="rounded-2xl shadow-xl bg-white/20 backdrop-blur-lg border border-white/20 overflow-hidden transition-all duration-300 hover:bg-white/25"
+              className="rounded-2xl shadow-xl bg-black/40 backdrop-blur-lg border border-white/30 overflow-hidden transition-all duration-300 hover:bg-black/50"
             >
               {/* Opponent Header */}
               <div
@@ -157,11 +157,11 @@ const OpponentsBriefing: React.FC = () => {
 
               {/* Expanded Content */}
               {expandedOpponent === opponent.id && (
-                <div className="px-6 pb-6 border-t border-white/20">
+                <div className="px-6 pb-6 border-t border-white/30">
                   <div className="space-y-6">
                     {/* Main Drivers */}
                     <div>
-                      <h4 className="text-lg font-semibold text-white mb-3 flex items-center">
+                      <h4 className="text-lg font-semibold text-white mb-3 flex items-center drop-shadow-lg">
                         <IconWrapper icon={FaCar} className="mr-2 text-red-400" />
                         Main Drivers Available
                       </h4>
@@ -169,7 +169,7 @@ const OpponentsBriefing: React.FC = () => {
                         {opponent.remainingSelections.mainDrivers.map((driver, index) => (
                           <div
                             key={index}
-                            className="px-3 py-2 bg-white/10 rounded-lg text-white text-sm font-medium text-center"
+                            className="px-3 py-2 bg-white/20 rounded-lg text-white text-sm font-medium text-center drop-shadow-lg"
                           >
                             {driver}
                           </div>
@@ -179,7 +179,7 @@ const OpponentsBriefing: React.FC = () => {
 
                     {/* Reserve Drivers */}
                     <div>
-                      <h4 className="text-lg font-semibold text-white mb-3 flex items-center">
+                      <h4 className="text-lg font-semibold text-white mb-3 flex items-center drop-shadow-lg">
                         <IconWrapper icon={FaCar} className="mr-2 text-blue-400" />
                         Reserve Drivers Available
                       </h4>
@@ -187,7 +187,7 @@ const OpponentsBriefing: React.FC = () => {
                         {opponent.remainingSelections.reserveDrivers.map((driver, index) => (
                           <div
                             key={index}
-                            className="px-3 py-2 bg-white/10 rounded-lg text-white text-sm font-medium text-center"
+                            className="px-3 py-2 bg-white/20 rounded-lg text-white text-sm font-medium text-center drop-shadow-lg"
                           >
                             {driver}
                           </div>
@@ -197,7 +197,7 @@ const OpponentsBriefing: React.FC = () => {
 
                     {/* Teams */}
                     <div>
-                      <h4 className="text-lg font-semibold text-white mb-3 flex items-center">
+                      <h4 className="text-lg font-semibold text-white mb-3 flex items-center drop-shadow-lg">
                         <IconWrapper icon={FaUsers} className="mr-2 text-green-400" />
                         Teams Available
                       </h4>
@@ -205,8 +205,8 @@ const OpponentsBriefing: React.FC = () => {
                         {opponent.remainingSelections.teams.map((team, index) => (
                           <div
                             key={index}
-                            className="px-3 py-2 rounded-lg text-white text-sm font-medium text-center"
-                            style={{ backgroundColor: getTeamColor(team) + '40' }}
+                            className="px-3 py-2 rounded-lg text-white text-sm font-medium text-center drop-shadow-lg"
+                            style={{ backgroundColor: getTeamColor(team) + '60' }}
                           >
                             {team}
                           </div>
