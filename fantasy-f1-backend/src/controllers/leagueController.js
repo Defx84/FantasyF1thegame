@@ -407,11 +407,18 @@ const getLeagueOpponents = async (req, res) => {
         
         const teamNameMapping = {};
         F1_TEAMS_2025.forEach(team => {
+            // Map the canonical name to itself
             teamNameMapping[team.name] = team.name;
+            // Map short name to canonical name
+            teamNameMapping[team.shortName] = team.name;
+            // Map all alternate names to canonical name
             team.alternateNames.forEach(altName => {
                 teamNameMapping[altName] = team.name;
             });
         });
+        
+        // Debug: Log the team name mapping
+        console.log('[Opponents] Team name mapping:', teamNameMapping);
         
         // Calculate remaining selections for each opponent
         const opponentsData = opponents.map(opponent => {
