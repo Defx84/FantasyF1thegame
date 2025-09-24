@@ -128,13 +128,16 @@ Follow us on Instagram at @thefantasyf1game
 // Check if there's a race tomorrow with qualifying
 async function getTomorrowsRace() {
   const now = new Date();
-  const tomorrow = addDays(now, 1);
+  
+  // Get start of tomorrow (00:00:00) instead of current time + 24 hours
+  const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+  const dayAfterTomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2);
   
   // Get all races that have qualifying tomorrow
   const races = await RaceCalendar.find({
     $or: [
-      { qualifyingStart: { $gte: tomorrow, $lt: addDays(tomorrow, 1) } },
-      { sprintQualifyingStart: { $gte: tomorrow, $lt: addDays(tomorrow, 1) } }
+      { qualifyingStart: { $gte: tomorrow, $lt: dayAfterTomorrow } },
+      { sprintQualifyingStart: { $gte: tomorrow, $lt: dayAfterTomorrow } }
     ]
   });
   

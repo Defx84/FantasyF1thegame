@@ -632,6 +632,12 @@ const NextRaceSelections: React.FC = () => {
                   >
                     Go to Grid
                   </button>
+                  <button
+                    onClick={() => navigate(`/league/${leagueId}/briefing`)}
+                    className="w-full min-w-[160px] flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold transition-colors duration-200"
+                  >
+                    🎯 Opponents Briefing
+                  </button>
                 </div>
               </div>
             </div>

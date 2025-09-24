@@ -320,6 +320,106 @@ const abandonLeague = async (req, res) => {
   }
 };
 
+/**
+ * Get league opponents with their remaining selections
+ */
+const getLeagueOpponents = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user._id;
+        
+        // Get league and verify user is a member
+        const league = await League.findById(id);
+        if (!league) {
+            return res.status(404).json({ message: 'League not found' });
+        }
+        
+        if (!league.members.includes(userId)) {
+            return res.status(403).json({ message: 'You are not a member of this league' });
+        }
+        
+        // Get current race round
+        const raceCalendar = await RaceCalendar.findOne({ season: new Date().getFullYear() })
+            .sort({ round: 1 });
+        
+        if (!raceCalendar) {
+            return res.status(404).json({ message: 'No race calendar found' });
+        }
+        
+        const currentRound = raceCalendar.round;
+        
+        // Get all league members except current user
+        const opponents = await User.find({
+            _id: { $in: league.members.filter(memberId => memberId.toString() !== userId.toString()) }
+        }, 'username avatar');
+        
+        // Get used selections for current round
+        const usedSelections = await RaceSelection.find({
+            league: id,
+            round: currentRound
+        }).populate('user', 'username');
+        
+        // Create a map of used selections by user
+        const usedSelectionsMap = {};
+        usedSelections.forEach(selection => {
+            const userId = selection.user._id.toString();
+            if (!usedSelectionsMap[userId]) {
+                usedSelectionsMap[userId] = {
+                    mainDrivers: [],
+                    reserveDrivers: [],
+                    teams: []
+                };
+            }
+            if (selection.mainDriver) usedSelectionsMap[userId].mainDrivers.push(selection.mainDriver);
+            if (selection.reserveDriver) usedSelectionsMap[userId].reserveDrivers.push(selection.reserveDriver);
+            if (selection.team) usedSelectionsMap[userId].teams.push(selection.team);
+        });
+        
+        // Get all available drivers and teams
+        const allDrivers = [
+            'Max Verstappen', 'Sergio Perez', 'Charles Leclerc', 'Carlos Sainz',
+            'Lewis Hamilton', 'George Russell', 'Lando Norris', 'Oscar Piastri',
+            'Fernando Alonso', 'Lance Stroll', 'Pierre Gasly', 'Esteban Ocon',
+            'Alexander Albon', 'Logan Sargeant', 'Yuki Tsunoda', 'Daniel Ricciardo',
+            'Nico Hulkenberg', 'Kevin Magnussen', 'Valtteri Bottas', 'Zhou Guanyu'
+        ];
+        
+        const allTeams = [
+            'Red Bull Racing', 'Ferrari', 'Mercedes', 'McLaren',
+            'Aston Martin', 'Alpine', 'Williams', 'RB',
+            'Haas F1 Team', 'Stake F1 Team Kick Sauber'
+        ];
+        
+        // Calculate remaining selections for each opponent
+        const opponentsData = opponents.map(opponent => {
+            const userId = opponent._id.toString();
+            const used = usedSelectionsMap[userId] || { mainDrivers: [], reserveDrivers: [], teams: [] };
+            
+            const remainingMainDrivers = allDrivers.filter(driver => !used.mainDrivers.includes(driver));
+            const remainingReserveDrivers = allDrivers.filter(driver => !used.reserveDrivers.includes(driver));
+            const remainingTeams = allTeams.filter(team => !used.teams.includes(team));
+            
+            return {
+                id: opponent._id,
+                username: opponent.username,
+                avatar: opponent.avatar,
+                remainingDrivers: remainingMainDrivers.length,
+                remainingTeams: remainingTeams.length,
+                remainingSelections: {
+                    mainDrivers: remainingMainDrivers,
+                    reserveDrivers: remainingReserveDrivers,
+                    teams: remainingTeams
+                }
+            };
+        });
+        
+        res.json(opponentsData);
+    } catch (error) {
+        console.error('Error in getLeagueOpponents:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 module.exports = {
     createLeague: createLeague,
     joinLeague: joinLeague,
@@ -329,5 +429,6 @@ module.exports = {
     getLeagueSelections: getLeagueSelections,
     getUserLeagues: getUserLeagues,
     deleteLeague: deleteLeague,
-    abandonLeague: abandonLeague
+    abandonLeague: abandonLeague,
+    getLeagueOpponents: getLeagueOpponents
 }; 

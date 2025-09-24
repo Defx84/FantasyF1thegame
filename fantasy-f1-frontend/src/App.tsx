@@ -17,6 +17,7 @@ import ProfilePage from './pages/ProfilePage';
 import AvatarEditor from './pages/AvatarEditor';
 import Rules from './pages/Rules';
 import Statistics from './pages/Statistics';
+import OpponentsBriefing from './pages/OpponentsBriefing';
 import Info from './pages/Info';
 import { getNextRaceTiming } from './services/raceService';
 import { getLeagueStandings } from './services/leagueService';
@@ -136,6 +137,7 @@ const App: React.FC = () => {
           <Route path="/league/:leagueId/race/:round" element={<PrivateRoute><RaceDetails /></PrivateRoute>} />
           <Route path="/league/:leagueId/standings" element={<PrivateRoute><Standings /></PrivateRoute>} />
             <Route path="/league/:leagueId/grid" element={<PrivateRoute><GridPageWrapper /></PrivateRoute>} />
+            <Route path="/league/:leagueId/briefing" element={<PrivateRoute><OpponentsBriefing /></PrivateRoute>} />
             <Route path="/league/:leagueId/statistics" element={<PrivateRoute><Statistics /></PrivateRoute>} />
             <Route path="/info" element={<Info />} />
           </Route>
