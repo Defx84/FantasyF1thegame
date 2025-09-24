@@ -158,14 +158,14 @@ const OpponentsBriefing: React.FC = () => {
       />
       {/* Glassmorphic Header */}
       <div className="flex flex-col items-center pt-8 relative z-10">
-        <div className="w-full max-w-3xl px-8 py-6 rounded-2xl shadow-xl bg-black/20 backdrop-blur-lg border border-white/10 mb-10">
-          <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">🎯 Opponents Briefing</h1>
-          <p className="text-lg text-white font-medium drop-shadow-lg">Strategic intelligence on your league rivals</p>
+        <div className="w-full max-w-3xl px-4 sm:px-8 py-4 sm:py-6 rounded-2xl shadow-xl bg-black/20 backdrop-blur-lg border border-white/10 mb-6 sm:mb-10">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white drop-shadow-lg mb-1">🎯 Opponents Briefing</h1>
+          <p className="text-sm sm:text-base md:text-lg text-white font-medium drop-shadow-lg">Strategic intelligence on your league rivals</p>
         </div>
       </div>
 
       {/* Opponents Carousel */}
-      <div className="max-w-4xl mx-auto px-4 py-10 pt-4 relative z-10">
+      <div className="max-w-4xl mx-auto px-2 sm:px-4 py-6 sm:py-10 pt-2 sm:pt-4 relative z-10">
         <div className="relative">
           {/* Navigation Arrows */}
           <button
@@ -175,7 +175,7 @@ const OpponentsBriefing: React.FC = () => {
               setCurrentOpponent(opponents[prevIndex].id);
               setExpandedOpponent(null); // Close any expanded content
             }}
-            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-colors"
+            className="absolute left-1 sm:left-0 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 text-white p-2 sm:p-3 rounded-full transition-colors"
           >
             <IconWrapper icon={FaChevronDown} className="rotate-90 text-xl" />
           </button>
@@ -187,7 +187,7 @@ const OpponentsBriefing: React.FC = () => {
               setCurrentOpponent(opponents[nextIndex].id);
               setExpandedOpponent(null); // Close any expanded content
             }}
-            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-colors"
+            className="absolute right-1 sm:right-0 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 text-white p-2 sm:p-3 rounded-full transition-colors"
           >
             <IconWrapper icon={FaChevronDown} className="-rotate-90 text-xl" />
           </button>
@@ -197,27 +197,27 @@ const OpponentsBriefing: React.FC = () => {
             {opponents.map((opponent) => (
             <div
               key={opponent.id}
-              className={`w-80 bg-white/10 backdrop-blur-sm border-2 border-white/20 overflow-hidden transition-all duration-500 ${
+              className={`w-full max-w-xs sm:max-w-sm md:w-80 bg-white/10 backdrop-blur-sm border-2 border-white/20 overflow-hidden transition-all duration-500 ${
                 currentOpponent === opponent.id ? 'block' : 'hidden'
               }`}
             >
               {/* Opponent Card */}
               <div
-                className="cursor-pointer flex flex-col items-center text-center p-6"
+                className="cursor-pointer flex flex-col items-center text-center p-4 sm:p-6"
                 onClick={() => toggleOpponent(opponent.id)}
               >
                 {/* Large Avatar - no extra container */}
-                <div className="mb-4">
+                <div className="mb-3 sm:mb-4">
                   <AvatarImage 
                     userId={opponent.id} 
                     username={opponent.username} 
                     size={192} 
-                    className="w-48 h-48" 
+                    className="w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48" 
                   />
                 </div>
                 
                 {/* Username */}
-                <h3 className="text-xl font-bold text-white mb-4">{opponent.username}</h3>
+                <h3 className="text-lg sm:text-xl font-bold text-white mb-3 sm:mb-4">{opponent.username}</h3>
                 
                 {/* Expand/Collapse Arrow */}
                 <div className="text-white">
@@ -231,15 +231,15 @@ const OpponentsBriefing: React.FC = () => {
 
               {/* Expanded Content */}
               {expandedOpponent === opponent.id && (
-                <div className="px-4 pb-4 border-t border-white/20">
-                  <div className="space-y-4">
+                <div className="px-3 sm:px-4 pb-3 sm:pb-4 border-t border-white/20">
+                  <div className="space-y-3 sm:space-y-4">
                     {/* Main Drivers */}
                     <div>
-                      <h4 className="text-sm font-semibold text-white mb-2 flex items-center">
+                      <h4 className="text-xs sm:text-sm font-semibold text-white mb-2 flex items-center">
                         <IconWrapper icon={FaCar} className="mr-2 text-red-400" />
                         Main Drivers
                       </h4>
-                      <div className="grid grid-cols-2 gap-1">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
                         {opponent.remainingSelections.mainDrivers.map((driver, index) => (
                           <div
                             key={index}
@@ -253,11 +253,11 @@ const OpponentsBriefing: React.FC = () => {
 
                     {/* Reserve Drivers */}
                     <div>
-                      <h4 className="text-sm font-semibold text-white mb-2 flex items-center">
+                      <h4 className="text-xs sm:text-sm font-semibold text-white mb-2 flex items-center">
                         <IconWrapper icon={FaCar} className="mr-2 text-blue-400" />
                         Reserve Drivers
                       </h4>
-                      <div className="grid grid-cols-2 gap-1">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
                         {opponent.remainingSelections.reserveDrivers.map((driver, index) => (
                           <div
                             key={index}
@@ -271,11 +271,11 @@ const OpponentsBriefing: React.FC = () => {
 
                     {/* Teams */}
                     <div>
-                      <h4 className="text-sm font-semibold text-white mb-2 flex items-center">
+                      <h4 className="text-xs sm:text-sm font-semibold text-white mb-2 flex items-center">
                         <IconWrapper icon={FaUsers} className="mr-2 text-green-400" />
                         Teams
                       </h4>
-                      <div className="grid grid-cols-2 gap-1">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
                         {opponent.remainingSelections.teams.map((team, index) => (
                           <div
                             key={index}
@@ -295,7 +295,7 @@ const OpponentsBriefing: React.FC = () => {
           </div>
           
           {/* Navigation Indicators */}
-          <div className="flex justify-center mt-6 space-x-2">
+          <div className="flex justify-center mt-4 sm:mt-6 space-x-2">
             {opponents.map((opponent, index) => (
               <button
                 key={opponent.id}
