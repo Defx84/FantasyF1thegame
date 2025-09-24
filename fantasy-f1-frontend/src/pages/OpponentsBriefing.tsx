@@ -4,6 +4,7 @@ import { FaChevronDown, FaChevronUp, FaUser, FaCar, FaUsers } from 'react-icons/
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import IconWrapper from '../utils/iconWrapper';
+import AvatarImage from '../components/Avatar/AvatarImage';
 import briefingBackground from '../assets/briefing-background.png';
 
 interface Opponent {
@@ -171,24 +172,12 @@ const OpponentsBriefing: React.FC = () => {
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-br from-red-500 to-red-700 flex items-center justify-center text-white font-bold text-lg">
-                      {opponent.avatar ? (
-                        <img
-                          src={opponent.avatar}
-                          alt={opponent.username}
-                          className="w-12 h-12 rounded-full object-cover"
-                          onError={(e) => {
-                            console.log('Avatar failed to load for', opponent.username, ':', opponent.avatar);
-                            e.currentTarget.style.display = 'none';
-                          }}
-                        />
-                      ) : null}
-                      {!opponent.avatar && (
-                        <span className="text-white text-lg font-bold">
-                          {opponent.username.substring(0, 2).toUpperCase()}
-                        </span>
-                      )}
-                    </div>
+                    <AvatarImage 
+                      userId={opponent.id} 
+                      username={opponent.username} 
+                      size={48} 
+                      className="mr-3" 
+                    />
                     <div>
                       <h3 className="text-xl font-bold text-white">{opponent.username}</h3>
                       <p className="text-sm text-white/80">
