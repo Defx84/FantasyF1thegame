@@ -427,6 +427,13 @@ const getLeagueOpponents = async (req, res) => {
             const remainingReserveDrivers = allDrivers.filter(driver => !usedReserveDriversFull.includes(driver));
             const remainingTeams = allTeams.filter(team => !usedTeamsFull.includes(team));
             
+            // Debug logging
+            console.log(`[Opponents] User: ${opponent.username}`);
+            console.log(`[Opponents] Used teams:`, used.teams);
+            console.log(`[Opponents] Used teams full:`, usedTeamsFull);
+            console.log(`[Opponents] All teams:`, allTeams);
+            console.log(`[Opponents] Remaining teams:`, remainingTeams);
+            
             return {
                 id: opponent._id,
                 username: opponent.username,
