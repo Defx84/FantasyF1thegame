@@ -42,7 +42,7 @@ const OpponentsBriefing: React.FC = () => {
     const fetchOpponents = async () => {
       try {
         setLoading(true);
-        const response = await api.get(`/api/leagues/${leagueId}/opponents`);
+        const response = await api.get(`/api/league/${leagueId}/opponents`);
         setOpponents(response.data);
       } catch (err) {
         setError('Failed to load opponents data');
