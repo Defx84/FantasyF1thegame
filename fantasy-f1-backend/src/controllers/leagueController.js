@@ -353,16 +353,15 @@ const getLeagueOpponents = async (req, res) => {
             _id: { $in: league.members.filter(memberId => memberId.toString() !== userId.toString()) }
         }, 'username avatar');
         
-        // Get used selections for current round
-        const usedSelections = await RaceSelection.find({
-            league: id,
-            round: currentRound
+        // Get used selections for all league members
+        const usedSelections = await UsedSelection.find({
+            league: id
         }).populate('user', 'username');
         
         // Create a map of used selections by user
         const usedSelectionsMap = {};
-        usedSelections.forEach(selection => {
-            const userId = selection.user._id.toString();
+        usedSelections.forEach(usedSelection => {
+            const userId = usedSelection.user._id.toString();
             if (!usedSelectionsMap[userId]) {
                 usedSelectionsMap[userId] = {
                     mainDrivers: [],
@@ -370,34 +369,63 @@ const getLeagueOpponents = async (req, res) => {
                     teams: []
                 };
             }
-            if (selection.mainDriver) usedSelectionsMap[userId].mainDrivers.push(selection.mainDriver);
-            if (selection.reserveDriver) usedSelectionsMap[userId].reserveDrivers.push(selection.reserveDriver);
-            if (selection.team) usedSelectionsMap[userId].teams.push(selection.team);
+            
+            // Get all used drivers and teams from all cycles
+            const allUsedMainDrivers = [];
+            const allUsedReserveDrivers = [];
+            const allUsedTeams = [];
+            
+            usedSelection.mainDriverCycles.forEach(cycle => {
+                allUsedMainDrivers.push(...cycle);
+            });
+            usedSelection.reserveDriverCycles.forEach(cycle => {
+                allUsedReserveDrivers.push(...cycle);
+            });
+            usedSelection.teamCycles.forEach(cycle => {
+                allUsedTeams.push(...cycle);
+            });
+            
+            usedSelectionsMap[userId] = {
+                mainDrivers: allUsedMainDrivers,
+                reserveDrivers: allUsedReserveDrivers,
+                teams: allUsedTeams
+            };
         });
         
-        // Get all available drivers and teams
-        const allDrivers = [
-            'Max Verstappen', 'Sergio Perez', 'Charles Leclerc', 'Carlos Sainz',
-            'Lewis Hamilton', 'George Russell', 'Lando Norris', 'Oscar Piastri',
-            'Fernando Alonso', 'Lance Stroll', 'Pierre Gasly', 'Esteban Ocon',
-            'Alexander Albon', 'Logan Sargeant', 'Yuki Tsunoda', 'Daniel Ricciardo',
-            'Nico Hulkenberg', 'Kevin Magnussen', 'Valtteri Bottas', 'Zhou Guanyu'
-        ];
+        // Import F1 data constants
+        const { F1_DRIVERS_2025, F1_TEAMS_2025 } = require('../constants/f1Data2025');
         
-        const allTeams = [
-            'Red Bull Racing', 'Ferrari', 'Mercedes', 'McLaren',
-            'Aston Martin', 'Alpine', 'Williams', 'RB',
-            'Haas F1 Team', 'Stake F1 Team Kick Sauber'
-        ];
+        // Get all available drivers and teams
+        const allDrivers = F1_DRIVERS_2025.map(driver => driver.name);
+        const allTeams = F1_TEAMS_2025.map(team => team.name);
+        
+        // Create mapping from short names to full names
+        const shortNameToFullName = {};
+        F1_DRIVERS_2025.forEach(driver => {
+            shortNameToFullName[driver.shortName] = driver.name;
+        });
+        
+        const teamNameMapping = {};
+        F1_TEAMS_2025.forEach(team => {
+            teamNameMapping[team.name] = team.name;
+            team.alternateNames.forEach(altName => {
+                teamNameMapping[altName] = team.name;
+            });
+        });
         
         // Calculate remaining selections for each opponent
         const opponentsData = opponents.map(opponent => {
             const userId = opponent._id.toString();
             const used = usedSelectionsMap[userId] || { mainDrivers: [], reserveDrivers: [], teams: [] };
             
-            const remainingMainDrivers = allDrivers.filter(driver => !used.mainDrivers.includes(driver));
-            const remainingReserveDrivers = allDrivers.filter(driver => !used.reserveDrivers.includes(driver));
-            const remainingTeams = allTeams.filter(team => !used.teams.includes(team));
+            // Convert short names to full names for comparison
+            const usedMainDriversFull = used.mainDrivers.map(shortName => shortNameToFullName[shortName]).filter(Boolean);
+            const usedReserveDriversFull = used.reserveDrivers.map(shortName => shortNameToFullName[shortName]).filter(Boolean);
+            const usedTeamsFull = used.teams.map(teamName => teamNameMapping[teamName] || teamName).filter(Boolean);
+            
+            const remainingMainDrivers = allDrivers.filter(driver => !usedMainDriversFull.includes(driver));
+            const remainingReserveDrivers = allDrivers.filter(driver => !usedReserveDriversFull.includes(driver));
+            const remainingTeams = allTeams.filter(team => !usedTeamsFull.includes(team));
             
             return {
                 id: opponent._id,
