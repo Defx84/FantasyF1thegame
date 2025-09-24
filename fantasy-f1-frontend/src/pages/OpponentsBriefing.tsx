@@ -77,7 +77,12 @@ const OpponentsBriefing: React.FC = () => {
   useEffect(() => {
     console.log('Briefing background image path:', briefingBackground);
     console.log('Opponents data:', opponents);
-  }, [opponents]);
+    
+    // Auto-select first opponent when data loads
+    if (opponents.length > 0 && !expandedOpponent) {
+      setExpandedOpponent(opponents[0].id);
+    }
+  }, [opponents, expandedOpponent]);
 
   const toggleOpponent = (opponentId: string) => {
     setExpandedOpponent(expandedOpponent === opponentId ? null : opponentId);
@@ -157,38 +162,65 @@ const OpponentsBriefing: React.FC = () => {
         </div>
       </div>
 
-      {/* Opponents Grid */}
+      {/* Opponents Carousel */}
       <div className="max-w-4xl mx-auto px-4 py-10 pt-4">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {opponents.map((opponent) => (
+        <div className="relative">
+          {/* Navigation Arrows */}
+          <button
+            onClick={() => {
+              const currentIndex = opponents.findIndex(opp => opp.id === expandedOpponent);
+              const prevIndex = currentIndex > 0 ? currentIndex - 1 : opponents.length - 1;
+              setExpandedOpponent(opponents[prevIndex].id);
+            }}
+            className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-colors"
+          >
+            <IconWrapper icon={FaChevronDown} className="rotate-90 text-xl" />
+          </button>
+          
+          <button
+            onClick={() => {
+              const currentIndex = opponents.findIndex(opp => opp.id === expandedOpponent);
+              const nextIndex = currentIndex < opponents.length - 1 ? currentIndex + 1 : 0;
+              setExpandedOpponent(opponents[nextIndex].id);
+            }}
+            className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-colors"
+          >
+            <IconWrapper icon={FaChevronDown} className="-rotate-90 text-xl" />
+          </button>
+
+          {/* Single Card Display */}
+          <div className="flex justify-center">
+            {opponents.map((opponent) => (
             <div
               key={opponent.id}
-              className="bg-white/10 backdrop-blur-sm border-2 border-white/20 overflow-hidden transition-all duration-300 hover:bg-white/15"
+              className={`w-80 h-96 bg-white/10 backdrop-blur-sm border-2 border-white/20 overflow-hidden transition-all duration-500 ${
+                expandedOpponent === opponent.id ? 'block' : 'hidden'
+              }`}
             >
               {/* Opponent Card */}
               <div
-                className="p-4 cursor-pointer flex flex-col items-center text-center"
+                className="h-full cursor-pointer flex flex-col items-center text-center p-6"
                 onClick={() => toggleOpponent(opponent.id)}
               >
-                {/* Avatar Container */}
-                <div className="w-16 h-16 border-2 border-white/30 mb-3 flex items-center justify-center bg-white/5">
+                {/* Large Avatar Container */}
+                <div className="w-48 h-48 border-2 border-white/30 mb-4 flex items-center justify-center bg-white/5">
                   <AvatarImage 
                     userId={opponent.id} 
                     username={opponent.username} 
-                    size={48} 
+                    size={180} 
                     className="" 
                   />
                 </div>
                 
                 {/* Username */}
-                <h3 className="text-lg font-bold text-white mb-2">{opponent.username}</h3>
+                <h3 className="text-xl font-bold text-white mb-4">{opponent.username}</h3>
                 
                 {/* Expand/Collapse Arrow */}
                 <div className="text-white">
                   {expandedOpponent === opponent.id ? (
-                    <IconWrapper icon={FaChevronUp} className="text-white text-lg" />
+                    <IconWrapper icon={FaChevronUp} className="text-white text-xl" />
                   ) : (
-                    <IconWrapper icon={FaChevronDown} className="text-white text-lg" />
+                    <IconWrapper icon={FaChevronDown} className="text-white text-xl" />
                   )}
                 </div>
               </div>
@@ -256,6 +288,22 @@ const OpponentsBriefing: React.FC = () => {
               )}
             </div>
           ))}
+          </div>
+          
+          {/* Navigation Indicators */}
+          <div className="flex justify-center mt-6 space-x-2">
+            {opponents.map((opponent, index) => (
+              <button
+                key={opponent.id}
+                onClick={() => setExpandedOpponent(opponent.id)}
+                className={`w-3 h-3 rounded-full transition-colors ${
+                  expandedOpponent === opponent.id 
+                    ? 'bg-white' 
+                    : 'bg-white/30 hover:bg-white/50'
+                }`}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>
