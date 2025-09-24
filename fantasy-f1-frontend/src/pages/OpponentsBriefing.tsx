@@ -58,6 +58,11 @@ const OpponentsBriefing: React.FC = () => {
     }
   }, [leagueId]);
 
+  // Debug: Log the imported image path
+  useEffect(() => {
+    console.log('Briefing background image path:', briefingBackground);
+  }, []);
+
   const toggleOpponent = (opponentId: string) => {
     setExpandedOpponent(expandedOpponent === opponentId ? null : opponentId);
   };
@@ -98,11 +103,12 @@ const OpponentsBriefing: React.FC = () => {
     <div
       className="min-h-screen w-full overflow-y-auto relative"
       style={{
-        background: `linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%), url("${briefingBackground}")`,
+        backgroundImage: `url("${briefingBackground}")`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
         backgroundAttachment: 'fixed',
+        backgroundColor: '#1e3a8a',
         minHeight: '100vh',
       }}
     >
