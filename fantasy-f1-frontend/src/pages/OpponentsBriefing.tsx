@@ -39,6 +39,7 @@ const OpponentsBriefing: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedOpponent, setExpandedOpponent] = useState<string | null>(null);
+  const [currentOpponent, setCurrentOpponent] = useState<string | null>(null);
   const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
   useEffect(() => {
@@ -79,10 +80,10 @@ const OpponentsBriefing: React.FC = () => {
     console.log('Opponents data:', opponents);
     
     // Auto-select first opponent when data loads
-    if (opponents.length > 0 && !expandedOpponent) {
-      setExpandedOpponent(opponents[0].id);
+    if (opponents.length > 0 && !currentOpponent) {
+      setCurrentOpponent(opponents[0].id);
     }
-  }, [opponents, expandedOpponent]);
+  }, [opponents, currentOpponent]);
 
   const toggleOpponent = (opponentId: string) => {
     setExpandedOpponent(expandedOpponent === opponentId ? null : opponentId);
@@ -168,9 +169,10 @@ const OpponentsBriefing: React.FC = () => {
           {/* Navigation Arrows */}
           <button
             onClick={() => {
-              const currentIndex = opponents.findIndex(opp => opp.id === expandedOpponent);
+              const currentIndex = opponents.findIndex(opp => opp.id === currentOpponent);
               const prevIndex = currentIndex > 0 ? currentIndex - 1 : opponents.length - 1;
-              setExpandedOpponent(opponents[prevIndex].id);
+              setCurrentOpponent(opponents[prevIndex].id);
+              setExpandedOpponent(null); // Close any expanded content
             }}
             className="absolute left-0 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-colors"
           >
@@ -179,9 +181,10 @@ const OpponentsBriefing: React.FC = () => {
           
           <button
             onClick={() => {
-              const currentIndex = opponents.findIndex(opp => opp.id === expandedOpponent);
+              const currentIndex = opponents.findIndex(opp => opp.id === currentOpponent);
               const nextIndex = currentIndex < opponents.length - 1 ? currentIndex + 1 : 0;
-              setExpandedOpponent(opponents[nextIndex].id);
+              setCurrentOpponent(opponents[nextIndex].id);
+              setExpandedOpponent(null); // Close any expanded content
             }}
             className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/50 hover:bg-black/70 text-white p-3 rounded-full transition-colors"
           >
@@ -194,7 +197,7 @@ const OpponentsBriefing: React.FC = () => {
             <div
               key={opponent.id}
               className={`w-80 bg-white/10 backdrop-blur-sm border-2 border-white/20 overflow-hidden transition-all duration-500 ${
-                expandedOpponent === opponent.id ? 'block' : 'hidden'
+                currentOpponent === opponent.id ? 'block' : 'hidden'
               }`}
             >
               {/* Opponent Card */}
@@ -202,13 +205,13 @@ const OpponentsBriefing: React.FC = () => {
                 className="cursor-pointer flex flex-col items-center text-center p-6"
                 onClick={() => toggleOpponent(opponent.id)}
               >
-                {/* Large Avatar - fills entire square */}
-                <div className="w-48 h-48 border-2 border-white/30 mb-4">
+                {/* Large Avatar - no extra container */}
+                <div className="mb-4">
                   <AvatarImage 
                     userId={opponent.id} 
                     username={opponent.username} 
                     size={192} 
-                    className="w-full h-full" 
+                    className="w-48 h-48" 
                   />
                 </div>
                 
@@ -295,9 +298,12 @@ const OpponentsBriefing: React.FC = () => {
             {opponents.map((opponent, index) => (
               <button
                 key={opponent.id}
-                onClick={() => setExpandedOpponent(opponent.id)}
+                onClick={() => {
+                  setCurrentOpponent(opponent.id);
+                  setExpandedOpponent(null); // Close any expanded content
+                }}
                 className={`w-3 h-3 rounded-full transition-colors ${
-                  expandedOpponent === opponent.id 
+                  currentOpponent === opponent.id 
                     ? 'bg-white' 
                     : 'bg-white/30 hover:bg-white/50'
                 }`}
