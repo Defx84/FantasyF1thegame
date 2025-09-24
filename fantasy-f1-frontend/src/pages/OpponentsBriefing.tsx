@@ -193,22 +193,22 @@ const OpponentsBriefing: React.FC = () => {
             {opponents.map((opponent) => (
             <div
               key={opponent.id}
-              className={`w-80 h-96 bg-white/10 backdrop-blur-sm border-2 border-white/20 overflow-hidden transition-all duration-500 ${
+              className={`w-80 bg-white/10 backdrop-blur-sm border-2 border-white/20 overflow-hidden transition-all duration-500 ${
                 expandedOpponent === opponent.id ? 'block' : 'hidden'
               }`}
             >
               {/* Opponent Card */}
               <div
-                className="h-full cursor-pointer flex flex-col items-center text-center p-6"
+                className="cursor-pointer flex flex-col items-center text-center p-6"
                 onClick={() => toggleOpponent(opponent.id)}
               >
-                {/* Large Avatar Container */}
-                <div className="w-48 h-48 border-2 border-white/30 mb-4 flex items-center justify-center bg-white/5">
+                {/* Large Avatar - fills entire square */}
+                <div className="w-48 h-48 border-2 border-white/30 mb-4">
                   <AvatarImage 
                     userId={opponent.id} 
                     username={opponent.username} 
-                    size={180} 
-                    className="" 
+                    size={192} 
+                    className="w-full h-full" 
                   />
                 </div>
                 
