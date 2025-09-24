@@ -356,96 +356,42 @@ const getLeagueOpponents = async (req, res) => {
         // Filter out any null opponents (shouldn't happen but safety check)
         const validOpponents = opponents.filter(opponent => opponent && opponent._id);
         
-        // Get used selections for all league members
-        const usedSelections = await UsedSelection.find({
+        // Get all race selections for the league (all rounds)
+        const allRaceSelections = await RaceSelection.find({
             league: id
         }).populate('user', 'username');
         
-        // Get current race selections to exclude them (maintain secrecy)
-        const currentRaceSelections = await RaceSelection.find({
-            league: id,
-            round: currentRound
-        }).populate('user', 'username');
-        
         console.log(`[Opponents] Current round: ${currentRound}`);
-        console.log(`[Opponents] Current race selections count: ${currentRaceSelections.length}`);
+        console.log(`[Opponents] Total race selections: ${allRaceSelections.length}`);
         
-        // Create a map of current race selections to exclude them
-        const currentRaceSelectionsMap = {};
-        currentRaceSelections.forEach(selection => {
-            if (selection.user && selection.user._id) {
-                const userId = selection.user._id.toString();
-                if (!currentRaceSelectionsMap[userId]) {
-                    currentRaceSelectionsMap[userId] = {
-                        mainDriver: null,
-                        reserveDriver: null,
-                        team: null
-                    };
-                }
-                if (selection.mainDriver) currentRaceSelectionsMap[userId].mainDriver = selection.mainDriver;
-                if (selection.reserveDriver) currentRaceSelectionsMap[userId].reserveDriver = selection.reserveDriver;
-                if (selection.team) currentRaceSelectionsMap[userId].team = selection.team;
-            }
-        });
+        // Filter to only include selections from completed rounds (exclude current/upcoming race)
+        const historicalSelections = allRaceSelections.filter(selection => 
+            selection.round < currentRound
+        );
         
-        // Create a map of used selections by user
-        const usedSelectionsMap = {};
-        usedSelections.forEach(usedSelection => {
-            // Skip if user is null or doesn't exist
-            if (!usedSelection.user || !usedSelection.user._id) {
-                console.log('[Opponents] Skipping usedSelection with null user:', usedSelection);
+        console.log(`[Opponents] Historical selections (rounds < ${currentRound}): ${historicalSelections.length}`);
+        
+        // Create a map of historical selections by user
+        const historicalSelectionsMap = {};
+        historicalSelections.forEach(selection => {
+            if (!selection.user || !selection.user._id) {
+                console.log('[Opponents] Skipping race selection with null user:', selection);
                 return;
             }
             
-            const userId = usedSelection.user._id.toString();
-            if (!usedSelectionsMap[userId]) {
-                usedSelectionsMap[userId] = {
+            const userId = selection.user._id.toString();
+            if (!historicalSelectionsMap[userId]) {
+                historicalSelectionsMap[userId] = {
                     mainDrivers: [],
                     reserveDrivers: [],
                     teams: []
                 };
             }
             
-            // Get used drivers and teams from the CURRENT cycle (last one)
-            let currentMainDriverCycle = usedSelection.mainDriverCycles[usedSelection.mainDriverCycles.length - 1] || [];
-            let currentReserveDriverCycle = usedSelection.reserveDriverCycles[usedSelection.reserveDriverCycles.length - 1] || [];
-            let currentTeamCycle = usedSelection.teamCycles[usedSelection.teamCycles.length - 1] || [];
-            
-            // Remove current race selections to maintain secrecy
-            const currentRaceSelection = currentRaceSelectionsMap[userId];
-            if (currentRaceSelection) {
-                // Convert full names to short names for comparison with cycles
-                const { normalizeDriverName } = require('../constants/driverNameNormalization');
-                const { normalizeTeamName } = require('../constants/f1Data2025');
-                
-                const normalizedMainDriver = currentRaceSelection.mainDriver ? normalizeDriverName(currentRaceSelection.mainDriver) : null;
-                const normalizedReserveDriver = currentRaceSelection.reserveDriver ? normalizeDriverName(currentRaceSelection.reserveDriver) : null;
-                const normalizedTeam = currentRaceSelection.team ? normalizeTeamName(currentRaceSelection.team) : null;
-                
-                // Remove current race selections from the cycles
-                currentMainDriverCycle = currentMainDriverCycle.filter(driver => driver !== normalizedMainDriver);
-                currentReserveDriverCycle = currentReserveDriverCycle.filter(driver => driver !== normalizedReserveDriver);
-                currentTeamCycle = currentTeamCycle.filter(team => team !== normalizedTeam);
-                
-                console.log(`[Opponents] Removed current race selections for user ${userId}:`, {
-                    original: {
-                        mainDriver: currentRaceSelection.mainDriver,
-                        reserveDriver: currentRaceSelection.reserveDriver,
-                        team: currentRaceSelection.team
-                    },
-                    normalized: {
-                        mainDriver: normalizedMainDriver,
-                        reserveDriver: normalizedReserveDriver,
-                        team: normalizedTeam
-                    }
-                });
-            }
-            
-            usedSelectionsMap[userId] = {
-                mainDrivers: currentMainDriverCycle,
-                reserveDrivers: currentReserveDriverCycle,
-                teams: currentTeamCycle
-            };
+            // Add selections from historical races only
+            if (selection.mainDriver) historicalSelectionsMap[userId].mainDrivers.push(selection.mainDriver);
+            if (selection.reserveDriver) historicalSelectionsMap[userId].reserveDrivers.push(selection.reserveDriver);
+            if (selection.team) historicalSelectionsMap[userId].teams.push(selection.team);
         });
         
         // Import F1 data constants
@@ -479,11 +425,11 @@ const getLeagueOpponents = async (req, res) => {
         // Calculate remaining selections for each opponent
         const opponentsData = validOpponents.map(opponent => {
             const userId = opponent._id.toString();
-            const used = usedSelectionsMap[userId] || { mainDrivers: [], reserveDrivers: [], teams: [] };
+            const used = historicalSelectionsMap[userId] || { mainDrivers: [], reserveDrivers: [], teams: [] };
             
-            // Convert short names to full names for comparison
-            const usedMainDriversFull = used.mainDrivers.map(shortName => shortNameToFullName[shortName]).filter(Boolean);
-            const usedReserveDriversFull = used.reserveDrivers.map(shortName => shortNameToFullName[shortName]).filter(Boolean);
+            // RaceSelection already stores full names, so we can use them directly
+            const usedMainDriversFull = used.mainDrivers;
+            const usedReserveDriversFull = used.reserveDrivers;
             const usedTeamsFull = used.teams.map(teamName => teamNameMapping[teamName] || teamName).filter(Boolean);
             
             const remainingMainDrivers = allDrivers.filter(driver => !usedMainDriversFull.includes(driver));
@@ -492,11 +438,14 @@ const getLeagueOpponents = async (req, res) => {
             
             // Debug logging
             console.log(`[Opponents] User: ${opponent.username}`);
-            console.log(`[Opponents] Current cycle teams:`, used.teams);
+            console.log(`[Opponents] Historical selections:`, {
+                mainDrivers: used.mainDrivers,
+                reserveDrivers: used.reserveDrivers,
+                teams: used.teams
+            });
             console.log(`[Opponents] Used teams full:`, usedTeamsFull);
             console.log(`[Opponents] All teams:`, allTeams);
             console.log(`[Opponents] Remaining teams:`, remainingTeams);
-            console.log(`[Opponents] Team name mapping for used teams:`, used.teams.map(team => ({ original: team, mapped: teamNameMapping[team] || team })));
             
             return {
                 id: opponent._id,
