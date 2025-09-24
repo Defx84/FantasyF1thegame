@@ -414,15 +414,30 @@ const getLeagueOpponents = async (req, res) => {
             // Remove current race selections to maintain secrecy
             const currentRaceSelection = currentRaceSelectionsMap[userId];
             if (currentRaceSelection) {
+                // Convert full names to short names for comparison with cycles
+                const { normalizeDriverName } = require('../constants/driverNameNormalization');
+                const { normalizeTeamName } = require('../constants/teamNameNormalization');
+                
+                const normalizedMainDriver = currentRaceSelection.mainDriver ? normalizeDriverName(currentRaceSelection.mainDriver) : null;
+                const normalizedReserveDriver = currentRaceSelection.reserveDriver ? normalizeDriverName(currentRaceSelection.reserveDriver) : null;
+                const normalizedTeam = currentRaceSelection.team ? normalizeTeamName(currentRaceSelection.team) : null;
+                
                 // Remove current race selections from the cycles
-                currentMainDriverCycle = currentMainDriverCycle.filter(driver => driver !== currentRaceSelection.mainDriver);
-                currentReserveDriverCycle = currentReserveDriverCycle.filter(driver => driver !== currentRaceSelection.reserveDriver);
-                currentTeamCycle = currentTeamCycle.filter(team => team !== currentRaceSelection.team);
+                currentMainDriverCycle = currentMainDriverCycle.filter(driver => driver !== normalizedMainDriver);
+                currentReserveDriverCycle = currentReserveDriverCycle.filter(driver => driver !== normalizedReserveDriver);
+                currentTeamCycle = currentTeamCycle.filter(team => team !== normalizedTeam);
                 
                 console.log(`[Opponents] Removed current race selections for user ${userId}:`, {
-                    mainDriver: currentRaceSelection.mainDriver,
-                    reserveDriver: currentRaceSelection.reserveDriver,
-                    team: currentRaceSelection.team
+                    original: {
+                        mainDriver: currentRaceSelection.mainDriver,
+                        reserveDriver: currentRaceSelection.reserveDriver,
+                        team: currentRaceSelection.team
+                    },
+                    normalized: {
+                        mainDriver: normalizedMainDriver,
+                        reserveDriver: normalizedReserveDriver,
+                        team: normalizedTeam
+                    }
                 });
             }
             
