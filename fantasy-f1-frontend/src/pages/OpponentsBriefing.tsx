@@ -143,20 +143,21 @@ const OpponentsBriefing: React.FC = () => {
   }
 
   return (
-    <div
-      className="min-h-screen w-full overflow-y-auto relative"
-      style={{
-        backgroundImage: `url("${briefingBackground}")`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center',
-        backgroundRepeat: 'no-repeat',
-        backgroundAttachment: 'fixed',
-        backgroundColor: '#1e3a8a',
-        minHeight: '100vh',
-      }}
-    >
+    <div className="min-h-screen w-full overflow-y-auto relative">
+      {/* Fixed background */}
+      <div 
+        className="fixed inset-0 w-full h-full"
+        style={{
+          backgroundImage: `url("${briefingBackground}")`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          filter: 'brightness(0.8)',
+          zIndex: 0
+        }}
+      />
       {/* Glassmorphic Header */}
-      <div className="flex flex-col items-center pt-8">
+      <div className="flex flex-col items-center pt-8 relative z-10">
         <div className="w-full max-w-3xl px-8 py-6 rounded-2xl shadow-xl bg-black/20 backdrop-blur-lg border border-white/10 mb-10">
           <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">🎯 Opponents Briefing</h1>
           <p className="text-lg text-white font-medium drop-shadow-lg">Strategic intelligence on your league rivals</p>
@@ -164,7 +165,7 @@ const OpponentsBriefing: React.FC = () => {
       </div>
 
       {/* Opponents Carousel */}
-      <div className="max-w-4xl mx-auto px-4 py-10 pt-4">
+      <div className="max-w-4xl mx-auto px-4 py-10 pt-4 relative z-10">
         <div className="relative">
           {/* Navigation Arrows */}
           <button
