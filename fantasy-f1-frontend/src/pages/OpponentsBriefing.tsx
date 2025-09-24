@@ -38,25 +38,39 @@ const OpponentsBriefing: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [expandedOpponent, setExpandedOpponent] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const fetchOpponents = async () => {
+    const checkAdminAndFetchData = async () => {
       try {
         setLoading(true);
+        
+        // First check if user is admin
+        const leagueResponse = await api.get(`/api/league/${leagueId}`);
+        const league = leagueResponse.data;
+        const userIsAdmin = league.owner === user?.id;
+        setIsAdmin(userIsAdmin);
+        
+        if (!userIsAdmin) {
+          setError('Access denied. This feature is only available to league administrators.');
+          return;
+        }
+        
+        // If admin, fetch opponents data
         const response = await api.get(`/api/league/${leagueId}/opponents`);
         setOpponents(response.data);
       } catch (err) {
-        setError('Failed to load opponents data');
-        console.error('Error fetching opponents:', err);
+        setError('Failed to load data');
+        console.error('Error fetching data:', err);
       } finally {
         setLoading(false);
       }
     };
 
-    if (leagueId) {
-      fetchOpponents();
+    if (leagueId && user) {
+      checkAdminAndFetchData();
     }
-  }, [leagueId]);
+  }, [leagueId, user]);
 
   // Debug: Log the imported image path and opponents data
   useEffect(() => {
@@ -94,8 +108,29 @@ const OpponentsBriefing: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-white text-2xl">{error}</div>
+      <div 
+        className="min-h-screen w-full flex items-center justify-center"
+        style={{
+          backgroundImage: `url("${briefingBackground}")`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundRepeat: 'no-repeat',
+          backgroundAttachment: 'fixed',
+          backgroundColor: '#1e3a8a',
+        }}
+      >
+        <div className="text-center max-w-md mx-auto px-6">
+          <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
+            <h2 className="text-3xl font-bold text-white mb-4">🔒 Access Restricted</h2>
+            <p className="text-white text-lg mb-6">{error}</p>
+            <button
+              onClick={() => navigate(`/league/${leagueId}`)}
+              className="px-6 py-3 bg-red-600 text-white rounded-lg hover:bg-red-700 font-bold transition-colors duration-200"
+            >
+              Back to League
+            </button>
+          </div>
+        </div>
       </div>
     );
   }

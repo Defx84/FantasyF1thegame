@@ -9,6 +9,7 @@ import { drivers as allDrivers, teams as allTeams, driverTeams } from '../utils/
 import { getTimeUntilLock, isSelectionsLocked, formatTimeLeft } from '../utils/raceUtils';
 import { normalizeDriver, normalizeTeam } from '../utils/normalization';
 import { api } from '../services/api';
+import { useAuth } from '../context/AuthContext';
 
 interface Driver {
   id: string;
@@ -28,6 +29,7 @@ const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 const NextRaceSelections: React.FC = () => {
   const navigate = useNavigate();
   const { leagueId } = useParams<{ leagueId: string }>();
+  const { user } = useAuth();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [raceData, setRaceData] = useState<RaceTiming | null>(null);
@@ -48,6 +50,7 @@ const NextRaceSelections: React.FC = () => {
   const [switcherooCount, setSwitcherooCount] = useState<number | null>(null);
   const [switcherooTotal, setSwitcherooTotal] = useState<number>(3);
   const [switcherooLoading, setSwitcherooLoading] = useState(true);
+  const [isAdmin, setIsAdmin] = useState<boolean>(false);
   const [switcherooError, setSwitcherooError] = useState<string | null>(null);
   const [isSwitcherooWindow, setIsSwitcherooWindow] = useState(false);
   const [raceStatus, setRaceStatus] = useState<string | null>(null);
@@ -76,6 +79,17 @@ const NextRaceSelections: React.FC = () => {
       }
 
       setLoading(true);
+      
+      // Check if user is admin
+      try {
+        const leagueResponse = await api.get(`/api/league/${leagueId}`);
+        const league = leagueResponse.data;
+        const userIsAdmin = league.owner === user?.id;
+        setIsAdmin(userIsAdmin);
+      } catch (err) {
+        console.error('Error checking admin status:', err);
+        setIsAdmin(false);
+      }
       // Fetch the next race timing
       const raceTiming = await getNextRaceTiming();
       // Use the round from raceTiming
@@ -632,12 +646,14 @@ const NextRaceSelections: React.FC = () => {
                   >
                     Go to Grid
                   </button>
-                  <button
-                    onClick={() => navigate(`/league/${leagueId}/briefing`)}
-                    className="w-full min-w-[160px] flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold transition-colors duration-200"
-                  >
-                    🎯 Opponents Briefing
-                  </button>
+                  {isAdmin && (
+                    <button
+                      onClick={() => navigate(`/league/${leagueId}/briefing`)}
+                      className="w-full min-w-[160px] flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold transition-colors duration-200"
+                    >
+                      🎯 Opponents Briefing
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
