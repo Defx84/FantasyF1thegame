@@ -353,6 +353,9 @@ const getLeagueOpponents = async (req, res) => {
             _id: { $in: league.members.filter(memberId => memberId.toString() !== userId.toString()) }
         }, 'username avatar');
         
+        // Filter out any null opponents (shouldn't happen but safety check)
+        const validOpponents = opponents.filter(opponent => opponent && opponent._id);
+        
         // Get used selections for all league members
         const usedSelections = await UsedSelection.find({
             league: id
@@ -361,6 +364,12 @@ const getLeagueOpponents = async (req, res) => {
         // Create a map of used selections by user
         const usedSelectionsMap = {};
         usedSelections.forEach(usedSelection => {
+            // Skip if user is null or doesn't exist
+            if (!usedSelection.user || !usedSelection.user._id) {
+                console.log('[Opponents] Skipping usedSelection with null user:', usedSelection);
+                return;
+            }
+            
             const userId = usedSelection.user._id.toString();
             if (!usedSelectionsMap[userId]) {
                 usedSelectionsMap[userId] = {
@@ -411,7 +420,7 @@ const getLeagueOpponents = async (req, res) => {
         console.log('[Opponents] Team name mapping:', teamNameMapping);
         
         // Calculate remaining selections for each opponent
-        const opponentsData = opponents.map(opponent => {
+        const opponentsData = validOpponents.map(opponent => {
             const userId = opponent._id.toString();
             const used = usedSelectionsMap[userId] || { mainDrivers: [], reserveDrivers: [], teams: [] };
             
