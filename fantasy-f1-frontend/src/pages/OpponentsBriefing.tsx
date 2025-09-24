@@ -58,10 +58,11 @@ const OpponentsBriefing: React.FC = () => {
     }
   }, [leagueId]);
 
-  // Debug: Log the imported image path
+  // Debug: Log the imported image path and opponents data
   useEffect(() => {
     console.log('Briefing background image path:', briefingBackground);
-  }, []);
+    console.log('Opponents data:', opponents);
+  }, [opponents]);
 
   const toggleOpponent = (opponentId: string) => {
     setExpandedOpponent(expandedOpponent === opponentId ? null : opponentId);
@@ -113,8 +114,8 @@ const OpponentsBriefing: React.FC = () => {
       }}
     >
       {/* Glassmorphic Header */}
-      <div className="flex flex-col items-center pt-16">
-        <div className="w-full max-w-3xl px-8 py-6 rounded-2xl shadow-xl bg-black/30 backdrop-blur-lg border border-white/20 mb-10">
+      <div className="flex flex-col items-center pt-8">
+        <div className="w-full max-w-3xl px-8 py-6 rounded-2xl shadow-xl bg-black/20 backdrop-blur-lg border border-white/10 mb-10">
           <h1 className="text-4xl font-bold text-white drop-shadow-lg mb-1">🎯 Opponents Briefing</h1>
           <p className="text-lg text-white font-medium drop-shadow-lg">Strategic intelligence on your league rivals</p>
         </div>
@@ -141,9 +142,16 @@ const OpponentsBriefing: React.FC = () => {
                           src={opponent.avatar}
                           alt={opponent.username}
                           className="w-12 h-12 rounded-full object-cover"
+                          onError={(e) => {
+                            console.log('Avatar failed to load for', opponent.username, ':', opponent.avatar);
+                            e.currentTarget.style.display = 'none';
+                          }}
                         />
-                      ) : (
-                        <IconWrapper icon={FaUser} className="text-white text-xl" />
+                      ) : null}
+                      {!opponent.avatar && (
+                        <span className="text-white text-lg font-bold">
+                          {opponent.username.substring(0, 2).toUpperCase()}
+                        </span>
                       )}
                     </div>
                     <div>
