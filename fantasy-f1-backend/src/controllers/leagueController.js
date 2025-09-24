@@ -416,7 +416,7 @@ const getLeagueOpponents = async (req, res) => {
             if (currentRaceSelection) {
                 // Convert full names to short names for comparison with cycles
                 const { normalizeDriverName } = require('../constants/driverNameNormalization');
-                const { normalizeTeamName } = require('../constants/teamNameNormalization');
+                const { normalizeTeamName } = require('../constants/f1Data2025');
                 
                 const normalizedMainDriver = currentRaceSelection.mainDriver ? normalizeDriverName(currentRaceSelection.mainDriver) : null;
                 const normalizedReserveDriver = currentRaceSelection.reserveDriver ? normalizeDriverName(currentRaceSelection.reserveDriver) : null;
