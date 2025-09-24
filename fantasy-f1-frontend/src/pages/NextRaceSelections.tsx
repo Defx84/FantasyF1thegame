@@ -84,7 +84,11 @@ const NextRaceSelections: React.FC = () => {
       try {
         const leagueResponse = await api.get(`/api/league/${leagueId}`);
         const league = leagueResponse.data;
+        console.log('League data:', league);
+        console.log('User ID:', user?.id);
+        console.log('League owner:', league.owner);
         const userIsAdmin = league.owner === user?.id;
+        console.log('Is admin:', userIsAdmin);
         setIsAdmin(userIsAdmin);
       } catch (err) {
         console.error('Error checking admin status:', err);
@@ -654,6 +658,10 @@ const NextRaceSelections: React.FC = () => {
                       🎯 Opponents Briefing
                     </button>
                   )}
+                  {/* Debug: Show admin status */}
+                  <div className="text-xs text-gray-500 mt-2">
+                    Admin Status: {isAdmin ? 'Yes' : 'No'} | User: {user?.id} | League: {leagueId}
+                  </div>
                 </div>
               </div>
             </div>
