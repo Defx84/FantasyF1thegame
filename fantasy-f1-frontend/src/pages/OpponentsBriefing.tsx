@@ -4,6 +4,7 @@ import { FaChevronDown, FaChevronUp, FaUser, FaCar, FaUsers } from 'react-icons/
 import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import IconWrapper from '../utils/iconWrapper';
+import briefingBackground from '../assets/briefing-background.png';
 
 interface Opponent {
   id: string;
@@ -97,7 +98,7 @@ const OpponentsBriefing: React.FC = () => {
     <div
       className="min-h-screen w-full overflow-y-auto relative"
       style={{
-        background: 'linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%), url("/Briefing-page.png")',
+        background: `linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #3b82f6 100%), url("${briefingBackground}")`,
         backgroundSize: 'cover',
         backgroundPosition: 'center',
         backgroundRepeat: 'no-repeat',
