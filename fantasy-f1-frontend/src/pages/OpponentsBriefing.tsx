@@ -42,25 +42,11 @@ const OpponentsBriefing: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [expandedOpponent, setExpandedOpponent] = useState<string | null>(null);
   const [currentOpponent, setCurrentOpponent] = useState<string | null>(null);
-  const [isAdmin, setIsAdmin] = useState<boolean | null>(null);
 
   useEffect(() => {
-    const checkAdminAndFetchData = async () => {
+    const fetchData = async () => {
       try {
         setLoading(true);
-        
-        // First check if user is admin
-        const leagueResponse = await api.get(`/api/league/${leagueId}`);
-        const league = leagueResponse.data;
-        const userIsAdmin = league.owner?.id === user?.id;
-        setIsAdmin(userIsAdmin);
-        
-        if (!userIsAdmin) {
-          setError('Access denied. This feature is only available to league administrators.');
-          return;
-        }
-        
-        // If admin, fetch opponents data
         const response = await api.get(`/api/league/${leagueId}/opponents`);
         setOpponents(response.data);
       } catch (err) {
@@ -72,7 +58,7 @@ const OpponentsBriefing: React.FC = () => {
     };
 
     if (leagueId && user) {
-      checkAdminAndFetchData();
+      fetchData();
     }
   }, [leagueId, user]);
 
@@ -138,7 +124,7 @@ const OpponentsBriefing: React.FC = () => {
       >
         <div className="text-center max-w-md mx-auto px-6">
           <div className="bg-black/40 backdrop-blur-lg rounded-2xl p-8 border border-white/20">
-            <h2 className="text-3xl font-bold text-white mb-4">🔒 Access Restricted</h2>
+            <h2 className="text-3xl font-bold text-white mb-4">⚠️ Error</h2>
             <p className="text-white text-lg mb-6">{error}</p>
             <button
               onClick={() => navigate(`/league/${leagueId}`)}
