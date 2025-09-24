@@ -87,7 +87,7 @@ const NextRaceSelections: React.FC = () => {
         console.log('League data:', league);
         console.log('User ID:', user?.id);
         console.log('League owner:', league.owner);
-        const userIsAdmin = league.owner === user?.id;
+        const userIsAdmin = league.owner?.id === user?.id;
         console.log('Is admin:', userIsAdmin);
         setIsAdmin(userIsAdmin);
       } catch (err) {

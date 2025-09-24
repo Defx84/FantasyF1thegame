@@ -48,7 +48,7 @@ const OpponentsBriefing: React.FC = () => {
         // First check if user is admin
         const leagueResponse = await api.get(`/api/league/${leagueId}`);
         const league = leagueResponse.data;
-        const userIsAdmin = league.owner === user?.id;
+        const userIsAdmin = league.owner?.id === user?.id;
         setIsAdmin(userIsAdmin);
         
         if (!userIsAdmin) {
