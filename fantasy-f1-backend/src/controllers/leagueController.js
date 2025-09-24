@@ -440,6 +440,7 @@ const getLeagueOpponents = async (req, res) => {
             console.log(`[Opponents] Used teams full:`, usedTeamsFull);
             console.log(`[Opponents] All teams:`, allTeams);
             console.log(`[Opponents] Remaining teams:`, remainingTeams);
+            console.log(`[Opponents] Team name mapping for used teams:`, used.teams.map(team => ({ original: team, mapped: teamNameMapping[team] || team })));
             
             return {
                 id: opponent._id,
