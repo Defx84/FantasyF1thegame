@@ -370,25 +370,15 @@ const getLeagueOpponents = async (req, res) => {
                 };
             }
             
-            // Get all used drivers and teams from all cycles
-            const allUsedMainDrivers = [];
-            const allUsedReserveDrivers = [];
-            const allUsedTeams = [];
-            
-            usedSelection.mainDriverCycles.forEach(cycle => {
-                allUsedMainDrivers.push(...cycle);
-            });
-            usedSelection.reserveDriverCycles.forEach(cycle => {
-                allUsedReserveDrivers.push(...cycle);
-            });
-            usedSelection.teamCycles.forEach(cycle => {
-                allUsedTeams.push(...cycle);
-            });
+            // Get used drivers and teams from the CURRENT cycle (last one)
+            const currentMainDriverCycle = usedSelection.mainDriverCycles[usedSelection.mainDriverCycles.length - 1] || [];
+            const currentReserveDriverCycle = usedSelection.reserveDriverCycles[usedSelection.reserveDriverCycles.length - 1] || [];
+            const currentTeamCycle = usedSelection.teamCycles[usedSelection.teamCycles.length - 1] || [];
             
             usedSelectionsMap[userId] = {
-                mainDrivers: allUsedMainDrivers,
-                reserveDrivers: allUsedReserveDrivers,
-                teams: allUsedTeams
+                mainDrivers: currentMainDriverCycle,
+                reserveDrivers: currentReserveDriverCycle,
+                teams: currentTeamCycle
             };
         });
         
@@ -436,7 +426,7 @@ const getLeagueOpponents = async (req, res) => {
             
             // Debug logging
             console.log(`[Opponents] User: ${opponent.username}`);
-            console.log(`[Opponents] Used teams:`, used.teams);
+            console.log(`[Opponents] Current cycle teams:`, used.teams);
             console.log(`[Opponents] Used teams full:`, usedTeamsFull);
             console.log(`[Opponents] All teams:`, allTeams);
             console.log(`[Opponents] Remaining teams:`, remainingTeams);
