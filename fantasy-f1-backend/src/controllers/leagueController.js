@@ -435,10 +435,42 @@ const getLeagueOpponents = async (req, res) => {
             const remainingReserveDrivers = Math.max(0, 20 - usedReserveDrivers);
             const remainingTeams = Math.max(0, 10 - usedTeams);
             
-            // Get the actual remaining drivers/teams (for display purposes)
-            const remainingMainDriversList = allDrivers.slice(0, remainingMainDrivers);
-            const remainingReserveDriversList = allDrivers.slice(0, remainingReserveDrivers);
-            const remainingTeamsList = allTeams.slice(0, remainingTeams);
+            // Get the actual used drivers/teams from cycles
+            let usedMainDriversList = [];
+            let usedReserveDriversList = [];
+            let usedTeamsList = [];
+            
+            if (usedSelection) {
+                const lastMainDriverCycleIndex = usedSelection.mainDriverCycles.length - 1;
+                const lastReserveDriverCycleIndex = usedSelection.reserveDriverCycles.length - 1;
+                const lastTeamCycleIndex = usedSelection.teamCycles.length - 1;
+                
+                usedMainDriversList = usedSelection.mainDriverCycles[lastMainDriverCycleIndex] || [];
+                usedReserveDriversList = usedSelection.reserveDriverCycles[lastReserveDriverCycleIndex] || [];
+                usedTeamsList = usedSelection.teamCycles[lastTeamCycleIndex] || [];
+            }
+            
+            // Convert short names to full names for drivers
+            const usedMainDriversFull = usedMainDriversList.map(shortName => shortNameToFullName[shortName] || shortName);
+            const usedReserveDriversFull = usedReserveDriversList.map(shortName => shortNameToFullName[shortName] || shortName);
+            const usedTeamsFull = usedTeamsList.map(teamName => teamNameMapping[teamName] || teamName);
+            
+            // Get the actual remaining drivers/teams (filter out used ones)
+            let remainingMainDriversList = allDrivers.filter(driver => !usedMainDriversFull.includes(driver));
+            let remainingReserveDriversList = allDrivers.filter(driver => !usedReserveDriversFull.includes(driver));
+            let remainingTeamsList = allTeams.filter(team => !usedTeamsFull.includes(team));
+            
+            // If opponent has future race selections, we need to hide them from the list
+            // but we don't know what they are, so we just show fewer options
+            if (futureSelections.hasMainDriver) {
+                remainingMainDriversList = remainingMainDriversList.slice(0, -1);
+            }
+            if (futureSelections.hasReserveDriver) {
+                remainingReserveDriversList = remainingReserveDriversList.slice(0, -1);
+            }
+            if (futureSelections.hasTeam) {
+                remainingTeamsList = remainingTeamsList.slice(0, -1);
+            }
             
             console.log(`[Opponents] User: ${opponent.username}`);
             console.log(`[Opponents] Used in cycles:`, { usedMainDrivers, usedReserveDrivers, usedTeams });
