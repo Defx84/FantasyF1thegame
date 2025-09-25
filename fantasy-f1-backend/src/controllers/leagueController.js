@@ -464,6 +464,39 @@ const getLeagueOpponents = async (req, res) => {
             // This maintains secrecy - future selections are included in the list
             // so opponents can't tell what was selected for future races
             
+            // If opponent has future race selections, we need to include them in the list
+            // to maintain secrecy (opponents can't tell what was selected)
+            if (futureSelections.hasMainDriver) {
+                // Add one more driver to the list to include the future selection
+                const additionalDrivers = allDrivers.filter(driver => 
+                    !usedMainDriversFull.includes(driver) && 
+                    !remainingMainDriversList.includes(driver)
+                );
+                if (additionalDrivers.length > 0) {
+                    remainingMainDriversList.push(additionalDrivers[0]);
+                }
+            }
+            if (futureSelections.hasReserveDriver) {
+                // Add one more driver to the list to include the future selection
+                const additionalDrivers = allDrivers.filter(driver => 
+                    !usedReserveDriversFull.includes(driver) && 
+                    !remainingReserveDriversList.includes(driver)
+                );
+                if (additionalDrivers.length > 0) {
+                    remainingReserveDriversList.push(additionalDrivers[0]);
+                }
+            }
+            if (futureSelections.hasTeam) {
+                // Add one more team to the list to include the future selection
+                const additionalTeams = allTeams.filter(team => 
+                    !usedTeamsFull.includes(team) && 
+                    !remainingTeamsList.includes(team)
+                );
+                if (additionalTeams.length > 0) {
+                    remainingTeamsList.push(additionalTeams[0]);
+                }
+            }
+            
             console.log(`[Opponents] User: ${opponent.username}`);
             console.log(`[Opponents] Used in cycles:`, { usedMainDrivers, usedReserveDrivers, usedTeams });
             console.log(`[Opponents] Future selections:`, futureSelections);
