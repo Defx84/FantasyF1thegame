@@ -468,30 +468,25 @@ const getLeagueOpponents = async (req, res) => {
             // to maintain secrecy (opponents can't tell what was selected)
             if (futureSelections.hasMainDriver) {
                 // Add one more driver to the list to include the future selection
-                const additionalDrivers = allDrivers.filter(driver => 
-                    !usedMainDriversFull.includes(driver) && 
-                    !remainingMainDriversList.includes(driver)
-                );
+                // We need to find a driver that's not in the used list but also not already in remaining list
+                const allAvailableDrivers = allDrivers.filter(driver => !usedMainDriversFull.includes(driver));
+                const additionalDrivers = allAvailableDrivers.filter(driver => !remainingMainDriversList.includes(driver));
                 if (additionalDrivers.length > 0) {
                     remainingMainDriversList.push(additionalDrivers[0]);
                 }
             }
             if (futureSelections.hasReserveDriver) {
                 // Add one more driver to the list to include the future selection
-                const additionalDrivers = allDrivers.filter(driver => 
-                    !usedReserveDriversFull.includes(driver) && 
-                    !remainingReserveDriversList.includes(driver)
-                );
+                const allAvailableDrivers = allDrivers.filter(driver => !usedReserveDriversFull.includes(driver));
+                const additionalDrivers = allAvailableDrivers.filter(driver => !remainingReserveDriversList.includes(driver));
                 if (additionalDrivers.length > 0) {
                     remainingReserveDriversList.push(additionalDrivers[0]);
                 }
             }
             if (futureSelections.hasTeam) {
                 // Add one more team to the list to include the future selection
-                const additionalTeams = allTeams.filter(team => 
-                    !usedTeamsFull.includes(team) && 
-                    !remainingTeamsList.includes(team)
-                );
+                const allAvailableTeams = allTeams.filter(team => !usedTeamsFull.includes(team));
+                const additionalTeams = allAvailableTeams.filter(team => !remainingTeamsList.includes(team));
                 if (additionalTeams.length > 0) {
                     remainingTeamsList.push(additionalTeams[0]);
                 }
@@ -501,6 +496,16 @@ const getLeagueOpponents = async (req, res) => {
             console.log(`[Opponents] Used in cycles:`, { usedMainDrivers, usedReserveDrivers, usedTeams });
             console.log(`[Opponents] Future selections:`, futureSelections);
             console.log(`[Opponents] Remaining:`, { remainingMainDrivers, remainingReserveDrivers, remainingTeams });
+            console.log(`[Opponents] Remaining lists length:`, { 
+                mainDrivers: remainingMainDriversList.length, 
+                reserveDrivers: remainingReserveDriversList.length, 
+                teams: remainingTeamsList.length 
+            });
+            console.log(`[Opponents] Remaining lists:`, { 
+                mainDrivers: remainingMainDriversList, 
+                reserveDrivers: remainingReserveDriversList, 
+                teams: remainingTeamsList 
+            });
             
             return {
                 id: opponent._id,
