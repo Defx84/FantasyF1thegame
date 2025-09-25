@@ -322,6 +322,7 @@ const abandonLeague = async (req, res) => {
 
 /**
  * Get league opponents with their remaining selections
+ * Updated to use cycle logic and filter out future race selections
  */
 const getLeagueOpponents = async (req, res) => {
     try {
@@ -338,16 +339,6 @@ const getLeagueOpponents = async (req, res) => {
             return res.status(403).json({ message: 'You are not a member of this league' });
         }
         
-        // Get current race round
-        const raceCalendar = await RaceCalendar.findOne({ season: new Date().getFullYear() })
-            .sort({ round: 1 });
-        
-        if (!raceCalendar) {
-            return res.status(404).json({ message: 'No race calendar found' });
-        }
-        
-        const currentRound = raceCalendar.round;
-        
         // Get all league members except current user
         const opponents = await User.find({
             _id: { $in: league.members.filter(memberId => memberId.toString() !== userId.toString()) }
@@ -356,42 +347,35 @@ const getLeagueOpponents = async (req, res) => {
         // Filter out any null opponents (shouldn't happen but safety check)
         const validOpponents = opponents.filter(opponent => opponent && opponent._id);
         
-        // Get all race selections for the league (all rounds)
-        const allRaceSelections = await RaceSelection.find({
+        // Get all UsedSelection documents for opponents
+        const usedSelections = await UsedSelection.find({
+            user: { $in: validOpponents.map(opponent => opponent._id) },
             league: id
-        }).populate('user', 'username');
+        });
         
-        console.log(`[Opponents] Current round: ${currentRound}`);
-        console.log(`[Opponents] Total race selections: ${allRaceSelections.length}`);
+        // Get all future race selections for opponents (to hide them)
+        const now = new Date();
+        const futureRaces = await RaceCalendar.find({
+            date: { $gt: now }
+        }).sort({ date: 1 });
         
-        // Filter to only include selections from completed rounds (exclude current/upcoming race)
-        const historicalSelections = allRaceSelections.filter(selection => 
-            selection.round < currentRound
-        );
+        const futureRaceSelections = await RaceSelection.find({
+            league: id,
+            round: { $in: futureRaces.map(race => race.round) },
+            user: { $in: validOpponents.map(opponent => opponent._id) }
+        });
         
-        console.log(`[Opponents] Historical selections (rounds < ${currentRound}): ${historicalSelections.length}`);
-        
-        // Create a map of historical selections by user
-        const historicalSelectionsMap = {};
-        historicalSelections.forEach(selection => {
-            if (!selection.user || !selection.user._id) {
-                console.log('[Opponents] Skipping race selection with null user:', selection);
-                return;
-            }
-            
-            const userId = selection.user._id.toString();
-            if (!historicalSelectionsMap[userId]) {
-                historicalSelectionsMap[userId] = {
-                    mainDrivers: [],
-                    reserveDrivers: [],
-                    teams: []
+        // Create a map of future selections by user
+        const futureSelectionsMap = {};
+        futureRaceSelections.forEach(selection => {
+            const userId = selection.user.toString();
+            if (!futureSelectionsMap[userId]) {
+                futureSelectionsMap[userId] = {
+                    hasMainDriver: !!selection.mainDriver,
+                    hasReserveDriver: !!selection.reserveDriver,
+                    hasTeam: !!selection.team
                 };
             }
-            
-            // Add selections from historical races only
-            if (selection.mainDriver) historicalSelectionsMap[userId].mainDrivers.push(selection.mainDriver);
-            if (selection.reserveDriver) historicalSelectionsMap[userId].reserveDrivers.push(selection.reserveDriver);
-            if (selection.team) historicalSelectionsMap[userId].teams.push(selection.team);
         });
         
         // Import F1 data constants
@@ -419,44 +403,58 @@ const getLeagueOpponents = async (req, res) => {
             });
         });
         
-        // Debug: Log the team name mapping
-        console.log('[Opponents] Team name mapping:', teamNameMapping);
-        
-        // Calculate remaining selections for each opponent
+        // Calculate remaining selections for each opponent using cycle logic
         const opponentsData = validOpponents.map(opponent => {
             const userId = opponent._id.toString();
-            const used = historicalSelectionsMap[userId] || { mainDrivers: [], reserveDrivers: [], teams: [] };
+            const usedSelection = usedSelections.find(us => us.user.toString() === userId);
+            const futureSelections = futureSelectionsMap[userId] || { hasMainDriver: false, hasReserveDriver: false, hasTeam: false };
             
-            // RaceSelection already stores full names, so we can use them directly
-            const usedMainDriversFull = used.mainDrivers;
-            const usedReserveDriversFull = used.reserveDrivers;
-            const usedTeamsFull = used.teams.map(teamName => teamNameMapping[teamName] || teamName).filter(Boolean);
+            // Get current cycle usage
+            let usedMainDrivers = 0;
+            let usedReserveDrivers = 0;
+            let usedTeams = 0;
             
-            const remainingMainDrivers = allDrivers.filter(driver => !usedMainDriversFull.includes(driver));
-            const remainingReserveDrivers = allDrivers.filter(driver => !usedReserveDriversFull.includes(driver));
-            const remainingTeams = allTeams.filter(team => !usedTeamsFull.includes(team));
+            if (usedSelection) {
+                // Get the last cycle for each type
+                const lastMainDriverCycleIndex = usedSelection.mainDriverCycles.length - 1;
+                const lastReserveDriverCycleIndex = usedSelection.reserveDriverCycles.length - 1;
+                const lastTeamCycleIndex = usedSelection.teamCycles.length - 1;
+                
+                usedMainDrivers = usedSelection.mainDriverCycles[lastMainDriverCycleIndex]?.length || 0;
+                usedReserveDrivers = usedSelection.reserveDriverCycles[lastReserveDriverCycleIndex]?.length || 0;
+                usedTeams = usedSelection.teamCycles[lastTeamCycleIndex]?.length || 0;
+            }
             
-            // Debug logging
+            // Adjust for future race selections (hide them to maintain secrecy)
+            if (futureSelections.hasMainDriver) usedMainDrivers -= 1;
+            if (futureSelections.hasReserveDriver) usedReserveDrivers -= 1;
+            if (futureSelections.hasTeam) usedTeams -= 1;
+            
+            // Calculate remaining
+            const remainingMainDrivers = Math.max(0, 20 - usedMainDrivers);
+            const remainingReserveDrivers = Math.max(0, 20 - usedReserveDrivers);
+            const remainingTeams = Math.max(0, 10 - usedTeams);
+            
+            // Get the actual remaining drivers/teams (for display purposes)
+            const remainingMainDriversList = allDrivers.slice(0, remainingMainDrivers);
+            const remainingReserveDriversList = allDrivers.slice(0, remainingReserveDrivers);
+            const remainingTeamsList = allTeams.slice(0, remainingTeams);
+            
             console.log(`[Opponents] User: ${opponent.username}`);
-            console.log(`[Opponents] Historical selections:`, {
-                mainDrivers: used.mainDrivers,
-                reserveDrivers: used.reserveDrivers,
-                teams: used.teams
-            });
-            console.log(`[Opponents] Used teams full:`, usedTeamsFull);
-            console.log(`[Opponents] All teams:`, allTeams);
-            console.log(`[Opponents] Remaining teams:`, remainingTeams);
+            console.log(`[Opponents] Used in cycles:`, { usedMainDrivers, usedReserveDrivers, usedTeams });
+            console.log(`[Opponents] Future selections:`, futureSelections);
+            console.log(`[Opponents] Remaining:`, { remainingMainDrivers, remainingReserveDrivers, remainingTeams });
             
             return {
                 id: opponent._id,
                 username: opponent.username,
                 avatar: opponent.avatar,
-                remainingDrivers: remainingMainDrivers.length,
-                remainingTeams: remainingTeams.length,
+                remainingDrivers: remainingMainDrivers,
+                remainingTeams: remainingTeams,
                 remainingSelections: {
-                    mainDrivers: remainingMainDrivers,
-                    reserveDrivers: remainingReserveDrivers,
-                    teams: remainingTeams
+                    mainDrivers: remainingMainDriversList,
+                    reserveDrivers: remainingReserveDriversList,
+                    teams: remainingTeamsList
                 }
             };
         });
