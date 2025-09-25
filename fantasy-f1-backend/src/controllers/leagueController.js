@@ -460,17 +460,9 @@ const getLeagueOpponents = async (req, res) => {
             let remainingReserveDriversList = allDrivers.filter(driver => !usedReserveDriversFull.includes(driver));
             let remainingTeamsList = allTeams.filter(team => !usedTeamsFull.includes(team));
             
-            // If opponent has future race selections, we need to hide them from the list
-            // but we don't know what they are, so we just show fewer options
-            if (futureSelections.hasMainDriver) {
-                remainingMainDriversList = remainingMainDriversList.slice(0, -1);
-            }
-            if (futureSelections.hasReserveDriver) {
-                remainingReserveDriversList = remainingReserveDriversList.slice(0, -1);
-            }
-            if (futureSelections.hasTeam) {
-                remainingTeamsList = remainingTeamsList.slice(0, -1);
-            }
+            // Show the actual remaining drivers/teams for all opponents
+            // This maintains secrecy - future selections are included in the list
+            // so opponents can't tell what was selected for future races
             
             console.log(`[Opponents] User: ${opponent.username}`);
             console.log(`[Opponents] Used in cycles:`, { usedMainDrivers, usedReserveDrivers, usedTeams });
