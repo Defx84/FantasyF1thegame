@@ -373,7 +373,10 @@ const getLeagueOpponents = async (req, res) => {
                 futureSelectionsMap[userId] = {
                     hasMainDriver: !!selection.mainDriver,
                     hasReserveDriver: !!selection.reserveDriver,
-                    hasTeam: !!selection.team
+                    hasTeam: !!selection.team,
+                    mainDriver: selection.mainDriver,
+                    reserveDriver: selection.reserveDriver,
+                    team: selection.team
                 };
             }
         });
@@ -456,9 +459,32 @@ const getLeagueOpponents = async (req, res) => {
             const usedTeamsFull = usedTeamsList.map(teamName => teamNameMapping[teamName] || teamName);
             
             // Get the actual remaining drivers/teams (filter out used ones)
+            // BUT: if there are future selections, we need to include them in the list for secrecy
             let remainingMainDriversList = allDrivers.filter(driver => !usedMainDriversFull.includes(driver));
             let remainingReserveDriversList = allDrivers.filter(driver => !usedReserveDriversFull.includes(driver));
             let remainingTeamsList = allTeams.filter(team => !usedTeamsFull.includes(team));
+            
+            // If opponent has future selections, we need to add them back to the list
+            // to maintain secrecy (opponents can't tell what was selected for future races)
+            if (futureSelections.hasMainDriver) {
+                // Find the future selection and add it back to the list
+                const futureMainDriver = futureSelections.mainDriver;
+                if (futureMainDriver && !remainingMainDriversList.includes(futureMainDriver)) {
+                    remainingMainDriversList.push(futureMainDriver);
+                }
+            }
+            if (futureSelections.hasReserveDriver) {
+                const futureReserveDriver = futureSelections.reserveDriver;
+                if (futureReserveDriver && !remainingReserveDriversList.includes(futureReserveDriver)) {
+                    remainingReserveDriversList.push(futureReserveDriver);
+                }
+            }
+            if (futureSelections.hasTeam) {
+                const futureTeam = futureSelections.team;
+                if (futureTeam && !remainingTeamsList.includes(futureTeam)) {
+                    remainingTeamsList.push(futureTeam);
+                }
+            }
             
             // Show the actual remaining drivers/teams for all opponents
             // This maintains secrecy - future selections are included in the list
@@ -466,30 +492,18 @@ const getLeagueOpponents = async (req, res) => {
             
             // If opponent has future race selections, we need to include them in the list
             // to maintain secrecy (opponents can't tell what was selected)
+            // The future selection itself should be visible in the list
             if (futureSelections.hasMainDriver) {
-                // Add one more driver to the list to include the future selection
-                // We need to find a driver that's not in the used list but also not already in remaining list
-                const allAvailableDrivers = allDrivers.filter(driver => !usedMainDriversFull.includes(driver));
-                const additionalDrivers = allAvailableDrivers.filter(driver => !remainingMainDriversList.includes(driver));
-                if (additionalDrivers.length > 0) {
-                    remainingMainDriversList.push(additionalDrivers[0]);
-                }
+                // The future selection is already in the remaining list, but we need to ensure
+                // the count matches the list length. Since we're showing the future selection,
+                // we don't need to add anything - the list should already contain it.
+                console.log(`[Debug] Bonomett main drivers - remaining list length: ${remainingMainDriversList.length}, count: ${remainingMainDrivers}`);
             }
             if (futureSelections.hasReserveDriver) {
-                // Add one more driver to the list to include the future selection
-                const allAvailableDrivers = allDrivers.filter(driver => !usedReserveDriversFull.includes(driver));
-                const additionalDrivers = allAvailableDrivers.filter(driver => !remainingReserveDriversList.includes(driver));
-                if (additionalDrivers.length > 0) {
-                    remainingReserveDriversList.push(additionalDrivers[0]);
-                }
+                console.log(`[Debug] Bonomett reserve drivers - remaining list length: ${remainingReserveDriversList.length}, count: ${remainingReserveDrivers}`);
             }
             if (futureSelections.hasTeam) {
-                // Add one more team to the list to include the future selection
-                const allAvailableTeams = allTeams.filter(team => !usedTeamsFull.includes(team));
-                const additionalTeams = allAvailableTeams.filter(team => !remainingTeamsList.includes(team));
-                if (additionalTeams.length > 0) {
-                    remainingTeamsList.push(additionalTeams[0]);
-                }
+                console.log(`[Debug] Bonomett teams - remaining list length: ${remainingTeamsList.length}, count: ${remainingTeams}`);
             }
             
             console.log(`[Opponents] User: ${opponent.username}`);
