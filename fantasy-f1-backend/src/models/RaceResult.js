@@ -385,6 +385,8 @@ raceResultSchema.post('save', async function(doc) {
     // Find all leagues with selections for this round
     const leagues = await mongoose.model('League').find({}).distinct('_id');
     const RaceSelection = mongoose.model('RaceSelection');
+    
+    console.log(`[RaceResult Post-Save] Found ${leagues.length} leagues to process for round ${doc.round}`);
 
     let totalUpdated = 0;
     for (const leagueId of leagues) {
@@ -395,13 +397,21 @@ raceResultSchema.post('save', async function(doc) {
       }
 
       let updatedCount = 0;
+      console.log(`[RaceResult Post-Save] Processing league ${league.name} with ${league.members.length} members`);
+      
       for (const member of league.members) {
         let selection = await RaceSelection.findOne({
           user: member._id,
           league: leagueId,
-          race: doc._id
+          round: doc.round
         });
-        if (!selection) continue;
+        
+        if (!selection) {
+          console.log(`[RaceResult Post-Save] No selection found for user ${member.username} in league ${league.name} for round ${doc.round}`);
+          continue;
+        }
+        
+        console.log(`[RaceResult Post-Save] Processing selection for user ${member.username}: ${selection.mainDriver}, ${selection.reserveDriver}, ${selection.team}`);
 
         // Calculate new points
         const pointsData = scoringService.calculateRacePoints({
