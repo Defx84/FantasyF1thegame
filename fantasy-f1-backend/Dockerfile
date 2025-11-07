@@ -32,7 +32,7 @@ RUN apt-get update && apt-get install -y \
 COPY package*.json ./
 
 # Install only production dependencies
-RUN npm ci --omit=dev --prefer-offline --no-audit
+RUN npm install --omit=dev --prefer-offline --no-audit
 
 # Copy source code
 COPY . .
