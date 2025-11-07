@@ -47,7 +47,12 @@ function formatUKTime(date) {
 // Generate email HTML template
 function generateEmailHTML(username, race) {
   const countryFlag = getCountryFlag(race.country);
-  const qualifyingTime = formatUKTime(race.qualifyingStart);
+  // Use sprint qualifying time for sprint weekends, otherwise use regular qualifying
+  const qualifyingTime = formatUKTime(
+    race.isSprintWeekend && race.sprintQualifyingStart 
+      ? race.sprintQualifyingStart 
+      : race.qualifyingStart
+  );
   
   return `
     <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa; border-radius: 10px;">
@@ -68,7 +73,7 @@ function generateEmailHTML(username, race) {
         <li><strong>Team</strong></li>
       </ul>
       
-      <p style="font-size: 16px; line-height: 1.6;">Selections close 5 minutes before qualifying (or sprint qualifying on sprint weekends). Once the deadline passes, your lineup will be locked, and you won't be able to make changes.</p>
+      <p style="font-size: 16px; line-height: 1.6;">Selections close 5 minutes before ${race.isSprintWeekend ? 'sprint qualifying' : 'qualifying'}, which is scheduled for <strong>${qualifyingTime}</strong>. Once the deadline passes, your lineup will be locked, and you won't be able to make changes.</p>
       
       <p style="font-size: 16px; line-height: 1.6; font-weight: bold; color: #dc2626;">Stay ahead of the competition—set your picks now and secure your points!</p>
       
@@ -97,7 +102,12 @@ function generateEmailHTML(username, race) {
 // Generate email text template
 function generateEmailText(username, race) {
   const countryFlag = getCountryFlag(race.country);
-  const qualifyingTime = formatUKTime(race.qualifyingStart);
+  // Use sprint qualifying time for sprint weekends, otherwise use regular qualifying
+  const qualifyingTime = formatUKTime(
+    race.isSprintWeekend && race.sprintQualifyingStart 
+      ? race.sprintQualifyingStart 
+      : race.qualifyingStart
+  );
   
   return `
 Hi ${username},
@@ -108,7 +118,7 @@ Make sure you've chosen your:
 
 Main driver, reserve driver and team.
 
-Selections close 5 minutes before qualifying (or sprint qualifying on sprint weekends). Once the deadline passes, your lineup will be locked, and you won't be able to make changes.
+Selections close 5 minutes before ${race.isSprintWeekend ? 'sprint qualifying' : 'qualifying'}, which is scheduled for ${qualifyingTime}. Once the deadline passes, your lineup will be locked, and you won't be able to make changes.
 
 Stay ahead of the competition—set your picks now and secure your points!
 
@@ -316,10 +326,76 @@ async function sendTestReminder(userId) {
   }
 }
 
+// Send reminder for a specific race (by round number)
+async function sendRaceReminderByRound(round) {
+  try {
+    console.log(`🔔 Starting reminder email process for round ${round}...`);
+    
+    // Find the race by round
+    const race = await RaceCalendar.findOne({ round });
+    if (!race) {
+      throw new Error(`Race with round ${round} not found`);
+    }
+    
+    console.log(`🏁 Found race: ${race.raceName} at ${race.circuit}`);
+    
+    // Get all users who want reminders
+    const users = await User.find({ 
+      emailRemindersEnabled: true 
+    }).select('username email lastReminderSent');
+    
+    console.log(`👥 Found ${users.length} users opted in for reminders`);
+    
+    let sentCount = 0;
+    let skippedCount = 0;
+    
+    // Send emails to each user (bypass the "already sent today" check for manual sends)
+    for (const user of users) {
+      try {
+        const subject = `${race.raceName} ${getCountryFlag(race.country)}`;
+        const html = generateEmailHTML(user.username, race);
+        const text = generateEmailText(user.username, race);
+        
+        await sendEmail({
+          to: user.email,
+          subject,
+          html,
+          text
+        });
+        
+        // Update last reminder sent timestamp
+        await User.findByIdAndUpdate(user._id, {
+          lastReminderSent: new Date()
+        });
+        
+        console.log(`✅ Sent reminder to ${user.username} (${user.email})`);
+        sentCount++;
+        
+        // Add small delay to avoid overwhelming email service
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+      } catch (error) {
+        console.error(`❌ Failed to send reminder to ${user.username}:`, error.message);
+        skippedCount++;
+      }
+    }
+    
+    console.log(`📧 Reminder process complete: ${sentCount} sent, ${skippedCount} skipped`);
+    return { sent: sentCount, skipped: skippedCount };
+    
+  } catch (error) {
+    console.error('❌ Error in race reminder process:', error);
+    throw error;
+  }
+}
+
 module.exports = {
   sendReminderEmails,
   getTomorrowsRace,
   getNextRace,
   getCountryFlag,
-  sendTestReminder
+  sendTestReminder,
+  generateEmailHTML,
+  generateEmailText,
+  sendRaceReminderByRound
 };
