@@ -1,18 +1,3 @@
-# Build stage
-FROM node:18-slim AS builder
-
-WORKDIR /app
-
-# Copy package files
-COPY package*.json ./
-
-# Install dependencies
-RUN npm install
-
-# Copy source code
-COPY . .
-
-# Production stage
 FROM node:18-slim
 
 ENV NODE_ENV=production
@@ -21,13 +6,7 @@ ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
-
-# Install only production dependencies
-RUN npm install --omit=dev
-
-# Install Chromium and minimal dependencies
+# Install Chromium and minimal dependencies first (better caching)
 RUN apt-get update && apt-get install -y \
     chromium \
     fonts-liberation \
@@ -49,8 +28,14 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
-# Copy everything from builder stage
-COPY --from=builder /app ./
+# Copy package files first for better layer caching
+COPY package*.json ./
+
+# Install only production dependencies
+RUN npm ci --omit=dev --prefer-offline --no-audit
+
+# Copy source code
+COPY . .
 
 EXPOSE 8080
 
