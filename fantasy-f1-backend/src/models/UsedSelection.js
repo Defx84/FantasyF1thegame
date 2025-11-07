@@ -85,9 +85,16 @@ usedSelectionSchema.methods.addUsedMainDriver = function(driver) {
     currentCycle.push(normalizedDriver);
     console.log('[addUsedMainDriver] added to cycle. cycle after:', currentCycle);
     if (currentCycle.length === 20) {
+      // Create new empty cycle - the 20th driver should ONLY be in the completed cycle
       this.mainDriverCycles.push([]); // Start new cycle immediately after 20th
       console.log('[addUsedMainDriver] 20 drivers used, new cycle started');
-      currentCycle = this.mainDriverCycles[this.mainDriverCycles.length - 1];
+      // Defensive check: ensure the driver is NOT in the new cycle (should never happen, but safety check)
+      const newCycle = this.mainDriverCycles[this.mainDriverCycles.length - 1];
+      const driverIndex = newCycle.indexOf(normalizedDriver);
+      if (driverIndex > -1) {
+        console.log('[addUsedMainDriver] WARNING: Driver found in new cycle, removing it!');
+        newCycle.splice(driverIndex, 1);
+      }
     }
   } else {
     console.log('[addUsedMainDriver] already in cycle, not adding');
@@ -104,8 +111,15 @@ usedSelectionSchema.methods.addUsedReserveDriver = function(driver) {
   if (!currentCycle.includes(normalizedDriver)) {
     currentCycle.push(normalizedDriver);
     if (currentCycle.length === 20) {
+      // Create new empty cycle - the 20th driver should ONLY be in the completed cycle
       this.reserveDriverCycles.push([]); // Start new cycle immediately after 20th
-      currentCycle = this.reserveDriverCycles[this.reserveDriverCycles.length - 1];
+      // Defensive check: ensure the driver is NOT in the new cycle (should never happen, but safety check)
+      const newCycle = this.reserveDriverCycles[this.reserveDriverCycles.length - 1];
+      const driverIndex = newCycle.indexOf(normalizedDriver);
+      if (driverIndex > -1) {
+        console.log('[addUsedReserveDriver] WARNING: Driver found in new cycle, removing it!');
+        newCycle.splice(driverIndex, 1);
+      }
     }
   }
 };
@@ -120,8 +134,15 @@ usedSelectionSchema.methods.addUsedTeam = function(team) {
   if (!currentCycle.includes(normalizedTeam)) {
     currentCycle.push(normalizedTeam);
     if (currentCycle.length === 10) {
+      // Create new empty cycle - the 10th team should ONLY be in the completed cycle
       this.teamCycles.push([]); // Start new cycle immediately after 10th
-      currentCycle = this.teamCycles[this.teamCycles.length - 1];
+      // Defensive check: ensure the team is NOT in the new cycle (should never happen, but safety check)
+      const newCycle = this.teamCycles[this.teamCycles.length - 1];
+      const teamIndex = newCycle.indexOf(normalizedTeam);
+      if (teamIndex > -1) {
+        console.log('[addUsedTeam] WARNING: Team found in new cycle, removing it!');
+        newCycle.splice(teamIndex, 1);
+      }
     }
   }
 };
