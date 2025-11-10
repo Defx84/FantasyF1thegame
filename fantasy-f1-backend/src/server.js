@@ -21,7 +21,7 @@ const RaceResult = require('./models/RaceResult');
 const League = require('./models/League');
 const User = require('./models/User');
 const { processRawResults, calculateTeamPoints } = require('./utils/scoringUtils');
-const { sendReminderEmails, sendRaceReminderByRound } = require('./services/reminderService');
+const { sendReminderEmails } = require('./services/reminderService');
 
 const app = require('./app');
 
@@ -199,30 +199,6 @@ app.listen(port, async () => {
             }
         });
         
-        // One-time: Send Brazilian GP reminder at 10:00 AM UTC today (November 7, 2025)
-        // This is a manual override because the database wasn't set properly when the original email should have been sent
-        const now = new Date();
-        const today = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-        const tenAMToday = new Date(today.getTime() + 10 * 60 * 60 * 1000); // 10:00 UTC
-        const timeUntilTenAM = tenAMToday.getTime() - now.getTime();
-        
-        if (timeUntilTenAM > 0) {
-            const minutesUntil = Math.round(timeUntilTenAM / 1000 / 60);
-            console.log(`⏰ Scheduling Brazilian GP reminder for 10:00 AM UTC today (in ${minutesUntil} minutes)...`);
-            setTimeout(async () => {
-                console.log('🔔 Running Brazilian GP reminder at 10:00 AM UTC...');
-                try {
-                    const result = await sendRaceReminderByRound(21); // Round 21 = Brazilian GP
-                    console.log(`✅ Brazilian GP reminder emails sent: ${result.sent}, skipped: ${result.skipped}`);
-                } catch (error) {
-                    console.error('❌ Error during Brazilian GP reminder:', error);
-                }
-            }, timeUntilTenAM);
-        } else {
-            console.log('⏰ 10 AM UTC has already passed today. Brazilian GP reminder will not be scheduled.');
-            console.log('   (You can manually trigger it using: node scripts/sendBrazilianGPReminder.js)');
-        }
-        
         // Run scraper immediately since it's past 19:05
         console.log('🏎 Running immediate Dutch GP scraper since scheduled time has passed...');
         setTimeout(async () => {
@@ -245,6 +221,20 @@ app.listen(port, async () => {
                 }, 5 * 60 * 1000);
             }
         }, 10000); // Run after 10 seconds
+        
+        // Schedule scraper to run in 20 minutes for debugging
+        const now = new Date();
+        const runTime = new Date(now.getTime() + 20 * 60 * 1000); // 20 minutes from now
+        console.log(`⏰ Scheduling scraper to run in 20 minutes at ${runTime.toISOString()} for debugging...`);
+        setTimeout(async () => {
+            try {
+                console.log('🔍 Running scheduled scraper (20-minute debug run)...');
+                await runScraper();
+                console.log('✅ Scheduled scraper completed successfully');
+            } catch (error) {
+                console.error('❌ Error during scheduled scraper:', error);
+            }
+        }, 20 * 60 * 1000); // 20 minutes
         
         console.log('✅ Server initialization complete');
     } catch (error) {
