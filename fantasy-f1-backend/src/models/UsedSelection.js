@@ -74,36 +74,28 @@ usedSelectionSchema.methods.canUseTeam = function(team) {
 
 // Method to add a used main driver
 usedSelectionSchema.methods.addUsedMainDriver = function(driver) {
-  console.log('[addUsedMainDriver] value received:', driver);
     if (!driver || driver === 'None') return;
   if (!isValidDriver(driver)) throw new Error('Invalid driver name');
   const normalizedDriver = normalizeDriverName(driver); // always short name
   let currentCycle = this.mainDriverCycles[this.mainDriverCycles.length - 1];
-  console.log('[addUsedMainDriver] normalized to:', normalizedDriver);
-  console.log('[addUsedMainDriver] current cycle before:', currentCycle);
   if (!currentCycle.includes(normalizedDriver)) {
     currentCycle.push(normalizedDriver);
-    console.log('[addUsedMainDriver] added to cycle. cycle after:', currentCycle);
     if (currentCycle.length === 20) {
       // Create new empty cycle - the 20th driver should ONLY be in the completed cycle
       this.mainDriverCycles.push([]); // Start new cycle immediately after 20th
-      console.log('[addUsedMainDriver] 20 drivers used, new cycle started');
       // Defensive check: ensure the driver is NOT in the new cycle (should never happen, but safety check)
       const newCycle = this.mainDriverCycles[this.mainDriverCycles.length - 1];
       const driverIndex = newCycle.indexOf(normalizedDriver);
       if (driverIndex > -1) {
-        console.log('[addUsedMainDriver] WARNING: Driver found in new cycle, removing it!');
+        console.error('[addUsedMainDriver] WARNING: Driver found in new cycle, removing it!');
         newCycle.splice(driverIndex, 1);
       }
     }
-  } else {
-    console.log('[addUsedMainDriver] already in cycle, not adding');
   }
 };
 
 // Method to add a used reserve driver
 usedSelectionSchema.methods.addUsedReserveDriver = function(driver) {
-  console.log('[addUsedReserveDriver] value received:', driver);
     if (!driver || driver === 'None') return;
   if (!isValidDriver(driver)) throw new Error('Invalid driver name');
   const normalizedDriver = normalizeDriverName(driver); // always short name
@@ -117,7 +109,7 @@ usedSelectionSchema.methods.addUsedReserveDriver = function(driver) {
       const newCycle = this.reserveDriverCycles[this.reserveDriverCycles.length - 1];
       const driverIndex = newCycle.indexOf(normalizedDriver);
       if (driverIndex > -1) {
-        console.log('[addUsedReserveDriver] WARNING: Driver found in new cycle, removing it!');
+        console.error('[addUsedReserveDriver] WARNING: Driver found in new cycle, removing it!');
         newCycle.splice(driverIndex, 1);
       }
     }
@@ -126,7 +118,6 @@ usedSelectionSchema.methods.addUsedReserveDriver = function(driver) {
 
 // Method to add a used team
 usedSelectionSchema.methods.addUsedTeam = function(team) {
-  console.log('[addUsedTeam] value received:', team);
     if (!team || team === 'None') return;
   if (!isValidTeam(team)) throw new Error('Invalid team name');
   const normalizedTeam = normalizeTeamName(team); // always canonical name
@@ -140,7 +131,7 @@ usedSelectionSchema.methods.addUsedTeam = function(team) {
       const newCycle = this.teamCycles[this.teamCycles.length - 1];
       const teamIndex = newCycle.indexOf(normalizedTeam);
       if (teamIndex > -1) {
-        console.log('[addUsedTeam] WARNING: Team found in new cycle, removing it!');
+        console.error('[addUsedTeam] WARNING: Team found in new cycle, removing it!');
         newCycle.splice(teamIndex, 1);
       }
     }
@@ -149,26 +140,19 @@ usedSelectionSchema.methods.addUsedTeam = function(team) {
 
 // Method to remove a used main driver
 usedSelectionSchema.methods.removeUsedMainDriver = function(driver) {
-  console.log('[removeUsedMainDriver] value received:', driver);
   if (!driver || driver === 'None') return;
   if (!isValidDriver(driver)) throw new Error('Invalid driver name');
   const normalizedDriver = normalizeDriverName(driver); // always short name
   let currentCycle = this.mainDriverCycles[this.mainDriverCycles.length - 1];
-  console.log('[removeUsedMainDriver] normalized to:', normalizedDriver);
-  console.log('[removeUsedMainDriver] current cycle before:', currentCycle);
   
   const index = currentCycle.indexOf(normalizedDriver);
   if (index > -1) {
     currentCycle.splice(index, 1); // Remove from array
-    console.log('[removeUsedMainDriver] removed from cycle. cycle after:', currentCycle);
-  } else {
-    console.log('[removeUsedMainDriver] not found in cycle, nothing to remove');
   }
 };
 
 // Method to remove a used reserve driver
 usedSelectionSchema.methods.removeUsedReserveDriver = function(driver) {
-  console.log('[removeUsedReserveDriver] value received:', driver);
   if (!driver || driver === 'None') return;
   if (!isValidDriver(driver)) throw new Error('Invalid driver name');
   const normalizedDriver = normalizeDriverName(driver); // always short name
@@ -177,13 +161,11 @@ usedSelectionSchema.methods.removeUsedReserveDriver = function(driver) {
   const index = currentCycle.indexOf(normalizedDriver);
   if (index > -1) {
     currentCycle.splice(index, 1); // Remove from array
-    console.log('[removeUsedReserveDriver] removed from cycle');
   }
 };
 
 // Method to remove a used team
 usedSelectionSchema.methods.removeUsedTeam = function(team) {
-  console.log('[removeUsedTeam] value received:', team);
   if (!team || team === 'None') return;
   if (!isValidTeam(team)) throw new Error('Invalid team name');
   const normalizedTeam = normalizeTeamName(team); // always canonical name
@@ -192,7 +174,6 @@ usedSelectionSchema.methods.removeUsedTeam = function(team) {
   const index = currentCycle.indexOf(normalizedTeam);
   if (index > -1) {
     currentCycle.splice(index, 1); // Remove from array
-    console.log('[removeUsedTeam] removed from cycle');
   }
 };
 
