@@ -397,7 +397,7 @@ raceResultSchema.post('save', async function(doc) {
       }
 
       let updatedCount = 0;
-      console.log(`[RaceResult Post-Save] Processing league ${league.name} with ${league.members.length} members`);
+      let noSelectionCount = 0;
       
       for (const member of league.members) {
         let selection = await RaceSelection.findOne({
@@ -407,11 +407,9 @@ raceResultSchema.post('save', async function(doc) {
         });
         
         if (!selection) {
-          console.log(`[RaceResult Post-Save] No selection found for user ${member.username} in league ${league.name} for round ${doc.round}`);
+          noSelectionCount++;
           continue;
         }
-        
-        console.log(`[RaceResult Post-Save] Processing selection for user ${member.username}: ${selection.mainDriver}, ${selection.reserveDriver}, ${selection.team}`);
 
         // Calculate new points
         const pointsData = scoringService.calculateRacePoints({
@@ -504,15 +502,15 @@ raceResultSchema.post('save', async function(doc) {
           usedSelection.addUsedReserveDriver(selection.reserveDriver);
           usedSelection.addUsedTeam(selection.team);
           await usedSelection.save();
-
-          console.log(`[RaceResult Post-Save] Updated usage tracking for user ${member._id} in league ${league.name}`);
         }
       }
 
       if (updatedCount > 0) {
         await leaderboardService.updateStandings(leagueId);
-        console.log(`[RaceResult Post-Save] Updated points for ${updatedCount} users in league ${league.name} for round ${doc.round}`);
+        console.log(`[RaceResult Post-Save] League ${league.name}: Updated ${updatedCount} users, ${noSelectionCount} without selections for round ${doc.round}`);
         totalUpdated += updatedCount;
+      } else if (noSelectionCount > 0) {
+        console.log(`[RaceResult Post-Save] League ${league.name}: No updates needed, ${noSelectionCount} users without selections for round ${doc.round}`);
       }
     }
 

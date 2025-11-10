@@ -58,21 +58,22 @@ class LeaderboardService {
                 let driverTotalPoints = 0;
                 let constructorTotalPoints = 0;
 
+                let skippedCount = 0;
                 for (const selection of memberSelections) {
                     // Only process if all required fields are present and selection.race is not null
                     if (!selection.mainDriver || !selection.reserveDriver || !selection.team || !selection.race) {
-                        console.log(`[Leaderboard] Skipping selection for user ${member.username} - missing required fields`);
+                        skippedCount++;
                         continue;
                     }
                     
                     // Only process if the race is completed (check RaceResult)
                     const raceResult = await RaceResult.findOne({ round: selection.round });
                     if (!raceResult) {
-                        console.log(`[Leaderboard] Skipping selection for user ${member.username} - race result not found for round ${selection.round}`);
+                        skippedCount++;
                         continue;
                     }
                     if (raceResult.status !== "completed") {
-                        console.log(`[Leaderboard] Skipping selection for user ${member.username} - race ${raceResult.raceName} (round ${selection.round}) status is ${raceResult.status}, expected 'completed'`);
+                        skippedCount++;
                         continue;
                     }
 
@@ -88,15 +89,6 @@ class LeaderboardService {
                         mainDriverStatus: 'FINISHED'
                     };
 
-                    console.log('Processing selection:', {
-                        round: selection.round,
-                        raceName: selection.race.raceName,
-                        mainDriver: selection.mainDriver,
-                        reserveDriver: selection.reserveDriver,
-                        team: selection.team,
-                        pointBreakdown: pb
-                    });
-
                     // Driver race result - always create an entry
                     const driverResult = {
                         round: selection.round,
@@ -109,7 +101,6 @@ class LeaderboardService {
                         isSprintWeekend: pb.isSprintWeekend || false,
                         mainDriverStatus: pb.mainDriverStatus || 'FINISHED'
                     };
-                    console.log('Driver result:', driverResult);
                     driverRaceResults.push(driverResult);
                     driverTotalPoints += driverResult.totalPoints;
 
@@ -124,9 +115,13 @@ class LeaderboardService {
                         totalPoints: pb.teamPoints || 0,
                         isSprintWeekend: pb.isSprintWeekend || false
                     };
-                    console.log('Constructor result:', constructorResult);
                     constructorRaceResults.push(constructorResult);
                     constructorTotalPoints += constructorResult.totalPoints;
+                }
+                
+                // Log summary instead of per-selection logs
+                if (skippedCount > 0) {
+                    console.log(`[Leaderboard] Processed ${memberSelections.length - skippedCount} selections for ${member.username}, skipped ${skippedCount}`);
                 }
 
                 // Sort race results by round
