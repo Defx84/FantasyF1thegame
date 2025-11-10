@@ -132,6 +132,14 @@ async function discoverMotorsportSlugs(year = new Date().getFullYear()) {
       }
     }
 
+    // Add alias mappings for races that have different names on Motorsport.com
+    // Brazilian GP is called "sao-paulo" on Motorsport.com but "brazilian" in our system
+    if (slugCache['sao-paulo'] && !slugCache['brazilian']) {
+      slugCache['brazilian'] = slugCache['sao-paulo'];
+      hasNewSlugs = true;
+      console.log(`🔄 Added alias: brazilian -> ${slugCache['brazilian']}`);
+    }
+
     if (hasNewSlugs) {
       await saveSlugsToFile(slugCache);
     } else {
