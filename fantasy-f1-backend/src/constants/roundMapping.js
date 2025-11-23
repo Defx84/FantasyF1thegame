@@ -140,8 +140,8 @@ const ROUND_TO_RACE = {
     },
     22: {
         name: 'las-vegas',
-        date: new Date('2025-11-22T06:00:00Z'),
-        qualifyingStart: new Date('2025-11-21T06:00:00Z'),
+        date: new Date('2025-11-23T12:00:00Z'),
+        qualifyingStart: new Date('2025-11-22T12:00:00Z'),
         hasSprint: false
     },
     23: {
