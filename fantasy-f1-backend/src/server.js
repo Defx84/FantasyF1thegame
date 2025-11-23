@@ -199,6 +199,30 @@ app.listen(port, async () => {
             }
         });
         
+        // Schedule one-time slug discovery for 12:30 GMT
+        const now = new Date();
+        const targetTime = new Date();
+        targetTime.setUTCHours(12, 30, 0, 0); // 12:30 GMT
+        
+        // If 12:30 GMT has already passed today, schedule for tomorrow
+        if (targetTime <= now) {
+            targetTime.setUTCDate(targetTime.getUTCDate() + 1);
+        }
+        
+        const timeUntilSlugDiscovery = targetTime.getTime() - now.getTime();
+        console.log(`⏰ Scheduling one-time slug discovery for ${targetTime.toUTCString()} (${Math.round(timeUntilSlugDiscovery / 1000 / 60)} minutes from now)...`);
+        
+        setTimeout(async () => {
+            try {
+                console.log('🔍 Running scheduled slug discovery at 12:30 GMT...');
+                const currentYear = new Date().getFullYear();
+                await discoverMotorsportSlugs(currentYear);
+                console.log('✅ Scheduled slug discovery completed successfully');
+            } catch (error) {
+                console.error('❌ Error during scheduled slug discovery:', error);
+            }
+        }, timeUntilSlugDiscovery);
+        
         // Run scraper immediately since it's past 19:05
         console.log('🏎 Running immediate Dutch GP scraper since scheduled time has passed...');
         setTimeout(async () => {
@@ -223,7 +247,6 @@ app.listen(port, async () => {
         }, 10000); // Run after 10 seconds
         
         // Schedule scraper to run in 20 minutes for debugging
-        const now = new Date();
         const runTime = new Date(now.getTime() + 20 * 60 * 1000); // 20 minutes from now
         console.log(`⏰ Scheduling scraper to run in 20 minutes at ${runTime.toISOString()} for debugging...`);
         setTimeout(async () => {
