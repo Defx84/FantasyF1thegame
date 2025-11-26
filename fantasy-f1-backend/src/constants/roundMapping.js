@@ -146,10 +146,10 @@ const ROUND_TO_RACE = {
     },
     23: {
         name: 'qatar',
-        date: new Date('2025-11-30T14:00:00Z'),
-        qualifyingStart: new Date('2025-11-29T14:00:00Z'),
+        date: new Date('2025-11-30T16:00:00Z'),
+        qualifyingStart: new Date('2025-11-29T18:00:00Z'),
         hasSprint: true,
-        sprintQualifyingStart: new Date('2025-11-28T14:00:00Z'),
+        sprintQualifyingStart: new Date('2025-11-28T17:30:00Z'),
         sprintStart: new Date('2025-11-29T14:00:00Z')
     },
     24: {
