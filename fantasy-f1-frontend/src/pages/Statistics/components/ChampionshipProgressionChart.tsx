@@ -77,7 +77,7 @@ const ChampionshipProgressionChart: React.FC<ChampionshipProgressionChartProps> 
     });
   }, [data, championshipType]);
 
-  // Create car marker label function with proper closure
+  // Create car marker label function with proper closure - improved F1 car silhouette
   const createCarMarkerLabel = (playerIndex: number, totalRounds: number) => {
     return (props: any) => {
       try {
@@ -93,43 +93,101 @@ const ChampionshipProgressionChart: React.FC<ChampionshipProgressionChartProps> 
         }
         
         const color = PLAYER_COLORS[playerIndex % PLAYER_COLORS.length];
-        const carSize = 20;
-        const carHeight = carSize * 0.6;
+        const carWidth = 40;
+        const carHeight = 18;
         
         return (
-          <g transform={`translate(${x - carSize / 2}, ${y - carHeight / 2})`}>
-            {/* Car body - main shape */}
+          <g transform={`translate(${x - carWidth / 2}, ${y - carHeight / 2})`}>
+            {/* Main car body - F1 silhouette shape */}
             <path
-              d="M2 21 L3 15 L5 12 L7 11 L10 11 L13 12 L15 15 L17 18 L18 21 L18 24 L17 25 L15 25 L14 27 L6 27 L5 25 L3 25 L2 24 Z"
+              d="M5 14 L7 7 L12 5 L16 5 L20 5 L24 7 L28 9 L32 11 L34 14 L34 16 L32 17 L30 17 L28 18 L12 18 L10 17 L8 17 L6 16 L5 14 Z"
               fill={color}
-              stroke={color}
-              strokeWidth="0.3"
+              stroke="rgba(0, 0, 0, 0.4)"
+              strokeWidth="0.8"
             />
-            {/* Front wing */}
+            {/* Front wing - prominent multi-element */}
             <path
-              d="M3 15 L4 14 L5 12"
+              d="M7 7 L9 4 L12 5"
               stroke={color}
-              strokeWidth="0.4"
+              strokeWidth="1.2"
               fill="none"
             />
-            {/* Rear wing */}
             <path
-              d="M15 15 L16 14 L17 18"
+              d="M7 7 L8 5.5 L9 4"
               stroke={color}
-              strokeWidth="0.4"
+              strokeWidth="1"
               fill="none"
             />
-            {/* Cockpit */}
+            {/* Rear wing - prominent multi-element */}
+            <path
+              d="M24 7 L26 5 L28 9"
+              stroke={color}
+              strokeWidth="1.2"
+              fill="none"
+            />
+            <path
+              d="M26 5 L27 6.5 L28 9"
+              stroke={color}
+              strokeWidth="1"
+              fill="none"
+            />
+            {/* Cockpit/air intake - more visible */}
             <ellipse
-              cx="10"
-              cy="15"
-              rx="1.6"
-              ry="1"
+              cx="18"
+              cy="9"
+              rx="4"
+              ry="2.5"
+              fill="rgba(0, 0, 0, 0.5)"
+            />
+            {/* Side pod detail */}
+            <path
+              d="M14 11 L22 11 L22 13 L14 13 Z"
               fill="rgba(0, 0, 0, 0.3)"
             />
-            {/* Wheels */}
-            <circle cx="5" cy="25" r="0.8" fill="rgba(0, 0, 0, 0.5)" />
-            <circle cx="15" cy="25" r="0.8" fill="rgba(0, 0, 0, 0.5)" />
+            {/* Front wheel - larger with white outline like reference */}
+            <circle 
+              cx="12" 
+              cy="17" 
+              r="3" 
+              fill="rgba(0, 0, 0, 0.7)"
+              stroke="rgba(255, 255, 255, 0.5)"
+              strokeWidth="0.8"
+            />
+            <circle 
+              cx="12" 
+              cy="17" 
+              r="2" 
+              fill="rgba(0, 0, 0, 0.9)"
+            />
+            {/* Rear wheel - larger with white outline like reference */}
+            <circle 
+              cx="28" 
+              cy="17" 
+              r="3" 
+              fill="rgba(0, 0, 0, 0.7)"
+              stroke="rgba(255, 255, 255, 0.5)"
+              strokeWidth="0.8"
+            />
+            <circle 
+              cx="28" 
+              cy="17" 
+              r="2" 
+              fill="rgba(0, 0, 0, 0.9)"
+            />
+            {/* Nose detail - pointed F1 nose */}
+            <path
+              d="M5 14 L6 11 L7 7"
+              stroke={color}
+              strokeWidth="0.8"
+              fill="none"
+            />
+            {/* Engine cover detail */}
+            <path
+              d="M20 5 L22 7 L24 7"
+              stroke="rgba(0, 0, 0, 0.3)"
+              strokeWidth="0.6"
+              fill="none"
+            />
           </g>
         );
       } catch (error) {
