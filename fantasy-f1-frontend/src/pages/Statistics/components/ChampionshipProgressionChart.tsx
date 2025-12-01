@@ -77,72 +77,66 @@ const ChampionshipProgressionChart: React.FC<ChampionshipProgressionChartProps> 
     });
   }, [data, championshipType]);
 
-  // Custom label component for car marker at end of line
-  const CarMarkerLabel = (props: any) => {
-    try {
-      const { x, y, index, value, dataKey } = props;
-      
-      if (x === undefined || y === undefined || index === undefined) {
+  // Create car marker label function with proper closure
+  const createCarMarkerLabel = (playerIndex: number, totalRounds: number) => {
+    return (props: any) => {
+      try {
+        const { x, y, index } = props;
+        
+        if (x === undefined || y === undefined || index === undefined) {
+          return null;
+        }
+        
+        // Only show on the last data point
+        if (index !== totalRounds - 1) {
+          return null;
+        }
+        
+        const color = PLAYER_COLORS[playerIndex % PLAYER_COLORS.length];
+        const carSize = 20;
+        const carHeight = carSize * 0.6;
+        
+        return (
+          <g transform={`translate(${x - carSize / 2}, ${y - carHeight / 2})`}>
+            {/* Car body - main shape */}
+            <path
+              d="M2 21 L3 15 L5 12 L7 11 L10 11 L13 12 L15 15 L17 18 L18 21 L18 24 L17 25 L15 25 L14 27 L6 27 L5 25 L3 25 L2 24 Z"
+              fill={color}
+              stroke={color}
+              strokeWidth="0.3"
+            />
+            {/* Front wing */}
+            <path
+              d="M3 15 L4 14 L5 12"
+              stroke={color}
+              strokeWidth="0.4"
+              fill="none"
+            />
+            {/* Rear wing */}
+            <path
+              d="M15 15 L16 14 L17 18"
+              stroke={color}
+              strokeWidth="0.4"
+              fill="none"
+            />
+            {/* Cockpit */}
+            <ellipse
+              cx="10"
+              cy="15"
+              rx="1.6"
+              ry="1"
+              fill="rgba(0, 0, 0, 0.3)"
+            />
+            {/* Wheels */}
+            <circle cx="5" cy="25" r="0.8" fill="rgba(0, 0, 0, 0.5)" />
+            <circle cx="15" cy="25" r="0.8" fill="rgba(0, 0, 0, 0.5)" />
+          </g>
+        );
+      } catch (error) {
+        console.error('Error rendering car marker:', error);
         return null;
       }
-
-      const players = championshipType === 'driver' 
-        ? data?.driverChampionship 
-        : data?.teamChampionship;
-      
-      if (!players || !data?.rounds || data.rounds.length === 0) return null;
-      
-      // Only show on the last data point
-      const isLastPoint = index === data.rounds.length - 1;
-      if (!isLastPoint) return null;
-
-      const playerIndex = parseInt(String(dataKey || '').replace('player_', ''), 10);
-      if (isNaN(playerIndex)) return null;
-      
-      const color = PLAYER_COLORS[playerIndex % PLAYER_COLORS.length];
-      const carSize = 20;
-      const carHeight = carSize * 0.6;
-      
-      return (
-        <g transform={`translate(${x - carSize / 2}, ${y - carHeight / 2})`}>
-          {/* Car body - main shape */}
-          <path
-            d="M2 21 L3 15 L5 12 L7 11 L10 11 L13 12 L15 15 L17 18 L18 21 L18 24 L17 25 L15 25 L14 27 L6 27 L5 25 L3 25 L2 24 Z"
-            fill={color}
-            stroke={color}
-            strokeWidth="0.3"
-          />
-          {/* Front wing */}
-          <path
-            d="M3 15 L4 14 L5 12"
-            stroke={color}
-            strokeWidth="0.4"
-            fill="none"
-          />
-          {/* Rear wing */}
-          <path
-            d="M15 15 L16 14 L17 18"
-            stroke={color}
-            strokeWidth="0.4"
-            fill="none"
-          />
-          {/* Cockpit */}
-          <ellipse
-            cx="10"
-            cy="15"
-            rx="1.6"
-            ry="1"
-            fill="rgba(0, 0, 0, 0.3)"
-          />
-          {/* Wheels */}
-          <circle cx="5" cy="25" r="0.8" fill="rgba(0, 0, 0, 0.5)" />
-          <circle cx="15" cy="25" r="0.8" fill="rgba(0, 0, 0, 0.5)" />
-        </g>
-      );
-    } catch (error) {
-      console.error('Error rendering car marker:', error);
-      return null;
-    }
+    };
   };
 
   // Custom tooltip
@@ -270,8 +264,7 @@ const ChampionshipProgressionChart: React.FC<ChampionshipProgressionChartProps> 
                     dot={{ r: 3 }}
                     name={player.username || `Player ${index + 1}`}
                   >
-                    {/* Temporarily disabled car markers for debugging */}
-                    {/* <LabelList content={(props: any) => <CarMarkerLabel {...props} />} /> */}
+                    <LabelList content={createCarMarkerLabel(index, data?.rounds?.length || 0)} />
                   </Line>
                 );
               } catch (error) {
