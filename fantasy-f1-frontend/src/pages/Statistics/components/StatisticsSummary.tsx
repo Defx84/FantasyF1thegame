@@ -3,6 +3,7 @@ import { fetchUserStatistics } from '../../../services/statisticsService';
 import ReactCardFlip from 'react-card-flip';
 import { FaChevronDown, FaInfoCircle } from 'react-icons/fa';
 import type { FC } from 'react';
+import ChampionshipProgressionChart from './ChampionshipProgressionChart';
 
 interface StatisticsSummaryProps {
   userId?: string;
@@ -96,6 +97,7 @@ const StatisticsSummary: React.FC<StatisticsSummaryProps> = ({ userId, leagueId,
   const teamPoints = stats.teamPoints ?? 0;
 
   return (
+    <>
     <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
       {/* Total Points Card - Flippable */}
       <ReactCardFlip isFlipped={isTotalPointsFlipped} flipDirection="horizontal" flipSpeedBackToFront={0.6} flipSpeedFrontToBack={0.6}>
@@ -233,6 +235,12 @@ const StatisticsSummary: React.FC<StatisticsSummaryProps> = ({ userId, leagueId,
         </div>
       </ReactCardFlip>
     </div>
+    
+    {/* Championship Progression Chart */}
+    {leagueId && (
+      <ChampionshipProgressionChart leagueId={leagueId} glassShade={glassShade} />
+    )}
+    </>
   );
 };
 

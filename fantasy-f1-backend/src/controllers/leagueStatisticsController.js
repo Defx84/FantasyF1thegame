@@ -246,9 +246,108 @@ const updateLeagueStatistics = async (req, res) => {
     }
 };
 
+/**
+ * Get championship progression for all players in a league
+ * Returns cumulative points for both driver and team championships
+ */
+const getChampionshipProgression = async (req, res) => {
+    try {
+        const { leagueId } = req.params;
+        const season = new Date().getFullYear();
+
+        // Fetch the leaderboard for this league and season
+        const leaderboard = await LeagueLeaderboard.findOne({
+            league: leagueId,
+            season: season
+        }).populate('driverStandings.user constructorStandings.user', 'username');
+
+        if (!leaderboard) {
+            return res.json({
+                rounds: [],
+                driverChampionship: [],
+                teamChampionship: []
+            });
+        }
+
+        // Get all unique rounds from driver standings
+        const allRounds = new Set();
+        leaderboard.driverStandings.forEach(standing => {
+            standing.raceResults.forEach(result => {
+                allRounds.add(result.round);
+            });
+        });
+        leaderboard.constructorStandings.forEach(standing => {
+            standing.raceResults.forEach(result => {
+                allRounds.add(result.round);
+            });
+        });
+
+        const rounds = Array.from(allRounds).sort((a, b) => a - b);
+
+        // Calculate driver championship progression
+        const driverChampionship = leaderboard.driverStandings.map(standing => {
+            const cumulativePoints = [];
+            let runningTotal = 0;
+
+            rounds.forEach(round => {
+                const result = standing.raceResults.find(r => r.round === round);
+                if (result) {
+                    // Driver points = mainRacePoints + sprintPoints
+                    const points = (result.mainRacePoints || 0) + (result.sprintPoints || 0);
+                    runningTotal += points;
+                }
+                cumulativePoints.push(runningTotal);
+            });
+
+            const userId = standing.user._id ? standing.user._id.toString() : standing.user.toString();
+            const username = standing.username || (standing.user.username ? standing.user.username : 'Unknown');
+
+            return {
+                userId: userId,
+                username: username,
+                cumulativePoints: cumulativePoints
+            };
+        });
+
+        // Calculate team championship progression
+        const teamChampionship = leaderboard.constructorStandings.map(standing => {
+            const cumulativePoints = [];
+            let runningTotal = 0;
+
+            rounds.forEach(round => {
+                const result = standing.raceResults.find(r => r.round === round);
+                if (result) {
+                    // Team points = totalPoints
+                    const points = result.totalPoints || 0;
+                    runningTotal += points;
+                }
+                cumulativePoints.push(runningTotal);
+            });
+
+            const userId = standing.user._id ? standing.user._id.toString() : standing.user.toString();
+            const username = standing.username || (standing.user.username ? standing.user.username : 'Unknown');
+
+            return {
+                userId: userId,
+                username: username,
+                cumulativePoints: cumulativePoints
+            };
+        });
+
+        res.json({
+            rounds: rounds,
+            driverChampionship: driverChampionship,
+            teamChampionship: teamChampionship
+        });
+    } catch (error) {
+        handleError(res, error);
+    }
+};
+
 module.exports = {
     getUserStatistics,
     getLeagueStatistics,
     updateLeagueStatistics,
-    updateUserStatistics
+    updateUserStatistics,
+    getChampionshipProgression
 }; 

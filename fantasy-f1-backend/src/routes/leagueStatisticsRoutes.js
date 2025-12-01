@@ -20,6 +20,9 @@ router.get('/league/:leagueId/user/:userId', auth, leagueStatisticsController.ge
 // Get all statistics for a league
 router.get('/league/:leagueId', auth, leagueStatisticsController.getLeagueStatistics);
 
+// Get championship progression for a league
+router.get('/league/:leagueId/championship-progression', auth, leagueStatisticsController.getChampionshipProgression);
+
 // Update statistics for all users in a league
 router.post('/league/:leagueId/update', auth, leagueStatisticsController.updateLeagueStatistics);
 

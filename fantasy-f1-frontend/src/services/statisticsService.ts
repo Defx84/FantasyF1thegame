@@ -63,4 +63,28 @@ export const fetchDriverTeamStatistics = async (): Promise<DriverTeamStatistics>
   }
   
   return response.data;
+};
+
+export interface ChampionshipProgression {
+  rounds: number[];
+  driverChampionship: Array<{
+    userId: string;
+    username: string;
+    cumulativePoints: number[];
+  }>;
+  teamChampionship: Array<{
+    userId: string;
+    username: string;
+    cumulativePoints: number[];
+  }>;
+}
+
+export const fetchChampionshipProgression = async (leagueId: string): Promise<ChampionshipProgression> => {
+  const response = await api.get(`/api/statistics/league/${leagueId}/championship-progression`);
+  
+  if (response.status !== 200) {
+    throw new Error('Failed to fetch championship progression');
+  }
+  
+  return response.data;
 }; 
