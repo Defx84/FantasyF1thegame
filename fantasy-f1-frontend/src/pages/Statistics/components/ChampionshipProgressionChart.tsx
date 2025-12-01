@@ -93,99 +93,138 @@ const ChampionshipProgressionChart: React.FC<ChampionshipProgressionChartProps> 
         }
         
         const color = PLAYER_COLORS[playerIndex % PLAYER_COLORS.length];
-        const carWidth = 40;
-        const carHeight = 18;
+        const carWidth = 48;
+        const carHeight = 22;
         
         return (
           <g transform={`translate(${x - carWidth / 2}, ${y - carHeight / 2})`}>
-            {/* Main car body - F1 silhouette shape */}
+            {/* Main car body - F1 silhouette with proper proportions */}
             <path
-              d="M5 14 L7 7 L12 5 L16 5 L20 5 L24 7 L28 9 L32 11 L34 14 L34 16 L32 17 L30 17 L28 18 L12 18 L10 17 L8 17 L6 16 L5 14 Z"
+              d="M4 18 L6 9 L10 7 L14 7 L18 7 L22 7 L26 9 L30 11 L34 13 L36 15 L36 17 L34 18 L32 18 L30 19 L18 19 L16 18 L14 18 L12 18 L10 18 L8 18 L6 18 L4 18 Z"
               fill={color}
-              stroke="rgba(0, 0, 0, 0.4)"
-              strokeWidth="0.8"
+              stroke="rgba(0, 0, 0, 0.6)"
+              strokeWidth="1.2"
             />
-            {/* Front wing - prominent multi-element */}
+            
+            {/* Front wing - wide, multi-element F1 front wing */}
             <path
-              d="M7 7 L9 4 L12 5"
+              d="M6 9 L8 2 L10 7"
+              stroke={color}
+              strokeWidth="2"
+              fill="none"
+            />
+            <path
+              d="M6 9 L7 5.5 L8 2"
+              stroke={color}
+              strokeWidth="1.5"
+              fill="none"
+            />
+            <path
+              d="M8 2 L9 4.5 L10 7"
+              stroke={color}
+              strokeWidth="1.5"
+              fill="none"
+            />
+            
+            {/* Rear wing - high, prominent F1 rear wing */}
+            <path
+              d="M26 9 L28 3 L30 11"
+              stroke={color}
+              strokeWidth="2"
+              fill="none"
+            />
+            <path
+              d="M28 3 L29 6 L30 11"
+              stroke={color}
+              strokeWidth="1.5"
+              fill="none"
+            />
+            <path
+              d="M30 11 L31 8 L32 5"
+              stroke={color}
+              strokeWidth="1.5"
+              fill="none"
+            />
+            
+            {/* Cockpit/air intake - prominent raised section */}
+            <path
+              d="M16 7 L18 4 L20 4 L22 4 L24 7 L24 11 L22 12 L20 12 L18 12 L16 11 Z"
+              fill="rgba(0, 0, 0, 0.7)"
+              stroke="rgba(0, 0, 0, 0.5)"
+              strokeWidth="0.5"
+            />
+            
+            {/* Side pod - F1 characteristic side pod shape */}
+            <path
+              d="M14 11 L26 11 L26 13 L24 14 L16 14 L14 13 Z"
+              fill="rgba(0, 0, 0, 0.4)"
+            />
+            
+            {/* Front wheel - prominent with white outline */}
+            <circle 
+              cx="12" 
+              cy="18" 
+              r="4" 
+              fill="rgba(0, 0, 0, 0.85)"
+              stroke="rgba(255, 255, 255, 0.8)"
+              strokeWidth="1.2"
+            />
+            <circle 
+              cx="12" 
+              cy="18" 
+              r="3" 
+              fill="rgba(0, 0, 0, 0.95)"
+            />
+            <circle 
+              cx="12" 
+              cy="18" 
+              r="1.5" 
+              fill="rgba(255, 255, 255, 0.4)"
+            />
+            
+            {/* Rear wheel - prominent with white outline */}
+            <circle 
+              cx="28" 
+              cy="18" 
+              r="4" 
+              fill="rgba(0, 0, 0, 0.85)"
+              stroke="rgba(255, 255, 255, 0.8)"
+              strokeWidth="1.2"
+            />
+            <circle 
+              cx="28" 
+              cy="18" 
+              r="3" 
+              fill="rgba(0, 0, 0, 0.95)"
+            />
+            <circle 
+              cx="28" 
+              cy="18" 
+              r="1.5" 
+              fill="rgba(255, 255, 255, 0.4)"
+            />
+            
+            {/* Nose cone - low, pointed F1 nose */}
+            <path
+              d="M4 18 L5 14 L6 9"
               stroke={color}
               strokeWidth="1.2"
               fill="none"
             />
+            
+            {/* Engine cover detail - raised section behind cockpit */}
             <path
-              d="M7 7 L8 5.5 L9 4"
-              stroke={color}
+              d="M20 7 L22 9 L24 9 L26 9"
+              stroke="rgba(0, 0, 0, 0.5)"
               strokeWidth="1"
               fill="none"
             />
-            {/* Rear wing - prominent multi-element */}
+            
+            {/* Halo/roll hoop - modern F1 safety feature */}
             <path
-              d="M24 7 L26 5 L28 9"
-              stroke={color}
-              strokeWidth="1.2"
-              fill="none"
-            />
-            <path
-              d="M26 5 L27 6.5 L28 9"
-              stroke={color}
-              strokeWidth="1"
-              fill="none"
-            />
-            {/* Cockpit/air intake - more visible */}
-            <ellipse
-              cx="18"
-              cy="9"
-              rx="4"
-              ry="2.5"
-              fill="rgba(0, 0, 0, 0.5)"
-            />
-            {/* Side pod detail */}
-            <path
-              d="M14 11 L22 11 L22 13 L14 13 Z"
-              fill="rgba(0, 0, 0, 0.3)"
-            />
-            {/* Front wheel - larger with white outline like reference */}
-            <circle 
-              cx="12" 
-              cy="17" 
-              r="3" 
-              fill="rgba(0, 0, 0, 0.7)"
-              stroke="rgba(255, 255, 255, 0.5)"
-              strokeWidth="0.8"
-            />
-            <circle 
-              cx="12" 
-              cy="17" 
-              r="2" 
-              fill="rgba(0, 0, 0, 0.9)"
-            />
-            {/* Rear wheel - larger with white outline like reference */}
-            <circle 
-              cx="28" 
-              cy="17" 
-              r="3" 
-              fill="rgba(0, 0, 0, 0.7)"
-              stroke="rgba(255, 255, 255, 0.5)"
-              strokeWidth="0.8"
-            />
-            <circle 
-              cx="28" 
-              cy="17" 
-              r="2" 
-              fill="rgba(0, 0, 0, 0.9)"
-            />
-            {/* Nose detail - pointed F1 nose */}
-            <path
-              d="M5 14 L6 11 L7 7"
-              stroke={color}
-              strokeWidth="0.8"
-              fill="none"
-            />
-            {/* Engine cover detail */}
-            <path
-              d="M20 5 L22 7 L24 7"
-              stroke="rgba(0, 0, 0, 0.3)"
-              strokeWidth="0.6"
+              d="M18 4 L20 4"
+              stroke="rgba(0, 0, 0, 0.6)"
+              strokeWidth="1.5"
               fill="none"
             />
           </g>
