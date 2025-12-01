@@ -349,7 +349,7 @@ const updateRaceResults = async (req, res) => {
                 let selection = await RaceSelection.findOne({
                     user: member._id,
                     league: leagueId,
-                    race: updatedRace._id
+                    round: parseInt(round)
                 });
                 if (!selection) continue;
                 
