@@ -519,6 +519,10 @@ raceResultSchema.post('save', async function(doc) {
     } else {
       console.log(`[RaceResult Post-Save] No points changes detected for round ${doc.round}`);
     }
+
+    // Note: Season completion and PDF generation is now handled by a scheduled job
+    // that runs every Monday at 8am UK time (see server.js)
+
   } catch (error) {
     console.error('[RaceResult Post-Save] Error assigning points:', error);
     console.error('[RaceResult Post-Save] Error details:', {

@@ -85,7 +85,110 @@ const testEmailConnection = async () => {
   }
 };
 
+/**
+ * Send season archive PDF to all league members
+ * @param {Object} league - League object with populated members (must have email field)
+ * @param {Buffer} pdfBuffer - PDF buffer to attach
+ */
+const sendSeasonArchiveToLeague = async (league, pdfBuffer) => {
+  try {
+    if (!league || !league.members || league.members.length === 0) {
+      console.error('[Season Archive] No members found in league');
+      return;
+    }
+
+    if (!pdfBuffer) {
+      console.error('[Season Archive] No PDF buffer provided');
+      return;
+    }
+
+    // Get all member emails
+    const memberEmails = league.members
+      .map(member => member.email)
+      .filter(email => email); // Filter out any undefined/null emails
+
+    if (memberEmails.length === 0) {
+      console.error('[Season Archive] No valid email addresses found for league members');
+      return;
+    }
+
+    console.log(`[Season Archive] Preparing to send PDF to ${memberEmails.length} league members for league: ${league.name}`);
+
+    // Convert PDF buffer to base64 for MailerSend attachment
+    const pdfBase64 = pdfBuffer.toString('base64');
+    const season = league.season || new Date().getFullYear();
+
+    // Prepare email content
+    const subject = `🏁 ${league.name} - Season ${season} Archive`;
+    const html = `
+      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+        <h2 style="color: #d32f2f;">🏁 Season ${season} Complete!</h2>
+        <p>Congratulations on completing another season of The Fantasy F1 Game!</p>
+        <p>Attached is your complete season archive for <strong>${league.name}</strong>, including:</p>
+        <ul>
+          <li>Final standings (Driver & Constructor championships)</li>
+          <li>Championship progression charts</li>
+        </ul>
+        <p>Thank you for playing, and we'll see you next season!</p>
+        <p style="margin-top: 30px; color: #666; font-size: 12px;">
+          — The Fantasy F1 Game Team
+        </p>
+      </div>
+    `;
+    const text = `Season ${season} Complete!\n\nCongratulations on completing another season of The Fantasy F1 Game!\n\nAttached is your complete season archive for ${league.name}, including final standings and championship progression charts.\n\nThank you for playing!\n\n— The Fantasy F1 Game Team`;
+
+    // Send email to each member individually
+    // MailerSend attachment format: { filename, content (base64 string) }
+    const filename = `${league.name.replace(/[^a-z0-9]/gi, '_')}_Season_${season}_Archive.pdf`;
+    const emailPromises = memberEmails.map(async (email) => {
+      try {
+        const data = await mailerSend.email.send({
+          from: {
+            email: 'noreply@thefantasyf1game.com',
+            name: 'The Fantasy F1 Game'
+          },
+          to: [
+            {
+              email: email
+            }
+          ],
+          subject: subject,
+          html: html,
+          text: text,
+          attachments: [
+            {
+              filename: filename,
+              content: pdfBase64
+            }
+          ]
+        });
+        console.log(`[Season Archive] ✅ PDF sent to ${email}`);
+        return data;
+      } catch (error) {
+        console.error(`[Season Archive] ❌ Failed to send PDF to ${email}:`, error.message);
+        // Don't throw - continue with other emails even if one fails
+        return null;
+      }
+    });
+
+    const results = await Promise.allSettled(emailPromises);
+    const successful = results.filter(r => r.status === 'fulfilled' && r.value !== null).length;
+    const failed = results.length - successful;
+    
+    if (successful > 0) {
+      console.log(`[Season Archive] ✅ ${successful}/${memberEmails.length} emails sent successfully for league: ${league.name}`);
+    }
+    if (failed > 0) {
+      console.warn(`[Season Archive] ⚠️ ${failed} emails failed to send for league: ${league.name}`);
+    }
+  } catch (error) {
+    console.error('[Season Archive] ❌ Error sending season archive:', error);
+    throw error;
+  }
+};
+
 module.exports = {
   sendEmail,
-  testEmailConnection
+  testEmailConnection,
+  sendSeasonArchiveToLeague
 };

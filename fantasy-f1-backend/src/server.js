@@ -199,6 +199,70 @@ app.listen(port, async () => {
             }
         });
         
+        // Schedule season archive PDF generation (run on Monday, December 8th at 8am UK time)
+        // Note: UK time is GMT in December (UTC+0), so 8am UK = 8am UTC
+        // Cron: minute 0, hour 8, day 8, month 12 (December), any day of week
+        // This will run on December 8th at 8am UTC, but only process the current year's season
+        cron.schedule('0 8 8 12 *', async () => {
+            console.log('📧 Running scheduled season archive PDF generation on December 8th at 8am UTC...');
+            try {
+                const { isSeasonComplete, updateLeagueWithFinalStandings } = require('./controllers/seasonController');
+                const League = require('./models/League');
+                
+                const currentYear = new Date().getFullYear();
+                const season = currentYear;
+                
+                // Verify we're actually on December 8th (cron should handle this, but double-check)
+                const today = new Date();
+                if (today.getDate() !== 8 || today.getMonth() !== 11) { // Month is 0-indexed, so 11 = December
+                    console.log(`⏭️ Skipping - today is not December 8th (current date: ${today.toDateString()})`);
+                    return;
+                }
+                
+                console.log(`📅 Processing season ${season} archive on December 8th, ${currentYear}`);
+                const seasonComplete = await isSeasonComplete(season);
+                
+                if (seasonComplete) {
+                    console.log(`🏁 Season ${season} is complete! Processing final standings for all leagues...`);
+                    
+                    // Get all active leagues for this season that haven't been processed yet
+                    // The seasonStatus check ensures we only process each league once
+                    const leagues = await League.find({ 
+                        season: season,
+                        seasonStatus: { $ne: 'completed' } // Only process leagues that aren't already completed
+                    });
+                    
+                    console.log(`📊 Found ${leagues.length} leagues to process for season completion`);
+                    
+                    // Process each league
+                    let successCount = 0;
+                    let errorCount = 0;
+                    for (const league of leagues) {
+                        try {
+                            console.log(`📄 Processing season completion for league: ${league.name} (${league._id})`);
+                            await updateLeagueWithFinalStandings(league._id, season);
+                            console.log(`✅ Season completion processed for league: ${league.name}`);
+                            successCount++;
+                        } catch (leagueError) {
+                            console.error(`❌ Error processing season completion for league ${league.name}:`, leagueError);
+                            errorCount++;
+                            // Continue with other leagues even if one fails
+                        }
+                    }
+                    
+                    console.log(`🏁 Season ${season} completion processing finished: ${successCount} successful, ${errorCount} errors`);
+                } else {
+                    // Check how many races are left
+                    const allRaces = await RaceResult.find({ season });
+                    const completedRaces = allRaces.filter(r => r.status === 'completed').length;
+                    const totalRaces = allRaces.length;
+                    console.log(`⏳ Season ${season} not yet complete: ${completedRaces}/${totalRaces} races completed`);
+                }
+            } catch (error) {
+                console.error('❌ Error during season archive PDF generation:', error);
+            }
+        });
+        
         // Schedule one-time slug discovery for 12:30 GMT
         const now = new Date();
         const targetTime = new Date();
