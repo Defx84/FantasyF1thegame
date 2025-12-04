@@ -282,14 +282,14 @@ const ProfilePage: React.FC = () => {
             {/* User Details */}
             <div className="space-y-4">
               <div className="flex items-center gap-3">
-                {FaUser({ className: "text-white/80", size: 22 })}
+                <IconWrapper icon={FaUser} className="text-white/80" size={22} />
                 <div>
                   <div className="text-sm text-white/70">Username</div>
                   <div className="text-lg text-white/90">{user.username}</div>
                 </div>
               </div>
               <div className="flex items-center gap-3">
-                {FaEnvelope({ className: "text-white/80", size: 22 })}
+                <IconWrapper icon={FaEnvelope} className="text-white/80" size={22} />
                 <div>
                   <div className="text-sm text-white/70">Email</div>
                   <div className="text-lg text-white/90">{user.email}</div>
@@ -302,8 +302,8 @@ const ProfilePage: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3">
                   {emailRemindersEnabled ? 
-                    FaBell({ className: "text-green-400", size: 20 }) : 
-                    FaBellSlash({ className: "text-gray-400", size: 20 })
+                    <IconWrapper icon={FaBell} className="text-green-400" size={20} /> : 
+                    <IconWrapper icon={FaBellSlash} className="text-gray-400" size={20} />
                   }
                   <div>
                     <div className="text-sm text-white/70">Email Reminders</div>
@@ -416,12 +416,12 @@ const ProfilePage: React.FC = () => {
           {/* Leagues Section */}
           <div className="backdrop-blur-lg bg-white/2 rounded-2xl p-8 border border-white/10 shadow-xl">
             <h2 className="text-2xl font-bold mb-6 flex items-center text-white/90">
-              {FaTrophy({ className: "mr-2", size: 22 })}
+              <IconWrapper icon={FaTrophy} className="mr-2" size={22} />
               Your Leagues
             </h2>
             
             {/* Active/Past Tabs */}
-            {!loading && leagues.length > 0 && (
+            {!loading && (
               <div className="flex gap-2 mb-6">
                 <button
                   onClick={() => setActiveTab('active')}
@@ -431,7 +431,7 @@ const ProfilePage: React.FC = () => {
                       : 'bg-white/10 text-white/70 hover:bg-white/20'
                   }`}
                 >
-                  Active
+                  Active {leagues.filter(l => l.seasonStatus === 'active').length > 0 && `(${leagues.filter(l => l.seasonStatus === 'active').length})`}
                 </button>
                 <button
                   onClick={() => setActiveTab('past')}
@@ -441,7 +441,7 @@ const ProfilePage: React.FC = () => {
                       : 'bg-white/10 text-white/70 hover:bg-white/20'
                   }`}
                 >
-                  Past
+                  Past {leagues.filter(l => l.seasonStatus === 'completed').length > 0 && `(${leagues.filter(l => l.seasonStatus === 'completed').length})`}
                 </button>
               </div>
             )}

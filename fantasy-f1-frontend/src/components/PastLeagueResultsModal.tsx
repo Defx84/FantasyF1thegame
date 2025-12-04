@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { FaTimes, FaTrophy } from 'react-icons/fa';
 import { getLeagueFinalStandings, FinalStandings } from '../services/leagueService';
 import { useAuth } from '../context/AuthContext';
+import IconWrapper from '../utils/iconWrapper';
 
 interface PastLeagueResultsModalProps {
   leagueId: string;
@@ -127,11 +128,15 @@ const PastLeagueResultsModal: React.FC<PastLeagueResultsModalProps> = ({
                     <td className="p-3 text-white/90">
                       <div className="flex items-center gap-2">
                         {standing.position <= 3 && (
-                          <FaTrophy className={`${
-                            standing.position === 1 ? 'text-yellow-400' :
-                            standing.position === 2 ? 'text-gray-300' :
-                            'text-orange-400'
-                          }`} size={14} />
+                          <IconWrapper 
+                            icon={FaTrophy}
+                            className={
+                              standing.position === 1 ? 'text-yellow-400' :
+                              standing.position === 2 ? 'text-gray-300' :
+                              'text-orange-400'
+                            } 
+                            size={14} 
+                          />
                         )}
                         <span className={isUser ? 'font-bold text-yellow-400' : ''}>
                           {standing.position}
@@ -190,7 +195,7 @@ const PastLeagueResultsModal: React.FC<PastLeagueResultsModalProps> = ({
             className="text-white/70 hover:text-white transition-colors p-2 hover:bg-white/10 rounded"
             aria-label="Close"
           >
-            <FaTimes size={24} />
+            <IconWrapper icon={FaTimes} size={24} />
           </button>
         </div>
 
