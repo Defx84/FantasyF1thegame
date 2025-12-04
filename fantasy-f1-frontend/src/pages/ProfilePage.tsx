@@ -7,6 +7,7 @@ import IconWrapper from '../utils/iconWrapper';
 import { api } from '../services/api';
 import AvatarTestingPanel from '../components/Avatar/AvatarTestingPanel';
 import AvatarImage from '../components/Avatar/AvatarImage';
+import PastLeagueResultsModal from '../components/PastLeagueResultsModal';
 
 const ProfilePage: React.FC = () => {
   const { user, logout, getToken } = useAuth();
@@ -34,6 +35,8 @@ const ProfilePage: React.FC = () => {
   const [selectedTestUser, setSelectedTestUser] = useState<string>('');
   const [testReminderLoading, setTestReminderLoading] = useState<boolean>(false);
   const [testConnectionLoading, setTestConnectionLoading] = useState<boolean>(false);
+  const [selectedPastLeague, setSelectedPastLeague] = useState<{ id: string; name: string; season: number } | null>(null);
+  const [activeTab, setActiveTab] = useState<'active' | 'past'>('active');
 
   useEffect(() => {
     const fetchLeagues = async () => {
@@ -416,6 +419,33 @@ const ProfilePage: React.FC = () => {
               {FaTrophy({ className: "mr-2", size: 22 })}
               Your Leagues
             </h2>
+            
+            {/* Active/Past Tabs */}
+            {!loading && leagues.length > 0 && (
+              <div className="flex gap-2 mb-6">
+                <button
+                  onClick={() => setActiveTab('active')}
+                  className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                    activeTab === 'active'
+                      ? 'bg-red-600 text-white'
+                      : 'bg-white/10 text-white/70 hover:bg-white/20'
+                  }`}
+                >
+                  Active
+                </button>
+                <button
+                  onClick={() => setActiveTab('past')}
+                  className={`px-4 py-2 rounded-lg font-semibold transition-colors ${
+                    activeTab === 'past'
+                      ? 'bg-red-600 text-white'
+                      : 'bg-white/10 text-white/70 hover:bg-white/20'
+                  }`}
+                >
+                  Past
+                </button>
+              </div>
+            )}
+
             {loading ? (
               <div className="text-white/70">Loading leagues...</div>
             ) : error ? (
@@ -424,58 +454,115 @@ const ProfilePage: React.FC = () => {
               <div className="text-white/70">You are not part of any leagues yet.</div>
             ) : (
               <div className="space-y-4">
-                {leagues.map((league) => (
-                  <div
-                    key={league._id}
-                    className="flex items-center justify-between bg-white/10 p-4 rounded-lg border border-white/10 cursor-pointer hover:bg-white/20 transition-colors"
-                  >
-                    <div className="flex items-center space-x-4">
-                      <span className="font-semibold text-white/90">{league.name}</span>
-                      <span className="text-sm text-white/70">Season {league.season}</span>
-                      {league.owner === user.id && (
-                        <span className="text-xs bg-emerald-400 text-white px-2 py-1 rounded">Owner</span>
-                      )}
-                    </div>
-                    <div className="flex items-center space-x-4">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/league/${league._id}`);
+                {leagues
+                  .filter(league => 
+                    activeTab === 'active' 
+                      ? league.seasonStatus === 'active' 
+                      : league.seasonStatus === 'completed'
+                  )
+                  .map((league) => {
+                    const isPastLeague = league.seasonStatus === 'completed';
+                    return (
+                      <div
+                        key={league._id}
+                        className={`flex items-center justify-between bg-white/10 p-4 rounded-lg border border-white/10 transition-colors ${
+                          isPastLeague 
+                            ? 'cursor-pointer hover:bg-white/20' 
+                            : 'cursor-pointer hover:bg-white/20'
+                        }`}
+                        onClick={() => {
+                          if (isPastLeague) {
+                            setSelectedPastLeague({
+                              id: league._id,
+                              name: league.name,
+                              season: league.season
+                            });
+                          } else {
+                            navigate(`/league/${league._id}`);
+                          }
                         }}
-                        className="text-blue-400 hover:text-blue-300 transition-colors"
-                        title="View League"
                       >
-                        <IconWrapper icon={FaEye} size={16} />
-                      </button>
-                      {league.owner !== user.id && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setAbandoningLeagueId(league._id);
-                          }}
-                          className="text-yellow-400 hover:text-yellow-300 transition-colors"
-                          title="Abandon League"
-                        >
-                          <IconWrapper icon={FaSignOutAlt} size={16} />
-                        </button>
-                      )}
-                      {league.owner === user.id && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteLeague(league._id);
-                          }}
-                          disabled={deleting}
-                          className="text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
-                          title="Delete League"
-                        >
-                          <IconWrapper icon={FaTrash} size={16} />
-                        </button>
-                      )}
-                    </div>
+                        <div className="flex items-center space-x-4">
+                          <span className="font-semibold text-white/90">{league.name}</span>
+                          <span className="text-sm text-white/70">Season {league.season}</span>
+                          {league.owner === user.id && (
+                            <span className="text-xs bg-emerald-400 text-white px-2 py-1 rounded">Owner</span>
+                          )}
+                          {isPastLeague && (
+                            <span className="text-xs bg-gray-500 text-white px-2 py-1 rounded">Completed</span>
+                          )}
+                        </div>
+                        <div className="flex items-center space-x-4">
+                          {isPastLeague ? (
+                            <span className="text-sm text-white/70">View Results →</span>
+                          ) : (
+                            <>
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate(`/league/${league._id}`);
+                                }}
+                                className="text-blue-400 hover:text-blue-300 transition-colors"
+                                title="View League"
+                              >
+                                <IconWrapper icon={FaEye} size={16} />
+                              </button>
+                              {league.owner !== user.id && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setAbandoningLeagueId(league._id);
+                                  }}
+                                  className="text-yellow-400 hover:text-yellow-300 transition-colors"
+                                  title="Abandon League"
+                                >
+                                  <IconWrapper icon={FaSignOutAlt} size={16} />
+                                </button>
+                              )}
+                              {league.owner === user.id && (
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleDeleteLeague(league._id);
+                                  }}
+                                  disabled={deleting}
+                                  className="text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
+                                  title="Delete League"
+                                >
+                                  <IconWrapper icon={FaTrash} size={16} />
+                                </button>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    );
+                  })}
+                
+                {/* Show message if no leagues in selected tab */}
+                {leagues.filter(league => 
+                  activeTab === 'active' 
+                    ? league.seasonStatus === 'active' 
+                    : league.seasonStatus === 'completed'
+                ).length === 0 && (
+                  <div className="text-white/70 text-center py-8">
+                    {activeTab === 'active' 
+                      ? 'No active leagues' 
+                      : 'No past leagues'}
                   </div>
-                ))}
+                )}
               </div>
+            )}
+
+            {/* Past League Results Modal */}
+            {selectedPastLeague && (
+              <PastLeagueResultsModal
+                leagueId={selectedPastLeague.id}
+                leagueName={selectedPastLeague.name}
+                season={selectedPastLeague.season}
+                isOpen={!!selectedPastLeague}
+                onClose={() => setSelectedPastLeague(null)}
+              />
             )}
             {/* Abandon League Modal */}
             {abandoningLeagueId && (

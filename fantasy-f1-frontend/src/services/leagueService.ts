@@ -128,6 +128,45 @@ export const getLeagueStandings = async (leagueId: string, season: number): Prom
   } catch (error) {
     throw error;
   }
+};
+
+export interface FinalStandings {
+  leagueId: string;
+  leagueName: string;
+  season: number;
+  finalStandings: {
+    driverChampionship: {
+      champion: { user: string; username: string; totalPoints: number };
+      second: { user: string; username: string; totalPoints: number };
+      third: { user: string; username: string; totalPoints: number };
+      standings: Array<{
+        position: number;
+        user: string;
+        username: string;
+        totalPoints: number;
+      }>;
+    };
+    constructorChampionship: {
+      champion: { user: string; username: string; totalPoints: number };
+      second: { user: string; username: string; totalPoints: number };
+      third: { user: string; username: string; totalPoints: number };
+      standings: Array<{
+        position: number;
+        user: string;
+        username: string;
+        totalPoints: number;
+      }>;
+    };
+  };
+}
+
+export const getLeagueFinalStandings = async (leagueId: string): Promise<FinalStandings> => {
+  try {
+    const response = await api.get(`${API_URL}/${leagueId}/final-standings`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
 }; 
 
 export const deleteLeague = async (leagueId: string): Promise<void> => {

@@ -19,6 +19,7 @@ router.get('/:id/members', auth, leagueController.getLeagueMembers);
 router.get('/:id/selections', auth, leagueController.getLeagueSelections);
 router.get('/:id/standings/:season', auth, getLeagueLeaderboard);
 router.get('/:id/opponents', auth, leagueController.getLeagueOpponents);
+router.get('/:id/final-standings', auth, leagueController.getLeagueFinalStandings);
 
 // Abandon league (user leaves league and deletes their data)
 router.post('/:id/abandon', auth, leagueController.abandonLeague);

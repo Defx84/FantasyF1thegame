@@ -542,6 +542,56 @@ const getLeagueOpponents = async (req, res) => {
     }
 };
 
+/**
+ * Get final standings for a completed league
+ * Only accessible to league members
+ */
+const getLeagueFinalStandings = async (req, res) => {
+    try {
+        const { id: leagueId } = req.params;
+        const userId = req.user.id;
+
+        // Find the league
+        const league = await League.findById(leagueId);
+        if (!league) {
+            return res.status(404).json({ message: 'League not found' });
+        }
+
+        // Check if user is a member
+        const isMember = league.members.some(
+            member => member.toString() === userId.toString()
+        ) || league.owner.toString() === userId.toString();
+
+        if (!isMember) {
+            return res.status(403).json({ message: 'You are not a member of this league' });
+        }
+
+        // Check if league is completed
+        if (league.seasonStatus !== 'completed') {
+            return res.status(400).json({ 
+                message: 'League season is not yet completed',
+                seasonStatus: league.seasonStatus
+            });
+        }
+
+        // Check if final standings exist
+        if (!league.finalStandings) {
+            return res.status(404).json({ message: 'Final standings not available for this league' });
+        }
+
+        // Return final standings
+        res.json({
+            leagueId: league._id,
+            leagueName: league.name,
+            season: league.season,
+            finalStandings: league.finalStandings
+        });
+    } catch (error) {
+        console.error('Error getting league final standings:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+};
+
 module.exports = {
     createLeague: createLeague,
     joinLeague: joinLeague,
@@ -552,5 +602,6 @@ module.exports = {
     getUserLeagues: getUserLeagues,
     deleteLeague: deleteLeague,
     abandonLeague: abandonLeague,
-    getLeagueOpponents: getLeagueOpponents
+    getLeagueOpponents: getLeagueOpponents,
+    getLeagueFinalStandings: getLeagueFinalStandings
 }; 
