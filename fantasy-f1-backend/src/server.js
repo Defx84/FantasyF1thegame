@@ -260,17 +260,17 @@ app.listen(port, async () => {
             }
         };
 
-        // Schedule one-time season archive PDF generation for December 7th at 20:15 (8:15 PM) local time
-        const scheduleDecember7At2015 = () => {
+        // Schedule one-time season archive PDF generation for December 7th at 20:40 (8:40 PM) local time
+        const scheduleDecember7At2040 = () => {
             const now = new Date();
             const targetDate = new Date();
             targetDate.setMonth(11); // December (0-indexed, so 11 = December)
             targetDate.setDate(7);
-            targetDate.setHours(20, 15, 0, 0); // 20:15 (8:15 PM) on December 7th
+            targetDate.setHours(20, 40, 0, 0); // 20:40 (8:40 PM) on December 7th
             
-            // If it's already past December 7th at 20:15 this year, don't schedule
+            // If it's already past December 7th at 20:40 this year, don't schedule
             if (now >= targetDate) {
-                console.log(`⏭️ December 7th at 20:15 has already passed. Season archive email will not be sent.`);
+                console.log(`⏭️ December 7th at 20:40 has already passed. Season archive email will not be sent.`);
                 return;
             }
             
@@ -279,17 +279,17 @@ app.listen(port, async () => {
             const delayHours = Math.floor((delay % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const delayMinutes = Math.floor((delay % (1000 * 60 * 60)) / (1000 * 60));
             
-            console.log(`📧 Season archive email scheduled for December 7th at 20:15 (in ${delayDays}d ${delayHours}h ${delayMinutes}m)`);
+            console.log(`📧 Season archive email scheduled for December 7th at 20:40 (in ${delayDays}d ${delayHours}h ${delayMinutes}m)`);
             
             setTimeout(async () => {
-                console.log('📧 Running scheduled season archive PDF generation on December 7th at 20:15...');
+                console.log('📧 Running scheduled season archive PDF generation on December 7th at 20:40...');
                 const currentYear = new Date().getFullYear();
-                await processSeasonArchive(currentYear, 'December 7th at 20:15');
+                await processSeasonArchive(currentYear, 'December 7th at 20:40');
             }, delay);
         };
         
-        // Schedule the one-time job for December 7th at 20:15
-        scheduleDecember7At2015();
+        // Schedule the one-time job for December 7th at 20:40
+        scheduleDecember7At2040();
 
         // Schedule season archive PDF generation (run on December 8th at 8am UK time)
         // Note: UK time is GMT in December (UTC+0), so 8am UK = 8am UTC
