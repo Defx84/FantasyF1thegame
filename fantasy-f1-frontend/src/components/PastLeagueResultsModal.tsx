@@ -169,31 +169,23 @@ const PastLeagueResultsModal: React.FC<PastLeagueResultsModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <>
-      {/* Backdrop */}
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* Backdrop with blur */}
       <div
-        className={`fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity duration-300 ${
-          isOpen ? 'opacity-100' : 'opacity-0'
-        }`}
+        className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
         onClick={onClose}
       />
 
-      {/* Centered Modal Overlay */}
+      {/* Centered Semi-Transparent Modal Card */}
       <div
-        className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-300 ${
-          isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
+        className={`relative bg-gray-900/95 backdrop-blur-md rounded-2xl shadow-2xl w-full max-w-6xl max-h-[90vh] border border-white/10 transform transition-all duration-300 ${
+          isOpen ? 'scale-100 translate-y-0 opacity-100' : 'scale-95 translate-y-4 opacity-0'
         }`}
-        onClick={onClose}
+        style={{ overflowY: 'auto' }}
+        onClick={(e) => e.stopPropagation()}
       >
-        <div
-          className={`bg-gray-900 rounded-lg shadow-2xl w-full max-w-6xl max-h-[90vh] transform transition-all duration-300 ${
-            isOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'
-          }`}
-          style={{ overflowY: 'auto' }}
-          onClick={(e) => e.stopPropagation()}
-        >
           {/* Header */}
-          <div className="sticky top-0 bg-gray-800 border-b border-white/10 p-6 flex items-center justify-between z-10 rounded-t-lg">
+          <div className="sticky top-0 bg-gray-800/90 backdrop-blur-sm border-b border-white/10 p-6 flex items-center justify-between z-10 rounded-t-2xl">
             <div>
               <h2 className="text-2xl font-bold text-white">{leagueName}</h2>
               <p className="text-white/70 text-sm mt-1">Season {season} - Final Standings</p>
@@ -246,8 +238,7 @@ const PastLeagueResultsModal: React.FC<PastLeagueResultsModalProps> = ({
             )}
           </div>
         </div>
-      </div>
-    </>
+    </div>
   );
 };
 
