@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { FaTimes, FaTrophy } from 'react-icons/fa';
 import { getLeagueFinalStandings, FinalStandings } from '../services/leagueService';
 import { useAuth } from '../context/AuthContext';
@@ -65,7 +66,7 @@ const PastLeagueResultsModal: React.FC<PastLeagueResultsModalProps> = ({
                   : 'bg-white/10 border border-white/20'
               }`}>
                 <div className="text-3xl mb-2">🥈</div>
-                <div className="font-semibold text-white">{topThree.second.username}</div>
+                <div className="font-semibold text-white break-words px-2">{topThree.second.username}</div>
                 <div className="text-sm text-white/70">{topThree.second.totalPoints} pts</div>
                 {isCurrentUser(topThree.second.user) && (
                   <div className="text-xs text-yellow-400 mt-1">You</div>
@@ -79,7 +80,7 @@ const PastLeagueResultsModal: React.FC<PastLeagueResultsModalProps> = ({
                   : 'bg-white/10 border border-white/20'
               }`}>
                 <div className="text-3xl mb-2">🥇</div>
-                <div className="font-semibold text-white">{topThree.champion.username}</div>
+                <div className="font-semibold text-white break-words px-2">{topThree.champion.username}</div>
                 <div className="text-sm text-white/70">{topThree.champion.totalPoints} pts</div>
                 {isCurrentUser(topThree.champion.user) && (
                   <div className="text-xs text-yellow-400 mt-1">You</div>
@@ -93,7 +94,7 @@ const PastLeagueResultsModal: React.FC<PastLeagueResultsModalProps> = ({
                   : 'bg-white/10 border border-white/20'
               }`}>
                 <div className="text-3xl mb-2">🥉</div>
-                <div className="font-semibold text-white">{topThree.third.username}</div>
+                <div className="font-semibold text-white break-words px-2">{topThree.third.username}</div>
                 <div className="text-sm text-white/70">{topThree.third.totalPoints} pts</div>
                 {isCurrentUser(topThree.third.user) && (
                   <div className="text-xs text-yellow-400 mt-1">You</div>
@@ -168,8 +169,8 @@ const PastLeagueResultsModal: React.FC<PastLeagueResultsModalProps> = ({
 
   if (!isOpen) return null;
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+  const modalContent = (
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4">
       {/* Backdrop with blur */}
       <div
         className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300"
@@ -238,8 +239,12 @@ const PastLeagueResultsModal: React.FC<PastLeagueResultsModalProps> = ({
             )}
           </div>
         </div>
+      </div>
     </div>
   );
+
+  // Use React Portal to render at document body level
+  return createPortal(modalContent, document.body);
 };
 
 export default PastLeagueResultsModal;
