@@ -1,11 +1,14 @@
-FROM node:18-slim
+FROM node:18-alpine
 
 # Install Chromium and minimal Puppeteer dependencies
-RUN apt-get update && apt-get install -y \
+RUN apk add --no-cache \
     chromium \
-    --no-install-recommends && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    nss \
+    freetype \
+    freetype-dev \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont
 
 # Prevent Puppeteer from downloading Chromium again
 ENV PUPPETEER_SKIP_DOWNLOAD=true

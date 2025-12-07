@@ -90,6 +90,7 @@ const NextRaceSelections: React.FC = () => {
       }
       // Fetch current selections
       const currentSelectionsData = round ? await getCurrentSelections(leagueId, round) : null;
+      
 
       setRaceData(raceTiming);
       setRaceStatus(raceTiming.status || null);

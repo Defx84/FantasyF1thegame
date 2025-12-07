@@ -199,40 +199,30 @@ app.listen(port, async () => {
             }
         });
         
-        // Schedule season archive PDF generation (run on Monday, December 8th at 8am UK time)
-        // Note: UK time is GMT in December (UTC+0), so 8am UK = 8am UTC
-        // Cron: minute 0, hour 8, day 8, month 12 (December), any day of week
-        // This will run on December 8th at 8am UTC, but only process the current year's season
-        cron.schedule('0 8 8 12 *', async () => {
-            console.log('📧 Running scheduled season archive PDF generation on December 8th at 8am UTC...');
+        // Helper function to process season archive for completed leagues
+        const processSeasonArchive = async (season, triggerReason = 'scheduled') => {
             try {
                 const { isSeasonComplete, updateLeagueWithFinalStandings } = require('./controllers/seasonController');
                 const League = require('./models/League');
                 
-                const currentYear = new Date().getFullYear();
-                const season = currentYear;
-                
-                // Verify we're actually on December 8th (cron should handle this, but double-check)
-                const today = new Date();
-                if (today.getDate() !== 8 || today.getMonth() !== 11) { // Month is 0-indexed, so 11 = December
-                    console.log(`⏭️ Skipping - today is not December 8th (current date: ${today.toDateString()})`);
-                    return;
-                }
-                
-                console.log(`📅 Processing season ${season} archive on December 8th, ${currentYear}`);
+                console.log(`📅 Processing season ${season} archive (triggered by: ${triggerReason})`);
                 const seasonComplete = await isSeasonComplete(season);
                 
                 if (seasonComplete) {
                     console.log(`🏁 Season ${season} is complete! Processing final standings for all leagues...`);
                     
-                    // Get all active leagues for this season that haven't been processed yet
-                    // The seasonStatus check ensures we only process each league once
+                    // Get all leagues for this season that haven't been processed yet
+                    // Note: We check for leagues that are either active OR already completed but don't have finalStandings
+                    // This allows re-processing if needed, but the email will only be sent once per league
                     const leagues = await League.find({ 
                         season: season,
-                        seasonStatus: { $ne: 'completed' } // Only process leagues that aren't already completed
+                        $or: [
+                            { seasonStatus: { $ne: 'completed' } },
+                            { finalStandings: { $exists: false } }
+                        ]
                     });
                     
-                    console.log(`📊 Found ${leagues.length} leagues to process for season completion`);
+                    console.log(`📊 Found ${leagues.length} league(s) to process for season completion`);
                     
                     // Process each league
                     let successCount = 0;
@@ -240,7 +230,7 @@ app.listen(port, async () => {
                     for (const league of leagues) {
                         try {
                             console.log(`📄 Processing season completion for league: ${league.name} (${league._id})`);
-                            await updateLeagueWithFinalStandings(league._id, season);
+                            await updateLeagueWithFinalStandings(league._id, season, false); // false = send emails
                             console.log(`✅ Season completion processed for league: ${league.name}`);
                             successCount++;
                         } catch (leagueError) {
@@ -253,6 +243,7 @@ app.listen(port, async () => {
                     console.log(`🏁 Season ${season} completion processing finished: ${successCount} successful, ${errorCount} errors`);
                 } else {
                     // Check how many races are left
+                    const RaceResult = require('./models/RaceResult');
                     const allRaces = await RaceResult.find({ season });
                     const completedRaces = allRaces.filter(r => r.status === 'completed').length;
                     const totalRaces = allRaces.length;
@@ -261,6 +252,51 @@ app.listen(port, async () => {
             } catch (error) {
                 console.error('❌ Error during season archive PDF generation:', error);
             }
+        };
+
+        // Schedule one-time season archive PDF generation for today at 20:00 (8 PM) local time
+        const scheduleTodayAt20 = () => {
+            const now = new Date();
+            const today = new Date();
+            today.setHours(20, 0, 0, 0); // 20:00 (8 PM) today
+            
+            // If it's already past 20:00 today, schedule for tomorrow
+            if (now >= today) {
+                today.setDate(today.getDate() + 1);
+            }
+            
+            const delay = today.getTime() - now.getTime();
+            const delayHours = Math.floor(delay / (1000 * 60 * 60));
+            const delayMinutes = Math.floor((delay % (1000 * 60 * 60)) / (1000 * 60));
+            
+            console.log(`📧 Season archive email scheduled for today at 20:00 (in ${delayHours}h ${delayMinutes}m)`);
+            
+            setTimeout(async () => {
+                console.log('📧 Running scheduled season archive PDF generation at 20:00...');
+                const currentYear = new Date().getFullYear();
+                await processSeasonArchive(currentYear, 'today at 20:00');
+            }, delay);
+        };
+        
+        // Schedule the one-time job for today
+        scheduleTodayAt20();
+
+        // Schedule season archive PDF generation (run on December 8th at 8am UK time)
+        // Note: UK time is GMT in December (UTC+0), so 8am UK = 8am UTC
+        // Cron: minute 0, hour 8, day 8, month 12 (December), any day of week
+        // This will run on December 8th at 8am UTC, but only process the current year's season
+        cron.schedule('0 8 8 12 *', async () => {
+            console.log('📧 Running scheduled season archive PDF generation on December 8th at 8am UTC...');
+            const currentYear = new Date().getFullYear();
+            const today = new Date();
+            
+            // Verify we're actually on December 8th (cron should handle this, but double-check)
+            if (today.getDate() !== 8 || today.getMonth() !== 11) { // Month is 0-indexed, so 11 = December
+                console.log(`⏭️ Skipping - today is not December 8th (current date: ${today.toDateString()})`);
+                return;
+            }
+            
+            await processSeasonArchive(currentYear, 'December 8th at 8am UTC');
         });
         
         // Schedule one-time slug discovery for 12:30 GMT

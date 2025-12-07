@@ -7,6 +7,7 @@ export interface UsedSelections {
   usedTeams: string[];
 }
 
+
 export interface Selection {
   mainDriver: string | null;
   reserveDriver: string | null;
@@ -68,6 +69,7 @@ export const getUsedSelections = async (leagueId: string, round: number, userId?
     throw new Error(error.response?.data?.message || 'Failed to get used selections');
   }
 };
+
 
 export const saveSelections = async (selections: Selection, leagueId: string): Promise<void> => {
   try {

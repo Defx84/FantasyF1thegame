@@ -82,8 +82,11 @@ const getFinalStandings = async (leagueId, season) => {
 
 /**
  * Update league with final standings
+ * @param {string} leagueId - The league ID
+ * @param {number} season - The season year
+ * @param {boolean} skipEmail - If true, skip PDF generation and email sending (default: false)
  */
-const updateLeagueWithFinalStandings = async (leagueId, season) => {
+const updateLeagueWithFinalStandings = async (leagueId, season, skipEmail = false) => {
     try {
         // Get final standings
         const finalStandings = await getFinalStandings(leagueId, season);
@@ -101,16 +104,20 @@ const updateLeagueWithFinalStandings = async (leagueId, season) => {
             { new: true }
         );
 
-        // --- NEW: Generate and email season archive PDF ---
-        try {
-            const seasonData = await getSeasonArchiveData(leagueId, season);
-            const pdfBuffer = await generateSeasonArchivePdf(seasonData.league, seasonData);
-            await sendSeasonArchiveToLeague(seasonData.league, pdfBuffer);
-            console.log(`[Season Archive] PDF sent to league members for league ${league.name} (season ${season})`);
-        } catch (archiveErr) {
-            console.error('[Season Archive] Failed to generate or send PDF:', archiveErr);
+        // --- Generate and email season archive PDF (unless skipped) ---
+        if (!skipEmail) {
+            try {
+                const seasonData = await getSeasonArchiveData(leagueId, season);
+                const pdfBuffer = await generateSeasonArchivePdf(seasonData.league, seasonData);
+                await sendSeasonArchiveToLeague(seasonData.league, pdfBuffer);
+                console.log(`[Season Archive] PDF sent to league members for league ${league.name} (season ${season})`);
+            } catch (archiveErr) {
+                console.error('[Season Archive] Failed to generate or send PDF:', archiveErr);
+            }
+        } else {
+            console.log(`[Season Archive] Skipping PDF generation and email for league ${league.name} (season ${season})`);
         }
-        // --- END NEW ---
+        // --- END PDF/Email logic ---
 
         return league;
     } catch (error) {

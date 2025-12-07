@@ -172,70 +172,79 @@ const PastLeagueResultsModal: React.FC<PastLeagueResultsModalProps> = ({
     <>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity"
+        className={`fixed inset-0 bg-black bg-opacity-50 z-50 transition-opacity duration-300 ${
+          isOpen ? 'opacity-100' : 'opacity-0'
+        }`}
         onClick={onClose}
       />
 
-      {/* Sliding Panel - slides from left to right */}
+      {/* Centered Modal Overlay */}
       <div
-        className={`fixed top-0 left-0 h-full w-full md:w-2/3 lg:w-1/2 bg-gray-900 z-50 shadow-2xl transform transition-transform duration-300 ease-out ${
-          isOpen ? 'translate-x-0' : '-translate-x-full'
+        className={`fixed inset-0 z-50 flex items-center justify-center p-4 transition-opacity duration-300 ${
+          isOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'
         }`}
-        style={{ overflowY: 'auto' }}
-        onClick={(e) => e.stopPropagation()}
+        onClick={onClose}
       >
-        {/* Header */}
-        <div className="sticky top-0 bg-gray-800 border-b border-white/10 p-6 flex items-center justify-between z-10">
-          <div>
-            <h2 className="text-2xl font-bold text-white">{leagueName}</h2>
-            <p className="text-white/70 text-sm mt-1">Season {season} - Final Standings</p>
+        <div
+          className={`bg-gray-900 rounded-lg shadow-2xl w-full max-w-6xl max-h-[90vh] transform transition-all duration-300 ${
+            isOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'
+          }`}
+          style={{ overflowY: 'auto' }}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Header */}
+          <div className="sticky top-0 bg-gray-800 border-b border-white/10 p-6 flex items-center justify-between z-10 rounded-t-lg">
+            <div>
+              <h2 className="text-2xl font-bold text-white">{leagueName}</h2>
+              <p className="text-white/70 text-sm mt-1">Season {season} - Final Standings</p>
+            </div>
+            <button
+              onClick={onClose}
+              className="text-white/70 hover:text-white transition-colors p-2 hover:bg-white/10 rounded"
+              aria-label="Close"
+            >
+              <IconWrapper icon={FaTimes} size={24} />
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="text-white/70 hover:text-white transition-colors p-2 hover:bg-white/10 rounded"
-            aria-label="Close"
-          >
-            <IconWrapper icon={FaTimes} size={24} />
-          </button>
-        </div>
 
-        {/* Content */}
-        <div className="p-6">
-          {loading && (
-            <div className="flex items-center justify-center py-12">
-              <div className="text-white/70">Loading final standings...</div>
-            </div>
-          )}
+          {/* Content */}
+          <div className="p-6">
+            {loading && (
+              <div className="flex items-center justify-center py-12">
+                <div className="text-white/70">Loading final standings...</div>
+              </div>
+            )}
 
-          {error && (
-            <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mb-6">
-              <p className="text-red-400">{error}</p>
-            </div>
-          )}
+            {error && (
+              <div className="bg-red-500/20 border border-red-500/50 rounded-lg p-4 mb-6">
+                <p className="text-red-400">{error}</p>
+              </div>
+            )}
 
-          {standings && !loading && (
-            <>
-              {renderStandingsTable(
-                'Driver Championship',
-                standings.finalStandings.driverChampionship.standings,
-                {
-                  champion: standings.finalStandings.driverChampionship.champion,
-                  second: standings.finalStandings.driverChampionship.second,
-                  third: standings.finalStandings.driverChampionship.third
-                }
-              )}
+            {standings && !loading && (
+              <>
+                {renderStandingsTable(
+                  'Driver Championship',
+                  standings.finalStandings.driverChampionship.standings,
+                  {
+                    champion: standings.finalStandings.driverChampionship.champion,
+                    second: standings.finalStandings.driverChampionship.second,
+                    third: standings.finalStandings.driverChampionship.third
+                  }
+                )}
 
-              {renderStandingsTable(
-                'Constructor Championship',
-                standings.finalStandings.constructorChampionship.standings,
-                {
-                  champion: standings.finalStandings.constructorChampionship.champion,
-                  second: standings.finalStandings.constructorChampionship.second,
-                  third: standings.finalStandings.constructorChampionship.third
-                }
-              )}
-            </>
-          )}
+                {renderStandingsTable(
+                  'Constructor Championship',
+                  standings.finalStandings.constructorChampionship.standings,
+                  {
+                    champion: standings.finalStandings.constructorChampionship.champion,
+                    second: standings.finalStandings.constructorChampionship.second,
+                    third: standings.finalStandings.constructorChampionship.third
+                  }
+                )}
+              </>
+            )}
+          </div>
         </div>
       </div>
     </>
