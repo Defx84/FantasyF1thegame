@@ -240,7 +240,6 @@ const PastLeagueResultsModal: React.FC<PastLeagueResultsModalProps> = ({
           </div>
         </div>
       </div>
-    </div>
   );
 
   // Use React Portal to render at document body level
