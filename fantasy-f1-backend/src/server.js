@@ -211,36 +211,42 @@ app.listen(port, async () => {
                 if (seasonComplete) {
                     console.log(`🏁 Season ${season} is complete! Processing final standings for all leagues...`);
                     
-                    // Get all leagues for this season that haven't been processed yet
-                    // Note: We check for leagues that are either active OR already completed but don't have finalStandings
-                    // This allows re-processing if needed, but the email will only be sent once per league
+                    // Get all completed leagues for this season that have finalStandings
+                    // This will send emails to all completed leagues
                     const leagues = await League.find({ 
                         season: season,
-                        $or: [
-                            { seasonStatus: { $ne: 'completed' } },
-                            { finalStandings: { $exists: false } }
-                        ]
-                    });
+                        seasonStatus: 'completed',
+                        finalStandings: { $exists: true }
+                    }).populate('members', 'email username');
                     
-                    console.log(`📊 Found ${leagues.length} league(s) to process for season completion`);
+                    console.log(`📊 Found ${leagues.length} completed league(s) to send season archive emails`);
                     
-                    // Process each league
+                    // Process each league - send emails only (don't update standings again)
                     let successCount = 0;
                     let errorCount = 0;
                     for (const league of leagues) {
                         try {
-                            console.log(`📄 Processing season completion for league: ${league.name} (${league._id})`);
-                            await updateLeagueWithFinalStandings(league._id, season, false); // false = send emails
-                            console.log(`✅ Season completion processed for league: ${league.name}`);
+                            console.log(`📄 Sending season archive email for league: ${league.name} (${league._id})`);
+                            
+                            // Generate and send PDF without updating standings again
+                            const { getSeasonArchiveData } = require('./utils/seasonArchiveData');
+                            const { generateSeasonArchivePdf } = require('./utils/seasonArchivePdf');
+                            const { sendSeasonArchiveToLeague } = require('./utils/email');
+                            
+                            const seasonData = await getSeasonArchiveData(league._id, season);
+                            const pdfBuffer = await generateSeasonArchivePdf(seasonData.league, seasonData);
+                            await sendSeasonArchiveToLeague(seasonData.league, pdfBuffer);
+                            
+                            console.log(`✅ Season archive email sent for league: ${league.name}`);
                             successCount++;
                         } catch (leagueError) {
-                            console.error(`❌ Error processing season completion for league ${league.name}:`, leagueError);
+                            console.error(`❌ Error sending season archive email for league ${league.name}:`, leagueError);
                             errorCount++;
                             // Continue with other leagues even if one fails
                         }
                     }
                     
-                    console.log(`🏁 Season ${season} completion processing finished: ${successCount} successful, ${errorCount} errors`);
+                    console.log(`🏁 Season ${season} archive email processing finished: ${successCount} successful, ${errorCount} errors`);
                 } else {
                     // Check how many races are left
                     const RaceResult = require('./models/RaceResult');
@@ -254,32 +260,36 @@ app.listen(port, async () => {
             }
         };
 
-        // Schedule one-time season archive PDF generation for today at 20:00 (8 PM) local time
-        const scheduleTodayAt20 = () => {
+        // Schedule one-time season archive PDF generation for December 7th at 20:15 (8:15 PM) local time
+        const scheduleDecember7At2015 = () => {
             const now = new Date();
-            const today = new Date();
-            today.setHours(20, 0, 0, 0); // 20:00 (8 PM) today
+            const targetDate = new Date();
+            targetDate.setMonth(11); // December (0-indexed, so 11 = December)
+            targetDate.setDate(7);
+            targetDate.setHours(20, 15, 0, 0); // 20:15 (8:15 PM) on December 7th
             
-            // If it's already past 20:00 today, schedule for tomorrow
-            if (now >= today) {
-                today.setDate(today.getDate() + 1);
+            // If it's already past December 7th at 20:15 this year, don't schedule
+            if (now >= targetDate) {
+                console.log(`⏭️ December 7th at 20:15 has already passed. Season archive email will not be sent.`);
+                return;
             }
             
-            const delay = today.getTime() - now.getTime();
-            const delayHours = Math.floor(delay / (1000 * 60 * 60));
+            const delay = targetDate.getTime() - now.getTime();
+            const delayDays = Math.floor(delay / (1000 * 60 * 60 * 24));
+            const delayHours = Math.floor((delay % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
             const delayMinutes = Math.floor((delay % (1000 * 60 * 60)) / (1000 * 60));
             
-            console.log(`📧 Season archive email scheduled for today at 20:00 (in ${delayHours}h ${delayMinutes}m)`);
+            console.log(`📧 Season archive email scheduled for December 7th at 20:15 (in ${delayDays}d ${delayHours}h ${delayMinutes}m)`);
             
             setTimeout(async () => {
-                console.log('📧 Running scheduled season archive PDF generation at 20:00...');
+                console.log('📧 Running scheduled season archive PDF generation on December 7th at 20:15...');
                 const currentYear = new Date().getFullYear();
-                await processSeasonArchive(currentYear, 'today at 20:00');
+                await processSeasonArchive(currentYear, 'December 7th at 20:15');
             }, delay);
         };
         
-        // Schedule the one-time job for today
-        scheduleTodayAt20();
+        // Schedule the one-time job for December 7th at 20:15
+        scheduleDecember7At2015();
 
         // Schedule season archive PDF generation (run on December 8th at 8am UK time)
         // Note: UK time is GMT in December (UTC+0), so 8am UK = 8am UTC
