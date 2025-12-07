@@ -411,6 +411,12 @@ raceResultSchema.post('save', async function(doc) {
           continue;
         }
 
+        // Skip empty selections (no drivers or team selected)
+        if (!selection.mainDriver || !selection.reserveDriver || !selection.team) {
+          noSelectionCount++;
+          continue;
+        }
+
         // Calculate new points
         const pointsData = scoringService.calculateRacePoints({
           mainDriver: selection.mainDriver,
@@ -476,7 +482,8 @@ raceResultSchema.post('save', async function(doc) {
           selection.points = pointsData.totalPoints;
           selection.pointBreakdown = pointsData.breakdown;
           selection.status = 'admin-assigned';
-          selection.isAdminAssigned = true;
+          // Note: Not setting isAdminAssigned=true for automated assignments
+          // as it requires assignedBy field which we don't have for automated process
           selection.assignedAt = new Date();
           await selection.save();
           updatedCount++;

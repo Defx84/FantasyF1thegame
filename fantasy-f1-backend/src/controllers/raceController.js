@@ -353,6 +353,12 @@ const updateRaceResults = async (req, res) => {
                 });
                 if (!selection) continue;
                 
+                // Skip empty selections (no drivers or team selected)
+                if (!selection.mainDriver || !selection.reserveDriver || !selection.team) {
+                    console.log(`[AutoAssign] Skipping ${member.username} - empty selection (no drivers/team selected)`);
+                    continue;
+                }
+                
                 // FIXED: Handle both 'empty' and 'user-submitted' statuses for automation
                 if (!selection.pointBreakdown || selection.status === 'empty' || selection.status === 'user-submitted') {
                     console.log(`[AutoAssign] Processing selection for user ${member.username} (status: ${selection.status})`);
@@ -364,7 +370,8 @@ const updateRaceResults = async (req, res) => {
                     selection.points = pointsData.totalPoints;
                     selection.pointBreakdown = pointsData.breakdown;
                     selection.status = 'admin-assigned';
-                    selection.isAdminAssigned = true;
+                    // Note: Not setting isAdminAssigned=true for automated assignments
+                    // as it requires assignedBy field which we don't have for automated process
                     selection.assignedAt = new Date();
                     await selection.save();
                     updatedCount++;
