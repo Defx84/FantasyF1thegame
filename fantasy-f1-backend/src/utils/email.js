@@ -165,7 +165,11 @@ const sendSeasonArchiveToLeague = async (league, pdfBuffer) => {
         console.log(`[Season Archive] ✅ PDF sent to ${email}`);
         return data;
       } catch (error) {
-        console.error(`[Season Archive] ❌ Failed to send PDF to ${email}:`, error.message);
+        const errorMessage = error?.message || error?.error?.message || JSON.stringify(error) || 'Unknown error';
+        console.error(`[Season Archive] ❌ Failed to send PDF to ${email}:`, errorMessage);
+        if (error?.response) {
+          console.error(`[Season Archive] Error response:`, JSON.stringify(error.response, null, 2));
+        }
         // Don't throw - continue with other emails even if one fails
         return null;
       }

@@ -243,10 +243,27 @@ async function generateChampionshipChartImage(leagueId, season, type = 'driver')
     const browser = await puppeteer.launch(launchOptions);
     const page = await browser.newPage();
     await page.setViewport({ width: 800, height: 450 });
-    await page.setContent(chartHtml, { waitUntil: 'networkidle0' });
     
-    // Wait for chart to render
-    await page.waitForTimeout(1000);
+    // Set a longer timeout for chart generation
+    page.setDefaultTimeout(60000); // 60 seconds
+    
+    // Use domcontentloaded instead of networkidle0 for faster loading
+    await page.setContent(chartHtml, { waitUntil: 'domcontentloaded', timeout: 60000 });
+    
+    // Wait for chart to render (check if chart element exists and has content)
+    try {
+      await page.waitForFunction(
+        () => {
+          const canvas = document.getElementById('chart');
+          return canvas && canvas.width > 0 && canvas.height > 0;
+        },
+        { timeout: 30000 }
+      );
+    } catch (waitError) {
+      // If chart doesn't render in time, wait a bit more and continue
+      console.warn('[PDF Generation] Chart rendering timeout, waiting additional 2 seconds...');
+      await page.waitForTimeout(2000);
+    }
     
     // Capture chart as image
     const imageBuffer = await page.screenshot({ 
@@ -361,7 +378,16 @@ async function generateSeasonArchivePdf(league, seasonData, outputPath = null) {
   const launchOptions = executablePath ? { executablePath } : {};
   const browser = await puppeteer.launch(launchOptions);
   const page = await browser.newPage();
-  await page.setContent(html, { waitUntil: 'networkidle0' });
+  
+  // Set a longer timeout for PDF generation
+  page.setDefaultTimeout(60000); // 60 seconds
+  
+  // Use domcontentloaded instead of networkidle0 for faster loading
+  await page.setContent(html, { waitUntil: 'domcontentloaded', timeout: 60000 });
+  
+  // Wait a bit for any images to load
+  await page.waitForTimeout(2000);
+  
   const pdfBuffer = await page.pdf({ format: 'A4' });
 
   await browser.close();
