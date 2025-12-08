@@ -140,8 +140,14 @@ const sendSeasonArchiveToLeague = async (league, pdfBuffer) => {
     // Send email to each member individually
     // MailerSend attachment format: { filename, content (base64 string) }
     const filename = `${league.name.replace(/[^a-z0-9]/gi, '_')}_Season_${season}_Archive.pdf`;
+    
+    console.log(`[Season Archive] Sending emails to ${memberEmails.length} recipients...`);
+    console.log(`[Season Archive] PDF size: ${(pdfBuffer.length / 1024 / 1024).toFixed(2)} MB`);
+    
     const emailPromises = memberEmails.map(async (email) => {
       try {
+        console.log(`[Season Archive] 📧 Sending email to ${email}...`);
+        
         const data = await mailerSend.email.send({
           from: {
             email: 'noreply@thefantasyf1game.com',
@@ -162,14 +168,25 @@ const sendSeasonArchiveToLeague = async (league, pdfBuffer) => {
             }
           ]
         });
+        
         console.log(`[Season Archive] ✅ PDF sent to ${email}`);
         return data;
       } catch (error) {
-        const errorMessage = error?.message || error?.error?.message || JSON.stringify(error) || 'Unknown error';
+        // Better error handling matching the sendEmail function pattern
+        const errorMessage = error?.message || error?.error?.message || error?.toString() || 'Unknown error';
         console.error(`[Season Archive] ❌ Failed to send PDF to ${email}:`, errorMessage);
+        
+        // Log full error details for debugging
         if (error?.response) {
           console.error(`[Season Archive] Error response:`, JSON.stringify(error.response, null, 2));
         }
+        if (error?.error) {
+          console.error(`[Season Archive] Error details:`, JSON.stringify(error.error, null, 2));
+        }
+        if (error?.body) {
+          console.error(`[Season Archive] Error body:`, JSON.stringify(error.body, null, 2));
+        }
+        
         // Don't throw - continue with other emails even if one fails
         return null;
       }

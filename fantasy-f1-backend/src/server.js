@@ -260,36 +260,28 @@ app.listen(port, async () => {
             }
         };
 
-        // Schedule one-time season archive PDF generation for December 7th at 20:40 (8:40 PM) local time
-        const scheduleDecember7At2040 = () => {
-            const now = new Date();
-            const targetDate = new Date();
-            targetDate.setMonth(11); // December (0-indexed, so 11 = December)
-            targetDate.setDate(7);
-            targetDate.setHours(20, 40, 0, 0); // 20:40 (8:40 PM) on December 7th
-            
-            // If it's already past December 7th at 20:40 this year, don't schedule
-            if (now >= targetDate) {
-                console.log(`⏭️ December 7th at 20:40 has already passed. Season archive email will not be sent.`);
-                return;
-            }
-            
-            const delay = targetDate.getTime() - now.getTime();
-            const delayDays = Math.floor(delay / (1000 * 60 * 60 * 24));
-            const delayHours = Math.floor((delay % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const delayMinutes = Math.floor((delay % (1000 * 60 * 60)) / (1000 * 60));
-            
-            console.log(`📧 Season archive email scheduled for December 7th at 20:40 (in ${delayDays}d ${delayHours}h ${delayMinutes}m)`);
-            
-            setTimeout(async () => {
-                console.log('📧 Running scheduled season archive PDF generation on December 7th at 20:40...');
+        // Schedule season archive PDF generation for December 7th at 20:40 (8:40 PM) local time
+        // Using cron for reliability (runs daily, but only processes on December 7th)
+        // Cron: minute 40, hour 20, day 7, month 12 (December), any day of week
+        cron.schedule('40 20 7 12 *', async () => {
+            console.log('📧 Running scheduled season archive PDF generation on December 7th at 20:40...');
+            try {
                 const currentYear = new Date().getFullYear();
-                await processSeasonArchive(currentYear, 'December 7th at 20:40');
-            }, delay);
-        };
+                const today = new Date();
+                
+                // Verify we're actually on December 7th (cron should handle this, but double-check)
+                if (today.getDate() !== 7 || today.getMonth() !== 11) { // Month is 0-indexed, so 11 = December
+                    console.log(`⏭️ Skipping - today is not December 7th (current date: ${today.toDateString()})`);
+                    return;
+                }
+                
+                await processSeasonArchive(currentYear, 'December 7th at 20:40 (cron)');
+            } catch (error) {
+                console.error('❌ Error during scheduled season archive generation:', error);
+            }
+        });
         
-        // Schedule the one-time job for December 7th at 20:40
-        scheduleDecember7At2040();
+        console.log('📧 Season archive email scheduled via cron for December 7th at 20:40');
 
         // Schedule season archive PDF generation (run on December 8th at 8am UK time)
         // Note: UK time is GMT in December (UTC+0), so 8am UK = 8am UTC
