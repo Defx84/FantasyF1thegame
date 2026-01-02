@@ -56,17 +56,18 @@ const Welcome: React.FC = () => {
       <div 
         className="fixed inset-0 w-full h-full"
         style={{
-          backgroundImage: 'url("/background1.png")',
+          backgroundImage: 'url("/Bacgkground_Ultrawide.png")',
           backgroundSize: 'cover',
-          backgroundPosition: 'center bottom',
-          backgroundRepeat: 'no-repeat'
+          backgroundPosition: 'center center',
+          backgroundRepeat: 'no-repeat',
+          backgroundColor: '#000000'
         }}
       />
 
       {/* Content wrapper */}
-      <div className="relative min-h-screen flex flex-col md:flex-row">
+      <div className="relative h-screen overflow-hidden flex flex-col md:flex-row">
         {/* Semi-transparent overlay */}
-        <div className="absolute inset-0 bg-black bg-opacity-30" />
+        <div className="absolute inset-0 bg-black bg-opacity-30 pointer-events-none" />
 
         {/* Login container */}
         <div className="relative z-10 w-full md:w-[400px] p-4 md:p-8 flex items-center">
@@ -75,7 +76,7 @@ const Welcome: React.FC = () => {
               <h1 className="flex flex-col gap-2">
                 <span className="text-xl font-medium text-white/80">Welcome to</span>
                 <span className="text-3xl font-bold animate-pulse drop-shadow-[0_0_10px_rgba(239,68,68,0.7)] [text-shadow:_2px_2px_0_rgb(0_0_0),_-2px_-2px_0_rgb(0_0_0),_2px_-2px_0_rgb(0_0_0),_-2px_2px_0_rgb(0_0_0)]">
-                  <span className="text-white">TheFantasy</span>
+                  <span className="text-white">theFantasy</span>
                   <span className="text-red-500">F1</span>
                   <span className="text-white">game</span>
                 </span>
@@ -192,33 +193,40 @@ const Welcome: React.FC = () => {
           </div>
         </div>
 
-        {/* Feature boxes container */}
+        {/* Feature boxes container - positioned at three locations with consistent spacing */}
         <div className="hidden md:block flex-grow relative z-10">
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2">
-            <div className="flex gap-12">
-              <FeatureBox
-                icon={TypedChartIcon}
-                title="Track Performance"
-                description="Get detailed stats and insights"
-              />
-              <FeatureBox
-                icon={TypedTrophyIcon}
-                title="Compete & Win"
-                description="Join leagues and climb the leaderboard"
-              />
-              <FeatureBox
-                icon={TypedCarIcon}
-                title="Race Strategy"
-                description="Make decisions based on live data"
-              />
-            </div>
+          {/* Top-right box - 25% from top */}
+          <div className="absolute right-8" style={{ top: '25%', transform: 'translateY(-50%)' }}>
+            <FeatureBox
+              icon={TypedChartIcon}
+              title="Track Performance"
+              description="Get detailed stats and insights"
+            />
+          </div>
+          
+          {/* Middle-right box - 50% from top (centered) */}
+          <div className="absolute top-1/2 right-8 -translate-y-1/2">
+            <FeatureBox
+              icon={TypedTrophyIcon}
+              title="Compete & Win"
+              description="Join leagues and climb the leaderboard"
+            />
+          </div>
+          
+          {/* Bottom-right box - 75% from top */}
+          <div className="absolute right-8" style={{ top: '75%', transform: 'translateY(-50%)' }}>
+            <FeatureBox
+              icon={TypedCarIcon}
+              title="Race Strategy"
+              description="Make decisions based on live data"
+            />
           </div>
         </div>
-      </div>
-      
-      {/* Footer - positioned outside main flex container for proper mobile display */}
-      <div className="relative z-10">
-        <Footer />
+        
+        {/* Footer - positioned inside main container */}
+        <div className="absolute bottom-0 left-0 right-0 z-10">
+          <Footer />
+        </div>
       </div>
     </>
   );
