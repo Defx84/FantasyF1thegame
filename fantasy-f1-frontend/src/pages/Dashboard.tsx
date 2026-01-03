@@ -120,9 +120,9 @@ const Dashboard: React.FC = () => {
       <div 
         className="fixed inset-0 w-full h-full"
         style={{
-          backgroundImage: 'url("/background1.png")',
+          backgroundImage: 'url("/Background_dashboard.png")',
           backgroundSize: 'cover',
-          backgroundPosition: 'center bottom',
+          backgroundPosition: 'center center',
           backgroundRepeat: 'no-repeat'
         }}
       />
@@ -164,31 +164,35 @@ const Dashboard: React.FC = () => {
           </div>
 
           {/* Main content area */}
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-6xl mx-auto pt-16 md:pt-24">
             {/* Menu block */}
             <div className="backdrop-blur-sm bg-white/[0.02] rounded-xl p-8 border border-white/10 mb-12">
-              {/* Main header with Instagram icon aligned right */}
-              <div className="flex items-center justify-center mb-12 gap-4 relative">
-                <h1 className="flex items-center mx-auto max-w-xs sm:max-w-md md:max-w-2xl text-3xl sm:text-4xl md:text-5xl font-bold text-white text-center tracking-wider break-words">
-                  <span className="text-white">TheFantasy</span><span className="text-red-500">F1</span><span className="text-white">game</span>
+              {/* Action buttons */}
+              <div className="flex flex-col sm:flex-row justify-center gap-4 w-full">
+                {/* Instagram icon button */}
+                <div className="card-container w-full sm:w-40 h-16 mb-2 sm:mb-0">
                   <a
                     href="https://instagram.com/thefantasyf1game"
                     target="_blank"
                     rel="noopener noreferrer"
                     aria-label="Instagram @thefantasyf1game"
-                    className="ml-3 align-middle"
                     title="Follow us on Instagram"
+                    className="card-flip-half bg-red-500 text-white rounded-xl w-full h-full block"
                   >
-                    <TypedInstagramIcon
-                      size={28}
-                      className="text-pink-500 hover:scale-110 transition-transform duration-150"
-                    />
+                    <div className="card-front-half absolute inset-0 flex flex-row items-center justify-center p-6">
+                      <TypedInstagramIcon
+                        size={24}
+                        className="text-white"
+                      />
+                    </div>
+                    <div className="card-back-half absolute inset-0 flex flex-row items-center justify-center p-6">
+                      <TypedInstagramIcon
+                        size={20}
+                        className="text-white"
+                      />
+                    </div>
                   </a>
-                </h1>
-              </div>
-
-              {/* Action buttons */}
-              <div className="flex flex-col sm:flex-row justify-center gap-4 w-full">
+                </div>
                 <div className="card-container w-full sm:w-40 h-16 mb-2 sm:mb-0">
                 <button
                   onClick={() => handleTabAndScroll('create-league', setShowCreateLeagueForm)}
