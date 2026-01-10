@@ -1,0 +1,5804 @@
+{
+  "simulationDate": "2026-01-06T21:24:05.929Z",
+  "league": {
+    "id": "695d7bbb8f13ea88601e7efe",
+    "name": "Full Season Test 2026-01-06",
+    "season": 2026
+  },
+  "summary": {
+    "totalRaces": 24,
+    "totalPlayers": 6,
+    "sprintWeekends": 6,
+    "regularWeekends": 18
+  },
+  "players": [
+    {
+      "username": "full_season_1767734198761_1",
+      "deck": {
+        "driverCards": 7,
+        "teamCards": 5,
+        "driverSlots": 12,
+        "teamSlots": 10
+      },
+      "cardUsage": {
+        "driverCardsUsed": 7,
+        "teamCardsUsed": 5,
+        "activations": [
+          {
+            "round": 1,
+            "raceName": "Australian Grand Prix",
+            "driverCard": {
+              "name": "Competitiveness",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": {
+              "original": "Random",
+              "transformed": "Participating Trophy",
+              "type": "random"
+            },
+            "transformations": {
+              "random": "Participating Trophy"
+            }
+          },
+          {
+            "round": 3,
+            "raceName": "Japanese Grand Prix",
+            "driverCard": {
+              "name": "+3 Points",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Undercut",
+              "tier": "silver",
+              "target": null
+            },
+            "transformations": {}
+          },
+          {
+            "round": 4,
+            "raceName": "Bahrain Grand Prix",
+            "driverCard": {
+              "name": "2× Points",
+              "tier": "gold",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Last Place Bonus",
+              "tier": "bronze",
+              "target": null
+            },
+            "transformations": {}
+          },
+          {
+            "round": 5,
+            "raceName": "Saudi Arabian Grand Prix",
+            "driverCard": {
+              "name": "Teamwork",
+              "tier": "silver",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Podium",
+              "tier": "gold",
+              "target": null
+            },
+            "transformations": {}
+          },
+          {
+            "round": 8,
+            "raceName": "Monaco Grand Prix",
+            "driverCard": {
+              "name": "Top 10 Boost",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Sponsors",
+              "tier": "bronze",
+              "target": null
+            },
+            "transformations": {}
+          },
+          {
+            "round": 9,
+            "raceName": "Spanish Grand Prix",
+            "driverCard": {
+              "original": "Mystery Card",
+              "transformed": "2× Points",
+              "type": "mystery"
+            },
+            "teamCard": null,
+            "transformations": {
+              "mystery": "2× Points"
+            }
+          },
+          {
+            "round": 10,
+            "raceName": "Austrian Grand Prix",
+            "driverCard": {
+              "name": "Top 5 Boost",
+              "tier": "silver",
+              "target": null
+            },
+            "teamCard": null,
+            "transformations": {}
+          }
+        ]
+      },
+      "standings": {
+        "driver": {
+          "totalPoints": 0,
+          "races": 0
+        },
+        "team": {
+          "totalPoints": 0,
+          "races": 0
+        }
+      },
+      "statistics": {
+        "totalPoints": 0,
+        "averagePoints": 0,
+        "raceHistory": [
+          {
+            "_id": "695d7bf555288fe863623cb6",
+            "round": 1,
+            "mainDriver": "L. Norris",
+            "points": 0,
+            "reserveDriver": "O. Piastri",
+            "status": "empty",
+            "team": "Williams"
+          },
+          {
+            "_id": "695d7bfd55288fe863623d46",
+            "round": 1,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf655288fe863623cb7",
+            "round": 2,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfe55288fe863623d4c",
+            "round": 2,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfe55288fe863623d52",
+            "round": 3,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf655288fe863623cba",
+            "round": 3,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfe55288fe863623d58",
+            "round": 4,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf655288fe863623cbf",
+            "round": 4,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf755288fe863623cc6",
+            "round": 5,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfe55288fe863623d5e",
+            "round": 5,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf755288fe863623cce",
+            "round": 6,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bff55288fe863623d64",
+            "round": 6,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bff55288fe863623d6a",
+            "round": 7,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf755288fe863623cd9",
+            "round": 7,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bff55288fe863623d70",
+            "round": 8,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf855288fe863623ce0",
+            "round": 8,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0055288fe863623d76",
+            "round": 9,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf855288fe863623ce6",
+            "round": 9,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0055288fe863623d7c",
+            "round": 10,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf855288fe863623cec",
+            "round": 10,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0055288fe863623d82",
+            "round": 11,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf955288fe863623cf2",
+            "round": 11,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0155288fe863623d88",
+            "round": 12,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf955288fe863623cf8",
+            "round": 12,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf955288fe863623cfe",
+            "round": 13,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0155288fe863623d8e",
+            "round": 13,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfa55288fe863623d04",
+            "round": 14,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0155288fe863623d94",
+            "round": 14,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfa55288fe863623d0a",
+            "round": 15,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0255288fe863623d9a",
+            "round": 15,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfa55288fe863623d10",
+            "round": 16,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0255288fe863623da0",
+            "round": 16,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfb55288fe863623d16",
+            "round": 17,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0255288fe863623da6",
+            "round": 17,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfb55288fe863623d1c",
+            "round": 18,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0255288fe863623dac",
+            "round": 18,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfb55288fe863623d22",
+            "round": 19,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0355288fe863623db2",
+            "round": 19,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0355288fe863623db8",
+            "round": 20,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfc55288fe863623d28",
+            "round": 20,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0355288fe863623dbe",
+            "round": 21,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfc55288fe863623d2e",
+            "round": 21,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0455288fe863623dc4",
+            "round": 22,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfc55288fe863623d34",
+            "round": 22,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0455288fe863623dca",
+            "round": 23,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfd55288fe863623d3a",
+            "round": 23,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfd55288fe863623d40",
+            "round": 24,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0455288fe863623dd0",
+            "round": 24,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          }
+        ],
+        "bestRace": {
+          "_id": "695d7c0455288fe863623dd0",
+          "round": 24,
+          "mainDriver": null,
+          "points": 0,
+          "reserveDriver": null,
+          "status": "empty",
+          "team": null
+        },
+        "successRate": 0,
+        "comebackCount": 0,
+        "comebackRounds": [],
+        "driverPoints": 0,
+        "teamPoints": 0,
+        "driverAverages": [],
+        "teamAverages": [],
+        "worstRace": null
+      }
+    },
+    {
+      "username": "full_season_1767734198761_2",
+      "deck": {
+        "driverCards": 7,
+        "teamCards": 5,
+        "driverSlots": 12,
+        "teamSlots": 10
+      },
+      "cardUsage": {
+        "driverCardsUsed": 7,
+        "teamCardsUsed": 5,
+        "activations": [
+          {
+            "round": 1,
+            "raceName": "Australian Grand Prix",
+            "driverCard": {
+              "name": "Top 5 Boost",
+              "tier": "silver",
+              "target": null
+            },
+            "teamCard": {
+              "original": "Random",
+              "transformed": "Random",
+              "type": "random"
+            },
+            "transformations": {
+              "random": "Random"
+            }
+          },
+          {
+            "round": 3,
+            "raceName": "Japanese Grand Prix",
+            "driverCard": {
+              "name": "Teamwork",
+              "tier": "silver",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Undercut",
+              "tier": "silver",
+              "target": null
+            },
+            "transformations": {}
+          },
+          {
+            "round": 4,
+            "raceName": "Bahrain Grand Prix",
+            "driverCard": {
+              "original": "Mystery Card",
+              "transformed": "Teamwork",
+              "type": "mystery"
+            },
+            "teamCard": {
+              "name": "Podium",
+              "tier": "gold",
+              "target": null
+            },
+            "transformations": {
+              "mystery": "Teamwork"
+            }
+          },
+          {
+            "round": 5,
+            "raceName": "Saudi Arabian Grand Prix",
+            "driverCard": {
+              "name": "2× Points",
+              "tier": "gold",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Sponsors",
+              "tier": "bronze",
+              "target": null
+            },
+            "transformations": {}
+          },
+          {
+            "round": 8,
+            "raceName": "Monaco Grand Prix",
+            "driverCard": {
+              "name": "+3 Points",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Last Place Bonus",
+              "tier": "bronze",
+              "target": null
+            },
+            "transformations": {}
+          },
+          {
+            "round": 9,
+            "raceName": "Spanish Grand Prix",
+            "driverCard": {
+              "name": "Competitiveness",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": null,
+            "transformations": {}
+          },
+          {
+            "round": 10,
+            "raceName": "Austrian Grand Prix",
+            "driverCard": {
+              "name": "Top 10 Boost",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": null,
+            "transformations": {}
+          }
+        ]
+      },
+      "standings": {
+        "driver": {
+          "totalPoints": 0,
+          "races": 0
+        },
+        "team": {
+          "totalPoints": 0,
+          "races": 0
+        }
+      },
+      "statistics": {
+        "totalPoints": 0,
+        "averagePoints": 0,
+        "raceHistory": [
+          {
+            "_id": "695d7bf655288fe863623cb9",
+            "round": 1,
+            "mainDriver": "O. Piastri",
+            "points": 0,
+            "reserveDriver": "A. Albon",
+            "status": "empty",
+            "team": "RB"
+          },
+          {
+            "_id": "695d7bfd55288fe863623d47",
+            "round": 1,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfe55288fe863623d4d",
+            "round": 2,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf655288fe863623cb8",
+            "round": 2,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf655288fe863623cbb",
+            "round": 3,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfe55288fe863623d53",
+            "round": 3,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf655288fe863623cc0",
+            "round": 4,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfe55288fe863623d59",
+            "round": 4,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfe55288fe863623d5f",
+            "round": 5,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf755288fe863623cc7",
+            "round": 5,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bff55288fe863623d65",
+            "round": 6,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf755288fe863623ccf",
+            "round": 6,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bff55288fe863623d6b",
+            "round": 7,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf755288fe863623cda",
+            "round": 7,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bff55288fe863623d71",
+            "round": 8,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf855288fe863623ce1",
+            "round": 8,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf855288fe863623ce7",
+            "round": 9,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0055288fe863623d77",
+            "round": 9,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf855288fe863623ced",
+            "round": 10,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0055288fe863623d7d",
+            "round": 10,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0055288fe863623d83",
+            "round": 11,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf955288fe863623cf3",
+            "round": 11,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0155288fe863623d89",
+            "round": 12,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf955288fe863623cf9",
+            "round": 12,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0155288fe863623d8f",
+            "round": 13,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf955288fe863623cff",
+            "round": 13,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0155288fe863623d95",
+            "round": 14,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfa55288fe863623d05",
+            "round": 14,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfa55288fe863623d0b",
+            "round": 15,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0255288fe863623d9b",
+            "round": 15,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfa55288fe863623d11",
+            "round": 16,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0255288fe863623da1",
+            "round": 16,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfb55288fe863623d17",
+            "round": 17,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0255288fe863623da7",
+            "round": 17,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfb55288fe863623d1d",
+            "round": 18,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0255288fe863623dad",
+            "round": 18,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfb55288fe863623d23",
+            "round": 19,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0355288fe863623db3",
+            "round": 19,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0355288fe863623db9",
+            "round": 20,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfc55288fe863623d29",
+            "round": 20,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0355288fe863623dbf",
+            "round": 21,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfc55288fe863623d2f",
+            "round": 21,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0455288fe863623dc5",
+            "round": 22,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfc55288fe863623d35",
+            "round": 22,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfd55288fe863623d3b",
+            "round": 23,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0455288fe863623dcb",
+            "round": 23,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfd55288fe863623d41",
+            "round": 24,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0455288fe863623dd1",
+            "round": 24,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          }
+        ],
+        "bestRace": {
+          "_id": "695d7c0455288fe863623dd1",
+          "round": 24,
+          "mainDriver": null,
+          "points": 0,
+          "reserveDriver": null,
+          "status": "empty",
+          "team": null
+        },
+        "successRate": 0,
+        "comebackCount": 0,
+        "comebackRounds": [],
+        "driverPoints": 0,
+        "teamPoints": 0,
+        "driverAverages": [],
+        "teamAverages": [],
+        "worstRace": null
+      }
+    },
+    {
+      "username": "full_season_1767734198761_3",
+      "deck": {
+        "driverCards": 7,
+        "teamCards": 5,
+        "driverSlots": 12,
+        "teamSlots": 10
+      },
+      "cardUsage": {
+        "driverCardsUsed": 7,
+        "teamCardsUsed": 5,
+        "activations": [
+          {
+            "round": 1,
+            "raceName": "Australian Grand Prix",
+            "driverCard": {
+              "name": "2× Points",
+              "tier": "gold",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Podium",
+              "tier": "gold",
+              "target": null
+            },
+            "transformations": {}
+          },
+          {
+            "round": 3,
+            "raceName": "Japanese Grand Prix",
+            "driverCard": {
+              "name": "+3 Points",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": {
+              "original": "Random",
+              "transformed": "Top 10",
+              "type": "random"
+            },
+            "transformations": {
+              "random": "Top 10"
+            }
+          },
+          {
+            "round": 4,
+            "raceName": "Bahrain Grand Prix",
+            "driverCard": {
+              "name": "Teamwork",
+              "tier": "silver",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Last Place Bonus",
+              "tier": "bronze",
+              "target": null
+            },
+            "transformations": {}
+          },
+          {
+            "round": 5,
+            "raceName": "Saudi Arabian Grand Prix",
+            "driverCard": {
+              "name": "Competitiveness",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Undercut",
+              "tier": "silver",
+              "target": null
+            },
+            "transformations": {}
+          },
+          {
+            "round": 8,
+            "raceName": "Monaco Grand Prix",
+            "driverCard": {
+              "name": "Top 5 Boost",
+              "tier": "silver",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Sponsors",
+              "tier": "bronze",
+              "target": null
+            },
+            "transformations": {}
+          },
+          {
+            "round": 9,
+            "raceName": "Spanish Grand Prix",
+            "driverCard": {
+              "name": "Top 10 Boost",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": null,
+            "transformations": {}
+          },
+          {
+            "round": 10,
+            "raceName": "Austrian Grand Prix",
+            "driverCard": {
+              "original": "Mystery Card",
+              "transformed": "Teamwork",
+              "type": "mystery"
+            },
+            "teamCard": null,
+            "transformations": {
+              "mystery": "Teamwork"
+            }
+          }
+        ]
+      },
+      "standings": {
+        "driver": {
+          "totalPoints": 0,
+          "races": 0
+        },
+        "team": {
+          "totalPoints": 0,
+          "races": 0
+        }
+      },
+      "statistics": {
+        "totalPoints": 0,
+        "averagePoints": 0,
+        "raceHistory": [
+          {
+            "_id": "695d7bf655288fe863623cbd",
+            "round": 1,
+            "mainDriver": "G. Russell",
+            "points": 0,
+            "reserveDriver": "K. Antonelli",
+            "status": "empty",
+            "team": "Ferrari"
+          },
+          {
+            "_id": "695d7bfd55288fe863623d48",
+            "round": 1,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf655288fe863623cbe",
+            "round": 2,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfe55288fe863623d4e",
+            "round": 2,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfe55288fe863623d54",
+            "round": 3,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf655288fe863623cbc",
+            "round": 3,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf655288fe863623cc1",
+            "round": 4,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfe55288fe863623d5a",
+            "round": 4,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfe55288fe863623d60",
+            "round": 5,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf755288fe863623cc8",
+            "round": 5,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bff55288fe863623d66",
+            "round": 6,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf755288fe863623cd0",
+            "round": 6,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bff55288fe863623d6c",
+            "round": 7,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf755288fe863623cdb",
+            "round": 7,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bff55288fe863623d72",
+            "round": 8,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf855288fe863623ce2",
+            "round": 8,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf855288fe863623ce8",
+            "round": 9,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0055288fe863623d78",
+            "round": 9,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf855288fe863623cee",
+            "round": 10,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0055288fe863623d7e",
+            "round": 10,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0055288fe863623d84",
+            "round": 11,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf955288fe863623cf4",
+            "round": 11,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0155288fe863623d8a",
+            "round": 12,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf955288fe863623cfa",
+            "round": 12,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0155288fe863623d90",
+            "round": 13,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf955288fe863623d00",
+            "round": 13,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0155288fe863623d96",
+            "round": 14,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfa55288fe863623d06",
+            "round": 14,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfa55288fe863623d0c",
+            "round": 15,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0255288fe863623d9c",
+            "round": 15,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfa55288fe863623d12",
+            "round": 16,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0255288fe863623da2",
+            "round": 16,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfb55288fe863623d18",
+            "round": 17,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0255288fe863623da8",
+            "round": 17,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfb55288fe863623d1e",
+            "round": 18,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0255288fe863623dae",
+            "round": 18,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfb55288fe863623d24",
+            "round": 19,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0355288fe863623db4",
+            "round": 19,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0355288fe863623dba",
+            "round": 20,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfc55288fe863623d2a",
+            "round": 20,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0355288fe863623dc0",
+            "round": 21,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfc55288fe863623d30",
+            "round": 21,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0455288fe863623dc6",
+            "round": 22,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfc55288fe863623d36",
+            "round": 22,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfd55288fe863623d3c",
+            "round": 23,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0455288fe863623dcc",
+            "round": 23,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfd55288fe863623d42",
+            "round": 24,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0455288fe863623dd2",
+            "round": 24,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          }
+        ],
+        "bestRace": {
+          "_id": "695d7c0455288fe863623dd2",
+          "round": 24,
+          "mainDriver": null,
+          "points": 0,
+          "reserveDriver": null,
+          "status": "empty",
+          "team": null
+        },
+        "successRate": 0,
+        "comebackCount": 0,
+        "comebackRounds": [],
+        "driverPoints": 0,
+        "teamPoints": 0,
+        "driverAverages": [],
+        "teamAverages": [],
+        "worstRace": null
+      }
+    },
+    {
+      "username": "full_season_1767734198761_4",
+      "deck": {
+        "driverCards": 7,
+        "teamCards": 5,
+        "driverSlots": 12,
+        "teamSlots": 10
+      },
+      "cardUsage": {
+        "driverCardsUsed": 7,
+        "teamCardsUsed": 5,
+        "activations": [
+          {
+            "round": 1,
+            "raceName": "Australian Grand Prix",
+            "driverCard": {
+              "name": "Top 10 Boost",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Podium",
+              "tier": "gold",
+              "target": null
+            },
+            "transformations": {}
+          },
+          {
+            "round": 3,
+            "raceName": "Japanese Grand Prix",
+            "driverCard": {
+              "name": "Top 5 Boost",
+              "tier": "silver",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Sponsors",
+              "tier": "bronze",
+              "target": null
+            },
+            "transformations": {}
+          },
+          {
+            "round": 4,
+            "raceName": "Bahrain Grand Prix",
+            "driverCard": {
+              "name": "2× Points",
+              "tier": "gold",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Last Place Bonus",
+              "tier": "bronze",
+              "target": null
+            },
+            "transformations": {}
+          },
+          {
+            "round": 5,
+            "raceName": "Saudi Arabian Grand Prix",
+            "driverCard": {
+              "original": "Mystery Card",
+              "transformed": "Top 5 Boost",
+              "type": "mystery"
+            },
+            "teamCard": {
+              "original": "Random",
+              "transformed": "Espionage",
+              "type": "random"
+            },
+            "transformations": {
+              "mystery": "Top 5 Boost",
+              "random": "Espionage"
+            }
+          },
+          {
+            "round": 8,
+            "raceName": "Monaco Grand Prix",
+            "driverCard": {
+              "name": "Competitiveness",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Undercut",
+              "tier": "silver",
+              "target": null
+            },
+            "transformations": {}
+          },
+          {
+            "round": 9,
+            "raceName": "Spanish Grand Prix",
+            "driverCard": {
+              "name": "Teamwork",
+              "tier": "silver",
+              "target": null
+            },
+            "teamCard": null,
+            "transformations": {}
+          },
+          {
+            "round": 10,
+            "raceName": "Austrian Grand Prix",
+            "driverCard": {
+              "name": "+3 Points",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": null,
+            "transformations": {}
+          }
+        ]
+      },
+      "standings": {
+        "driver": {
+          "totalPoints": 0,
+          "races": 0
+        },
+        "team": {
+          "totalPoints": 0,
+          "races": 0
+        }
+      },
+      "statistics": {
+        "totalPoints": 0,
+        "averagePoints": 0,
+        "raceHistory": [
+          {
+            "_id": "695d7bf755288fe863623cc4",
+            "round": 1,
+            "mainDriver": "C. Sainz",
+            "points": 0,
+            "reserveDriver": "L. Lawson",
+            "status": "empty",
+            "team": "Audi"
+          },
+          {
+            "_id": "695d7bfd55288fe863623d49",
+            "round": 1,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf655288fe863623cc3",
+            "round": 2,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfe55288fe863623d4f",
+            "round": 2,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfe55288fe863623d55",
+            "round": 3,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf755288fe863623cc5",
+            "round": 3,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfe55288fe863623d5b",
+            "round": 4,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf655288fe863623cc2",
+            "round": 4,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf755288fe863623cc9",
+            "round": 5,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfe55288fe863623d61",
+            "round": 5,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf755288fe863623cd1",
+            "round": 6,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bff55288fe863623d67",
+            "round": 6,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bff55288fe863623d6d",
+            "round": 7,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf755288fe863623cdc",
+            "round": 7,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bff55288fe863623d73",
+            "round": 8,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf855288fe863623ce3",
+            "round": 8,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0055288fe863623d79",
+            "round": 9,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf855288fe863623ce9",
+            "round": 9,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0055288fe863623d7f",
+            "round": 10,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf855288fe863623cef",
+            "round": 10,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0055288fe863623d85",
+            "round": 11,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf955288fe863623cf5",
+            "round": 11,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0155288fe863623d8b",
+            "round": 12,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf955288fe863623cfb",
+            "round": 12,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf955288fe863623d01",
+            "round": 13,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0155288fe863623d91",
+            "round": 13,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfa55288fe863623d07",
+            "round": 14,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0155288fe863623d97",
+            "round": 14,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfa55288fe863623d0d",
+            "round": 15,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0255288fe863623d9d",
+            "round": 15,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfa55288fe863623d13",
+            "round": 16,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0255288fe863623da3",
+            "round": 16,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfb55288fe863623d19",
+            "round": 17,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0255288fe863623da9",
+            "round": 17,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfb55288fe863623d1f",
+            "round": 18,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0255288fe863623daf",
+            "round": 18,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfb55288fe863623d25",
+            "round": 19,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0355288fe863623db5",
+            "round": 19,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0355288fe863623dbb",
+            "round": 20,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfc55288fe863623d2b",
+            "round": 20,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0355288fe863623dc1",
+            "round": 21,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfc55288fe863623d31",
+            "round": 21,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0455288fe863623dc7",
+            "round": 22,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfc55288fe863623d37",
+            "round": 22,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0455288fe863623dcd",
+            "round": 23,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfd55288fe863623d3d",
+            "round": 23,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfd55288fe863623d43",
+            "round": 24,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0455288fe863623dd3",
+            "round": 24,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          }
+        ],
+        "bestRace": {
+          "_id": "695d7c0455288fe863623dd3",
+          "round": 24,
+          "mainDriver": null,
+          "points": 0,
+          "reserveDriver": null,
+          "status": "empty",
+          "team": null
+        },
+        "successRate": 0,
+        "comebackCount": 0,
+        "comebackRounds": [],
+        "driverPoints": 0,
+        "teamPoints": 0,
+        "driverAverages": [],
+        "teamAverages": [],
+        "worstRace": null
+      }
+    },
+    {
+      "username": "full_season_1767734198761_5",
+      "deck": {
+        "driverCards": 7,
+        "teamCards": 5,
+        "driverSlots": 12,
+        "teamSlots": 10
+      },
+      "cardUsage": {
+        "driverCardsUsed": 7,
+        "teamCardsUsed": 5,
+        "activations": [
+          {
+            "round": 1,
+            "raceName": "Australian Grand Prix",
+            "driverCard": {
+              "name": "Competitiveness",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Undercut",
+              "tier": "silver",
+              "target": null
+            },
+            "transformations": {}
+          },
+          {
+            "round": 3,
+            "raceName": "Japanese Grand Prix",
+            "driverCard": {
+              "name": "Top 5 Boost",
+              "tier": "silver",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Sponsors",
+              "tier": "bronze",
+              "target": null
+            },
+            "transformations": {}
+          },
+          {
+            "round": 4,
+            "raceName": "Bahrain Grand Prix",
+            "driverCard": {
+              "original": "Mystery Card",
+              "transformed": "2× Points",
+              "type": "mystery"
+            },
+            "teamCard": {
+              "name": "Last Place Bonus",
+              "tier": "bronze",
+              "target": null
+            },
+            "transformations": {
+              "mystery": "2× Points"
+            }
+          },
+          {
+            "round": 5,
+            "raceName": "Saudi Arabian Grand Prix",
+            "driverCard": {
+              "name": "+3 Points",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Podium",
+              "tier": "gold",
+              "target": null
+            },
+            "transformations": {}
+          },
+          {
+            "round": 8,
+            "raceName": "Monaco Grand Prix",
+            "driverCard": {
+              "name": "Top 10 Boost",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": {
+              "original": "Random",
+              "transformed": "Espionage",
+              "type": "random"
+            },
+            "transformations": {
+              "random": "Espionage"
+            }
+          },
+          {
+            "round": 9,
+            "raceName": "Spanish Grand Prix",
+            "driverCard": {
+              "name": "2× Points",
+              "tier": "gold",
+              "target": null
+            },
+            "teamCard": null,
+            "transformations": {}
+          },
+          {
+            "round": 10,
+            "raceName": "Austrian Grand Prix",
+            "driverCard": {
+              "name": "Teamwork",
+              "tier": "silver",
+              "target": null
+            },
+            "teamCard": null,
+            "transformations": {}
+          }
+        ]
+      },
+      "standings": {
+        "driver": {
+          "totalPoints": 0,
+          "races": 0
+        },
+        "team": {
+          "totalPoints": 0,
+          "races": 0
+        }
+      },
+      "statistics": {
+        "totalPoints": 0,
+        "averagePoints": 0,
+        "raceHistory": [
+          {
+            "_id": "695d7bfd55288fe863623d4a",
+            "round": 1,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf755288fe863623ccd",
+            "round": 1,
+            "mainDriver": "L. Lawson",
+            "points": 0,
+            "reserveDriver": "A. Lindblad",
+            "status": "empty",
+            "team": "Cadillac"
+          },
+          {
+            "_id": "695d7bf755288fe863623ccb",
+            "round": 2,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfe55288fe863623d50",
+            "round": 2,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfe55288fe863623d56",
+            "round": 3,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf755288fe863623cca",
+            "round": 3,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfe55288fe863623d5c",
+            "round": 4,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf755288fe863623ccc",
+            "round": 4,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf755288fe863623cd7",
+            "round": 5,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfe55288fe863623d62",
+            "round": 5,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bff55288fe863623d68",
+            "round": 6,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf755288fe863623cd2",
+            "round": 6,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bff55288fe863623d6e",
+            "round": 7,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf755288fe863623cdd",
+            "round": 7,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bff55288fe863623d74",
+            "round": 8,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf855288fe863623ce4",
+            "round": 8,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0055288fe863623d7a",
+            "round": 9,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf855288fe863623cea",
+            "round": 9,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0055288fe863623d80",
+            "round": 10,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf855288fe863623cf0",
+            "round": 10,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf955288fe863623cf6",
+            "round": 11,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0055288fe863623d86",
+            "round": 11,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf955288fe863623cfc",
+            "round": 12,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0155288fe863623d8c",
+            "round": 12,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf955288fe863623d02",
+            "round": 13,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0155288fe863623d92",
+            "round": 13,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0155288fe863623d98",
+            "round": 14,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfa55288fe863623d08",
+            "round": 14,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0255288fe863623d9e",
+            "round": 15,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfa55288fe863623d0e",
+            "round": 15,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0255288fe863623da4",
+            "round": 16,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfa55288fe863623d14",
+            "round": 16,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0255288fe863623daa",
+            "round": 17,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfb55288fe863623d1a",
+            "round": 17,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0255288fe863623db0",
+            "round": 18,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfb55288fe863623d20",
+            "round": 18,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0355288fe863623db6",
+            "round": 19,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfb55288fe863623d26",
+            "round": 19,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfc55288fe863623d2c",
+            "round": 20,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0355288fe863623dbc",
+            "round": 20,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfc55288fe863623d32",
+            "round": 21,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0355288fe863623dc2",
+            "round": 21,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0455288fe863623dc8",
+            "round": 22,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfc55288fe863623d38",
+            "round": 22,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0455288fe863623dce",
+            "round": 23,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfd55288fe863623d3e",
+            "round": 23,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfd55288fe863623d44",
+            "round": 24,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0455288fe863623dd4",
+            "round": 24,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          }
+        ],
+        "bestRace": {
+          "_id": "695d7c0455288fe863623dd4",
+          "round": 24,
+          "mainDriver": null,
+          "points": 0,
+          "reserveDriver": null,
+          "status": "empty",
+          "team": null
+        },
+        "successRate": 0,
+        "comebackCount": 0,
+        "comebackRounds": [],
+        "driverPoints": 0,
+        "teamPoints": 0,
+        "driverAverages": [],
+        "teamAverages": [],
+        "worstRace": null
+      }
+    },
+    {
+      "username": "full_season_1767734198761_6",
+      "deck": {
+        "driverCards": 7,
+        "teamCards": 5,
+        "driverSlots": 12,
+        "teamSlots": 10
+      },
+      "cardUsage": {
+        "driverCardsUsed": 7,
+        "teamCardsUsed": 5,
+        "activations": [
+          {
+            "round": 1,
+            "raceName": "Australian Grand Prix",
+            "driverCard": {
+              "name": "Top 5 Boost",
+              "tier": "silver",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Last Place Bonus",
+              "tier": "bronze",
+              "target": null
+            },
+            "transformations": {}
+          },
+          {
+            "round": 3,
+            "raceName": "Japanese Grand Prix",
+            "driverCard": {
+              "name": "2× Points",
+              "tier": "gold",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Undercut",
+              "tier": "silver",
+              "target": null
+            },
+            "transformations": {}
+          },
+          {
+            "round": 5,
+            "raceName": "Saudi Arabian Grand Prix",
+            "driverCard": {
+              "name": "Competitiveness",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Sponsors",
+              "tier": "bronze",
+              "target": null
+            },
+            "transformations": {}
+          },
+          {
+            "round": 8,
+            "raceName": "Monaco Grand Prix",
+            "driverCard": {
+              "original": "Mystery Card",
+              "transformed": "Top 10 Boost",
+              "type": "mystery"
+            },
+            "teamCard": {
+              "name": "Podium",
+              "tier": "gold",
+              "target": null
+            },
+            "transformations": {
+              "mystery": "Top 10 Boost"
+            }
+          },
+          {
+            "round": 9,
+            "raceName": "Spanish Grand Prix",
+            "driverCard": {
+              "name": "+3 Points",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": {
+              "original": "Random",
+              "transformed": "Espionage",
+              "type": "random"
+            },
+            "transformations": {
+              "random": "Espionage"
+            }
+          },
+          {
+            "round": 10,
+            "raceName": "Austrian Grand Prix",
+            "driverCard": {
+              "name": "Teamwork",
+              "tier": "silver",
+              "target": null
+            },
+            "teamCard": null,
+            "transformations": {}
+          },
+          {
+            "round": 12,
+            "raceName": "Belgian Grand Prix",
+            "driverCard": {
+              "name": "Top 10 Boost",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": null,
+            "transformations": {}
+          }
+        ]
+      },
+      "standings": {
+        "driver": {
+          "totalPoints": 0,
+          "races": 0
+        },
+        "team": {
+          "totalPoints": 0,
+          "races": 0
+        }
+      },
+      "statistics": {
+        "totalPoints": 0,
+        "averagePoints": 0,
+        "raceHistory": [
+          {
+            "_id": "695d7bf755288fe863623cd4",
+            "round": 1,
+            "mainDriver": "A. Lindblad",
+            "points": 0,
+            "reserveDriver": "F. Alonso",
+            "status": "empty",
+            "team": "Red Bull Racing"
+          },
+          {
+            "_id": "695d7bfd55288fe863623d4b",
+            "round": 1,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf755288fe863623cd6",
+            "round": 2,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfe55288fe863623d51",
+            "round": 2,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfe55288fe863623d57",
+            "round": 3,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf755288fe863623cd5",
+            "round": 3,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfe55288fe863623d5d",
+            "round": 4,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf755288fe863623cd3",
+            "round": 4,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf755288fe863623cd8",
+            "round": 5,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfe55288fe863623d63",
+            "round": 5,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf855288fe863623cdf",
+            "round": 6,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bff55288fe863623d69",
+            "round": 6,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf755288fe863623cde",
+            "round": 7,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bff55288fe863623d6f",
+            "round": 7,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bff55288fe863623d75",
+            "round": 8,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf855288fe863623ce5",
+            "round": 8,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0055288fe863623d7b",
+            "round": 9,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf855288fe863623ceb",
+            "round": 9,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0055288fe863623d81",
+            "round": 10,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf855288fe863623cf1",
+            "round": 10,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0055288fe863623d87",
+            "round": 11,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf955288fe863623cf7",
+            "round": 11,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0155288fe863623d8d",
+            "round": 12,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf955288fe863623cfd",
+            "round": 12,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0155288fe863623d93",
+            "round": 13,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bf955288fe863623d03",
+            "round": 13,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0155288fe863623d99",
+            "round": 14,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfa55288fe863623d09",
+            "round": 14,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0255288fe863623d9f",
+            "round": 15,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfa55288fe863623d0f",
+            "round": 15,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfa55288fe863623d15",
+            "round": 16,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0255288fe863623da5",
+            "round": 16,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfb55288fe863623d1b",
+            "round": 17,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0255288fe863623dab",
+            "round": 17,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfb55288fe863623d21",
+            "round": 18,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0255288fe863623db1",
+            "round": 18,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfb55288fe863623d27",
+            "round": 19,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0355288fe863623db7",
+            "round": 19,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfc55288fe863623d2d",
+            "round": 20,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0355288fe863623dbd",
+            "round": 20,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfc55288fe863623d33",
+            "round": 21,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0355288fe863623dc3",
+            "round": 21,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfc55288fe863623d39",
+            "round": 22,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0455288fe863623dc9",
+            "round": 22,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfd55288fe863623d3f",
+            "round": 23,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0455288fe863623dcf",
+            "round": 23,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7bfd55288fe863623d45",
+            "round": 24,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          },
+          {
+            "_id": "695d7c0455288fe863623dd5",
+            "round": 24,
+            "mainDriver": null,
+            "points": 0,
+            "reserveDriver": null,
+            "status": "empty",
+            "team": null
+          }
+        ],
+        "bestRace": {
+          "_id": "695d7c0455288fe863623dd5",
+          "round": 24,
+          "mainDriver": null,
+          "points": 0,
+          "reserveDriver": null,
+          "status": "empty",
+          "team": null
+        },
+        "successRate": 0,
+        "comebackCount": 0,
+        "comebackRounds": [],
+        "driverPoints": 0,
+        "teamPoints": 0,
+        "driverAverages": [],
+        "teamAverages": [],
+        "worstRace": null
+      }
+    }
+  ],
+  "races": [
+    {
+      "round": 1,
+      "raceName": "Australian Grand Prix",
+      "date": "2026-03-08T00:00:00.000Z",
+      "isSprintWeekend": false,
+      "players": [
+        {
+          "username": "full_season_1767734198761_1",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "M. Verstappen",
+            "reserveDriver": "I. Hadjar",
+            "team": "Red Bull Racing"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "Competitiveness",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": {
+              "original": "Random",
+              "transformed": "Participating Trophy",
+              "type": "random"
+            },
+            "transformations": {
+              "random": "Participating Trophy"
+            }
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_2",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "I. Hadjar",
+            "reserveDriver": "G. Russell",
+            "team": "Mercedes"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "Top 5 Boost",
+              "tier": "silver",
+              "target": null
+            },
+            "teamCard": {
+              "original": "Random",
+              "transformed": "Random",
+              "type": "random"
+            },
+            "transformations": {
+              "random": "Random"
+            }
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_3",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "G. Russell",
+            "reserveDriver": "K. Antonelli",
+            "team": "Ferrari"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "2× Points",
+              "tier": "gold",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Podium",
+              "tier": "gold",
+              "target": null
+            },
+            "transformations": {}
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_4",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "K. Antonelli",
+            "reserveDriver": "C. Leclerc",
+            "team": "McLaren"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "Top 10 Boost",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Podium",
+              "tier": "gold",
+              "target": null
+            },
+            "transformations": {}
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_5",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "C. Leclerc",
+            "reserveDriver": "L. Hamilton",
+            "team": "Aston Martin"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "Competitiveness",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Undercut",
+              "tier": "silver",
+              "target": null
+            },
+            "transformations": {}
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_6",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "L. Hamilton",
+            "reserveDriver": "L. Norris",
+            "team": "Alpine"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "Top 5 Boost",
+              "tier": "silver",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Last Place Bonus",
+              "tier": "bronze",
+              "target": null
+            },
+            "transformations": {}
+          },
+          "points": 0
+        }
+      ]
+    },
+    {
+      "round": 2,
+      "raceName": "Chinese Grand Prix",
+      "date": "2026-03-15T00:00:00.000Z",
+      "isSprintWeekend": true,
+      "players": [
+        {
+          "username": "full_season_1767734198761_1",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "L. Norris",
+            "reserveDriver": "O. Piastri",
+            "team": "Williams"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_2",
+          "skipped": true,
+          "selections": {
+            "autoAssigned": true
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_3",
+          "skipped": true,
+          "selections": {
+            "autoAssigned": true
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_4",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "C. Sainz",
+            "reserveDriver": "L. Lawson",
+            "team": "Audi"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_5",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "L. Lawson",
+            "reserveDriver": "A. Lindblad",
+            "team": "Cadillac"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_6",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "A. Lindblad",
+            "reserveDriver": "F. Alonso",
+            "team": "Red Bull Racing"
+          },
+          "cards": null,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "round": 3,
+      "raceName": "Japanese Grand Prix",
+      "date": "2026-03-29T00:00:00.000Z",
+      "isSprintWeekend": false,
+      "players": [
+        {
+          "username": "full_season_1767734198761_1",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "F. Alonso",
+            "reserveDriver": "L. Stroll",
+            "team": "Mercedes"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "+3 Points",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Undercut",
+              "tier": "silver",
+              "target": null
+            },
+            "transformations": {}
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_2",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "L. Stroll",
+            "reserveDriver": "E. Ocon",
+            "team": "Ferrari"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "Teamwork",
+              "tier": "silver",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Undercut",
+              "tier": "silver",
+              "target": null
+            },
+            "transformations": {}
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_3",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "E. Ocon",
+            "reserveDriver": "O. Bearman",
+            "team": "McLaren"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "+3 Points",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": {
+              "original": "Random",
+              "transformed": "Top 10",
+              "type": "random"
+            },
+            "transformations": {
+              "random": "Top 10"
+            }
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_4",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "O. Bearman",
+            "reserveDriver": "N. Hulkenberg",
+            "team": "Aston Martin"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "Top 5 Boost",
+              "tier": "silver",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Sponsors",
+              "tier": "bronze",
+              "target": null
+            },
+            "transformations": {}
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_5",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "N. Hulkenberg",
+            "reserveDriver": "G. Bortoleto",
+            "team": "Alpine"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "Top 5 Boost",
+              "tier": "silver",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Sponsors",
+              "tier": "bronze",
+              "target": null
+            },
+            "transformations": {}
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_6",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "G. Bortoleto",
+            "reserveDriver": "P. Gasly",
+            "team": "Williams"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "2× Points",
+              "tier": "gold",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Undercut",
+              "tier": "silver",
+              "target": null
+            },
+            "transformations": {}
+          },
+          "points": 0
+        }
+      ]
+    },
+    {
+      "round": 4,
+      "raceName": "Bahrain Grand Prix",
+      "date": "2026-04-12T00:00:00.000Z",
+      "isSprintWeekend": false,
+      "players": [
+        {
+          "username": "full_season_1767734198761_1",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "P. Gasly",
+            "reserveDriver": "F. Colapinto",
+            "team": "RB"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "2× Points",
+              "tier": "gold",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Last Place Bonus",
+              "tier": "bronze",
+              "target": null
+            },
+            "transformations": {}
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_2",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "F. Colapinto",
+            "reserveDriver": "S. Perez",
+            "team": "Haas F1 Team"
+          },
+          "cards": {
+            "driverCard": {
+              "original": "Mystery Card",
+              "transformed": "Teamwork",
+              "type": "mystery"
+            },
+            "teamCard": {
+              "name": "Podium",
+              "tier": "gold",
+              "target": null
+            },
+            "transformations": {
+              "mystery": "Teamwork"
+            }
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_3",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "S. Perez",
+            "reserveDriver": "V. Bottas",
+            "team": "Audi"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "Teamwork",
+              "tier": "silver",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Last Place Bonus",
+              "tier": "bronze",
+              "target": null
+            },
+            "transformations": {}
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_4",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "V. Bottas",
+            "reserveDriver": "M. Verstappen",
+            "team": "Cadillac"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "2× Points",
+              "tier": "gold",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Last Place Bonus",
+              "tier": "bronze",
+              "target": null
+            },
+            "transformations": {}
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_5",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "M. Verstappen",
+            "reserveDriver": "I. Hadjar",
+            "team": "Red Bull Racing"
+          },
+          "cards": {
+            "driverCard": {
+              "original": "Mystery Card",
+              "transformed": "2× Points",
+              "type": "mystery"
+            },
+            "teamCard": {
+              "name": "Last Place Bonus",
+              "tier": "bronze",
+              "target": null
+            },
+            "transformations": {
+              "mystery": "2× Points"
+            }
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_6",
+          "skipped": true,
+          "selections": {
+            "autoAssigned": true
+          },
+          "cards": null,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "round": 5,
+      "raceName": "Saudi Arabian Grand Prix",
+      "date": "2026-04-19T00:00:00.000Z",
+      "isSprintWeekend": false,
+      "players": [
+        {
+          "username": "full_season_1767734198761_1",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "G. Russell",
+            "reserveDriver": "K. Antonelli",
+            "team": "Ferrari"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "Teamwork",
+              "tier": "silver",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Podium",
+              "tier": "gold",
+              "target": null
+            },
+            "transformations": {}
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_2",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "K. Antonelli",
+            "reserveDriver": "C. Leclerc",
+            "team": "McLaren"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "2× Points",
+              "tier": "gold",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Sponsors",
+              "tier": "bronze",
+              "target": null
+            },
+            "transformations": {}
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_3",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "C. Leclerc",
+            "reserveDriver": "L. Hamilton",
+            "team": "Aston Martin"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "Competitiveness",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Undercut",
+              "tier": "silver",
+              "target": null
+            },
+            "transformations": {}
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_4",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "L. Hamilton",
+            "reserveDriver": "L. Norris",
+            "team": "Alpine"
+          },
+          "cards": {
+            "driverCard": {
+              "original": "Mystery Card",
+              "transformed": "Top 5 Boost",
+              "type": "mystery"
+            },
+            "teamCard": {
+              "original": "Random",
+              "transformed": "Espionage",
+              "type": "random"
+            },
+            "transformations": {
+              "mystery": "Top 5 Boost",
+              "random": "Espionage"
+            }
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_5",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "L. Norris",
+            "reserveDriver": "O. Piastri",
+            "team": "Williams"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "+3 Points",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Podium",
+              "tier": "gold",
+              "target": null
+            },
+            "transformations": {}
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_6",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "O. Piastri",
+            "reserveDriver": "A. Albon",
+            "team": "RB"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "Competitiveness",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Sponsors",
+              "tier": "bronze",
+              "target": null
+            },
+            "transformations": {}
+          },
+          "points": 0
+        }
+      ]
+    },
+    {
+      "round": 6,
+      "raceName": "Miami Grand Prix",
+      "date": "2026-05-03T00:00:00.000Z",
+      "isSprintWeekend": true,
+      "players": [
+        {
+          "username": "full_season_1767734198761_1",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "A. Albon",
+            "reserveDriver": "C. Sainz",
+            "team": "Haas F1 Team"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_2",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "C. Sainz",
+            "reserveDriver": "L. Lawson",
+            "team": "Audi"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_3",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "L. Lawson",
+            "reserveDriver": "A. Lindblad",
+            "team": "Cadillac"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_4",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "A. Lindblad",
+            "reserveDriver": "F. Alonso",
+            "team": "Red Bull Racing"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_5",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "F. Alonso",
+            "reserveDriver": "L. Stroll",
+            "team": "Mercedes"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_6",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "L. Stroll",
+            "reserveDriver": "E. Ocon",
+            "team": "Ferrari"
+          },
+          "cards": null,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "round": 7,
+      "raceName": "Canadian Grand Prix",
+      "date": "2026-05-24T00:00:00.000Z",
+      "isSprintWeekend": true,
+      "players": [
+        {
+          "username": "full_season_1767734198761_1",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "E. Ocon",
+            "reserveDriver": "O. Bearman",
+            "team": "McLaren"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_2",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "O. Bearman",
+            "reserveDriver": "N. Hulkenberg",
+            "team": "Aston Martin"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_3",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "N. Hulkenberg",
+            "reserveDriver": "G. Bortoleto",
+            "team": "Alpine"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_4",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "G. Bortoleto",
+            "reserveDriver": "P. Gasly",
+            "team": "Williams"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_5",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "P. Gasly",
+            "reserveDriver": "F. Colapinto",
+            "team": "RB"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_6",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "F. Colapinto",
+            "reserveDriver": "S. Perez",
+            "team": "Haas F1 Team"
+          },
+          "cards": null,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "round": 8,
+      "raceName": "Monaco Grand Prix",
+      "date": "2026-06-07T00:00:00.000Z",
+      "isSprintWeekend": false,
+      "players": [
+        {
+          "username": "full_season_1767734198761_1",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "S. Perez",
+            "reserveDriver": "V. Bottas",
+            "team": "Audi"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "Top 10 Boost",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Sponsors",
+              "tier": "bronze",
+              "target": null
+            },
+            "transformations": {}
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_2",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "V. Bottas",
+            "reserveDriver": "M. Verstappen",
+            "team": "Cadillac"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "+3 Points",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Last Place Bonus",
+              "tier": "bronze",
+              "target": null
+            },
+            "transformations": {}
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_3",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "M. Verstappen",
+            "reserveDriver": "I. Hadjar",
+            "team": "Red Bull Racing"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "Top 5 Boost",
+              "tier": "silver",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Sponsors",
+              "tier": "bronze",
+              "target": null
+            },
+            "transformations": {}
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_4",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "I. Hadjar",
+            "reserveDriver": "G. Russell",
+            "team": "Mercedes"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "Competitiveness",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": {
+              "name": "Undercut",
+              "tier": "silver",
+              "target": null
+            },
+            "transformations": {}
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_5",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "G. Russell",
+            "reserveDriver": "K. Antonelli",
+            "team": "Ferrari"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "Top 10 Boost",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": {
+              "original": "Random",
+              "transformed": "Espionage",
+              "type": "random"
+            },
+            "transformations": {
+              "random": "Espionage"
+            }
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_6",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "K. Antonelli",
+            "reserveDriver": "C. Leclerc",
+            "team": "McLaren"
+          },
+          "cards": {
+            "driverCard": {
+              "original": "Mystery Card",
+              "transformed": "Top 10 Boost",
+              "type": "mystery"
+            },
+            "teamCard": {
+              "name": "Podium",
+              "tier": "gold",
+              "target": null
+            },
+            "transformations": {
+              "mystery": "Top 10 Boost"
+            }
+          },
+          "points": 0
+        }
+      ]
+    },
+    {
+      "round": 9,
+      "raceName": "Spanish Grand Prix",
+      "date": "2026-06-14T00:00:00.000Z",
+      "isSprintWeekend": false,
+      "players": [
+        {
+          "username": "full_season_1767734198761_1",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "C. Leclerc",
+            "reserveDriver": "L. Hamilton",
+            "team": "Aston Martin"
+          },
+          "cards": {
+            "driverCard": {
+              "original": "Mystery Card",
+              "transformed": "2× Points",
+              "type": "mystery"
+            },
+            "teamCard": null,
+            "transformations": {
+              "mystery": "2× Points"
+            }
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_2",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "L. Hamilton",
+            "reserveDriver": "L. Norris",
+            "team": "Alpine"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "Competitiveness",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": null,
+            "transformations": {}
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_3",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "L. Norris",
+            "reserveDriver": "O. Piastri",
+            "team": "Williams"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "Top 10 Boost",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": null,
+            "transformations": {}
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_4",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "O. Piastri",
+            "reserveDriver": "A. Albon",
+            "team": "RB"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "Teamwork",
+              "tier": "silver",
+              "target": null
+            },
+            "teamCard": null,
+            "transformations": {}
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_5",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "A. Albon",
+            "reserveDriver": "C. Sainz",
+            "team": "Haas F1 Team"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "2× Points",
+              "tier": "gold",
+              "target": null
+            },
+            "teamCard": null,
+            "transformations": {}
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_6",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "C. Sainz",
+            "reserveDriver": "L. Lawson",
+            "team": "Audi"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "+3 Points",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": {
+              "original": "Random",
+              "transformed": "Espionage",
+              "type": "random"
+            },
+            "transformations": {
+              "random": "Espionage"
+            }
+          },
+          "points": 0
+        }
+      ]
+    },
+    {
+      "round": 10,
+      "raceName": "Austrian Grand Prix",
+      "date": "2026-06-28T00:00:00.000Z",
+      "isSprintWeekend": false,
+      "players": [
+        {
+          "username": "full_season_1767734198761_1",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "L. Lawson",
+            "reserveDriver": "A. Lindblad",
+            "team": "Cadillac"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "Top 5 Boost",
+              "tier": "silver",
+              "target": null
+            },
+            "teamCard": null,
+            "transformations": {}
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_2",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "A. Lindblad",
+            "reserveDriver": "F. Alonso",
+            "team": "Red Bull Racing"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "Top 10 Boost",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": null,
+            "transformations": {}
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_3",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "F. Alonso",
+            "reserveDriver": "L. Stroll",
+            "team": "Mercedes"
+          },
+          "cards": {
+            "driverCard": {
+              "original": "Mystery Card",
+              "transformed": "Teamwork",
+              "type": "mystery"
+            },
+            "teamCard": null,
+            "transformations": {
+              "mystery": "Teamwork"
+            }
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_4",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "L. Stroll",
+            "reserveDriver": "E. Ocon",
+            "team": "Ferrari"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "+3 Points",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": null,
+            "transformations": {}
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_5",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "E. Ocon",
+            "reserveDriver": "O. Bearman",
+            "team": "McLaren"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "Teamwork",
+              "tier": "silver",
+              "target": null
+            },
+            "teamCard": null,
+            "transformations": {}
+          },
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_6",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "O. Bearman",
+            "reserveDriver": "N. Hulkenberg",
+            "team": "Aston Martin"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "Teamwork",
+              "tier": "silver",
+              "target": null
+            },
+            "teamCard": null,
+            "transformations": {}
+          },
+          "points": 0
+        }
+      ]
+    },
+    {
+      "round": 11,
+      "raceName": "British Grand Prix",
+      "date": "2026-07-05T00:00:00.000Z",
+      "isSprintWeekend": true,
+      "players": [
+        {
+          "username": "full_season_1767734198761_1",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "N. Hulkenberg",
+            "reserveDriver": "G. Bortoleto",
+            "team": "Alpine"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_2",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "G. Bortoleto",
+            "reserveDriver": "P. Gasly",
+            "team": "Williams"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_3",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "P. Gasly",
+            "reserveDriver": "F. Colapinto",
+            "team": "RB"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_4",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "F. Colapinto",
+            "reserveDriver": "S. Perez",
+            "team": "Haas F1 Team"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_5",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "S. Perez",
+            "reserveDriver": "V. Bottas",
+            "team": "Audi"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_6",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "V. Bottas",
+            "reserveDriver": "M. Verstappen",
+            "team": "Cadillac"
+          },
+          "cards": null,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "round": 12,
+      "raceName": "Belgian Grand Prix",
+      "date": "2026-07-19T00:00:00.000Z",
+      "isSprintWeekend": false,
+      "players": [
+        {
+          "username": "full_season_1767734198761_1",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "M. Verstappen",
+            "reserveDriver": "I. Hadjar",
+            "team": "Red Bull Racing"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_2",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "I. Hadjar",
+            "reserveDriver": "G. Russell",
+            "team": "Mercedes"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_3",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "G. Russell",
+            "reserveDriver": "K. Antonelli",
+            "team": "Ferrari"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_4",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "K. Antonelli",
+            "reserveDriver": "C. Leclerc",
+            "team": "McLaren"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_5",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "C. Leclerc",
+            "reserveDriver": "L. Hamilton",
+            "team": "Aston Martin"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_6",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "L. Hamilton",
+            "reserveDriver": "L. Norris",
+            "team": "Alpine"
+          },
+          "cards": {
+            "driverCard": {
+              "name": "Top 10 Boost",
+              "tier": "bronze",
+              "target": null
+            },
+            "teamCard": null,
+            "transformations": {}
+          },
+          "points": 0
+        }
+      ]
+    },
+    {
+      "round": 13,
+      "raceName": "Hungarian Grand Prix",
+      "date": "2026-07-26T00:00:00.000Z",
+      "isSprintWeekend": false,
+      "players": [
+        {
+          "username": "full_season_1767734198761_1",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "L. Norris",
+            "reserveDriver": "O. Piastri",
+            "team": "Williams"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_2",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "O. Piastri",
+            "reserveDriver": "A. Albon",
+            "team": "RB"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_3",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "A. Albon",
+            "reserveDriver": "C. Sainz",
+            "team": "Haas F1 Team"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_4",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "C. Sainz",
+            "reserveDriver": "L. Lawson",
+            "team": "Audi"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_5",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "L. Lawson",
+            "reserveDriver": "A. Lindblad",
+            "team": "Cadillac"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_6",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "A. Lindblad",
+            "reserveDriver": "F. Alonso",
+            "team": "Red Bull Racing"
+          },
+          "cards": null,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "round": 14,
+      "raceName": "Dutch Grand Prix",
+      "date": "2026-08-23T00:00:00.000Z",
+      "isSprintWeekend": true,
+      "players": [
+        {
+          "username": "full_season_1767734198761_1",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "F. Alonso",
+            "reserveDriver": "L. Stroll",
+            "team": "Mercedes"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_2",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "L. Stroll",
+            "reserveDriver": "E. Ocon",
+            "team": "Ferrari"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_3",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "E. Ocon",
+            "reserveDriver": "O. Bearman",
+            "team": "McLaren"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_4",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "O. Bearman",
+            "reserveDriver": "N. Hulkenberg",
+            "team": "Aston Martin"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_5",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "N. Hulkenberg",
+            "reserveDriver": "G. Bortoleto",
+            "team": "Alpine"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_6",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "G. Bortoleto",
+            "reserveDriver": "P. Gasly",
+            "team": "Williams"
+          },
+          "cards": null,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "round": 15,
+      "raceName": "Italian Grand Prix",
+      "date": "2026-09-06T00:00:00.000Z",
+      "isSprintWeekend": false,
+      "players": [
+        {
+          "username": "full_season_1767734198761_1",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "P. Gasly",
+            "reserveDriver": "F. Colapinto",
+            "team": "RB"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_2",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "F. Colapinto",
+            "reserveDriver": "S. Perez",
+            "team": "Haas F1 Team"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_3",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "S. Perez",
+            "reserveDriver": "V. Bottas",
+            "team": "Audi"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_4",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "V. Bottas",
+            "reserveDriver": "M. Verstappen",
+            "team": "Cadillac"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_5",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "M. Verstappen",
+            "reserveDriver": "I. Hadjar",
+            "team": "Red Bull Racing"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_6",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "I. Hadjar",
+            "reserveDriver": "G. Russell",
+            "team": "Mercedes"
+          },
+          "cards": null,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "round": 16,
+      "raceName": "Spanish Grand Prix",
+      "date": "2026-09-13T00:00:00.000Z",
+      "isSprintWeekend": false,
+      "players": [
+        {
+          "username": "full_season_1767734198761_1",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "G. Russell",
+            "reserveDriver": "K. Antonelli",
+            "team": "Ferrari"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_2",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "K. Antonelli",
+            "reserveDriver": "C. Leclerc",
+            "team": "McLaren"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_3",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "C. Leclerc",
+            "reserveDriver": "L. Hamilton",
+            "team": "Aston Martin"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_4",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "L. Hamilton",
+            "reserveDriver": "L. Norris",
+            "team": "Alpine"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_5",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "L. Norris",
+            "reserveDriver": "O. Piastri",
+            "team": "Williams"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_6",
+          "skipped": true,
+          "selections": {
+            "autoAssigned": true
+          },
+          "cards": null,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "round": 17,
+      "raceName": "Azerbaijan Grand Prix",
+      "date": "2026-09-26T00:00:00.000Z",
+      "isSprintWeekend": false,
+      "players": [
+        {
+          "username": "full_season_1767734198761_1",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "A. Albon",
+            "reserveDriver": "C. Sainz",
+            "team": "Haas F1 Team"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_2",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "C. Sainz",
+            "reserveDriver": "L. Lawson",
+            "team": "Audi"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_3",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "L. Lawson",
+            "reserveDriver": "A. Lindblad",
+            "team": "Cadillac"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_4",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "A. Lindblad",
+            "reserveDriver": "F. Alonso",
+            "team": "Red Bull Racing"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_5",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "F. Alonso",
+            "reserveDriver": "L. Stroll",
+            "team": "Mercedes"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_6",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "L. Stroll",
+            "reserveDriver": "E. Ocon",
+            "team": "Ferrari"
+          },
+          "cards": null,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "round": 18,
+      "raceName": "Singapore Grand Prix",
+      "date": "2026-10-11T00:00:00.000Z",
+      "isSprintWeekend": true,
+      "players": [
+        {
+          "username": "full_season_1767734198761_1",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "E. Ocon",
+            "reserveDriver": "O. Bearman",
+            "team": "McLaren"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_2",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "O. Bearman",
+            "reserveDriver": "N. Hulkenberg",
+            "team": "Aston Martin"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_3",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "N. Hulkenberg",
+            "reserveDriver": "G. Bortoleto",
+            "team": "Alpine"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_4",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "G. Bortoleto",
+            "reserveDriver": "P. Gasly",
+            "team": "Williams"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_5",
+          "skipped": true,
+          "selections": {
+            "autoAssigned": true
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_6",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "F. Colapinto",
+            "reserveDriver": "S. Perez",
+            "team": "Haas F1 Team"
+          },
+          "cards": null,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "round": 19,
+      "raceName": "United States Grand Prix",
+      "date": "2026-10-25T00:00:00.000Z",
+      "isSprintWeekend": false,
+      "players": [
+        {
+          "username": "full_season_1767734198761_1",
+          "skipped": true,
+          "selections": {
+            "autoAssigned": true
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_2",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "V. Bottas",
+            "reserveDriver": "M. Verstappen",
+            "team": "Cadillac"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_3",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "M. Verstappen",
+            "reserveDriver": "I. Hadjar",
+            "team": "Red Bull Racing"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_4",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "I. Hadjar",
+            "reserveDriver": "G. Russell",
+            "team": "Mercedes"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_5",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "G. Russell",
+            "reserveDriver": "K. Antonelli",
+            "team": "Ferrari"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_6",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "K. Antonelli",
+            "reserveDriver": "C. Leclerc",
+            "team": "McLaren"
+          },
+          "cards": null,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "round": 20,
+      "raceName": "Mexican Grand Prix",
+      "date": "2026-11-01T00:00:00.000Z",
+      "isSprintWeekend": false,
+      "players": [
+        {
+          "username": "full_season_1767734198761_1",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "C. Leclerc",
+            "reserveDriver": "L. Hamilton",
+            "team": "Aston Martin"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_2",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "L. Hamilton",
+            "reserveDriver": "L. Norris",
+            "team": "Alpine"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_3",
+          "skipped": true,
+          "selections": {
+            "autoAssigned": true
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_4",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "O. Piastri",
+            "reserveDriver": "A. Albon",
+            "team": "RB"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_5",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "A. Albon",
+            "reserveDriver": "C. Sainz",
+            "team": "Haas F1 Team"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_6",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "C. Sainz",
+            "reserveDriver": "L. Lawson",
+            "team": "Audi"
+          },
+          "cards": null,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "round": 21,
+      "raceName": "São Paulo Grand Prix",
+      "date": "2026-11-08T00:00:00.000Z",
+      "isSprintWeekend": false,
+      "players": [
+        {
+          "username": "full_season_1767734198761_1",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "L. Lawson",
+            "reserveDriver": "A. Lindblad",
+            "team": "Cadillac"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_2",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "A. Lindblad",
+            "reserveDriver": "F. Alonso",
+            "team": "Red Bull Racing"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_3",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "F. Alonso",
+            "reserveDriver": "L. Stroll",
+            "team": "Mercedes"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_4",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "L. Stroll",
+            "reserveDriver": "E. Ocon",
+            "team": "Ferrari"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_5",
+          "skipped": true,
+          "selections": {
+            "autoAssigned": true
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_6",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "O. Bearman",
+            "reserveDriver": "N. Hulkenberg",
+            "team": "Aston Martin"
+          },
+          "cards": null,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "round": 22,
+      "raceName": "Las Vegas Grand Prix",
+      "date": "2026-11-22T00:00:00.000Z",
+      "isSprintWeekend": false,
+      "players": [
+        {
+          "username": "full_season_1767734198761_1",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "N. Hulkenberg",
+            "reserveDriver": "G. Bortoleto",
+            "team": "Alpine"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_2",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "G. Bortoleto",
+            "reserveDriver": "P. Gasly",
+            "team": "Williams"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_3",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "P. Gasly",
+            "reserveDriver": "F. Colapinto",
+            "team": "RB"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_4",
+          "skipped": true,
+          "selections": {
+            "autoAssigned": true
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_5",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "S. Perez",
+            "reserveDriver": "V. Bottas",
+            "team": "Audi"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_6",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "V. Bottas",
+            "reserveDriver": "M. Verstappen",
+            "team": "Cadillac"
+          },
+          "cards": null,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "round": 23,
+      "raceName": "Qatar Grand Prix",
+      "date": "2026-11-29T00:00:00.000Z",
+      "isSprintWeekend": false,
+      "players": [
+        {
+          "username": "full_season_1767734198761_1",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "M. Verstappen",
+            "reserveDriver": "I. Hadjar",
+            "team": "Red Bull Racing"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_2",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "I. Hadjar",
+            "reserveDriver": "G. Russell",
+            "team": "Mercedes"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_3",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "G. Russell",
+            "reserveDriver": "K. Antonelli",
+            "team": "Ferrari"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_4",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "K. Antonelli",
+            "reserveDriver": "C. Leclerc",
+            "team": "McLaren"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_5",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "C. Leclerc",
+            "reserveDriver": "L. Hamilton",
+            "team": "Aston Martin"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_6",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "L. Hamilton",
+            "reserveDriver": "L. Norris",
+            "team": "Alpine"
+          },
+          "cards": null,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "round": 24,
+      "raceName": "Abu Dhabi Grand Prix",
+      "date": "2026-12-06T00:00:00.000Z",
+      "isSprintWeekend": false,
+      "players": [
+        {
+          "username": "full_season_1767734198761_1",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "L. Norris",
+            "reserveDriver": "O. Piastri",
+            "team": "Williams"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_2",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "O. Piastri",
+            "reserveDriver": "A. Albon",
+            "team": "RB"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_3",
+          "skipped": true,
+          "selections": {
+            "autoAssigned": true
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_4",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "C. Sainz",
+            "reserveDriver": "L. Lawson",
+            "team": "Audi"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_5",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "L. Lawson",
+            "reserveDriver": "A. Lindblad",
+            "team": "Cadillac"
+          },
+          "cards": null,
+          "points": 0
+        },
+        {
+          "username": "full_season_1767734198761_6",
+          "skipped": false,
+          "selections": {
+            "mainDriver": "A. Lindblad",
+            "reserveDriver": "F. Alonso",
+            "team": "Red Bull Racing"
+          },
+          "cards": null,
+          "points": 0
+        }
+      ]
+    }
+  ],
+  "standings": {
+    "driverStandings": [
+      {
+        "username": "full_season_1767734198761_1",
+        "totalPoints": 0,
+        "races": 0
+      },
+      {
+        "username": "full_season_1767734198761_2",
+        "totalPoints": 0,
+        "races": 0
+      },
+      {
+        "username": "full_season_1767734198761_3",
+        "totalPoints": 0,
+        "races": 0
+      },
+      {
+        "username": "full_season_1767734198761_4",
+        "totalPoints": 0,
+        "races": 0
+      },
+      {
+        "username": "full_season_1767734198761_5",
+        "totalPoints": 0,
+        "races": 0
+      },
+      {
+        "username": "full_season_1767734198761_6",
+        "totalPoints": 0,
+        "races": 0
+      }
+    ],
+    "teamStandings": [
+      {
+        "username": "full_season_1767734198761_1",
+        "totalPoints": 0,
+        "races": 0
+      },
+      {
+        "username": "full_season_1767734198761_2",
+        "totalPoints": 0,
+        "races": 0
+      },
+      {
+        "username": "full_season_1767734198761_3",
+        "totalPoints": 0,
+        "races": 0
+      },
+      {
+        "username": "full_season_1767734198761_4",
+        "totalPoints": 0,
+        "races": 0
+      },
+      {
+        "username": "full_season_1767734198761_5",
+        "totalPoints": 0,
+        "races": 0
+      },
+      {
+        "username": "full_season_1767734198761_6",
+        "totalPoints": 0,
+        "races": 0
+      }
+    ]
+  }
+}
