@@ -1,18 +1,8 @@
 const mongoose = require('mongoose');
-const { F1_DRIVERS_2025 } = require('../constants/f1DriverData');
 const { normalizeDriverName } = require('../constants/driverNameNormalization');
-const { normalizedTeams } = require('../constants/validTeams');
+const { getF1Validation } = require('../constants/f1DataLoader');
 const RaceCalendar = require('./RaceCalendar');
-
-// Create a set of all valid driver names
-const normalizedDrivers = new Set();
-F1_DRIVERS_2025.forEach(driver => {
-    normalizedDrivers.add(driver.name.toLowerCase());
-    normalizedDrivers.add(driver.shortName.toLowerCase());
-    driver.alternateNames.forEach(name => {
-        normalizedDrivers.add(name.toLowerCase());
-    });
-});
+const RaceCardSelection = require('./RaceCardSelection');
 
 const raceResultSchema = new mongoose.Schema({
   round: {
@@ -195,48 +185,20 @@ raceResultSchema.index({ date: 1 });
 raceResultSchema.index({ status: 1 });
 raceResultSchema.index({ season: 1, round: 1 }, { unique: true });
 
-// Virtual property to check if race is locked (no more selections/switcheroos allowed)
+// Virtual property to check if race is locked (no more selections allowed)
 raceResultSchema.virtual('isLocked').get(function() {
   const now = new Date();
   return now >= this.qualifyingStart;
 });
 
-// Method to check if switcheroo is allowed
-raceResultSchema.methods.isSwitcherooAllowed = function() {
-  const now = new Date();
-  if (this.isSprintWeekend) {
-    // Sprint weekend: between sprint qualifying end (or start+1h) and 5 minutes before sprint race
-    let sprintQualifyingEnd = this.sprintQualifyingEnd;
-    if (!sprintQualifyingEnd && this.sprintQualifyingStart) {
-      sprintQualifyingEnd = new Date(this.sprintQualifyingStart.getTime() + 60 * 60 * 1000); // +1 hour
-    }
-    if (!sprintQualifyingEnd || !this.sprintStart) {
-      return false;
-    }
-    const switcherooEnd = new Date(this.sprintStart);
-    switcherooEnd.setMinutes(switcherooEnd.getMinutes() - 5);
-    return now >= sprintQualifyingEnd && now <= switcherooEnd;
-  } else {
-    // Regular weekend: between qualifying end (or start+1h) and 5 minutes before race
-    let qualifyingEnd = this.qualifyingEnd;
-    if (!qualifyingEnd && this.qualifyingStart) {
-      qualifyingEnd = new Date(this.qualifyingStart.getTime() + 60 * 60 * 1000); // +1 hour
-    }
-    if (!qualifyingEnd || !this.raceStart) {
-      return false;
-    }
-    const switcherooEnd = new Date(this.raceStart);
-    switcherooEnd.setMinutes(switcherooEnd.getMinutes() - 5);
-    return now >= qualifyingEnd && now <= switcherooEnd;
-  }
-};
-
 // Method to get driver result by name
 raceResultSchema.methods.getDriverResult = function(driverName, type = 'race') {
-  const normalizedName = normalizedDrivers[driverName.toLowerCase()] || driverName.toLowerCase();
+  const season = this.season || new Date().getFullYear();
+  const { normalizeDriverName: normalizeDriver } = getF1Validation(season);
+  const normalizedName = normalizeDriver(driverName).toLowerCase();
   const results = type === 'sprint' ? this.sprintResults : this.results;
   return results.find(result => {
-    const resultDriverName = result.driver?.toLowerCase();
+    const resultDriverName = normalizeDriver(result.driver).toLowerCase();
     return resultDriverName === normalizedName;
   });
 };
@@ -257,9 +219,11 @@ raceResultSchema.methods.getDriverPoints = function(driverName, isSprint = false
 
 // Method to get team result
 raceResultSchema.methods.getTeamResult = function(teamName) {
-  const normalizedName = normalizedTeams[teamName.toLowerCase()] || teamName.toLowerCase();
+  const season = this.season || new Date().getFullYear();
+  const { normalizeTeamName } = getF1Validation(season);
+  const normalizedName = normalizeTeamName(teamName).toLowerCase();
   return this.teamResults.find(result => {
-    const resultTeamName = result.team?.toLowerCase();
+    const resultTeamName = normalizeTeamName(result.team).toLowerCase();
     return resultTeamName === normalizedName;
   });
 };
@@ -417,43 +381,80 @@ raceResultSchema.post('save', async function(doc) {
           continue;
         }
 
-        // Calculate new points
-        const pointsData = scoringService.calculateRacePoints({
+        // Get race card selection if season is 2026+
+        let raceCardSelection = null;
+        if (doc.season >= 2026) {
+          raceCardSelection = await RaceCardSelection.findOne({
+            user: member._id,
+            league: leagueId,
+            race: doc._id
+          }).populate('driverCard teamCard');
+        }
+
+        // Calculate new points (with card effects if applicable)
+        const pointsData = await scoringService.calculateRacePoints({
           mainDriver: selection.mainDriver,
           reserveDriver: selection.reserveDriver,
           team: selection.team
-        }, doc);
+        }, doc, raceCardSelection, {
+          userId: member._id,
+          leagueId: leagueId
+        });
 
         // Validate points against race results
         const mainDriverResult = doc.getDriverResult(selection.mainDriver);
         const reserveDriverResult = doc.getDriverResult(selection.reserveDriver);
         const teamResult = doc.getTeamResult(selection.team);
 
-        // Verify points match what's in race results
-        const expectedPoints = {
+        // Verify base points match what's in race results (before card effects)
+        // Note: Final points may differ due to card effects
+        const expectedBasePoints = {
           mainDriver: mainDriverResult?.points || 0,
           reserveDriver: reserveDriverResult?.points || 0,
           team: teamResult?.totalPoints || 0
         };
 
-        // Log any discrepancies
-        if (pointsData.breakdown.mainDriver !== expectedPoints.mainDriver ||
-            pointsData.breakdown.reserveDriver !== expectedPoints.reserveDriver ||
-            pointsData.breakdown.team !== expectedPoints.team) {
-          console.error(`[Validation] Points mismatch for user ${member._id} in race ${doc.round}:`, {
-            mainDriver: {
-              expected: expectedPoints.mainDriver,
-              calculated: pointsData.breakdown.mainDriver
-            },
-            reserveDriver: {
-              expected: expectedPoints.reserveDriver,
-              calculated: pointsData.breakdown.reserveDriver
-            },
-            team: {
-              expected: expectedPoints.team,
-              calculated: pointsData.breakdown.team
-            }
-          });
+        // Check base points (before card effects) if available
+        const basePoints = pointsData.breakdown.basePoints;
+        if (basePoints) {
+          if (basePoints.mainDriverPoints !== expectedBasePoints.mainDriver ||
+              basePoints.reserveDriverPoints !== expectedBasePoints.reserveDriver ||
+              basePoints.teamPoints !== expectedBasePoints.team) {
+            console.error(`[Validation] Base points mismatch for user ${member._id} in race ${doc.round}:`, {
+              mainDriver: {
+                expected: expectedBasePoints.mainDriver,
+                calculated: basePoints.mainDriverPoints
+              },
+              reserveDriver: {
+                expected: expectedBasePoints.reserveDriver,
+                calculated: basePoints.reserveDriverPoints
+              },
+              team: {
+                expected: expectedBasePoints.team,
+                calculated: basePoints.teamPoints
+              }
+            });
+          }
+        } else {
+          // Fallback for 2025 seasons (no card effects)
+          if (pointsData.breakdown.mainDriverPoints !== expectedBasePoints.mainDriver ||
+              pointsData.breakdown.reserveDriverPoints !== expectedBasePoints.reserveDriver ||
+              pointsData.breakdown.teamPoints !== expectedBasePoints.team) {
+            console.error(`[Validation] Points mismatch for user ${member._id} in race ${doc.round}:`, {
+              mainDriver: {
+                expected: expectedBasePoints.mainDriver,
+                calculated: pointsData.breakdown.mainDriverPoints
+              },
+              reserveDriver: {
+                expected: expectedBasePoints.reserveDriver,
+                calculated: pointsData.breakdown.reserveDriverPoints
+              },
+              team: {
+                expected: expectedBasePoints.team,
+                calculated: pointsData.breakdown.teamPoints
+              }
+            });
+          }
         }
 
         // Check if points have changed
@@ -505,9 +506,9 @@ raceResultSchema.post('save', async function(doc) {
           }
 
           // Add the selections to the current cycles
-          usedSelection.addUsedMainDriver(selection.mainDriver);
-          usedSelection.addUsedReserveDriver(selection.reserveDriver);
-          usedSelection.addUsedTeam(selection.team);
+          await usedSelection.addUsedMainDriver(selection.mainDriver);
+          await usedSelection.addUsedReserveDriver(selection.reserveDriver);
+          await usedSelection.addUsedTeam(selection.team);
           await usedSelection.save();
         }
       }

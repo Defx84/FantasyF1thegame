@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { auth } = require('../middleware/auth');
 const validateServerKey = require('../middleware/validateServerKey');
-const { getNextRaceTiming, getCurrentRaceStatus, getRaceStatus, updateRaceResults, getLeagueRaces, getRaceByLeagueAndRound } = require('../controllers/raceController');
+const { getNextRaceTiming, getCurrentRaceStatus, getRaceStatus, updateRaceResults, getLeagueRaces, getRaceByLeagueAndRound, autoAssignMissedSelections } = require('../controllers/raceController');
 
 // Debug logging
 console.log('Loading race routes:', {
@@ -35,5 +35,9 @@ router.get('/race-status/:round', getRaceStatus);
 
 // Post route for updating race results
 router.post('/update-race-results/:round', validateServerKey, updateRaceResults);
+
+// Auto-assign selections for users who missed the deadline
+// Can be called with or without round parameter
+router.post('/auto-assign-selections/:round?', validateServerKey, autoAssignMissedSelections);
 
 module.exports = router; 

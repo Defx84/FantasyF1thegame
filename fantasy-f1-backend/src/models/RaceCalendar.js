@@ -3,8 +3,7 @@ const mongoose = require('mongoose');
 const raceCalendarSchema = new mongoose.Schema({
   round: { 
     type: Number, 
-    required: true,
-    unique: true 
+    required: true
   },
   season: { 
     type: Number, 
@@ -53,6 +52,9 @@ const raceCalendarSchema = new mongoose.Schema({
     default: Date.now 
   }
 });
+
+// Compound unique index on round + season (allows same round number for different seasons)
+raceCalendarSchema.index({ round: 1, season: 1 }, { unique: true });
 
 // Update the updatedAt field before saving
 raceCalendarSchema.pre('save', function(next) {

@@ -1,12 +1,6 @@
 const mongoose = require('mongoose');
-const { 
-    F1_DRIVERS_2025,
-    F1_TEAMS_2025,
-    isValidDriver,
-    isValidTeam,
-    normalizeDriverName,
-    normalizeTeamName
-} = require('../constants/f1Data2025');
+const { getAllF1Data } = require('../constants/f1DataLoader');
+const League = require('./League');
 
 const usedSelectionSchema = new mongoose.Schema({
   user: {
@@ -23,12 +17,17 @@ const usedSelectionSchema = new mongoose.Schema({
     type: [[String]], // Array of arrays of team names
     default: [[]]
   },
+  driverCycles: {
+    type: [[String]], // Array of arrays of driver short names (shared for main and reserve)
+    default: [[]]
+  },
+  // Legacy fields - kept for migration compatibility, will be removed in future
   mainDriverCycles: {
-    type: [[String]], // Array of arrays of main driver short names
+    type: [[String]],
     default: [[]]
   },
   reserveDriverCycles: {
-    type: [[String]], // Array of arrays of reserve driver short names
+    type: [[String]],
     default: [[]]
   },
 }, { timestamps: true });
@@ -41,6 +40,10 @@ usedSelectionSchema.pre('save', function(next) {
   if (!this.teamCycles || this.teamCycles.length === 0) {
     this.teamCycles = [[]];
   }
+  if (!this.driverCycles || this.driverCycles.length === 0) {
+    this.driverCycles = [[]];
+  }
+  // Legacy: ensure old fields exist for migration compatibility
   if (!this.mainDriverCycles || this.mainDriverCycles.length === 0) {
     this.mainDriverCycles = [[]];
   }
@@ -50,83 +53,91 @@ usedSelectionSchema.pre('save', function(next) {
   next();
 });
 
-// Helper methods to check if a driver/team can be used
-usedSelectionSchema.methods.canUseMainDriver = function(driver) {
-  if (!driver) return true;
+// Helper method to get F1 data for this league's season
+usedSelectionSchema.methods.getF1DataForSeason = async function() {
+  const league = await League.findById(this.league);
+  if (!league) {
+    throw new Error('League not found');
+  }
+  return getAllF1Data(league.season);
+};
+
+// Unified method to check if a driver can be used (for both main and reserve)
+usedSelectionSchema.methods.canUseDriver = async function(driver) {
+  if (!driver || driver === 'None') return true;
+  const { normalizeDriverName } = await this.getF1DataForSeason();
   const normalizedDriver = normalizeDriverName(driver); // always short name
-  const currentCycle = this.mainDriverCycles[this.mainDriverCycles.length - 1];
+  const currentCycle = this.driverCycles[this.driverCycles.length - 1];
   return !currentCycle.includes(normalizedDriver);
 };
 
-usedSelectionSchema.methods.canUseReserveDriver = function(driver) {
-  if (!driver) return true;
-  const normalizedDriver = normalizeDriverName(driver); // always short name
-  const currentCycle = this.reserveDriverCycles[this.reserveDriverCycles.length - 1];
-  return !currentCycle.includes(normalizedDriver);
+// Legacy methods - kept for backward compatibility, now use unified method
+usedSelectionSchema.methods.canUseMainDriver = async function(driver) {
+  return this.canUseDriver(driver);
 };
 
-usedSelectionSchema.methods.canUseTeam = function(team) {
+usedSelectionSchema.methods.canUseReserveDriver = async function(driver) {
+  return this.canUseDriver(driver);
+};
+
+usedSelectionSchema.methods.canUseTeam = async function(team) {
   if (!team) return true;
+  const { normalizeTeamName } = await this.getF1DataForSeason();
   const normalizedTeam = normalizeTeamName(team); // always canonical name
   const currentCycle = this.teamCycles[this.teamCycles.length - 1];
   return !currentCycle.includes(normalizedTeam);
 };
 
-// Method to add a used main driver
-usedSelectionSchema.methods.addUsedMainDriver = function(driver) {
-    if (!driver || driver === 'None') return;
+// Unified method to add a used driver (for both main and reserve)
+usedSelectionSchema.methods.addUsedDriver = async function(driver) {
+  if (!driver || driver === 'None') return;
+  const { isValidDriver, normalizeDriverName } = await this.getF1DataForSeason();
   if (!isValidDriver(driver)) throw new Error('Invalid driver name');
   const normalizedDriver = normalizeDriverName(driver); // always short name
-  let currentCycle = this.mainDriverCycles[this.mainDriverCycles.length - 1];
+  let currentCycle = this.driverCycles[this.driverCycles.length - 1];
   if (!currentCycle.includes(normalizedDriver)) {
     currentCycle.push(normalizedDriver);
-    if (currentCycle.length === 20) {
-      // Create new empty cycle - the 20th driver should ONLY be in the completed cycle
-      this.mainDriverCycles.push([]); // Start new cycle immediately after 20th
+    // Get the number of drivers for this season to determine cycle length
+    const { drivers } = await this.getF1DataForSeason();
+    const maxDrivers = drivers.length;
+    if (currentCycle.length >= maxDrivers) {
+      // Create new empty cycle - the last driver should ONLY be in the completed cycle
+      this.driverCycles.push([]); // Start new cycle immediately after max drivers
       // Defensive check: ensure the driver is NOT in the new cycle (should never happen, but safety check)
-      const newCycle = this.mainDriverCycles[this.mainDriverCycles.length - 1];
+      const newCycle = this.driverCycles[this.driverCycles.length - 1];
       const driverIndex = newCycle.indexOf(normalizedDriver);
       if (driverIndex > -1) {
-        console.error('[addUsedMainDriver] WARNING: Driver found in new cycle, removing it!');
+        console.error('[addUsedDriver] WARNING: Driver found in new cycle, removing it!');
         newCycle.splice(driverIndex, 1);
       }
     }
   }
 };
 
-// Method to add a used reserve driver
-usedSelectionSchema.methods.addUsedReserveDriver = function(driver) {
-    if (!driver || driver === 'None') return;
-  if (!isValidDriver(driver)) throw new Error('Invalid driver name');
-  const normalizedDriver = normalizeDriverName(driver); // always short name
-  let currentCycle = this.reserveDriverCycles[this.reserveDriverCycles.length - 1];
-  if (!currentCycle.includes(normalizedDriver)) {
-    currentCycle.push(normalizedDriver);
-    if (currentCycle.length === 20) {
-      // Create new empty cycle - the 20th driver should ONLY be in the completed cycle
-      this.reserveDriverCycles.push([]); // Start new cycle immediately after 20th
-      // Defensive check: ensure the driver is NOT in the new cycle (should never happen, but safety check)
-      const newCycle = this.reserveDriverCycles[this.reserveDriverCycles.length - 1];
-      const driverIndex = newCycle.indexOf(normalizedDriver);
-      if (driverIndex > -1) {
-        console.error('[addUsedReserveDriver] WARNING: Driver found in new cycle, removing it!');
-        newCycle.splice(driverIndex, 1);
-      }
-    }
-  }
+// Legacy methods - kept for backward compatibility, now use unified method
+usedSelectionSchema.methods.addUsedMainDriver = async function(driver) {
+  return this.addUsedDriver(driver);
+};
+
+usedSelectionSchema.methods.addUsedReserveDriver = async function(driver) {
+  return this.addUsedDriver(driver);
 };
 
 // Method to add a used team
-usedSelectionSchema.methods.addUsedTeam = function(team) {
+usedSelectionSchema.methods.addUsedTeam = async function(team) {
     if (!team || team === 'None') return;
+  const { isValidTeam, normalizeTeamName } = await this.getF1DataForSeason();
   if (!isValidTeam(team)) throw new Error('Invalid team name');
   const normalizedTeam = normalizeTeamName(team); // always canonical name
   let currentCycle = this.teamCycles[this.teamCycles.length - 1];
   if (!currentCycle.includes(normalizedTeam)) {
     currentCycle.push(normalizedTeam);
-    if (currentCycle.length === 10) {
-      // Create new empty cycle - the 10th team should ONLY be in the completed cycle
-      this.teamCycles.push([]); // Start new cycle immediately after 10th
+    // Get the number of teams for this season to determine cycle length
+    const { teams } = await this.getF1DataForSeason();
+    const maxTeams = teams.length;
+    if (currentCycle.length >= maxTeams) {
+      // Create new empty cycle - the last team should ONLY be in the completed cycle
+      this.teamCycles.push([]); // Start new cycle immediately after max teams
       // Defensive check: ensure the team is NOT in the new cycle (should never happen, but safety check)
       const newCycle = this.teamCycles[this.teamCycles.length - 1];
       const teamIndex = newCycle.indexOf(normalizedTeam);
@@ -138,12 +149,13 @@ usedSelectionSchema.methods.addUsedTeam = function(team) {
   }
 };
 
-// Method to remove a used main driver
-usedSelectionSchema.methods.removeUsedMainDriver = function(driver) {
+// Unified method to remove a used driver (for both main and reserve)
+usedSelectionSchema.methods.removeUsedDriver = async function(driver) {
   if (!driver || driver === 'None') return;
+  const { isValidDriver, normalizeDriverName } = await this.getF1DataForSeason();
   if (!isValidDriver(driver)) throw new Error('Invalid driver name');
   const normalizedDriver = normalizeDriverName(driver); // always short name
-  let currentCycle = this.mainDriverCycles[this.mainDriverCycles.length - 1];
+  let currentCycle = this.driverCycles[this.driverCycles.length - 1];
   
   const index = currentCycle.indexOf(normalizedDriver);
   if (index > -1) {
@@ -151,22 +163,19 @@ usedSelectionSchema.methods.removeUsedMainDriver = function(driver) {
   }
 };
 
-// Method to remove a used reserve driver
-usedSelectionSchema.methods.removeUsedReserveDriver = function(driver) {
-  if (!driver || driver === 'None') return;
-  if (!isValidDriver(driver)) throw new Error('Invalid driver name');
-  const normalizedDriver = normalizeDriverName(driver); // always short name
-  let currentCycle = this.reserveDriverCycles[this.reserveDriverCycles.length - 1];
-  
-  const index = currentCycle.indexOf(normalizedDriver);
-  if (index > -1) {
-    currentCycle.splice(index, 1); // Remove from array
-  }
+// Legacy methods - kept for backward compatibility, now use unified method
+usedSelectionSchema.methods.removeUsedMainDriver = async function(driver) {
+  return this.removeUsedDriver(driver);
+};
+
+usedSelectionSchema.methods.removeUsedReserveDriver = async function(driver) {
+  return this.removeUsedDriver(driver);
 };
 
 // Method to remove a used team
-usedSelectionSchema.methods.removeUsedTeam = function(team) {
+usedSelectionSchema.methods.removeUsedTeam = async function(team) {
   if (!team || team === 'None') return;
+  const { isValidTeam, normalizeTeamName } = await this.getF1DataForSeason();
   if (!isValidTeam(team)) throw new Error('Invalid team name');
   const normalizedTeam = normalizeTeamName(team); // always canonical name
   let currentCycle = this.teamCycles[this.teamCycles.length - 1];
@@ -177,25 +186,31 @@ usedSelectionSchema.methods.removeUsedTeam = function(team) {
   }
 };
 
-// Method to get available drivers for main driver selection
-usedSelectionSchema.methods.getAvailableMainDrivers = function() {
-  const currentCycle = this.mainDriverCycles[this.mainDriverCycles.length - 1];
-  if (currentCycle.length >= 20) return [];
-  return F1_DRIVERS_2025.map(d => d.shortName).filter(driver => !currentCycle.includes(driver));
+// Unified method to get available drivers (shared for both main and reserve)
+usedSelectionSchema.methods.getAvailableDrivers = async function() {
+  const { drivers } = await this.getF1DataForSeason();
+  const currentCycle = this.driverCycles[this.driverCycles.length - 1];
+  const maxDrivers = drivers.length;
+  if (currentCycle.length >= maxDrivers) return [];
+  return drivers.map(d => d.shortName).filter(driver => !currentCycle.includes(driver));
 };
 
-// Method to get available drivers for reserve driver selection
-usedSelectionSchema.methods.getAvailableReserveDrivers = function() {
-  const currentCycle = this.reserveDriverCycles[this.reserveDriverCycles.length - 1];
-  if (currentCycle.length >= 20) return [];
-  return F1_DRIVERS_2025.map(d => d.shortName).filter(driver => !currentCycle.includes(driver));
+// Legacy methods - kept for backward compatibility, now use unified method
+usedSelectionSchema.methods.getAvailableMainDrivers = async function() {
+  return this.getAvailableDrivers();
+};
+
+usedSelectionSchema.methods.getAvailableReserveDrivers = async function() {
+  return this.getAvailableDrivers();
 };
 
 // Method to get available teams
-usedSelectionSchema.methods.getAvailableTeams = function() {
+usedSelectionSchema.methods.getAvailableTeams = async function() {
+  const { teams } = await this.getF1DataForSeason();
   const currentCycle = this.teamCycles[this.teamCycles.length - 1];
-  if (currentCycle.length >= 10) return [];
-  return F1_TEAMS_2025.map(t => t.name).filter(team => !currentCycle.includes(team));
+  const maxTeams = teams.length;
+  if (currentCycle.length >= maxTeams) return [];
+  return teams.map(t => t.name).filter(team => !currentCycle.includes(team));
 };
 
 const UsedSelection = mongoose.model('UsedSelection', usedSelectionSchema);

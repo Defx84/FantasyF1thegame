@@ -11,9 +11,9 @@ const canReuseSelection = async (userId, leagueId, mainDriver, reserveDriver, te
   const usedSelection = await UsedSelection.findOne({ user: userId, league: leagueId });
   if (!usedSelection) return true;
 
-  const canReuseMainDriver = !mainDriver || mainDriver === 'None' || usedSelection.canUseMainDriver(mainDriver);
-  const canReuseReserveDriver = !reserveDriver || reserveDriver === 'None' || usedSelection.canUseReserveDriver(reserveDriver);
-  const canReuseTeam = !team || usedSelection.canUseTeam(team);
+  const canReuseMainDriver = !mainDriver || mainDriver === 'None' || await usedSelection.canUseMainDriver(mainDriver);
+  const canReuseReserveDriver = !reserveDriver || reserveDriver === 'None' || await usedSelection.canUseReserveDriver(reserveDriver);
+  const canReuseTeam = !team || await usedSelection.canUseTeam(team);
 
   return canReuseMainDriver && canReuseReserveDriver && canReuseTeam;
 };
@@ -154,9 +154,9 @@ exports.assignLateJoinSelection = async (req, res) => {
         league: leagueId
       });
     }
-    usedSelection.addUsedMainDriver(driver);
-    usedSelection.addUsedReserveDriver('None');
-    usedSelection.addUsedTeam(team);
+    await usedSelection.addUsedMainDriver(driver);
+    await usedSelection.addUsedReserveDriver('None');
+    await usedSelection.addUsedTeam(team);
     await usedSelection.save();
 
     res.status(200).json({
@@ -315,11 +315,26 @@ exports.assignRealPointsToLeague = async (req, res) => {
       // Only update if not already assigned real points
       if (!selection.pointBreakdown || selection.status === 'empty' || selection.status === 'user-submitted') {
         console.log(`[Admin Points] Assigning points for user ${member.username} in league ${league.name} for round ${round}`);
-        const pointsData = scoringService.calculateRacePoints({
+        
+        // Get race card selection if season is 2026+
+        let raceCardSelection = null;
+        if (raceResult.season >= 2026) {
+          const RaceCardSelection = require('../models/RaceCardSelection');
+          raceCardSelection = await RaceCardSelection.findOne({
+            user: member._id,
+            league: leagueId,
+            round: round
+          }).populate('driverCard teamCard');
+        }
+
+        const pointsData = await scoringService.calculateRacePoints({
           mainDriver: selection.mainDriver,
           reserveDriver: selection.reserveDriver,
           team: selection.team
-        }, raceResult);
+        }, raceResult, raceCardSelection, {
+          userId: member._id,
+          leagueId: leagueId
+        });
         selection.points = pointsData.totalPoints;
         selection.pointBreakdown = pointsData.breakdown;
         selection.status = 'admin-assigned';
@@ -347,9 +362,9 @@ exports.assignRealPointsToLeague = async (req, res) => {
         }
 
         // Add the selections to the current cycles
-        usedSelection.addUsedMainDriver(selection.mainDriver);
-        usedSelection.addUsedReserveDriver(selection.reserveDriver);
-        usedSelection.addUsedTeam(selection.team);
+        await usedSelection.addUsedMainDriver(selection.mainDriver);
+        await usedSelection.addUsedReserveDriver(selection.reserveDriver);
+        await usedSelection.addUsedTeam(selection.team);
         await usedSelection.save();
 
         console.log(`[Admin Points] Updated usage tracking for user ${member.username} in league ${league.name}`);

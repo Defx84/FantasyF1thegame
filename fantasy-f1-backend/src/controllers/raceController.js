@@ -7,6 +7,7 @@ const RaceCalendar = require('../models/RaceCalendar');
 const RaceSelection = require('../models/RaceSelection');
 const ScoringService = require('../services/ScoringService');
 const LeaderboardService = require('../services/LeaderboardService');
+const AutoSelectionService = require('../services/AutoSelectionService');
 
 /**
  * Check if selections should be visible for a race
@@ -20,6 +21,35 @@ const shouldShowSelections = (race) => {
 };
 
 /**
+ * Auto-assign selections for users who missed the deadline
+ * This can be called manually or by a scheduled job
+ */
+const autoAssignMissedSelections = async (req, res) => {
+    try {
+        const { round } = req.params;
+        const autoSelectionService = new AutoSelectionService();
+        
+        let result;
+        if (round) {
+            // Auto-assign for specific round
+            result = await autoSelectionService.autoAssignSelectionsForRace(parseInt(round));
+        } else {
+            // Auto-assign for next race with passed deadline
+            result = await autoSelectionService.autoAssignSelectionsForNextRace();
+        }
+
+        res.status(200).json(result);
+    } catch (error) {
+        console.error('Error in autoAssignMissedSelections:', error);
+        res.status(500).json({ 
+            success: false,
+            message: 'Error auto-assigning selections',
+            error: error.message 
+        });
+    }
+};
+
+/**
  * Get next race timing information
  */
 const getNextRaceTiming = async (req, res) => {
@@ -27,6 +57,18 @@ const getNextRaceTiming = async (req, res) => {
     try {
         const now = new Date();
         console.log('Current time:', now);
+        
+        // Check if we should auto-assign selections for the current race
+        // This runs in the background and doesn't block the response
+        setImmediate(async () => {
+            try {
+                const autoSelectionService = new AutoSelectionService();
+                await autoSelectionService.autoAssignSelectionsForNextRace();
+            } catch (error) {
+                console.error('[AutoSelection] Background auto-assignment error:', error);
+                // Don't throw - this is a background process
+            }
+        });
         
         // Utility to calculate endOfWeekend (Sunday at 23:59)
         function getEndOfWeekend(raceDate) {
@@ -36,15 +78,30 @@ const getNextRaceTiming = async (req, res) => {
             return end;
         }
 
-        // 1. Find the most recent race whose qualifyingStart is in the past
-        const currentRace = await RaceCalendar.findOne({ qualifyingStart: { $lte: now } }).sort({ qualifyingStart: -1 });
+        // Find the most recent season with future races (prioritize current/future seasons)
+        const currentYear = new Date().getFullYear();
+        const seasons = await RaceCalendar.distinct('season');
+        const activeSeason = seasons
+            .filter(s => s >= currentYear - 1) // Only consider current year or last year
+            .sort((a, b) => b - a)[0]; // Get the most recent season
+        
+        const seasonFilter = activeSeason ? { season: activeSeason } : {};
+
+        // 1. Find the most recent race whose qualifyingStart is in the past (for the active season)
+        const currentRace = await RaceCalendar.findOne({ 
+            ...seasonFilter,
+            qualifyingStart: { $lte: now } 
+        }).sort({ qualifyingStart: -1 });
         console.log('Current race found:', currentRace);
         if (currentRace) {
             const endOfWeekend = getEndOfWeekend(currentRace.raceStart || currentRace.date);
             if (now < endOfWeekend) {
                 // Find the race result for this round to get the status
                 let raceStatus = 'scheduled';
-                const raceResult = await RaceResult.findOne({ round: currentRace.round });
+                const raceResult = await RaceResult.findOne({ 
+                    round: currentRace.round,
+                    season: currentRace.season 
+                });
                 if (raceResult && raceResult.status) {
                     raceStatus = raceResult.status;
                 }
@@ -78,8 +135,11 @@ const getNextRaceTiming = async (req, res) => {
             // If now >= endOfWeekend, fall through to nextRace logic below
         }
 
-        // 2. Otherwise, find the next upcoming race
-        const nextRace = await RaceCalendar.findOne({ qualifyingStart: { $gt: now } }).sort({ qualifyingStart: 1 });
+        // 2. Otherwise, find the next upcoming race (for the active season)
+        const nextRace = await RaceCalendar.findOne({ 
+            ...seasonFilter,
+            qualifyingStart: { $gt: now } 
+        }).sort({ qualifyingStart: 1 });
         console.log('Next race found:', nextRace);
         if (!nextRace) {
             console.log('No upcoming races found');
@@ -89,7 +149,10 @@ const getNextRaceTiming = async (req, res) => {
             });
         }
         let raceStatus = 'scheduled';
-        const raceResult = await RaceResult.findOne({ round: nextRace.round });
+        const raceResult = await RaceResult.findOne({ 
+            round: nextRace.round,
+            season: nextRace.season 
+        });
         if (raceResult && raceResult.status) {
             raceStatus = raceResult.status;
         }
@@ -190,21 +253,12 @@ const getRaceStatus = async (req, res) => {
             isSprintWeekend: race.isSprintWeekend,
             deadlines: {
                 selectionDeadline: race.qualifyingStart,
-                switcherooDeadline: race.isSprintWeekend ? 
-                    new Date(race.sprintStart.getTime() - 5 * 60000) : // 5 minutes before sprint
-                    new Date(race.raceStart.getTime() - 5 * 60000), // 5 minutes before race
                 raceStart: race.raceStart,
                 sprintStart: race.sprintStart
             },
             isLocked: now >= race.qualifyingStart,
-            isSwitcherooAllowed: now < (race.isSprintWeekend ? 
-                new Date(race.sprintStart.getTime() - 5 * 60000) : 
-                new Date(race.raceStart.getTime() - 5 * 60000)),
             timeUntil: {
                 selectionDeadline: Math.max(0, race.qualifyingStart - now),
-                switcherooDeadline: Math.max(0, (race.isSprintWeekend ? 
-                    new Date(race.sprintStart.getTime() - 5 * 60000) : 
-                    new Date(race.raceStart.getTime() - 5 * 60000)) - now),
                 raceStart: Math.max(0, race.raceStart - now),
                 sprintStart: race.sprintStart ? Math.max(0, race.sprintStart - now) : null
             }
@@ -315,22 +369,47 @@ const updateRaceResults = async (req, res) => {
             sprintResults,
             isSprintWeekend: raceCalendarEntry.isSprintWeekend,
             status: 'completed',
+            season: raceCalendarEntry.season, // Ensure season is set
             updatedAt: new Date()
         };
 
         // Update or create race result
-        const updatedRace = await RaceResult.findOneAndUpdate(
-            { round: parseInt(round) },
-            { $set: updateData },
-            { new: true, upsert: true }
-        );
+        // First try to find existing race result
+        let updatedRace = await RaceResult.findOne({ 
+            round: parseInt(round), 
+            season: raceCalendarEntry.season 
+        });
+
+        if (updatedRace) {
+            // Update existing race result
+            Object.assign(updatedRace, updateData);
+            await updatedRace.save(); // Use .save() to trigger post-save hooks
+        } else {
+            // Create new race result with all required fields
+            updatedRace = new RaceResult({
+                round: parseInt(round),
+                season: raceCalendarEntry.season,
+                raceName: raceCalendarEntry.raceName,
+                circuit: raceCalendarEntry.circuit,
+                country: raceCalendarEntry.country,
+                date: raceCalendarEntry.date,
+                raceStart: raceCalendarEntry.raceStart,
+                qualifyingStart: raceCalendarEntry.qualifyingStart,
+                ...updateData
+            });
+            await updatedRace.save(); // Use .save() to trigger post-save hooks
+        }
 
         // Add logging for race status
-        console.log(`[Race Update] Updated race ${updatedRace.raceName} (round ${round}) to status: ${updatedRace.status}`);
+        console.log(`[Race Update] Updated race ${updatedRace.raceName} (round ${round}, season ${updatedRace.season}) to status: ${updatedRace.status}`);
 
-        // Find all leagues that have selections for this race
-        const selections = await RaceSelection.find({ round: parseInt(round) })
-            .distinct('league');
+        // Find all leagues that have selections for this race (filter by season)
+        const leagues = await require('../models/League').find({ season: raceCalendarEntry.season }).select('_id');
+        const leagueIds = leagues.map(l => l._id);
+        const selections = await RaceSelection.find({ 
+            round: parseInt(round),
+            league: { $in: leagueIds }
+        }).distinct('league');
 
         // Initialize services
         const scoringService = new ScoringService();
@@ -362,11 +441,26 @@ const updateRaceResults = async (req, res) => {
                 // FIXED: Handle both 'empty' and 'user-submitted' statuses for automation
                 if (!selection.pointBreakdown || selection.status === 'empty' || selection.status === 'user-submitted') {
                     console.log(`[AutoAssign] Processing selection for user ${member.username} (status: ${selection.status})`);
-                    const pointsData = scoringService.calculateRacePoints({
+                    
+                    // Get race card selection if season is 2026+
+                    let raceCardSelection = null;
+                    if (updatedRace.season >= 2026) {
+                        const RaceCardSelection = require('../models/RaceCardSelection');
+                        raceCardSelection = await RaceCardSelection.findOne({
+                            user: member._id,
+                            league: leagueId,
+                            round: updatedRace.round
+                        }).populate('driverCard teamCard');
+                    }
+
+                    const pointsData = await scoringService.calculateRacePoints({
                         mainDriver: selection.mainDriver,
                         reserveDriver: selection.reserveDriver,
                         team: selection.team
-                    }, updatedRace);
+                    }, updatedRace, raceCardSelection, {
+                        userId: member._id,
+                        leagueId: leagueId
+                    });
                     selection.points = pointsData.totalPoints;
                     selection.pointBreakdown = pointsData.breakdown;
                     selection.status = 'admin-assigned';
@@ -403,9 +497,9 @@ const getLeagueRaces = async (req, res) => {
             return res.status(404).json({ message: 'League not found' });
         }
 
-        // Get all races from the calendar
-        const races = await RaceCalendar.find({})
-            .select('raceName circuit country raceStart date round season')
+        // Get races from the calendar filtered by the league's season
+        const races = await RaceCalendar.find({ season: league.season })
+            .select('raceName circuit country raceStart date round season isSprintWeekend qualifyingStart sprintStart sprintQualifyingStart')
             .sort({ date: 1 });
 
         res.json(races);
@@ -454,5 +548,6 @@ module.exports = {
   getCurrentRaceStatus,
   updateRaceResults,
   getLeagueRaces,
-  getRaceByLeagueAndRound
+  getRaceByLeagueAndRound,
+  autoAssignMissedSelections
 }; 
