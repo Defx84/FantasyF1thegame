@@ -2,14 +2,17 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getNextRaceTiming, RaceTiming } from '../services/raceService';
 import { getUsedSelections, saveSelections, getCurrentSelections, Selection, UsedSelections } from '../services/selectionService';
+import { getLeague, getLeagueOpponents, Opponent } from '../services/leagueService';
+import { getPlayerDeck, activateCards, getRaceCards, getUsedCards, Card, RaceCardSelection } from '../services/cardService';
 import IconWrapper from '../utils/iconWrapper';
-import { FaLock, FaEdit, FaCheck, FaTimes, FaArrowLeft, FaSyncAlt } from 'react-icons/fa';
+import { FaLock, FaEdit, FaCheck, FaTimes, FaArrowLeft, FaPlus } from 'react-icons/fa';
 import { teamColors } from '../constants/teamColors';
-import { drivers as allDrivers, teams as allTeams, driverTeams } from '../utils/validation';
+import { getDrivers, getTeams, getDriverTeams } from '../utils/validation';
 import { getTimeUntilLock, isSelectionsLocked, formatTimeLeft } from '../utils/raceUtils';
 import { normalizeDriver, normalizeTeam } from '../utils/normalization';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { getCardImagePath } from '../utils/cardImageMapper';
 
 interface Driver {
   id: string;
@@ -43,24 +46,44 @@ const NextRaceSelections: React.FC = () => {
     team: null
   });
   const [usedSelections, setUsedSelections] = useState<UsedSelections>({
-    usedMainDrivers: [],
-    usedReserveDrivers: [],
+    usedDrivers: [],
     usedTeams: []
   });
-  const [switcherooCount, setSwitcherooCount] = useState<number | null>(null);
-  const [switcherooTotal, setSwitcherooTotal] = useState<number>(3);
-  const [switcherooLoading, setSwitcherooLoading] = useState(true);
-  const [switcherooError, setSwitcherooError] = useState<string | null>(null);
-  const [isSwitcherooWindow, setIsSwitcherooWindow] = useState(false);
   const [raceStatus, setRaceStatus] = useState<string | null>(null);
-  const [lastSwitcherooWindowFetch, setLastSwitcherooWindowFetch] = useState<number>(0);
+  const [leagueSeason, setLeagueSeason] = useState<number>(2026); // Default to 2026
+  
+  // Card state
+  const [playerDeck, setPlayerDeck] = useState<{ driverCards: Card[]; teamCards: Card[] } | null>(null);
+  const [raceCardSelection, setRaceCardSelection] = useState<RaceCardSelection | null>(null);
+  const [selectedDriverCard, setSelectedDriverCard] = useState<Card | null>(null);
+  const [selectedTeamCard, setSelectedTeamCard] = useState<Card | null>(null);
+  const [isCardModalOpen, setIsCardModalOpen] = useState<{ driver: boolean; team: boolean }>({ driver: false, team: false });
+  const [cardModalType, setCardModalType] = useState<'driver' | 'team'>('driver');
+  const [isCardEditing, setIsCardEditing] = useState(false);
+  const [currentSelectionId, setCurrentSelectionId] = useState<string | null>(null);
+  const [cardSuccessMessage, setCardSuccessMessage] = useState<string | null>(null);
+  const [usedCardIds, setUsedCardIds] = useState<string[]>([]);
+  
+  // Target selection state (for Mirror, Espionage, and Switcheroo cards)
+  const [cardModalStep, setCardModalStep] = useState<'selectCard' | 'selectTarget'>('selectCard');
+  const [pendingCard, setPendingCard] = useState<Card | null>(null);
+  const [selectedTargetPlayer, setSelectedTargetPlayer] = useState<string | null>(null);
+  const [selectedTargetTeam, setSelectedTargetTeam] = useState<string | null>(null);
+  const [selectedTargetDriver, setSelectedTargetDriver] = useState<string | null>(null);
+  const [leagueOpponents, setLeagueOpponents] = useState<Opponent[]>([]);
+  const [loadingOpponents, setLoadingOpponents] = useState(false);
+
+  // Get season-aware driver and team data
+  const allDrivers = getDrivers(leagueSeason);
+  const allTeams = getTeams(leagueSeason);
+  const driverTeamsMap = getDriverTeams(leagueSeason);
 
   // Map drivers to our interface
   const drivers: Driver[] = allDrivers.map(name => ({
     id: name.toLowerCase(),
     name,
-    team: driverTeams[name],
-    teamColor: teamColors[driverTeams[name]] || '#FFFFFF'
+    team: driverTeamsMap[name],
+    teamColor: teamColors[driverTeamsMap[name]] || '#FFFFFF'
   }));
 
   // Map teams to our interface
@@ -79,14 +102,30 @@ const NextRaceSelections: React.FC = () => {
 
       setLoading(true);
       
+      // Fetch league data to get the season
+      const leagueData = await getLeague(leagueId);
+      const season = leagueData.season || 2026;
+      setLeagueSeason(season);
+      
       // Fetch the next race timing
       const raceTiming = await getNextRaceTiming();
       // Use the round from raceTiming
       const round = raceTiming?.round;
       // Only fetch used selections if round is available
-      let usedSelectionsData: UsedSelections = { usedMainDrivers: [], usedReserveDrivers: [], usedTeams: [] };
+      let usedSelectionsData: UsedSelections = { usedDrivers: [], usedTeams: [] };
       if (round) {
-        usedSelectionsData = await getUsedSelections(leagueId, round);
+        const rawData = await getUsedSelections(leagueId, round);
+        // Handle both new format (usedDrivers) and legacy format (usedMainDrivers/usedReserveDrivers)
+        const legacyMain = rawData.usedMainDrivers || [];
+        const legacyReserve = rawData.usedReserveDrivers || [];
+        const mergedLegacy = Array.from(new Set([...legacyMain, ...legacyReserve]));
+        usedSelectionsData = {
+          usedDrivers: rawData.usedDrivers || mergedLegacy,
+          usedTeams: rawData.usedTeams || [],
+          // Keep legacy fields for compatibility
+          usedMainDrivers: rawData.usedMainDrivers,
+          usedReserveDrivers: rawData.usedReserveDrivers
+        };
       }
       // Fetch current selections
       const currentSelectionsData = round ? await getCurrentSelections(leagueId, round) : null;
@@ -109,6 +148,93 @@ const NextRaceSelections: React.FC = () => {
         const timeLeft = getTimeUntilLock(raceTiming);
         setTimeUntilDeadline(timeLeft);
         setIsLocked(isSelectionsLocked(raceTiming));
+      }
+
+      // Fetch player deck and race cards (only for 2026+ seasons)
+      if (season >= 2026) {
+        try {
+          // Fetch player deck
+          const deck = await getPlayerDeck(leagueId);
+          setPlayerDeck({
+            driverCards: deck.driverCards || [],
+            teamCards: deck.teamCards || []
+          });
+
+          // Fetch used cards for the season
+          try {
+            const usedCardsData = await getUsedCards(leagueId);
+            setUsedCardIds(usedCardsData.usedCardIds || []);
+          } catch (err) {
+            console.error('Error fetching used cards:', err);
+            // If it fails, just use empty array
+            setUsedCardIds([]);
+          }
+
+          // If we have a selection, fetch existing race card selection
+          if (currentSelectionsData?._id) {
+            setCurrentSelectionId(currentSelectionsData._id);
+            try {
+              console.log('[fetchData] Fetching race cards for selection:', currentSelectionsData._id);
+              const raceCards = await getRaceCards(currentSelectionsData._id);
+              console.log('[fetchData] Race cards response:', raceCards);
+              
+              if (raceCards.raceCardSelection) {
+                console.log('[fetchData] Setting race card selection:', raceCards.raceCardSelection);
+                setRaceCardSelection(raceCards.raceCardSelection);
+                // Make sure driverCard and teamCard are populated Card objects, not just IDs
+                const driverCard = raceCards.raceCardSelection.driverCard;
+                const teamCard = raceCards.raceCardSelection.teamCard;
+                console.log('[fetchData] Driver card:', driverCard, 'Team card:', teamCard);
+                setSelectedDriverCard(driverCard || null);
+                setSelectedTeamCard(teamCard || null);
+                // Load target selections if they exist
+                if (raceCards.raceCardSelection.targetPlayer) {
+                  setSelectedTargetPlayer(
+                    typeof raceCards.raceCardSelection.targetPlayer === 'string'
+                      ? raceCards.raceCardSelection.targetPlayer
+                      : raceCards.raceCardSelection.targetPlayer._id
+                  );
+                }
+                if (raceCards.raceCardSelection.targetTeam) {
+                  setSelectedTargetTeam(raceCards.raceCardSelection.targetTeam);
+                }
+                if (raceCards.raceCardSelection.targetDriver) {
+                  setSelectedTargetDriver(raceCards.raceCardSelection.targetDriver);
+                }
+                setIsCardEditing(false);
+              } else {
+                console.log('[fetchData] No race card selection found');
+                setRaceCardSelection(null);
+                setSelectedDriverCard(null);
+                setSelectedTeamCard(null);
+                setSelectedTargetPlayer(null);
+                setSelectedTargetTeam(null);
+                setSelectedTargetDriver(null);
+              }
+            } catch (err) {
+              console.error('[fetchData] Error fetching race cards:', err);
+              // No race cards yet, that's okay
+              setRaceCardSelection(null);
+              setSelectedDriverCard(null);
+              setSelectedTeamCard(null);
+              setSelectedTargetPlayer(null);
+              setSelectedTargetTeam(null);
+              setSelectedTargetDriver(null);
+            }
+          } else {
+            console.log('[fetchData] No selection ID, clearing card state');
+            setCurrentSelectionId(null);
+            setRaceCardSelection(null);
+            setSelectedDriverCard(null);
+            setSelectedTeamCard(null);
+            setSelectedTargetPlayer(null);
+            setSelectedTargetTeam(null);
+            setSelectedTargetDriver(null);
+          }
+        } catch (err) {
+          console.error('Error fetching deck:', err);
+          // Deck might not be built yet, that's okay
+        }
       }
     } catch (err) {
       console.error('Error fetching data:', err);
@@ -184,12 +310,64 @@ const NextRaceSelections: React.FC = () => {
     return () => clearInterval(timer);
   }, [raceData, timeUntilDeadline, raceStatus]);
 
+  const handleDriverClick = (driverId: string) => {
+    if (isLocked) return;
+    // Require editing mode only if selections already exist
+    if (currentSelections && (currentSelections.mainDriver || currentSelections.reserveDriver || currentSelections.team)) {
+      if (!isEditing) return;
+    } else {
+      // No selections yet - auto-enable editing mode for initial selection
+      if (!isEditing) {
+        setIsEditing(true);
+        if (currentSelections) {
+          setEditingSelections(currentSelections);
+        }
+      }
+    }
+    
+    const currentMain = editingSelections.mainDriver;
+    const currentReserve = editingSelections.reserveDriver;
+    const normalizedDriverId = normalizeDriver(driverId);
+    const normalizedMain = currentMain ? normalizeDriver(currentMain) : null;
+    const normalizedReserve = currentReserve ? normalizeDriver(currentReserve) : null;
+
+    // If clicking a selected driver, deselect it
+    if (normalizedDriverId === normalizedMain) {
+      setEditingSelections(prev => ({ ...prev, mainDriver: null }));
+      return;
+    }
+    if (normalizedDriverId === normalizedReserve) {
+      setEditingSelections(prev => ({ ...prev, reserveDriver: null }));
+      return;
+    }
+
+    // Prevent selecting same driver in both slots
+    if (normalizedDriverId === normalizedMain || normalizedDriverId === normalizedReserve) {
+      return;
+    }
+
+    // Fill slots: first click = main, second click = reserve
+    if (!currentMain) {
+      // First slot empty - fill main
+      setEditingSelections(prev => ({ ...prev, mainDriver: driverId }));
+    } else if (!currentReserve) {
+      // Second slot empty - fill reserve
+      setEditingSelections(prev => ({ ...prev, reserveDriver: driverId }));
+    } else {
+      // Both filled - this shouldn't happen since clicking selected deselects, but handle it
+      // Replace main slot
+      setEditingSelections(prev => ({ ...prev, mainDriver: driverId }));
+    }
+  };
+
   const handleSelection = (type: keyof Selection, id: string) => {
-    // Allow selection if editing or if no selections have been made yet
-    if (isLocked || (!isEditing && currentSelections && 
-      (currentSelections.mainDriver || 
-       currentSelections.reserveDriver || 
-       currentSelections.team))) return;
+    if (isLocked || !isEditing) return;
+    
+    // For drivers, use the new handler
+    if (type === 'mainDriver' || type === 'reserveDriver') {
+      handleDriverClick(id);
+      return;
+    }
 
     setEditingSelections(prev => ({
       ...prev,
@@ -207,7 +385,7 @@ const NextRaceSelections: React.FC = () => {
       await saveSelections(editingSelections, leagueId);
       console.log('Saved successfully, fetching updated data...');
       setIsEditing(false);
-      await fetchData(); // Refresh data after saving
+      await fetchData(); // Refresh data after saving (this will also fetch cards if selection exists)
     } catch (err: any) {
       console.error('Error in handleConfirm:', err);
       setError(err.message || 'Failed to save selections');
@@ -229,11 +407,10 @@ const NextRaceSelections: React.FC = () => {
     setIsEditing(false);
   };
 
-  const isDriverUsed = (driverId: string, type: 'main' | 'reserve'): boolean => {
-    const usedList = type === 'main' ? usedSelections.usedMainDrivers : usedSelections.usedReserveDrivers;
+  const isDriverUsed = (driverId: string): boolean => {
+    const usedList = usedSelections.usedDrivers || [];
     const normalizedDriverId = normalizeDriver(driverId);
     const result = usedList.some(usedDriver => normalizeDriver(usedDriver) === normalizedDriverId);
-    console.log(`Checking if used: ${driverId} => ${normalizedDriverId} | result: ${result}`);
     return result;
   };
 
@@ -279,54 +456,81 @@ const NextRaceSelections: React.FC = () => {
     };
   };
 
-  // Helper function to get item class names
+  // Helper function to get item class names (for teams)
   const getItemClassNames = (type: keyof Selection, id: string) => {
     const selected = isItemSelected(type, id);
-    const isUsed = (type === 'mainDriver' || type === 'reserveDriver') 
-      ? isDriverUsed(id, type === 'mainDriver' ? 'main' : 'reserve')
-      : isTeamUsed(id);
+    const isUsed = type === 'team' ? isTeamUsed(id) : false;
 
     return `w-full px-2 py-1 rounded-lg border transition-all duration-200 relative ${
       selected ? 'border-2 border-white bg-opacity-100' : 'border border-white/20 hover:border-white/60'
     } ${isUsed ? 'opacity-40 cursor-not-allowed filter grayscale before:absolute before:content-["" ] before:left-0 before:right-0 before:top-1/2 before:-translate-y-1/2 before:h-[2px] before:bg-[#FFD600] before:pointer-events-none' : 'hover:bg-opacity-100'}`;
   };
 
-  // Helper function to get item status text
-  const getItemStatusText = (type: keyof Selection, id: string) => {
-    const isUsed = (type === 'mainDriver' || type === 'reserveDriver') 
-      ? isDriverUsed(id, type === 'mainDriver' ? 'main' : 'reserve')
-      : isTeamUsed(id);
-
-    if (isUsed) {
-      return <span className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-red-600 font-bold tracking-wider z-10">USED</span>;
-    }
+  // Helper to check if driver is selected in main or reserve slot
+  const getDriverSlot = (driverId: string): 'main' | 'reserve' | null => {
+    const currentMain = isEditing ? editingSelections.mainDriver : (currentSelections?.mainDriver || null);
+    const currentReserve = isEditing ? editingSelections.reserveDriver : (currentSelections?.reserveDriver || null);
+    const normalizedDriverId = normalizeDriver(driverId);
+    
+    if (currentMain && normalizeDriver(currentMain) === normalizedDriverId) return 'main';
+    if (currentReserve && normalizeDriver(currentReserve) === normalizedDriverId) return 'reserve';
     return null;
   };
 
-  // Update the renderDriverButton function
-  const renderDriverButton = (driver: Driver, type: 'mainDriver' | 'reserveDriver') => {
-    const isUsed = isDriverUsed(driver.id, type === 'mainDriver' ? 'main' : 'reserve');
-    // Debug log
-    console.log(`[${type}] Button:`, {
-      driverId: driver.id,
-      normalizedId: normalizeDriver(driver.id),
-      usedList: (type === 'mainDriver' ? usedSelections.usedMainDrivers : usedSelections.usedReserveDrivers).map(normalizeDriver)
-    });
+  // Helper function to get driver button class names
+  const getDriverButtonClassNames = (driverId: string) => {
+    const slot = getDriverSlot(driverId);
+    const isUsed = isDriverUsed(driverId);
+    const isSelected = slot !== null;
+
+    return `w-full px-3 py-2 rounded-lg border transition-all duration-200 relative ${
+      isSelected 
+        ? 'border-2 border-white bg-opacity-100' 
+        : 'border border-white/20 hover:border-white/60'
+    } ${
+      isUsed 
+        ? 'opacity-40 cursor-not-allowed filter grayscale' 
+        : isLocked 
+          ? 'cursor-not-allowed opacity-50' 
+          : 'hover:bg-opacity-100 cursor-pointer'
+    }`;
+  };
+
+  // Render driver button for the unified list
+  const renderDriverButton = (driver: Driver) => {
+    const slot = getDriverSlot(driver.id);
+    const isUsed = isDriverUsed(driver.id);
+    const isSelected = slot !== null;
+    
     return (
       <button
         key={driver.id}
-        onClick={() => handleSelection(type, driver.id)}
-        className={getItemClassNames(type, driver.id)}
-        style={getItemStyle(type, driver.id, driver.teamColor)}
-        disabled={isUsed || isLocked}
+        onClick={() => handleDriverClick(driver.id)}
+        className={getDriverButtonClassNames(driver.id)}
+        style={{
+          backgroundColor: isSelected ? driver.teamColor : `${driver.teamColor}10`,
+          minHeight: '1.5rem',
+          padding: '0.2rem 0.4rem',
+        }}
+        disabled={isUsed || isLocked || !!(currentSelections && (currentSelections.mainDriver || currentSelections.reserveDriver || currentSelections.team) && !isEditing)}
       >
-        {isItemSelected(type, driver.id) && (
-          <IconWrapper icon={FaCheck} className="absolute left-2 top-1/2 -translate-y-1/2 text-white text-xs z-10" />
-        )}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className={`text-xs ${isItemSelected(type, driver.id) ? 'text-white font-medium pl-4' : ''}`}>
+        <div className="flex items-center justify-between w-full">
+          <span className={`text-xs font-medium ${isSelected ? 'text-white' : 'text-white/90'}`}>
             {driver.name}
           </span>
+          {isSelected && (
+            <IconWrapper icon={FaCheck} className="text-white text-sm z-10 ml-2" />
+          )}
+          {slot && (
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/20 text-white">
+              {slot === 'main' ? 'M' : 'R'}
+            </span>
+          )}
+          {isUsed && !isSelected && (
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-600/50 text-red-200">
+              USED
+            </span>
+          )}
         </div>
       </button>
     );
@@ -346,16 +550,20 @@ const NextRaceSelections: React.FC = () => {
         key={team.id}
         onClick={() => handleSelection('team', team.id)}
         className={getItemClassNames('team', team.id)}
-        style={getItemStyle('team', team.id, team.color)}
-        disabled={isUsed || isLocked}
+        style={{
+          ...getItemStyle('team', team.id, team.color),
+          minHeight: '3rem',
+          padding: '0.75rem 1rem',
+        }}
+        disabled={isUsed || isLocked || !!(currentSelections && (currentSelections.mainDriver || currentSelections.reserveDriver || currentSelections.team) && !isEditing)}
       >
-        {isItemSelected('team', team.id) && (
-          <IconWrapper icon={FaCheck} className="absolute left-2 top-1/2 -translate-y-1/2 text-white text-xs z-10" />
-        )}
-        <div className="absolute inset-0 flex items-center justify-center">
-          <span className={`text-xs ${isItemSelected('team', team.id) ? 'text-white font-medium pl-4' : ''}`}>
+        <div className="w-full flex items-center justify-center relative">
+          <span className={`text-xs ${isItemSelected('team', team.id) ? 'text-white font-medium' : ''}`}>
             {team.name}
           </span>
+          {isItemSelected('team', team.id) && (
+            <IconWrapper icon={FaCheck} className="absolute right-2 text-white text-xs z-10" />
+          )}
         </div>
       </button>
     );
@@ -364,44 +572,20 @@ const NextRaceSelections: React.FC = () => {
   // Add this near the top of your component
   const getSelectionStats = () => {
     return {
-      mainDriversUsed: usedSelections.usedMainDrivers.length,
-      reserveDriversUsed: usedSelections.usedReserveDrivers.length,
+      driversUsed: usedSelections.usedDrivers?.length || 0,
       teamsUsed: usedSelections.usedTeams.length,
-      mainDriversRemaining: 20 - usedSelections.usedMainDrivers.length,
-      reserveDriversRemaining: 20 - usedSelections.usedReserveDrivers.length,
+      driversRemaining: 20 - (usedSelections.usedDrivers?.length || 0),
       teamsRemaining: 10 - usedSelections.usedTeams.length
     };
   };
 
-  // Add debug logging
+  // Debug logging
   useEffect(() => {
     console.log('Used Selections:', {
-      mainDrivers: usedSelections.usedMainDrivers.map(d => ({ original: d, normalized: normalizeDriver(d) })),
-      reserveDrivers: usedSelections.usedReserveDrivers.map(d => ({ original: d, normalized: normalizeDriver(d) })),
+      drivers: (usedSelections.usedDrivers || []).map(d => ({ original: d, normalized: normalizeDriver(d) })),
       teams: usedSelections.usedTeams.map(t => ({ original: t, normalized: normalizeTeam(t) }))
     });
   }, [usedSelections]);
-
-  useEffect(() => {
-    // Log all normalized driver options
-    console.log('🔍 Normalized Main Driver Options:');
-    allDrivers.forEach(driver => {
-      const normalized = normalizeDriver(driver);
-      console.log(`${driver} => ${normalized}`);
-    });
-    // Log all normalized team options
-    console.log('🔍 Normalized Team Options:');
-    allTeams.forEach(team => {
-      const normalized = normalizeTeam(team);
-      console.log(`${team} => ${normalized}`);
-    });
-    // Log used selections from API
-    console.log('📦 Used Selections from API:', usedSelections);
-    // Log normalized used selections
-    console.log('🧩 Normalized usedMainDrivers:', usedSelections.usedMainDrivers.map(normalizeDriver));
-    console.log('🧩 Normalized usedReserveDrivers:', usedSelections.usedReserveDrivers.map(normalizeDriver));
-    console.log('🧩 Normalized usedTeams:', usedSelections.usedTeams.map(normalizeTeam));
-  }, [allDrivers, allTeams, usedSelections]);
 
   // Helper to chunk drivers into pairs
   function chunkArray<T>(arr: T[], size: number): T[][] {
@@ -412,74 +596,195 @@ const NextRaceSelections: React.FC = () => {
     return result;
   }
 
-  // Fetch switcheroo count
-  const fetchSwitcherooCount = async () => {
-    setSwitcherooLoading(true);
-    setSwitcherooError(null);
-    try {
-      const accessToken = localStorage.getItem('accessToken');
-      const res = await fetch(`${API_BASE_URL}/api/switcheroo/remaining?leagueId=${leagueId}`,
-        {
-          headers: {
-            Authorization: `Bearer ${accessToken}`
-          }
+  // Card handlers
+  const handleCardSlotClick = (type: 'driver' | 'team') => {
+    if (isLocked && !isCardEditing) return;
+    setCardModalType(type);
+    setIsCardModalOpen({ driver: type === 'driver', team: type === 'team' });
+  };
+
+  const handleCardSelect = async (card: Card) => {
+    // Check if card requires a target
+    if (card.requiresTarget === 'player') {
+      // Mirror card - need to select target player
+      setPendingCard(card);
+      setCardModalStep('selectTarget');
+      
+      // Fetch league opponents if not already loaded
+      if (leagueOpponents.length === 0 && leagueId) {
+        setLoadingOpponents(true);
+        try {
+          const opponents = await getLeagueOpponents(leagueId);
+          setLeagueOpponents(opponents);
+        } catch (err) {
+          console.error('Failed to fetch opponents:', err);
+          setError('Failed to load league opponents');
+        } finally {
+          setLoadingOpponents(false);
         }
-      );
-      if (!res.ok) throw new Error('Failed to fetch switcheroo count');
-      const data = await res.json();
-      setSwitcherooCount(data.remaining);
-      setSwitcherooTotal(data.total || 3);
+      }
+    } else if (card.requiresTarget === 'team') {
+      // Espionage card - need to select target team
+      setPendingCard(card);
+      setCardModalStep('selectTarget');
+    } else if (card.requiresTarget === 'driver') {
+      // Switcheroo card - need to select target driver
+      setPendingCard(card);
+      setCardModalStep('selectTarget');
+    } else {
+      // No target required - select card directly
+      if (cardModalType === 'driver') {
+        setSelectedDriverCard(card);
+      } else {
+        setSelectedTeamCard(card);
+      }
+      setIsCardModalOpen({ driver: false, team: false });
+      setCardModalStep('selectCard');
+      setIsCardEditing(true);
+    }
+  };
+  
+  const handleTargetSelect = (targetId: string) => {
+    if (pendingCard?.requiresTarget === 'player') {
+      setSelectedTargetPlayer(targetId);
+    } else if (pendingCard?.requiresTarget === 'team') {
+      setSelectedTargetTeam(targetId);
+    } else if (pendingCard?.requiresTarget === 'driver') {
+      setSelectedTargetDriver(targetId);
+    }
+    
+    // Card and target selected - close modal and set card
+    if (cardModalType === 'driver') {
+      setSelectedDriverCard(pendingCard);
+    } else {
+      setSelectedTeamCard(pendingCard);
+    }
+    
+    setIsCardModalOpen({ driver: false, team: false });
+    setCardModalStep('selectCard');
+    setPendingCard(null);
+    setIsCardEditing(true);
+  };
+  
+  const handleCardModalBack = () => {
+    if (cardModalStep === 'selectTarget') {
+      setCardModalStep('selectCard');
+      setPendingCard(null);
+      setSelectedTargetPlayer(null);
+      setSelectedTargetTeam(null);
+      setSelectedTargetDriver(null);
+    } else {
+      setIsCardModalOpen({ driver: false, team: false });
+    }
+  };
+
+  const handleCardConfirm = async () => {
+    // If no selection ID yet, we need to wait for driver/team selections to be saved first
+    if (!currentSelectionId) {
+      const errorMsg = 'Please save your driver and team selections first before activating cards.';
+      setError(errorMsg);
+      console.error('Cannot activate cards: no selection ID');
+      return;
+    }
+    
+    try {
+      setError(null);
+      console.log('Activating cards:', {
+        selectionId: currentSelectionId,
+        driverCard: selectedDriverCard?._id,
+        teamCard: selectedTeamCard?._id
+      });
+      
+      const result = await activateCards(currentSelectionId, {
+        driverCardId: selectedDriverCard?._id || null,
+        teamCardId: selectedTeamCard?._id || null,
+        targetPlayer: selectedTargetPlayer || null,
+        targetDriver: selectedTargetDriver || null,
+        targetTeam: selectedTargetTeam || null
+      });
+      
+      console.log('Cards activated, result:', result);
+      
+      // Use the response directly - it contains the raceCardSelection
+      if (result.raceCardSelection) {
+        console.log('Setting race card selection from response:', result.raceCardSelection);
+        setRaceCardSelection(result.raceCardSelection);
+        // The driverCard and teamCard should be populated Card objects
+        setSelectedDriverCard(result.raceCardSelection.driverCard || null);
+        setSelectedTeamCard(result.raceCardSelection.teamCard || null);
+        console.log('Cards set:', {
+          driverCard: result.raceCardSelection.driverCard,
+          teamCard: result.raceCardSelection.teamCard
+        });
+      } else {
+        // Fallback: fetch again if response doesn't have it
+        console.log('Response missing raceCardSelection, fetching again...');
+        const raceCards = await getRaceCards(currentSelectionId);
+        console.log('Fetched race cards:', raceCards);
+        
+        if (raceCards.raceCardSelection) {
+          setRaceCardSelection(raceCards.raceCardSelection);
+          setSelectedDriverCard(raceCards.raceCardSelection.driverCard || null);
+          setSelectedTeamCard(raceCards.raceCardSelection.teamCard || null);
+        }
+      }
+      
+      setIsCardEditing(false);
+      setError(null);
+      setCardSuccessMessage('Cards activated successfully!');
+      
+      // Clear target selections
+      setSelectedTargetPlayer(null);
+      setSelectedTargetTeam(null);
+      setSelectedTargetDriver(null);
+      
+      // Clear success message after 3 seconds
+      setTimeout(() => {
+        setCardSuccessMessage(null);
+      }, 3000);
+      
+      // Show success message
+      console.log('Cards activated successfully');
     } catch (err: any) {
-      setSwitcherooError('Could not load switcheroo info');
-    } finally {
-      setSwitcherooLoading(false);
+      console.error('Error activating cards:', err);
+      const errorMessage = err.response?.data?.error || err.message || 'Failed to activate cards';
+      setError(errorMessage);
+      console.error('Full error:', err);
     }
   };
 
-  useEffect(() => {
-    fetchSwitcherooCount();
-  }, []);
-
-  const fetchSwitcherooWindowStatus = async () => {
-    const now = Date.now();
-    if (now - lastSwitcherooWindowFetch < 30000) return; // Only fetch once every 30 seconds
-    setLastSwitcherooWindowFetch(now);
-    try {
-      const response = await api.get('/api/switcheroo/window-status', {
-        params: { raceId: raceData?.round }
-      });
-      setIsSwitcherooWindow(response.data.isSwitcherooAllowed);
-    } catch (error) {
-      console.error('Error fetching switcheroo window status:', error);
-    }
+  const handleCardEdit = () => {
+    setIsCardEditing(true);
   };
 
-  useEffect(() => {
-    if (raceData?.round) {
-      fetchSwitcherooWindowStatus();
-    }
-  }, [raceData]);
-
-  // Switcheroo handler
-  const handleSwitcheroo = async () => {
-    if (!currentSelections || !currentSelections.mainDriver || !currentSelections.reserveDriver || !leagueId) return;
-    try {
-      setSwitcherooLoading(true);
-      // Call the switcheroo endpoint to perform the swap on the backend
-      await api.post('/api/switcheroo', {
-        raceId: raceData?.round,
-        leagueId,
-        originalDriver: currentSelections.mainDriver,
-        newDriver: currentSelections.reserveDriver,
-      });
-      await fetchSwitcherooCount(); // Refresh switcheroo count
-      await fetchData(); // Refresh selections
-    } catch (err) {
-      setSwitcherooError('Switcheroo failed');
-    } finally {
-      setSwitcherooLoading(false);
-    }
+  const handleCardClear = () => {
+    setSelectedDriverCard(null);
+    setSelectedTeamCard(null);
+    setSelectedTargetPlayer(null);
+    setSelectedTargetTeam(null);
+    setSelectedTargetDriver(null);
   };
+
+  const handleCardCancel = () => {
+    // Reset to saved state
+    if (raceCardSelection) {
+      setSelectedDriverCard(raceCardSelection.driverCard || null);
+      setSelectedTeamCard(raceCardSelection.teamCard || null);
+      setSelectedTargetPlayer(raceCardSelection.targetPlayer?._id || null);
+      setSelectedTargetTeam(raceCardSelection.targetTeam || null);
+      setSelectedTargetDriver(raceCardSelection.targetDriver || null);
+    } else {
+      setSelectedDriverCard(null);
+      setSelectedTeamCard(null);
+      setSelectedTargetPlayer(null);
+      setSelectedTargetTeam(null);
+      setSelectedTargetDriver(null);
+    }
+    setIsCardEditing(false);
+  };
+
+  // Used card IDs are now fetched from the API and stored in state
+
 
   if (loading) {
     return (
@@ -495,7 +800,7 @@ const NextRaceSelections: React.FC = () => {
       <div
         className="fixed inset-0 w-full h-full z-0"
         style={{
-          backgroundImage: 'url("/selections.webp")',
+          backgroundImage: 'url("/Selection_page.png")',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -505,6 +810,18 @@ const NextRaceSelections: React.FC = () => {
       {/* Main content wrapper */}
       <div className="relative w-full flex flex-col bg-transparent text-white z-10">
         <div className="flex-1 container mx-auto px-4 py-8 pt-16">
+          {/* Error and Success Messages */}
+          {error && (
+            <div className="w-full max-w-5xl mx-auto mb-4 p-4 bg-red-500/20 border border-red-500/50 rounded-lg text-red-300">
+              {error}
+            </div>
+          )}
+          {cardSuccessMessage && (
+            <div className="w-full max-w-5xl mx-auto mb-4 p-4 bg-green-500/20 border border-green-500/50 rounded-lg text-green-300">
+              {cardSuccessMessage}
+            </div>
+          )}
+
           {/* Deadline countdown */}
           <div className="w-full max-w-5xl mx-auto mb-4">
             <div className="backdrop-blur-sm bg-black/20 rounded-lg p-2">
@@ -520,77 +837,272 @@ const NextRaceSelections: React.FC = () => {
             </div>
           </div>
 
-          {/* Main content area with selections and utility panel */}
-          <div className="flex flex-col lg:flex-row max-w-7xl mx-auto gap-6">
-            {/* Selection columns */}
-            <div className="flex-1 grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Main Driver */}
-              <div className="backdrop-blur-sm bg-black/20 rounded-lg p-3 flex flex-col max-h-[calc(100vh-180px)]">
-                <h3 className="text-lg font-bold mb-2 text-center">Main Driver</h3>
-                <div className="flex-1 grid grid-cols-2 gap-2 overflow-y-auto scrollbar-thin scrollbar-thumb-red-500/50 scrollbar-track-transparent pr-2">
-                  {chunkArray(drivers, 2).map((pair, idx) => (
-                    <React.Fragment key={idx}>
-                      {pair.map(driver => renderDriverButton(driver, 'mainDriver'))}
-                    </React.Fragment>
-                  ))}
+          {/* Main content area with three equal columns */}
+          <div className="flex flex-col max-w-7xl mx-auto gap-3">
+            {/* Two slots at top - spans full width */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Main Driver Slot */}
+                <div className="backdrop-blur-sm bg-black/20 rounded-lg p-4 border-2 border-white/10">
+                  <h3 className="text-lg font-bold mb-3 text-center text-white">Main Driver</h3>
+                  <div className="min-h-[60px] flex items-center justify-center">
+                    {getCurrentSelection('mainDriver') ? (() => {
+                      const driverName = getCurrentSelection('mainDriver')!;
+                      // Find driver by matching normalized names
+                      const driver = drivers.find(d => {
+                        const normalizedStored = normalizeDriver(driverName);
+                        const normalizedDriver = normalizeDriver(d.name);
+                        return normalizedStored === normalizedDriver;
+                      });
+                      return driver ? (
+                        <div className="flex items-center justify-between w-full px-4 py-3 rounded-lg" style={{ backgroundColor: `${driver.teamColor}20`, border: `2px solid ${driver.teamColor}` }}>
+                          <span className="text-white font-semibold">{driver.name}</span>
+                          {!isLocked && (
+                            <button
+                              onClick={() => {
+                                setIsEditing(true);
+                                setEditingSelections(prev => ({ ...prev, mainDriver: null }));
+                              }}
+                              className="text-white/70 hover:text-white transition-colors"
+                            >
+                              <IconWrapper icon={FaTimes} />
+                            </button>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="text-white/50 text-sm text-center py-4">
+                          {driverName}
+                        </div>
+                      );
+                    })() : (
+                      <div className="text-white/50 text-sm text-center py-4">
+                        Click a driver below →
+                      </div>
+                    )}
                 </div>
               </div>
 
-              {/* Reserve Driver */}
-              <div className="backdrop-blur-sm bg-black/20 rounded-lg p-3 flex flex-col max-h-[calc(100vh-180px)]">
-                <h3 className="text-lg font-bold mb-2 text-center">Reserve Driver</h3>
-                <div className="flex-1 grid grid-cols-2 gap-2 overflow-y-auto scrollbar-thin scrollbar-thumb-red-500/50 scrollbar-track-transparent pr-2">
-                  {chunkArray(drivers, 2).map((pair, idx) => (
-                    <React.Fragment key={idx}>
-                      {pair.map(driver => renderDriverButton(driver, 'reserveDriver'))}
-                    </React.Fragment>
-                  ))}
-                </div>
-              </div>
-
-              {/* Teams */}
-              <div className="backdrop-blur-sm bg-black/20 rounded-lg p-3 flex flex-col max-h-[calc(100vh-180px)]">
-                <h3 className="text-lg font-bold mb-2 text-center">Team</h3>
-                <div className="flex-1 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-red-500/50 scrollbar-track-transparent pr-2">
-                  {teams.map(team => renderTeamButton(team))}
-                </div>
-              </div>
-            </div>
-
-            {/* Utility panel with Switcheroo and main actions */}
-            <div className="w-full lg:w-64 flex flex-col justify-center mt-6 lg:mt-0">
-              <div className="backdrop-blur-sm bg-black/20 rounded-lg p-6 text-center space-y-4">
-                <div className="flex flex-col items-center gap-4">
-                  <button
-                    className={`w-full flex items-center justify-center gap-2 px-6 py-4 rounded-lg font-bold text-xl transition-all duration-200 relative overflow-hidden
-                      ${isSwitcherooWindow && switcherooCount && switcherooCount > 0 
-                        ? 'before:absolute before:inset-0 before:bg-[repeating-linear-gradient(-45deg,#FFD700,#FFD700_10px,#000_10px,#000_20px)] hover:brightness-110 shadow-lg text-black' 
-                        : 'bg-gray-600 text-gray-300 cursor-not-allowed'}`}
-                    disabled={!isSwitcherooWindow || !switcherooCount || switcherooCount <= 0}
-                    title={isSwitcherooWindow ? (switcherooCount && switcherooCount > 0 ? 'Switcheroo available!' : 'No switcheroos left') : 'Switcheroo not available now'}
-                    onClick={handleSwitcheroo}
-                  >
-                    <div className="relative z-10 flex items-center justify-center gap-2 bg-yellow-400/90 w-full h-full rounded-lg py-2">
-                      <IconWrapper icon={FaSyncAlt} className="text-2xl" />
-                      Switcheroo
-                    </div>
-                  </button>
-                  <div className="text-center">
-                    <div className="text-sm font-semibold text-white/80 uppercase tracking-wider mb-1">Switcheroos Left</div>
-                    <div className={`text-2xl font-bold ${switcherooCount && switcherooCount > 0 ? 'text-green-400' : 'text-red-400'}`}>
-                      {switcherooLoading ? '...' : (switcherooCount ?? '?')}/{switcherooTotal}
-                    </div>
-                  </div>
-                  <div className="text-sm font-medium">
-                    {isSwitcherooWindow && switcherooCount && switcherooCount > 0 ? (
-                      <span className="text-green-400">Available Now!</span>
-                    ) : (
-                      <span className="text-gray-400">Currently Unavailable</span>
+                {/* Reserve Driver Slot */}
+                <div className="backdrop-blur-sm bg-black/20 rounded-lg p-4 border-2 border-white/10">
+                  <h3 className="text-lg font-bold mb-3 text-center text-white">Reserve Driver</h3>
+                  <div className="min-h-[60px] flex items-center justify-center">
+                    {getCurrentSelection('reserveDriver') ? (() => {
+                      const driverName = getCurrentSelection('reserveDriver')!;
+                      // Find driver by matching normalized names
+                      const driver = drivers.find(d => {
+                        const normalizedStored = normalizeDriver(driverName);
+                        const normalizedDriver = normalizeDriver(d.name);
+                        return normalizedStored === normalizedDriver;
+                      });
+                      return driver ? (
+                        <div className="flex items-center justify-between w-full px-4 py-3 rounded-lg" style={{ backgroundColor: `${driver.teamColor}20`, border: `2px solid ${driver.teamColor}` }}>
+                          <span className="text-white font-semibold">{driver.name}</span>
+                          {!isLocked && (
+                            <button
+                              onClick={() => {
+                                setIsEditing(true);
+                                setEditingSelections(prev => ({ ...prev, reserveDriver: null }));
+                              }}
+                              className="text-white/70 hover:text-white transition-colors"
+                            >
+                              <IconWrapper icon={FaTimes} />
+                            </button>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="text-white/50 text-sm text-center py-4">
+                          {driverName}
+                        </div>
+                      );
+                    })() : (
+                      <div className="text-white/50 text-sm text-center py-4">
+                        Click a driver below →
+                      </div>
                     )}
                   </div>
                 </div>
-                {/* Main action buttons */}
-                <div className="flex flex-col gap-3 mt-6">
+            </div>
+
+            {/* Layout: Drivers + Teams (equal) | Cards (fixed width) */}
+            <div className="flex flex-col lg:flex-row gap-3 flex-1 min-h-0">
+              {/* Left side: Drivers and Teams (equal width) */}
+              <div className="flex-1 flex flex-col lg:flex-row gap-3 min-h-0">
+                {/* Drivers Column - More compact to reduce height */}
+                <div className="flex-1 backdrop-blur-sm bg-black/20 rounded-lg p-2 flex flex-col min-h-0">
+                  <h3 className="text-base font-bold mb-2 text-center text-white">
+                    Available Drivers
+                    <span className="text-xs font-normal text-white/70 ml-2">
+                      ({drivers.length - (usedSelections.usedDrivers?.length || 0)} remaining)
+                    </span>
+                  </h3>
+                  <div className="flex-1 grid grid-cols-2 gap-0.5 overflow-y-auto scrollbar-thin scrollbar-thumb-red-500/50 scrollbar-track-transparent pr-1">
+                    {drivers.map(driver => renderDriverButton(driver))}
+                  </div>
+                </div>
+
+                {/* Teams Column - More spacing to increase height */}
+                <div className="flex-1 backdrop-blur-sm bg-black/20 rounded-lg p-4 flex flex-col min-h-0">
+                  <h3 className="text-base font-bold mb-2 text-center text-white">Team</h3>
+                  <div className="flex-1 space-y-2 overflow-y-auto scrollbar-thin scrollbar-thumb-red-500/50 scrollbar-track-transparent pr-1">
+                    {teams.map(team => renderTeamButton(team))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Cards Column - Fixed width on the right */}
+              <div className="w-full lg:w-64 flex flex-col justify-center min-h-0 flex-shrink-0">
+                  <div className="backdrop-blur-sm bg-black/20 rounded-lg p-4 text-center space-y-3 flex flex-col h-full">
+                {/* Card slots (only for 2026+ seasons) */}
+                {leagueSeason >= 2026 && playerDeck && (
+                  <div className="mb-6">
+                    <h3 className="text-lg font-bold text-white mb-3">Power Cards</h3>
+                    
+                    {/* Cards container - side by side on mobile, stacked on larger screens */}
+                    <div className="flex flex-row gap-3 lg:flex-col lg:gap-4 lg:space-y-0">
+                      {/* Driver Card Slot */}
+                      <div
+                        onClick={() => !isLocked || isCardEditing ? handleCardSlotClick('driver') : undefined}
+                        className={`relative cursor-pointer transition-all flex-1 lg:flex-none ${
+                          !isLocked || isCardEditing ? 'hover:scale-105' : 'opacity-50 cursor-not-allowed'
+                        }`}
+                      >
+                        <div className={`aspect-[3/4] rounded-lg border-2 overflow-hidden max-w-[140px] lg:max-w-none ${
+                          selectedDriverCard
+                            ? 'border-yellow-500'
+                            : 'bg-white/5 border-white/20'
+                        }`}>
+                        {selectedDriverCard ? (
+                          <div className="w-full h-full relative">
+                            <img
+                              src={getCardImagePath(selectedDriverCard.name, 'driver')}
+                              alt={selectedDriverCard.name}
+                              className="w-full h-full object-cover object-center"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2RkZCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
+                                target.onerror = null;
+                              }}
+                            />
+                            {/* Tier badge overlay */}
+                            <div className="absolute top-2 left-2">
+                              <div className={`px-2 py-1 rounded text-xs font-bold ${
+                                selectedDriverCard.tier === 'gold' ? 'bg-yellow-500 text-yellow-900' :
+                                selectedDriverCard.tier === 'silver' ? 'bg-gray-400 text-gray-900' : 'bg-amber-600 text-amber-900'
+                              }`}>
+                                {selectedDriverCard.tier.toUpperCase()}
+                              </div>
+                            </div>
+                          </div>
+                    ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center text-white/50 bg-white/5">
+                            <IconWrapper icon={FaPlus} className="mb-2 text-2xl" />
+                            <span className="text-xs">Driver Card</span>
+                          </div>
+                    )}
+                  </div>
+                </div>
+
+                      {/* Team Card Slot */}
+                      <div
+                        onClick={() => !isLocked || isCardEditing ? handleCardSlotClick('team') : undefined}
+                        className={`relative cursor-pointer transition-all flex-1 lg:flex-none ${
+                          !isLocked || isCardEditing ? 'hover:scale-105' : 'opacity-50 cursor-not-allowed'
+                        }`}
+                      >
+                        <div className={`aspect-[3/4] rounded-lg border-2 overflow-hidden max-w-[140px] lg:max-w-none ${
+                          selectedTeamCard
+                            ? 'border-yellow-500'
+                            : 'bg-white/5 border-white/20'
+                        }`}>
+                        {selectedTeamCard ? (
+                          <div className="w-full h-full relative">
+                            <img
+                              src={getCardImagePath(selectedTeamCard.name, 'team')}
+                              alt={selectedTeamCard.name}
+                              className="w-full h-full object-cover object-center"
+                              onError={(e) => {
+                                const target = e.target as HTMLImageElement;
+                                target.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjMwMCIgZmlsbD0iI2RkZCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
+                                target.onerror = null;
+                              }}
+                            />
+                            {/* Tier badge overlay */}
+                            <div className="absolute top-2 left-2">
+                              <div className={`px-2 py-1 rounded text-xs font-bold ${
+                                selectedTeamCard.tier === 'gold' ? 'bg-yellow-500 text-yellow-900' :
+                                selectedTeamCard.tier === 'silver' ? 'bg-gray-400 text-gray-900' : 'bg-amber-600 text-amber-900'
+                              }`}>
+                                {selectedTeamCard.tier.toUpperCase()}
+                              </div>
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="w-full h-full flex flex-col items-center justify-center text-white/50 bg-white/5">
+                            <IconWrapper icon={FaPlus} className="mb-2 text-2xl" />
+                            <span className="text-xs">Team Card</span>
+                          </div>
+                        )}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Card action buttons */}
+                    {leagueSeason >= 2026 && (
+                      <div className="flex flex-col gap-2 mt-4">
+                        {/* Show confirm button if cards are selected but not saved, or if in edit mode */}
+                        {(isCardEditing || ((selectedDriverCard || selectedTeamCard) && !raceCardSelection)) ? (
+                          <>
+                            <button
+                              onClick={handleCardConfirm}
+                              disabled={!currentSelectionId}
+                              className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-bold ${
+                                !currentSelectionId
+                                  ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                                  : 'bg-green-600 text-white hover:bg-green-700'
+                              }`}
+                              title={!currentSelectionId ? 'Please save your driver and team selections first' : 'Confirm card selection'}
+                            >
+                              <IconWrapper icon={FaCheck} />
+                              Confirm
+                            </button>
+                            <button
+                              onClick={handleCardCancel}
+                              className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 text-sm font-bold"
+                            >
+                              <IconWrapper icon={FaTimes} />
+                              Cancel
+                            </button>
+                            <button
+                              onClick={handleCardClear}
+                              className="w-full flex items-center justify-center gap-2 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 text-sm font-bold"
+                            >
+                              Clear
+                            </button>
+                          </>
+                        ) : (
+                          <button
+                            onClick={handleCardEdit}
+                            disabled={isLocked}
+                            className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-bold ${
+                              isLocked
+                                ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
+                                : 'bg-red-600 text-white hover:bg-red-700'
+                            }`}
+                          >
+                            <IconWrapper icon={FaEdit} />
+                            Edit Cards
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Main action buttons - full width below columns */}
+          <div className="flex flex-col gap-3 max-w-7xl mx-auto">
                   {!isLocked && (
                     <>
                       {isEditing ? (
@@ -643,11 +1155,225 @@ const NextRaceSelections: React.FC = () => {
                     🎯 Opponents Briefing
                   </button>
                 </div>
-              </div>
-            </div>
           </div>
         </div>
-      </div>
+
+      {/* Card Selection Modal */}
+      {(isCardModalOpen.driver || isCardModalOpen.team) && playerDeck && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
+          <div className="bg-gray-900 rounded-lg border-2 border-white/20 p-6 max-w-4xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center gap-4">
+                {cardModalStep === 'selectTarget' && (
+                  <button
+                    onClick={handleCardModalBack}
+                    className="text-white/70 hover:text-white transition-colors"
+                  >
+                    <IconWrapper icon={FaArrowLeft} className="text-xl" />
+                  </button>
+                )}
+                <h2 className="text-2xl font-bold text-white">
+                  {cardModalStep === 'selectTarget' 
+                    ? pendingCard?.requiresTarget === 'player'
+                      ? 'Select Target Player'
+                      : pendingCard?.requiresTarget === 'driver'
+                      ? 'Select Target Driver'
+                      : 'Select Target Team'
+                    : `Select ${cardModalType === 'driver' ? 'Driver' : 'Team'} Card`}
+                </h2>
+              </div>
+              <button
+                onClick={handleCardModalBack}
+                className="text-white/70 hover:text-white transition-colors"
+              >
+                <IconWrapper icon={FaTimes} className="text-2xl" />
+              </button>
+            </div>
+
+            {cardModalStep === 'selectCard' ? (
+              <>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                  {(cardModalType === 'driver' ? playerDeck.driverCards : playerDeck.teamCards).map((card) => {
+                    const isUsed = usedCardIds.includes(card._id);
+                    const isSelected = (cardModalType === 'driver' && selectedDriverCard?._id === card._id) ||
+                                      (cardModalType === 'team' && selectedTeamCard?._id === card._id);
+                    
+                    return (
+                      <button
+                        key={card._id}
+                        onClick={() => !isUsed && handleCardSelect(card)}
+                        disabled={isUsed}
+                        className={`aspect-[2/3] rounded-lg border-2 p-2 flex flex-col items-center justify-center transition-all ${
+                          isUsed
+                            ? 'bg-gray-800/50 border-gray-600 opacity-50 cursor-not-allowed'
+                            : isSelected
+                            ? 'bg-gradient-to-br from-yellow-500/30 to-yellow-600/30 border-yellow-500 scale-105'
+                            : 'bg-white/5 border-white/20 hover:border-white/40 hover:scale-105 cursor-pointer'
+                        }`}
+                      >
+                        {/* Card Image - Uniform sizing */}
+                        <div className="w-full flex-1 mb-2 rounded overflow-hidden bg-black/20">
+                          <img
+                            src={getCardImagePath(card.name, cardModalType)}
+                            alt={card.name}
+                            className="w-full h-full object-cover object-center"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = '/images/placeholder.png';
+                              target.onerror = null;
+                            }}
+                          />
+                        </div>
+                        <div className={`text-xs font-bold mb-1 ${
+                          card.tier === 'gold' ? 'text-yellow-400' :
+                          card.tier === 'silver' ? 'text-gray-300' : 'text-amber-600'
+                        }`}>
+                          {card.tier.toUpperCase()}
+                        </div>
+                        <div className="text-white text-sm font-semibold text-center mb-2">
+                          {card.name}
+                        </div>
+                        <div className="text-white/70 text-xs text-center line-clamp-3 mb-2">
+                          {card.description}
+                        </div>
+                        {isUsed && (
+                          <div className="text-red-400 text-xs font-bold mt-auto">
+                            USED
+                          </div>
+                        )}
+                        {isSelected && !isUsed && (
+                          <div className="text-green-400 text-xs font-bold mt-auto">
+                            SELECTED
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {playerDeck && (cardModalType === 'driver' ? playerDeck.driverCards : playerDeck.teamCards).length === 0 && (
+                  <div className="text-center text-white/70 py-8">
+                    <p>No {cardModalType} cards available in your deck.</p>
+                    <p className="text-sm mt-2">Build your deck first in the League page.</p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                {/* Target Selection Step */}
+                {pendingCard?.requiresTarget === 'player' ? (
+                  // Player selection for Mirror card
+                  <div>
+                    {loadingOpponents ? (
+                      <div className="flex items-center justify-center py-12">
+                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
+                      </div>
+                    ) : leagueOpponents.length === 0 ? (
+                      <div className="text-center text-white/70 py-8">
+                        <p>No opponents found in this league.</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {leagueOpponents.map((opponent) => {
+                          const isSelected = selectedTargetPlayer === opponent.id;
+                          return (
+                            <button
+                              key={opponent.id}
+                              onClick={() => handleTargetSelect(opponent.id)}
+                              className={`p-4 rounded-lg border-2 transition-all ${
+                                isSelected
+                                  ? 'bg-gradient-to-br from-blue-500/30 to-blue-600/30 border-blue-500 scale-105'
+                                  : 'bg-white/5 border-white/20 hover:border-white/40 hover:scale-105 cursor-pointer'
+                              }`}
+                            >
+                              <div className="text-white font-semibold text-center">
+                                {opponent.username}
+                              </div>
+                              {isSelected && (
+                                <div className="text-green-400 text-xs font-bold mt-2 text-center">
+                                  SELECTED
+                                </div>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                ) : pendingCard?.requiresTarget === 'team' ? (
+                  // Team selection for Espionage card
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {allTeams.map((teamName) => {
+                      const team = teams.find(t => normalizeTeam(t.name) === normalizeTeam(teamName));
+                      if (!team) return null;
+                      
+                      const isSelected = selectedTargetTeam && normalizeTeam(selectedTargetTeam) === normalizeTeam(teamName);
+                      return (
+                        <button
+                          key={team.id}
+                          onClick={() => handleTargetSelect(teamName)}
+                          className={`p-4 rounded-lg border-2 transition-all ${
+                            isSelected
+                              ? 'bg-gradient-to-br from-blue-500/30 to-blue-600/30 border-blue-500 scale-105'
+                              : 'bg-white/5 border-white/20 hover:border-white/40 hover:scale-105 cursor-pointer'
+                          }`}
+                          style={{
+                            backgroundColor: isSelected ? `${team.color}30` : undefined,
+                            borderColor: isSelected ? team.color : undefined
+                          }}
+                        >
+                          <div className="text-white font-semibold text-center">
+                            {team.name}
+                          </div>
+                          {isSelected && (
+                            <div className="text-green-400 text-xs font-bold mt-2 text-center">
+                              SELECTED
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : pendingCard?.requiresTarget === 'driver' ? (
+                  // Driver selection for Switcheroo card
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                    {allDrivers.map((driverName) => {
+                      const driver = drivers.find(d => normalizeDriver(d.name) === normalizeDriver(driverName));
+                      if (!driver) return null;
+                      
+                      const isSelected = selectedTargetDriver && normalizeDriver(selectedTargetDriver) === normalizeDriver(driverName);
+                      return (
+                        <button
+                          key={driver.id}
+                          onClick={() => handleTargetSelect(driverName)}
+                          className={`p-4 rounded-lg border-2 transition-all ${
+                            isSelected
+                              ? 'bg-gradient-to-br from-blue-500/30 to-blue-600/30 border-blue-500 scale-105'
+                              : 'bg-white/5 border-white/20 hover:border-white/40 hover:scale-105 cursor-pointer'
+                          }`}
+                          style={{
+                            backgroundColor: isSelected ? `${driver.teamColor}30` : undefined,
+                            borderColor: isSelected ? driver.teamColor : undefined
+                          }}
+                        >
+                          <div className="text-white font-semibold text-center">
+                            {driver.name}
+                          </div>
+                          {isSelected && (
+                            <div className="text-green-400 text-xs font-bold mt-2 text-center">
+                              SELECTED
+                            </div>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                ) : null}
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 };

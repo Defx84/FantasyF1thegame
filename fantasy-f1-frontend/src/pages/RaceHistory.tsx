@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaFlagCheckered, FaLock } from 'react-icons/fa';
 import IconWrapper from '../utils/iconWrapper';
 import { api } from '../services/api';
+import { getLeague } from '../services/leagueService';
 import CountryFlag from 'react-country-flag';
 
 // Mapping from country names to ISO country codes
@@ -55,20 +56,37 @@ const RaceHistory: React.FC = () => {
   const [races, setRaces] = useState<Race[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [leagueSeason, setLeagueSeason] = useState<number | null>(null);
 
   useEffect(() => {
     const fetchRaces = async () => {
       try {
+        // First, fetch league data to get the season
+        const leagueData = await getLeague(leagueId!);
+        const season = leagueData.season || new Date().getFullYear();
+        setLeagueSeason(season);
+
+        // Then fetch races (backend already filters by league.season)
         const response = await api.get(`/api/race/league/${leagueId}`);
-        setRaces(response.data);
+        const racesData = response.data || [];
+        
+        // Additional frontend filter to ensure we only show races for the correct season
+        const filteredRaces = racesData.filter((race: Race) => race.season === season);
+        
+        console.log(`RaceHistory: League season: ${season}, Races found: ${racesData.length}, Filtered: ${filteredRaces.length}`);
+        
+        setRaces(filteredRaces);
         setLoading(false);
       } catch (err) {
+        console.error('Error fetching race history:', err);
         setError('Failed to load races');
         setLoading(false);
       }
     };
 
-    fetchRaces();
+    if (leagueId) {
+      fetchRaces();
+    }
   }, [leagueId]);
 
   const isPastRace = (race: Race) => {
@@ -109,7 +127,7 @@ const RaceHistory: React.FC = () => {
       <div 
         className="fixed inset-0 w-full h-full"
         style={{
-          backgroundImage: 'url("/RaceHistory.png")',
+          backgroundImage: 'url("/Race_history.png")',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -123,7 +141,14 @@ const RaceHistory: React.FC = () => {
         {/* Main content */}
         <div className="relative z-10 w-full p-4 md:p-8">
           <div className="max-w-6xl mx-auto">
-            <h1 className="text-4xl font-bold mb-8 text-white">Race History</h1>
+            <div className="flex items-center justify-between mb-8">
+              <h1 className="text-4xl font-bold text-white">Race History</h1>
+              {leagueSeason && (
+                <span className="text-xl font-semibold text-white/70">
+                  Season {leagueSeason}
+                </span>
+              )}
+            </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {races.map((race) => {
