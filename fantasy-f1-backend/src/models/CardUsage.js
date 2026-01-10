@@ -48,3 +48,4 @@ const CardUsage = mongoose.model('CardUsage', cardUsageSchema);
 
 module.exports = CardUsage;
 
+

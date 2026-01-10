@@ -85,9 +85,13 @@ async function shouldProcessRace(round, raceName) {
 
 async function saveRaceResults(round, raceName, raceResults, sprintResults) {
     try {
+        // Get existing race result to determine season, or use current year as default
+        const existingRace = await RaceResult.findOne({ round });
+        const season = existingRace?.season || new Date().getFullYear();
+        
         // Calculate team points for both race and sprint
-        const teamResults = calculateTeamPoints(raceResults);
-        const sprintTeamResults = sprintResults ? calculateTeamPoints(sprintResults) : null;
+        const teamResults = calculateTeamPoints(raceResults, [], season);
+        const sprintTeamResults = sprintResults ? calculateTeamPoints(sprintResults, [], season) : null;
 
         // Process driver results
         const processedRaceResults = raceResults.map(result => ({

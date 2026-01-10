@@ -3,6 +3,7 @@ const router = express.Router();
 const { getUsedSelections, getCurrentSelections, saveSelections } = require('../controllers/selectionController');
 const { auth } = require('../middleware/auth');
 const selectionController = require('../controllers/selectionController');
+const cardController = require('../controllers/cardController');
 
 // Get used selections for the current user
 router.get('/used', auth, getUsedSelections);
@@ -18,5 +19,9 @@ router.get('/league/:leagueId/race/:round', auth, selectionController.getRaceSel
 
 // Admin override for selections
 router.post('/admin/override', auth, selectionController.adminOverrideSelection);
+
+// Card routes for selections
+router.post('/:selectionId/cards', auth, cardController.activateCards);
+router.get('/:selectionId/cards', auth, cardController.getRaceCards);
 
 module.exports = router; 

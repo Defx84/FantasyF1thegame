@@ -80,7 +80,8 @@ if (process.env.NODE_ENV === 'test') {
 // Routes
 app.use('/api/auth', authLimiter, require('./routes/auth'));
 app.use('/api/admin', require('./routes/adminRoutes'));
-app.use('/api/switcheroo', sensitiveLimiter, require('./routes/switcherooRoutes'));
+// Switcheroo routes removed - replaced by card system
+// app.use('/api/switcheroo', sensitiveLimiter, require('./routes/switcherooRoutes'));
 app.use('/api/race', require('./routes/raceRoutes'));
 app.use('/api/health', require('./routes/healthRoutes'));
 app.use('/api/announcements', require('./routes/announcementRoutes'));
@@ -88,6 +89,7 @@ app.use('/api/statistics', require('./routes/leagueStatisticsRoutes'));
 app.use('/api/league', require('./routes/leagueRoutes'));
 app.use('/api/selections', require('./routes/selectionRoutes'));
 app.use('/api/users', require('./routes/userRoutes'));
+app.use('/api/cards', require('./routes/cardRoutes'));
 
 // Avatar routes (admin-only for testing)
 app.use('/api/avatar', require('./routes/avatarRoutes'));
