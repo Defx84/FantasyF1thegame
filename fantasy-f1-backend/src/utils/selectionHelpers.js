@@ -1,5 +1,5 @@
 const { subMinutes } = require('date-fns');
-const { F1_DRIVERS_2025 } = require('../constants/f1DriverData');
+const { getF1Data } = require('../constants/f1DataLoader');
 const { normalizedDrivers, driverToTeam } = require('../constants/validDrivers');
 const { normalizedTeams, teamToDisplay } = require('../constants/validTeams');
 const { normalizeDriverName } = require('../constants/driverNameNormalization');
@@ -22,13 +22,17 @@ const isRaceLocked = (qualifyingTime) => {
  * Checks if a driver can be reused based on past selections
  * @param {Array} pastSelections - Array of past selection objects
  * @param {string} driverName - Name of the driver to check
+ * @param {number} season - Season year for cycle calculation
  * @returns {Object} - { canReuse: boolean, reason?: string }
- * Updated: Added trivial change to help with git operations
  */
-const checkDriverReuse = (pastSelections, driverName) => {
+const checkDriverReuse = (pastSelections, driverName, season = null) => {
   if (!pastSelections || pastSelections.length === 0) {
     return { canReuse: true };
   }
+
+  const seasonYear = season || new Date().getFullYear();
+  const { drivers } = getF1Data(seasonYear);
+  const driverCycleLength = drivers.length;
 
   // Normalize driver name for comparison
   const normalizedDriver = driverName.toLowerCase();
@@ -42,15 +46,15 @@ const checkDriverReuse = (pastSelections, driverName) => {
   const uniqueDrivers = [...new Set(allUsedDrivers)];
 
   // Only consider the current cycle
-  const driverCycle = Math.floor(uniqueDrivers.length / 20);
-  const currentCycleDriverStart = driverCycle * 20;
+  const driverCycle = Math.floor(uniqueDrivers.length / driverCycleLength);
+  const currentCycleDriverStart = driverCycle * driverCycleLength;
   const currentCycleDrivers = uniqueDrivers.slice(currentCycleDriverStart);
 
   // Check if driver has been used in the current cycle
   if (currentCycleDrivers.includes(normalizedDriver)) {
     return { 
       canReuse: false,
-      reason: `Driver ${driverName} has already been used in this cycle. You must use all 20 drivers before reusing.`
+      reason: `Driver ${driverName} has already been used in this cycle. You must use all ${driverCycleLength} drivers before reusing.`
     };
   }
 
@@ -61,12 +65,17 @@ const checkDriverReuse = (pastSelections, driverName) => {
  * Checks if a team can be reused based on past selections
  * @param {Array} pastSelections - Array of past selection objects
  * @param {string} teamName - Name of the team to check
+ * @param {number} season - Season year for cycle calculation
  * @returns {Object} - { canReuse: boolean, reason?: string }
  */
-const checkTeamReuse = (pastSelections, teamName) => {
+const checkTeamReuse = (pastSelections, teamName, season = null) => {
   if (!pastSelections || pastSelections.length === 0) {
     return { canReuse: true };
   }
+
+  const seasonYear = season || new Date().getFullYear();
+  const { teams } = getF1Data(seasonYear);
+  const teamCycleLength = teams.length;
 
   // Normalize team name for comparison
   const normalizedTeam = teamName.toLowerCase();
@@ -75,15 +84,15 @@ const checkTeamReuse = (pastSelections, teamName) => {
   const uniqueTeams = [...new Set(pastSelections.map(s => s.team).filter(Boolean))];
 
   // Only consider the current cycle
-  const teamCycle = Math.floor(uniqueTeams.length / 10);
-  const currentCycleTeamStart = teamCycle * 10;
+  const teamCycle = Math.floor(uniqueTeams.length / teamCycleLength);
+  const currentCycleTeamStart = teamCycle * teamCycleLength;
   const currentCycleTeams = uniqueTeams.slice(currentCycleTeamStart);
 
   // Check if team has been used in the current cycle
   if (currentCycleTeams.some(team => team.toLowerCase() === normalizedTeam)) {
     return { 
       canReuse: false,
-      reason: `Team ${teamToDisplay.get(normalizedTeam)} has already been used in this cycle. You must use all 10 teams before reusing.`
+      reason: `Team ${teamToDisplay.get(normalizedTeam)} has already been used in this cycle. You must use all ${teamCycleLength} teams before reusing.`
     };
   }
 
@@ -95,9 +104,10 @@ const checkTeamReuse = (pastSelections, teamName) => {
  * @param {Object} selection - The selection to validate
  * @param {Array} pastSelections - Array of past selection objects
  * @param {Date} qualifyingTime - The race's qualifying time
+ * @param {number} season - Season year for validation
  * @returns {Object} - { isValid: boolean, errors: string[] }
  */
-const validateSelection = (selection, pastSelections, qualifyingTime) => {
+const validateSelection = (selection, pastSelections, qualifyingTime, season = null) => {
   const errors = [];
 
   // Check race lock time
@@ -106,18 +116,18 @@ const validateSelection = (selection, pastSelections, qualifyingTime) => {
   }
 
   // Check driver reuse
-  const mainDriverCheck = checkDriverReuse(pastSelections, selection.mainDriver);
+  const mainDriverCheck = checkDriverReuse(pastSelections, selection.mainDriver, season);
   if (!mainDriverCheck.canReuse) {
     errors.push(mainDriverCheck.reason);
   }
 
-  const reserveDriverCheck = checkDriverReuse(pastSelections, selection.reserveDriver);
+  const reserveDriverCheck = checkDriverReuse(pastSelections, selection.reserveDriver, season);
   if (!reserveDriverCheck.canReuse) {
     errors.push(reserveDriverCheck.reason);
   }
 
   // Check team reuse
-  const teamCheck = checkTeamReuse(pastSelections, selection.team);
+  const teamCheck = checkTeamReuse(pastSelections, selection.team, season);
   if (!teamCheck.canReuse) {
     errors.push(teamCheck.reason);
   }

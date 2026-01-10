@@ -17,5 +17,14 @@
   "hungarian": "hungarian-gp-653191",
   "dutch": "dutch-gp-653195",
   "italian": "italian-gp-653199",
-  "azerbaijan": "azerbaijan-gp-653203"
+  "azerbaijan": "azerbaijan-gp-653203",
+  "abu-dhabi-testing": "abu-dhabi-testing",
+  "singapore": "singapore-gp-653207",
+  "united-states": "united-states-gp-653211",
+  "mexican": "mexican-gp-653215",
+  "sao-paulo": "sao-paulo-gp-653219",
+  "las-vegas": "las-vegas-gp-653223",
+  "qatar": "qatar-gp-653227",
+  "abu-dhabi": "abu-dhabi-gp-653231",
+  "brazilian": "sao-paulo-gp-653219"
 }

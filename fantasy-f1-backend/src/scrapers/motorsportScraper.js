@@ -270,14 +270,17 @@ async function scrapeMotorsportResultsByType(slug, type) {
         });
 
         // Normalize team names to match our constants
-        const { normalizeTeamName } = require('../constants/f1Data2025');
+        // Use current year as default season (can be overridden by caller)
+        const season = new Date().getFullYear();
+        const { getF1Validation } = require('../constants/f1DataLoader');
+        const { normalizeTeamName } = getF1Validation(season);
         const normalizedResults = results.map(result => ({
             ...result,
             team: normalizeTeamName(result.team) || result.team
         }));
 
         // Calculate team points using normalized team names
-        const teamResults = calculateTeamPoints(normalizedResults);
+        const teamResults = calculateTeamPoints(normalizedResults, [], season);
         
         return {
             results: normalizedResults,

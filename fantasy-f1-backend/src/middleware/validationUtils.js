@@ -113,40 +113,6 @@ const validateDriverReuse = async (req, res, next) => {
   }
 };
 
-// Validate switcheroo input
-const validateSwitcherooInput = [
-  body('raceId')
-    .trim()
-    .notEmpty()
-    .withMessage('Race ID is required')
-    .custom((value) => mongoose.Types.ObjectId.isValid(value))
-    .withMessage('Invalid race ID'),
-  body('leagueId')
-    .trim()
-    .notEmpty()
-    .withMessage('League ID is required')
-    .custom((value) => mongoose.Types.ObjectId.isValid(value))
-    .withMessage('Invalid league ID'),
-  body('originalDriver')
-    .trim()
-    .notEmpty()
-    .withMessage('Original driver is required')
-    .custom((value) => {
-      const normalized = value.toLowerCase();
-      return normalizedDrivers.some(driver => driver.toLowerCase() === normalized);
-    })
-    .withMessage('Invalid original driver'),
-  body('newDriver')
-    .trim()
-    .notEmpty()
-    .withMessage('New driver is required')
-    .custom((value) => {
-      const normalized = value.toLowerCase();
-      return normalizedDrivers.some(driver => driver.toLowerCase() === normalized);
-    })
-    .withMessage('Invalid new driver')
-];
-
 // Handle validation errors
 const handleValidationErrors = (req, res, next) => {
   const errors = validationResult(req);
@@ -163,6 +129,5 @@ module.exports = {
   validateSelectionInput,
   validateAdminSelection,
   validateDriverReuse,
-  handleValidationErrors,
-  validateSwitcherooInput
+  handleValidationErrors
 }; 

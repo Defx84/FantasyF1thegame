@@ -143,12 +143,20 @@ const sendSeasonArchiveToLeague = async (league, pdfBuffer) => {
     
     console.log(`[Season Archive] Sending emails to ${memberEmails.length} recipients...`);
     console.log(`[Season Archive] PDF size: ${(pdfBuffer.length / 1024 / 1024).toFixed(2)} MB`);
+    console.log(`[Season Archive] API Key present: ${!!process.env.MAILERSEND_API_KEY}`);
+    
+    // Check if PDF is too large (MailerSend typically has a 25MB limit, but trial accounts may have lower limits)
+    const pdfSizeMB = pdfBuffer.length / 1024 / 1024;
+    if (pdfSizeMB > 10) {
+      console.warn(`[Season Archive] ⚠️ PDF size (${pdfSizeMB.toFixed(2)} MB) may exceed MailerSend limits`);
+    }
     
     const emailPromises = memberEmails.map(async (email) => {
       try {
         console.log(`[Season Archive] 📧 Sending email to ${email}...`);
         
-        const data = await mailerSend.email.send({
+        // Prepare email payload
+        const emailPayload = {
           from: {
             email: 'noreply@thefantasyf1game.com',
             name: 'The Fantasy F1 Game'
@@ -167,7 +175,9 @@ const sendSeasonArchiveToLeague = async (league, pdfBuffer) => {
               content: pdfBase64
             }
           ]
-        });
+        };
+        
+        const data = await mailerSend.email.send(emailPayload);
         
         console.log(`[Season Archive] ✅ PDF sent to ${email}`);
         return data;

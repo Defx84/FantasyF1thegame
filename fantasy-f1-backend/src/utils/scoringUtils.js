@@ -1,7 +1,4 @@
-const {
-    normalizeDriverName,
-    normalizeTeamName
-} = require('../constants/f1Data2025');
+const { getF1Validation } = require('../constants/f1DataLoader');
 
 // Point system for race positions
 const RACE_POINTS = {
@@ -49,7 +46,10 @@ function calculatePoints(position, isSprint = false) {
 }
 
 // Process raw results from scraper
-function processRawResults(rawResults, isSprint = false) {
+function processRawResults(rawResults, isSprint = false, season = null) {
+    const seasonYear = season || new Date().getFullYear();
+    const { normalizeDriverName, normalizeTeamName } = getF1Validation(seasonYear);
+    
     return rawResults.map(result => {
         let position = result.position;
         let points = calculatePoints(position, isSprint);  // Recalculate points based on position
@@ -83,7 +83,9 @@ function processRawResults(rawResults, isSprint = false) {
 }
 
 // Process raw team results
-function processTeamResults(raceResults, sprintResults = []) {
+function processTeamResults(raceResults, sprintResults = [], season = null) {
+    const seasonYear = season || new Date().getFullYear();
+    const { normalizeTeamName } = getF1Validation(seasonYear);
     const teamResults = {};
     
     // Group results by team for main race
@@ -124,10 +126,10 @@ function processTeamResults(raceResults, sprintResults = []) {
 }
 
 // Calculate team points based on race and sprint results
-function calculateTeamPoints(raceResults, sprintResults = []) {
-    const processedRaceResults = processRawResults(raceResults, false);
-    const processedSprintResults = sprintResults.length > 0 ? processRawResults(sprintResults, true) : [];
-    return processTeamResults(processedRaceResults, processedSprintResults);
+function calculateTeamPoints(raceResults, sprintResults = [], season = null) {
+    const processedRaceResults = processRawResults(raceResults, false, season);
+    const processedSprintResults = sprintResults.length > 0 ? processRawResults(sprintResults, true, season) : [];
+    return processTeamResults(processedRaceResults, processedSprintResults, season);
 }
 
 module.exports = {
