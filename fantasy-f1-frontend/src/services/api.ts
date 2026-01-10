@@ -10,6 +10,7 @@ const api: AxiosInstance = axios.create({
     'Content-Type': 'application/json',
   },
   withCredentials: true, // Important for httpOnly cookies
+  timeout: 60000, // 60 second timeout for long operations like league creation
 });
 
 // Track if we're currently refreshing

@@ -2,13 +2,16 @@ import { api } from './api';
 import { AxiosResponse } from 'axios';
 
 export interface UsedSelections {
-  usedMainDrivers: string[];
-  usedReserveDrivers: string[];
+  usedDrivers: string[]; // Unified driver list (shared for main and reserve)
   usedTeams: string[];
+  // Legacy fields for backward compatibility during migration
+  usedMainDrivers?: string[];
+  usedReserveDrivers?: string[];
 }
 
 
 export interface Selection {
+  _id?: string; // Optional selection ID (returned when selection exists)
   mainDriver: string | null;
   reserveDriver: string | null;
   team: string | null;

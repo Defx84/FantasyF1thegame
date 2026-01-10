@@ -23,6 +23,7 @@ import Info from './pages/Info';
 import { getNextRaceTiming } from './services/raceService';
 import { getLeagueStandings } from './services/leagueService';
 import { getRaceSelections } from './services/selectionService';
+import { getRaceCards } from './services/cardService';
 import { Player } from './types/player';
 import './App.css';
 import AppLayout from './components/AppLayout';
@@ -55,25 +56,70 @@ const GridPageWrapper: React.FC = () => {
           const leagueStandings = await getLeagueStandings(leagueId, new Date().getFullYear());
           console.log('League standings:', leagueStandings);
 
+          // Check if this is a 2026+ league (cards only available for 2026+)
+          const leagueSeason = leagueStandings.season || new Date().getFullYear();
+          const isCardSeason = leagueSeason >= 2026;
+
           // Transform selections data into player format using league standings
-          const players = leagueStandings.driverStandings.map(standing => {
-            const userSelection = raceSelections.selections.find(s => s.username === standing.user.username);
-            
-            return {
-              id: standing.user._id,
-              username: standing.user.username,
-              selectionMade: !!(
-                userSelection?.mainDriver &&
-                userSelection?.reserveDriver &&
-                userSelection?.team
-              ),
-              selections: {
-                mainDriver: userSelection?.mainDriver || null,
-                reserveDriver: userSelection?.reserveDriver || null,
-                team: userSelection?.team || null
+          const playersWithSelections = await Promise.all(
+            leagueStandings.driverStandings.map(async (standing) => {
+              const userSelection = raceSelections.selections.find(s => s.username === standing.user.username);
+              
+              const basePlayer = {
+                id: standing.user._id,
+                username: standing.user.username,
+                selectionMade: !!(
+                  userSelection?.mainDriver &&
+                  userSelection?.reserveDriver &&
+                  userSelection?.team
+                ),
+                selections: {
+                  mainDriver: userSelection?.mainDriver || null,
+                  reserveDriver: userSelection?.reserveDriver || null,
+                  team: userSelection?.team || null
+                },
+                selectionId: userSelection?._id || undefined
+              };
+
+              // Fetch card selections if we have a selection ID (for 2026+ seasons only)
+              let cards = undefined;
+              if (isCardSeason && userSelection?._id) {
+                try {
+                  const raceCards = await getRaceCards(userSelection._id);
+                  console.log(`[GridPage] Cards for ${standing.user.username}:`, raceCards);
+                  if (raceCards.raceCardSelection) {
+                    // Use transformed cards if available (for Mystery/Random), otherwise use original
+                    const driverCard = raceCards.raceCardSelection.mysteryTransformedCard || 
+                                     raceCards.raceCardSelection.driverCard;
+                    const teamCard = raceCards.raceCardSelection.randomTransformedCard || 
+                                   raceCards.raceCardSelection.teamCard;
+                    
+                    cards = {
+                      driverCard: driverCard,
+                      teamCard: teamCard,
+                      mysteryTransformedCard: raceCards.raceCardSelection.mysteryTransformedCard,
+                      randomTransformedCard: raceCards.raceCardSelection.randomTransformedCard
+                    };
+                    console.log(`[GridPage] Processed cards for ${standing.user.username}:`, cards);
+                  } else {
+                    console.log(`[GridPage] No raceCardSelection found for ${standing.user.username}`);
+                  }
+                } catch (error) {
+                  // No cards selected yet, that's okay
+                  console.log(`[GridPage] No cards found for ${standing.user.username}:`, error);
+                }
+              } else {
+                console.log(`[GridPage] Skipping cards for ${standing.user.username} - isCardSeason: ${isCardSeason}, hasSelectionId: ${!!userSelection?._id}`);
               }
-            };
-          });
+
+              return {
+                ...basePlayer,
+                cards
+              };
+            })
+          );
+
+          const players = playersWithSelections;
 
           console.log('Final players data:', players);
 

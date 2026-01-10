@@ -21,10 +21,41 @@ const AppLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const hideNav = EXCLUDED_PATHS.includes(location.pathname);
 
   // Back button: go back or to dashboard
+  // Ensures coherent navigation behavior throughout the app
   const handleBack = () => {
+    const pathname = location.pathname;
+    const searchParams = new URLSearchParams(location.search);
+    
+    // Case 1: League detail page with deck tab active (state-based navigation)
+    // This is a special case because deck view is shown via URL param, not a separate route
+    const leagueDetailMatch = pathname.match(/^\/league\/([^/]+)$/);
+    const isDeckTab = searchParams.get('tab') === 'deck';
+    
+    if (leagueDetailMatch && isDeckTab) {
+      // Navigate back to league overview (remove tab param)
+      navigate(`/league/${leagueDetailMatch[1]}`, { replace: true });
+      return;
+    }
+    
+    // Case 2: League sub-pages (race, standings, grid, briefing, statistics)
+    // Navigate back to parent league overview for consistent hierarchy
+    const leagueSubPageMatch = pathname.match(/^\/league\/([^/]+)\/(.+)$/);
+    if (leagueSubPageMatch) {
+      const leagueId = leagueSubPageMatch[1];
+      const subPage = leagueSubPageMatch[2];
+      
+      // Navigate to league overview (parent page)
+      // Using replace: false to allow going back further if needed
+      navigate(`/league/${leagueId}`, { replace: false });
+      return;
+    }
+    
+    // Case 3: For other pages (profile, rules, info, etc.), use normal back navigation
+    // Check if we have sufficient history to go back
     if (window.history.length > 2) {
       navigate(-1);
     } else {
+      // No history or minimal history, go to dashboard as safe fallback
       navigate('/dashboard');
     }
   };
@@ -122,24 +153,33 @@ const AppLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
               >
                 {FaUsers({ className: "text-red-500" })} My League
               </button>
-              {leaguesOpen && leagues.length > 0 && (
+              {leaguesOpen && (
                 <div className="ml-8 mt-2 flex flex-col gap-2 bg-white/10 rounded-lg p-2 shadow-lg animate-slide-in-right">
-                  {leagues.map((league) => (
-                    <button
-                      key={league._id}
-                      className="text-white text-left px-2 py-1 rounded hover:bg-blue-700/60 transition"
-                      onClick={() => {
-                        setMenuOpen(false);
-                        setLeaguesOpen(false);
-                        navigate(`/league/${league._id}`);
-                      }}
-                    >
-                      {league.name}
-                    </button>
-                  ))}
-                  {leagues.length === 0 && (
-                    <span className="text-white/60 text-sm">No leagues found</span>
-                  )}
+                  {(() => {
+                    const currentYear = new Date().getFullYear();
+                    // Filter to show only active leagues (current season or future)
+                    const activeLeagues = leagues.filter(league => league.season >= currentYear);
+                    
+                    if (activeLeagues.length === 0) {
+                      return (
+                        <span className="text-white/60 text-sm">No active leagues found</span>
+                      );
+                    }
+                    
+                    return activeLeagues.map((league) => (
+                      <button
+                        key={league._id}
+                        className="text-white text-left px-2 py-1 rounded transition hover:bg-blue-700/60"
+                        onClick={() => {
+                          setMenuOpen(false);
+                          setLeaguesOpen(false);
+                          navigate(`/league/${league._id}`);
+                        }}
+                      >
+                        {league.name}
+                      </button>
+                    ));
+                  })()}
                 </div>
               )}
               <button

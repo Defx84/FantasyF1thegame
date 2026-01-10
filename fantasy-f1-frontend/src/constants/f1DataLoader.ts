@@ -77,3 +77,4 @@ export const getF1Teams = (season: number): Team[] => {
   return getF1Data(season).teams;
 };
 
+

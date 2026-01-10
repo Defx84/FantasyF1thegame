@@ -461,79 +461,101 @@ const ProfilePage: React.FC = () => {
                       : league.seasonStatus === 'completed'
                   )
                   .map((league) => {
-                    const isPastLeague = league.seasonStatus === 'completed';
+                    const currentYear = new Date().getFullYear();
+                    const isSeasonEnded = league.season < currentYear;
+                    const isPastLeague = league.seasonStatus === 'completed' || isSeasonEnded;
                     return (
                       <div
                         key={league._id}
-                        className={`flex items-center justify-between bg-white/10 p-4 rounded-lg border border-white/10 transition-colors ${
-                          isPastLeague 
-                            ? 'cursor-pointer hover:bg-white/20' 
-                            : 'cursor-pointer hover:bg-white/20'
-                        }`}
-                        onClick={() => {
-                          if (isPastLeague) {
-                            setSelectedPastLeague({
-                              id: league._id,
-                              name: league.name,
-                              season: league.season
-                            });
-                          } else {
-                            navigate(`/league/${league._id}`);
-                          }
-                        }}
+                        className={`flex flex-col bg-white/10 p-4 rounded-lg border ${
+                          isSeasonEnded 
+                            ? 'border-yellow-500/50' 
+                            : 'border-white/10'
+                        } transition-colors`}
                       >
-                        <div className="flex items-center space-x-4">
-                          <span className="font-semibold text-white/90">{league.name}</span>
-                          <span className="text-sm text-white/70">Season {league.season}</span>
-                          {league.owner === user.id && (
-                            <span className="text-xs bg-emerald-400 text-white px-2 py-1 rounded">Owner</span>
-                          )}
-                          {isPastLeague && (
-                            <span className="text-xs bg-gray-500 text-white px-2 py-1 rounded">Completed</span>
-                          )}
-                        </div>
-                        <div className="flex items-center space-x-4">
-                          {isPastLeague ? (
-                            <span className="text-sm text-white/70">View Results →</span>
-                          ) : (
-                            <>
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate(`/league/${league._id}`);
-                                }}
-                                className="text-blue-400 hover:text-blue-300 transition-colors"
-                                title="View League"
-                              >
-                                <IconWrapper icon={FaEye} size={16} />
-                              </button>
-                              {league.owner !== user.id && (
+                        {isSeasonEnded && (
+                          <div className="mb-3 px-3 py-2 bg-yellow-500/20 border border-yellow-500/50 rounded text-sm text-yellow-300">
+                            ⚠️ This season has now ended. Create a new league for {currentYear}.
+                          </div>
+                        )}
+                        <div
+                          className={`flex items-center justify-between ${
+                            isPastLeague 
+                              ? 'cursor-pointer hover:bg-white/20' 
+                              : 'cursor-pointer hover:bg-white/20'
+                          }`}
+                          onClick={() => {
+                            if (isPastLeague && !isSeasonEnded) {
+                              setSelectedPastLeague({
+                                id: league._id,
+                                name: league.name,
+                                season: league.season
+                              });
+                            } else if (!isSeasonEnded) {
+                              navigate(`/league/${league._id}`);
+                            }
+                          }}
+                        >
+                          <div className="flex items-center space-x-4">
+                            <span className="font-semibold text-white/90">{league.name}</span>
+                            <span className="text-sm text-white/70">Season {league.season}</span>
+                            {league.owner === user.id && (
+                              <span className="text-xs bg-emerald-400 text-white px-2 py-1 rounded">Owner</span>
+                            )}
+                            {isPastLeague && (
+                              <span className="text-xs bg-gray-500 text-white px-2 py-1 rounded">Completed</span>
+                            )}
+                          </div>
+                          <div className="flex items-center space-x-4">
+                            {isPastLeague || isSeasonEnded ? (
+                              <span className="text-sm text-white/70">View Results →</span>
+                            ) : (
+                              <>
                                 <button
                                   onClick={(e) => {
                                     e.stopPropagation();
-                                    setAbandoningLeagueId(league._id);
+                                    if (!isSeasonEnded) {
+                                      navigate(`/league/${league._id}`);
+                                    }
                                   }}
-                                  className="text-yellow-400 hover:text-yellow-300 transition-colors"
-                                  title="Abandon League"
+                                  disabled={isSeasonEnded}
+                                  className={`transition-colors ${
+                                    isSeasonEnded 
+                                      ? 'text-gray-500 cursor-not-allowed' 
+                                      : 'text-blue-400 hover:text-blue-300'
+                                  }`}
+                                  title="View League"
                                 >
-                                  <IconWrapper icon={FaSignOutAlt} size={16} />
+                                  <IconWrapper icon={FaEye} size={16} />
                                 </button>
-                              )}
-                              {league.owner === user.id && (
-                                <button
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDeleteLeague(league._id);
-                                  }}
-                                  disabled={deleting}
-                                  className="text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
-                                  title="Delete League"
-                                >
-                                  <IconWrapper icon={FaTrash} size={16} />
-                                </button>
-                              )}
-                            </>
-                          )}
+                                {league.owner !== user.id && !isSeasonEnded && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      setAbandoningLeagueId(league._id);
+                                    }}
+                                    className="text-yellow-400 hover:text-yellow-300 transition-colors"
+                                    title="Abandon League"
+                                  >
+                                    <IconWrapper icon={FaSignOutAlt} size={16} />
+                                  </button>
+                                )}
+                                {league.owner === user.id && !isSeasonEnded && (
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteLeague(league._id);
+                                    }}
+                                    disabled={deleting}
+                                    className="text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
+                                    title="Delete League"
+                                  >
+                                    <IconWrapper icon={FaTrash} size={16} />
+                                  </button>
+                                )}
+                              </>
+                            )}
+                          </div>
                         </div>
                       </div>
                     );

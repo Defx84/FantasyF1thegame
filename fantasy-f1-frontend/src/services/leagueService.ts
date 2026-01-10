@@ -184,4 +184,26 @@ export const abandonLeague = async (leagueId: string): Promise<void> => {
   } catch (error) {
     throw error;
   }
+};
+
+export interface Opponent {
+  id: string;
+  username: string;
+  avatar?: string;
+  remainingDrivers: number;
+  remainingTeams: number;
+  remainingSelections: {
+    mainDrivers: string[];
+    reserveDrivers: string[];
+    teams: string[];
+  };
+}
+
+export const getLeagueOpponents = async (leagueId: string): Promise<Opponent[]> => {
+  try {
+    const response = await api.get(`${API_URL}/${leagueId}/opponents`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
 }; 

@@ -4,7 +4,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaTrophy, FaMedal, FaChevronDown, FaChevronUp, FaInfoCircle } from 'react-icons/fa';
 import IconWrapper from '../utils/iconWrapper';
 import { api } from '../services/api';
-import { F1_DRIVERS_2025 } from '../constants/f1Data2025';
+import { getF1Drivers } from '../constants/f1DataLoader';
 import { getTeamColor } from '../constants/teamColors';
 import AvatarImage from '../components/Avatar/AvatarImage';
 
@@ -74,7 +74,8 @@ const Standings: React.FC = () => {
     const fetchStandings = async () => {
       try {
         setLoading(true);
-        const currentYear = 2025; // Hardcode to 2025 for now since that's the season we're using
+        // Get season from leaderboard data or default to current year
+        const currentYear = new Date().getFullYear();
         const response = await api.get(`/api/league/${leagueId}/standings/${currentYear}`);
         setLeaderboard(response.data);
       } catch (err) {
@@ -195,10 +196,12 @@ const Standings: React.FC = () => {
 
   // Helper to get team for a driver
   const getDriverTeam = (driverName?: string) => {
-    if (!driverName) return undefined;
+    if (!driverName || !leaderboard) return undefined;
     // Normalize the driver name for comparison (handle case sensitivity and formatting)
     const normalizedName = driverName.toLowerCase().trim();
-    const driver = F1_DRIVERS_2025.find(d => 
+    const season = leaderboard.season || 2026;
+    const drivers = getF1Drivers(season);
+    const driver = drivers.find(d => 
       d.name.toLowerCase() === normalizedName || 
       d.shortName.toLowerCase() === normalizedName || 
       d.alternateNames.some(alt => alt.toLowerCase() === normalizedName)

@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FaArrowLeft, FaEdit, FaCheck, FaTimes, FaUserShield, FaInfoCircle } from 'react-icons/fa';
 import IconWrapper from '../utils/iconWrapper';
 import { api } from '../services/api';
-import { F1_DRIVERS_2025, F1_TEAMS_2025 } from '../constants/f1Data2025';
+import { getDrivers, getTeams } from '../utils/validation';
 import { adminOverrideSelection, getUsedSelections, UsedSelections } from '../services/selectionService';
 import { normalizeDriver, normalizeTeam } from '../utils/normalization';
 import type { FC } from 'react';
@@ -70,20 +70,20 @@ const RaceDetails: React.FC = () => {
   const [usedSelections, setUsedSelections] = useState<UsedSelectionsMap>({});
   const [showTooltip, setShowTooltip] = useState(false);
   const tooltipTimeout = useRef<NodeJS.Timeout | null>(null);
+  const [leagueSeason, setLeagueSeason] = useState<number>(2026); // Default to 2026
 
-  // Get available drivers and teams from constants
-  const availableDrivers = F1_DRIVERS_2025.map(driver => driver.name);
-  const availableTeams = F1_TEAMS_2025.map(team => team.name);
+  // Get available drivers and teams based on season
+  const availableDrivers = getDrivers(leagueSeason);
+  const availableTeams = getTeams(leagueSeason);
 
-  // Helper function to check if a driver is used
-  const isDriverUsed = (userId: string, driverId: string, type: 'main' | 'reserve'): boolean => {
+  // Helper function to check if a driver is used (unified list for both main and reserve)
+  const isDriverUsed = (userId: string, driverId: string): boolean => {
     const userSelections = usedSelections[userId];
     if (!userSelections) return false;
-    const usedList = type === 'main' ? userSelections.usedMainDrivers : userSelections.usedReserveDrivers;
+    const usedList = userSelections.usedDrivers || [];
     if (!usedList) return false;
     const normalizedDriverId = normalizeDriver(driverId);
     const result = usedList.some(usedDriver => normalizeDriver(usedDriver) === normalizedDriverId);
-    console.log(`[Admin] Checking if used: ${driverId} => ${normalizedDriverId} | result: ${result}`);
     return result;
   };
 
@@ -111,6 +111,10 @@ const RaceDetails: React.FC = () => {
       const raceData = raceResponse.data;
       const selectionsData = selectionsResponse.data;
       const leagueData: LeagueResponse = leagueResponse.data;
+
+      // Get season from league data
+      const season = (leagueData as any).season || 2026;
+      setLeagueSeason(season);
 
       setRaceDetails(raceData);
       setSelections(selectionsData.selections || []);
@@ -172,8 +176,7 @@ const RaceDetails: React.FC = () => {
     Object.entries(usedSelections).forEach(([userId, used]) => {
       if (used) {
         console.log(`📦 [Admin] Used Selections for user ${userId}:`, used);
-        console.log(`[Admin] 🧩 Normalized usedMainDrivers:`, used.usedMainDrivers?.map(normalizeDriver) || []);
-        console.log(`[Admin] 🧩 Normalized usedReserveDrivers:`, used.usedReserveDrivers?.map(normalizeDriver) || []);
+        console.log(`[Admin] 🧩 Normalized usedDrivers:`, used.usedDrivers?.map(normalizeDriver) || []);
         console.log(`[Admin] 🧩 Normalized usedTeams:`, used.usedTeams?.map(normalizeTeam) || []);
       }
     });
@@ -412,7 +415,7 @@ const RaceDetails: React.FC = () => {
                                 >
                                   <option value="">-</option>
                                   {availableDrivers.map(driver => {
-                                    const isUsed = isDriverUsed(member.id, driver, 'main');
+                                    const isUsed = isDriverUsed(member.id, driver);
                                     return (
                                       <option 
                                         key={driver} 
@@ -450,7 +453,7 @@ const RaceDetails: React.FC = () => {
                                 >
                                   <option value="">-</option>
                                   {availableDrivers.map(driver => {
-                                    const isUsed = isDriverUsed(member.id, driver, 'reserve');
+                                    const isUsed = isDriverUsed(member.id, driver);
                                     return (
                                       <option 
                                         key={driver} 
@@ -619,7 +622,7 @@ const RaceDetails: React.FC = () => {
                               >
                                 <option value="">-</option>
                                 {availableDrivers.map(driver => {
-                                  const isUsed = isDriverUsed(member.id, driver, 'main');
+                                  const isUsed = isDriverUsed(member.id, driver);
                                   return (
                                     <option 
                                       key={driver} 
@@ -662,7 +665,7 @@ const RaceDetails: React.FC = () => {
                               >
                                 <option value="">-</option>
                                 {availableDrivers.map(driver => {
-                                  const isUsed = isDriverUsed(member.id, driver, 'reserve');
+                                  const isUsed = isDriverUsed(member.id, driver);
                                   return (
                                     <option 
                                       key={driver} 

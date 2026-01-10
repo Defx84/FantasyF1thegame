@@ -7,7 +7,8 @@ import IconWrapper from '../utils/iconWrapper';
 import AvatarImage from '../components/Avatar/AvatarImage';
 import briefingBackground from '../assets/briefing-background.png';
 import { getTeamColor } from '../constants/teamColors';
-import { F1_DRIVERS_2025 } from '../constants/f1Data2025';
+import { getF1Drivers } from '../constants/f1DataLoader';
+import { getLeague } from '../services/leagueService';
 
 interface Opponent {
   id: string;
@@ -42,11 +43,18 @@ const OpponentsBriefing: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [expandedOpponent, setExpandedOpponent] = useState<string | null>(null);
   const [currentOpponent, setCurrentOpponent] = useState<string | null>(null);
+  const [leagueSeason, setLeagueSeason] = useState<number>(2026);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true);
+        // Fetch league data to get season
+        if (leagueId) {
+          const leagueData = await getLeague(leagueId);
+          const season = leagueData.season || 2026;
+          setLeagueSeason(season);
+        }
         const response = await api.get(`/api/league/${leagueId}/opponents`);
         setOpponents(response.data);
       } catch (err) {
@@ -94,7 +102,8 @@ const OpponentsBriefing: React.FC = () => {
   };
 
   const getDriverColor = (driverName: string): string => {
-    const driver = F1_DRIVERS_2025.find(d => d.name === driverName);
+    const drivers = getF1Drivers(leagueSeason);
+    const driver = drivers.find(d => d.name === driverName);
     if (driver) {
       return getTeamColor(driver.team);
     }
