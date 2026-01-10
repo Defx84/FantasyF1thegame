@@ -3,6 +3,7 @@ const router = express.Router();
 const { auth } = require('../middleware/auth');
 const leagueController = require('../controllers/leagueController');
 const { getLeagueLeaderboard } = require('../controllers/leagueLeaderboardController');
+const cardController = require('../controllers/cardController');
 
 // Debug log
 console.log('leagueController:', leagueController);
@@ -26,5 +27,11 @@ router.post('/:id/abandon', auth, leagueController.abandonLeague);
 
 // Delete league
 router.delete('/:id', auth, leagueController.deleteLeague);
+
+// Card routes
+router.get('/:id/cards', auth, cardController.getPlayerCards);
+router.get('/:id/cards/deck', auth, cardController.getPlayerDeck);
+router.get('/:id/cards/used', auth, cardController.getUsedCards);
+router.post('/:id/cards/select', auth, cardController.selectDeck);
 
 module.exports = router; 
