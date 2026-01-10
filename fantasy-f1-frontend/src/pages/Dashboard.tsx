@@ -25,6 +25,7 @@ const Dashboard: React.FC = () => {
   const [isLoadingLeagues, setIsLoadingLeagues] = useState(false);
   const navigate = useNavigate();
   const carouselSectionRef = useRef<HTMLDivElement>(null);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
     const fetchUserLeagues = async () => {
@@ -44,9 +45,20 @@ const Dashboard: React.FC = () => {
     fetchUserLeagues();
   }, [activeTab]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+
+    window.addEventListener('resize', handleResize);
+    // Check on mount in case window size changed
+    handleResize();
+    
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const handleProfileClick = () => {
-    // TODO: Navigate to user profile
-    console.log('Navigate to profile');
+    navigate('/profile');
   };
 
   const handleTabAndScroll = (tab: string, showFormSetter?: (v: boolean) => void) => {
@@ -65,21 +77,60 @@ const Dashboard: React.FC = () => {
     setSuccess('');
 
     try {
-      const newLeague = await createLeague({
-        name: leagueName
-      });
-      setSuccess('League created successfully!');
+      console.log('[Dashboard] Creating league:', leagueName);
+      let newLeague;
+      
+      try {
+        newLeague = await createLeague({
+          name: leagueName
+        });
+      } catch (timeoutErr: any) {
+        // If we get a timeout, the league might still have been created
+        // Try to find it by fetching user's leagues
+        if (timeoutErr.code === 'ECONNABORTED' || timeoutErr.message?.includes('timeout')) {
+          console.log('[Dashboard] Request timed out, checking if league was created...');
+          try {
+            const userLeagues = await getUserLeagues();
+            const createdLeague = userLeagues.find((l: League) => l.name === leagueName);
+            if (createdLeague) {
+              console.log('[Dashboard] League found after timeout:', createdLeague._id);
+              newLeague = createdLeague;
+            } else {
+              throw timeoutErr; // Re-throw if league not found
+            }
+          } catch (fetchErr) {
+            throw timeoutErr; // Re-throw original timeout error
+          }
+        } else {
+          throw timeoutErr; // Re-throw if not a timeout error
+        }
+      }
+      
+      console.log('[Dashboard] League created, response:', newLeague);
+      
+      // Validate that we got a league with an ID
+      const leagueId = newLeague?._id || newLeague?.league?._id;
+      if (!leagueId) {
+        console.error('[Dashboard] Invalid league response:', newLeague);
+        throw new Error('Invalid league response: missing league ID');
+      }
+      
+      console.log('[Dashboard] Navigating to league:', leagueId);
+      
+      // Reset form state immediately
       setLeagueName('');
-      // Wait a moment to show the success message before navigating
+      setShowCreateLeagueForm(false);
+      
+      // Use setTimeout to ensure state updates and navigation happen in next tick
+      // This prevents UI freeze
       setTimeout(() => {
-        setShowCreateLeagueForm(false);
-        navigate(`/league/${newLeague._id}`);
-      }, 1500);
-    } catch (err) {
-      setError('Failed to create league. Please try again.');
-      console.error('League creation error:', err);
-    } finally {
+        setIsSubmitting(false);
+        navigate(`/league/${leagueId}`);
+      }, 0);
+    } catch (err: any) {
+      console.error('[Dashboard] League creation error:', err);
       setIsSubmitting(false);
+      setError(err?.response?.data?.error || err?.response?.data?.message || err?.message || 'Failed to create league. Please try again.');
     }
   };
 
@@ -90,19 +141,34 @@ const Dashboard: React.FC = () => {
     setSuccess('');
 
     try {
+      console.log('[Dashboard] Joining league with code:', leagueCode);
       const joinedLeague = await joinLeague(leagueCode);
-      setSuccess('Successfully joined the league!');
+      
+      console.log('[Dashboard] League joined, response:', joinedLeague);
+      
+      // Validate that we got a league with an ID
+      const leagueId = joinedLeague?._id || joinedLeague?.league?._id;
+      if (!leagueId) {
+        console.error('[Dashboard] Invalid league response:', joinedLeague);
+        throw new Error('Invalid league response: missing league ID');
+      }
+      
+      console.log('[Dashboard] Navigating to league:', leagueId);
+      
+      // Reset form state immediately
       setLeagueCode('');
-      // Wait a moment to show the success message before navigating
+      setShowJoinLeagueForm(false);
+      
+      // Use setTimeout to ensure state updates and navigation happen in next tick
+      // This prevents UI freeze
       setTimeout(() => {
-        setShowJoinLeagueForm(false);
-        navigate(`/league/${joinedLeague._id}`);
-      }, 1500);
-    } catch (err) {
-      setError('Failed to join league. Please check the code and try again.');
-      console.error('League join error:', err);
-    } finally {
+        setIsSubmitting(false);
+        navigate(`/league/${leagueId}`);
+      }, 0);
+    } catch (err: any) {
+      console.error('[Dashboard] League join error:', err);
       setIsSubmitting(false);
+      setError(err?.response?.data?.error || err?.response?.data?.message || err?.message || 'Failed to join league. Please check the code and try again.');
     }
   };
 
@@ -117,20 +183,21 @@ const Dashboard: React.FC = () => {
   return (
     <>
       {/* Background wrapper */}
-      <div 
-        className="fixed inset-0 w-full h-full"
+      <div
+        className="fixed inset-0 w-full h-full dashboard-bg dashboard-bg-mobile"
         style={{
-          backgroundImage: 'url("/Background_dashboard.png")',
+          backgroundImage: isMobile ? 'url("/Dashboard_mobile.png")' : 'url("/Background_dashboard.png")',
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
-          backgroundRepeat: 'no-repeat'
+          backgroundRepeat: 'no-repeat',
+          backgroundColor: '#000000'
         }}
       />
 
       {/* Content wrapper */}
       <div className="relative min-h-screen">
-        {/* Semi-transparent overlay */}
-        <div className="absolute inset-0 bg-black bg-opacity-30" />
+        {/* Semi-transparent overlay - reduced opacity for better logo visibility */}
+        <div className="absolute inset-0 bg-black bg-opacity-20 dashboard-overlay-mobile" />
 
         {/* Main content */}
         <div className="relative z-10 min-h-screen p-4 md:p-8">
@@ -138,33 +205,33 @@ const Dashboard: React.FC = () => {
           <div className="flex justify-between items-center mb-8">
             {/* Profile button on the left */}
             <button
-              onClick={() => navigate('/profile')}
-              className="flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors text-white font-semibold shadow"
+              onClick={handleProfileClick}
+              className="flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 rounded-lg transition-colors text-white font-semibold shadow text-sm"
             >
               {user?.id && (
                 <AvatarImage 
                   userId={user.id} 
                   username={user.username} 
-                  size={32} 
-                  className="mr-2" 
+                  size={24} 
+                  className="mr-1.5" 
                 />
               )}
-              <span className="ml-1">
+              <span className="ml-0.5">
                 {user?.username || 'User'}
               </span>
             </button>
             {/* Logout button on the right */}
             <button
               onClick={logout}
-              className="flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg transition-colors text-white font-semibold shadow"
+              className="flex items-center px-3 py-1.5 bg-red-600 hover:bg-red-700 rounded-lg transition-colors text-white font-semibold shadow text-sm"
             >
-              <IconWrapper icon={FaSignOutAlt} size={16} className="text-white" />
-              <span className="ml-2">Logout</span>
+              <IconWrapper icon={FaSignOutAlt} size={14} className="text-white" />
+              <span className="ml-1.5">Logout</span>
             </button>
           </div>
 
           {/* Main content area */}
-          <div className="max-w-6xl mx-auto pt-16 md:pt-24">
+          <div className="max-w-6xl mx-auto pt-8 md:pt-16">
             {/* Menu block */}
             <div className="backdrop-blur-sm bg-white/[0.02] rounded-xl p-8 border border-white/10 mb-12">
               {/* Action buttons */}
@@ -375,31 +442,46 @@ const Dashboard: React.FC = () => {
                         </div>
                       ) : (
                         <div className="grid grid-cols-1 gap-1 overflow-y-auto">
-                          {userLeagues.map((league) => (
-                            <div
-                              key={league._id}
-                              onClick={() => navigate(`/league/${league._id}`)}
-                              className="backdrop-blur-sm bg-white/[0.02] rounded-xl p-2 border border-white/10 cursor-pointer hover:bg-white/10 transition-colors"
-                            >
-                              <div className="flex items-center justify-between mb-1">
-                                <h3 className="text-xs font-bold text-white truncate">{league.name}</h3>
-                                {league.owner === user?.id && (
-                                  <span className="text-xs bg-red-500 text-white px-2 py-1 rounded">Admin</span>
-                                )}
+                          {(() => {
+                            const currentYear = new Date().getFullYear();
+                            // Filter to show only active leagues (current season or future)
+                            const activeLeagues = userLeagues.filter(league => league.season >= currentYear);
+                            
+                            if (activeLeagues.length === 0) {
+                              return (
+                                <div className="text-center text-white">
+                                  <p className="text-xs">No active leagues found.</p>
+                                  <p className="text-xs opacity-75">Create a new league or join an existing one to get started!</p>
+                                </div>
+                              );
+                            }
+                            
+                            return activeLeagues.map((league) => (
+                              <div
+                                key={league._id}
+                                onClick={() => navigate(`/league/${league._id}`)}
+                                className="backdrop-blur-sm bg-white/[0.02] rounded-xl p-2 border border-white/10 cursor-pointer hover:bg-white/10 transition-colors"
+                              >
+                                <div className="flex items-center justify-between mb-1">
+                                  <h3 className="text-xs font-bold text-white truncate">{league.name}</h3>
+                                  {league.owner === user?.id && (
+                                    <span className="text-xs bg-red-500 text-white px-2 py-1 rounded">Admin</span>
+                                  )}
+                                </div>
+                                <div className="flex items-center text-white/75 mb-1 text-xs">
+                                  <IconWrapper icon={FaUsers} className="mr-2" />
+                                  <span>{league.members.length} members</span>
+                                </div>
+                                <div className="flex items-center text-white/75 text-xs">
+                                  <IconWrapper icon={FaTrophy} className="mr-2" />
+                                  <span>Season {league.season}</span>
+                                </div>
+                                <div className="mt-1 text-xs text-white/50">
+                                  <p className="truncate">Code: {league.code}</p>
+                                </div>
                               </div>
-                              <div className="flex items-center text-white/75 mb-1 text-xs">
-                                <IconWrapper icon={FaUsers} className="mr-2" />
-                                <span>{league.members.length} members</span>
-                              </div>
-                              <div className="flex items-center text-white/75 text-xs">
-                                <IconWrapper icon={FaTrophy} className="mr-2" />
-                                <span>Season {league.season}</span>
-                              </div>
-                              <div className="mt-1 text-xs text-white/50">
-                                <p className="truncate">Code: {league.code}</p>
-                              </div>
-                            </div>
-                          ))}
+                            ));
+                          })()}
                         </div>
                       )}
                     </div>
