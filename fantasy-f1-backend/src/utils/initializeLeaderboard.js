@@ -67,8 +67,8 @@ const initializeLeaderboard = async (leagueId, season) => {
             });
         }
 
-        // Get all race results (shared, not filtered by league or season)
-        const raceResults = await RaceResult.find({}).sort({ round: 1 });
+        // Get all race results for this season only (CRITICAL: filter by season to avoid cross-season contamination)
+        const raceResults = await RaceResult.find({ season: season }).sort({ round: 1 });
 
         // Initialize standings for each member
         for (const member of league.members) {

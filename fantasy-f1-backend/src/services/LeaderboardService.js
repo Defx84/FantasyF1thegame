@@ -3,7 +3,7 @@ const RaceSelection = require('../models/RaceSelection');
 const League = require('../models/League');
 const User = require('../models/User');
 const RaceResult = require('../models/RaceResult');
-const { normalizeTeamName } = require('../constants/f1Data2025');
+const { getF1Validation } = require('../constants/f1DataLoader');
 
 class LeaderboardService {
     /**
@@ -29,16 +29,19 @@ class LeaderboardService {
                 .populate('user', 'username')
                 .populate('race', 'round raceName');
 
+            // Get season-aware normalization
+            const { normalizeTeamName } = getF1Validation(league.season);
+
             // Get or create leaderboard
             let leaderboard = await LeagueLeaderboard.findOne({
                 league: leagueId,
-                season: new Date().getFullYear()
+                season: league.season
             });
 
             if (!leaderboard) {
                 leaderboard = new LeagueLeaderboard({
                     league: leagueId,
-                    season: new Date().getFullYear(),
+                    season: league.season,
                     lastUpdated: new Date(),
                     driverStandings: [],
                     constructorStandings: []
@@ -67,7 +70,11 @@ class LeaderboardService {
                     }
                     
                     // Only process if the race is completed (check RaceResult)
-                    const raceResult = await RaceResult.findOne({ round: selection.round });
+                    // CRITICAL: Filter by both round AND season to avoid cross-season contamination
+                    const raceResult = await RaceResult.findOne({ 
+                        round: selection.round,
+                        season: league.season 
+                    });
                     if (!raceResult) {
                         skippedCount++;
                         continue;

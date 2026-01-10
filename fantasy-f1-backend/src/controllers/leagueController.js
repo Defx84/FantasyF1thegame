@@ -48,10 +48,13 @@ const createLeague = async (req, res) => {
 
         await league.save();
 
-        // Initialize empty race selections for all races
-        await initializeAllRaceSelections(league._id);
-
+        // Return the league immediately, initialize race selections in the background
         res.status(201).json(league);
+
+        // Initialize empty race selections for all races asynchronously (non-blocking)
+        initializeAllRaceSelections(league._id).catch(err => {
+            console.error(`Error initializing race selections for league ${league._id}:`, err);
+        });
     } catch (error) {
         console.error('Error creating league:', error);
         res.status(500).json({ message: 'Error creating league' });
@@ -75,16 +78,23 @@ const joinLeague = async (req, res) => {
         league.members.push(userId);
         await league.save();
 
-        // Initialize empty race selections for the new member
-        const races = await RaceCalendar.find({}).select('_id round');
-        for (const race of races) {
-            await initializeRaceSelections(league._id, race._id, race.round);
-        }
-
-        // Trigger leaderboard initialization/update for this league and season
-        await initializeLeaderboard(league._id, league.season);
-
+        // Return the league immediately, initialize race selections in the background
         res.json(league);
+
+        // Initialize empty race selections for the new member asynchronously (non-blocking)
+        (async () => {
+            try {
+                const races = await RaceCalendar.find({}).select('_id round');
+                for (const race of races) {
+                    await initializeRaceSelections(league._id, race._id, race.round);
+                }
+
+                // Trigger leaderboard initialization/update for this league and season
+                await initializeLeaderboard(league._id, league.season);
+            } catch (err) {
+                console.error(`Error initializing race selections for new member in league ${league._id}:`, err);
+            }
+        })();
     } catch (error) {
         console.error('Error joining league:', error);
         res.status(500).json({ message: 'Error joining league' });
@@ -356,6 +366,7 @@ const getLeagueOpponents = async (req, res) => {
         // Get all future race selections for opponents (to hide them)
         const now = new Date();
         const futureRaces = await RaceCalendar.find({
+            season: league.season,
             date: { $gt: now }
         }).sort({ date: 1 });
         
@@ -381,21 +392,22 @@ const getLeagueOpponents = async (req, res) => {
             }
         });
         
-        // Import F1 data constants
-        const { F1_DRIVERS_2025, F1_TEAMS_2025 } = require('../constants/f1Data2025');
+        // Import F1 data loader and get season-specific data
+        const { getAllF1Data } = require('../constants/f1DataLoader');
+        const f1Data = getAllF1Data(league.season);
         
         // Get all available drivers and teams
-        const allDrivers = F1_DRIVERS_2025.map(driver => driver.name);
-        const allTeams = F1_TEAMS_2025.map(team => team.name);
+        const allDrivers = f1Data.drivers.map(driver => driver.name);
+        const allTeams = f1Data.teams.map(team => team.name);
         
         // Create mapping from short names to full names
         const shortNameToFullName = {};
-        F1_DRIVERS_2025.forEach(driver => {
+        f1Data.drivers.forEach(driver => {
             shortNameToFullName[driver.shortName] = driver.name;
         });
         
         const teamNameMapping = {};
-        F1_TEAMS_2025.forEach(team => {
+        f1Data.teams.forEach(team => {
             // Map the canonical name to itself
             teamNameMapping[team.name] = team.name;
             // Map short name to canonical name
