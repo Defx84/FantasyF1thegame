@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getPlayerCards, getPlayerDeck, selectDeck, Card } from '../services/cardService';
 import { getLeague } from '../services/leagueService';
-import { FaLock, FaCheck, FaTimes, FaRedo, FaArrowLeft, FaChevronLeft, FaChevronRight, FaEdit } from 'react-icons/fa';
+import { FaLock, FaCheck, FaTimes, FaRedo, FaChevronLeft, FaChevronRight, FaEdit } from 'react-icons/fa';
 import IconWrapper from '../utils/iconWrapper';
 import { api } from '../services/api';
 import { getCardImagePath } from '../utils/cardImageMapper';
@@ -297,13 +297,6 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ leagueId: propLeagueId }) => 
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-white text-2xl text-center">
           <p className="mb-4">{error}</p>
-          <button
-            onClick={() => navigate(`/league/${leagueId}`)}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
-          >
-            <IconWrapper icon={FaArrowLeft} className="mr-2" />
-            Back to League
-          </button>
         </div>
       </div>
     );
@@ -340,16 +333,9 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ leagueId: propLeagueId }) => 
         {/* Semi-transparent overlay */}
         <div className="absolute inset-0 bg-black bg-opacity-30 pointer-events-none" />
 
-        <div className="relative z-10 max-w-7xl mx-auto w-full h-full flex flex-col px-4 py-2 md:px-6 md:py-4">
+        <div className="relative z-10 max-w-7xl mx-auto h-full flex flex-col px-4 py-2 md:px-6 md:py-4">
         {/* Header */}
         <div className="mb-2 flex-shrink-0">
-          <button
-            onClick={() => navigate(`/league/${leagueId}`)}
-            className="mb-2 flex items-center text-white/70 hover:text-white transition-colors text-sm"
-          >
-            <IconWrapper icon={FaArrowLeft} className="mr-2" />
-            Back to League
-          </button>
           <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">Build Your Power Card Deck</h1>
           {isDeckLocked && (
             <div className="flex items-center gap-2 text-yellow-400 mb-2 text-sm">
