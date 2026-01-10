@@ -467,7 +467,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ leagueId: propLeagueId }) => 
             {/* Cards Container */}
             <div
               ref={carouselRef}
-              className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 px-12 snap-x snap-mandatory h-full"
+              className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 pl-20 pr-12 snap-x snap-mandatory h-full"
               style={{
                 scrollBehavior: 'smooth'
               }}
