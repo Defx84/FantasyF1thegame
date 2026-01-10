@@ -467,7 +467,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ leagueId: propLeagueId }) => 
             {/* Cards Container */}
             <div
               ref={carouselRef}
-              className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 pl-20 pr-12 snap-x snap-mandatory h-full"
+              className="flex gap-4 overflow-x-auto scrollbar-hide pb-2 px-16 snap-x snap-mandatory h-full"
               style={{
                 scrollBehavior: 'smooth'
               }}
@@ -551,10 +551,10 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ leagueId: propLeagueId }) => 
                   carouselRef.current.scrollBy({ left: 280, behavior: 'smooth' });
                 }
               }}
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-white p-2 rounded-full backdrop-blur-sm transition-all shadow-lg"
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 bg-black/60 hover:bg-black/80 text-white p-3 rounded-full backdrop-blur-sm transition-all shadow-lg"
               aria-label="Next cards"
             >
-              <IconWrapper icon={FaChevronRight} size={16} />
+              <IconWrapper icon={FaChevronRight} size={20} />
             </button>
           </div>
         )}
