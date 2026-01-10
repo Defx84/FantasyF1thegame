@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { FaEnvelope } from 'react-icons/fa';
 import IconWrapper from '../components/IconWrapper';
+import { api } from '../services/api';
 
 const ForgotPassword: React.FC = () => {
   const [email, setEmail] = useState('');
@@ -16,10 +17,16 @@ const ForgotPassword: React.FC = () => {
     setSuccess(false);
 
     try {
-      // TODO: Implement forgot password logic
-      setSuccess(true);
-    } catch (err) {
-      setError('Failed to send reset email');
+      const response = await api.post('/api/auth/forgot-password', { email });
+      
+      if (response.status === 200) {
+        setSuccess(true);
+      } else {
+        setError('Failed to send reset email. Please try again.');
+      }
+    } catch (err: any) {
+      const errorMessage = err.response?.data?.error || err.message || 'Failed to send reset email. Please try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -94,7 +101,7 @@ const ForgotPassword: React.FC = () => {
           <div className="mt-6">
             <p className="text-center text-sm text-gray-600">
               Remember your password?{' '}
-              <Link to="/login" className="font-medium text-primary-600 hover:text-primary-500">
+              <Link to="/" className="font-medium text-primary-600 hover:text-primary-500">
                 Sign in
               </Link>
             </p>

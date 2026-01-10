@@ -1,13 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { FaEnvelope, FaLock, FaEye, FaEyeSlash } from 'react-icons/fa';
-import IconWrapper from '../utils/iconWrapper';
 import { api } from '../services/api';
 
 // Define types for form fields
 interface FormData {
-  email: string;
   password: string;
   confirmPassword: string;
 }
@@ -25,6 +22,13 @@ const ResetPassword: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  // Check if token is present
+  useEffect(() => {
+    if (!token) {
+      setError('Invalid or missing reset token. Please request a new password reset link.');
+    }
+  }, [token]);
+
   const onSubmit = async (data: FormData) => {
     if (data.password !== data.confirmPassword) {
       setError('Passwords do not match.');
@@ -37,8 +41,7 @@ const ResetPassword: React.FC = () => {
 
       const response = await api.post('/api/auth/reset-password', {
         token,
-        email: data.email,
-        password: data.password,
+        newPassword: data.password,
       });
 
       if (response.status !== 200) {
@@ -46,7 +49,7 @@ const ResetPassword: React.FC = () => {
         throw new Error(errorData.message || 'Failed to reset password.');
       }
 
-      navigate('/login');
+      navigate('/');
     } catch (err: any) {
       setError(err.message || 'Something went wrong.');
     } finally {
@@ -73,19 +76,6 @@ const ResetPassword: React.FC = () => {
         )}
 
         <form className="mt-8 space-y-6" onSubmit={handleSubmit(onSubmit)} noValidate>
-          <div className="relative">
-            <IconWrapper icon={FaEnvelope} />
-            <input
-              type="email"
-              {...register('email', { required: 'Email is required' })}
-              placeholder="Email address"
-              className="appearance-none rounded relative block w-full pl-10 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-primary focus:border-primary sm:text-sm"
-            />
-            {errors.email && (
-              <p className="text-red-500 text-xs mt-1">{errors.email.message}</p>
-            )}
-          </div>
-
           <div className="relative">
             <input
               type="password"
