@@ -98,7 +98,7 @@ const Rules: React.FC = () => {
   const total = rulesSections.length;
 
   return (
-    <div className="relative w-full flex items-center justify-center overflow-x-hidden p-4 md:p-8">
+    <div className="relative w-full min-h-screen flex items-center justify-center overflow-x-hidden px-4 md:px-8 py-4 md:py-8">
       {/* Background image */}
       <div
         className="fixed inset-0 w-full h-full z-0"
@@ -110,7 +110,7 @@ const Rules: React.FC = () => {
         }}
       />
       {/* Content wrapper */}
-      <div className="relative z-10 w-full max-w-2xl backdrop-blur-sm bg-white/60 rounded-xl p-8 border border-white/20 shadow-lg flex flex-col items-center">
+      <div className="relative z-10 w-full max-w-2xl mx-auto backdrop-blur-sm bg-white/60 rounded-xl p-8 border border-white/20 shadow-lg flex flex-col items-center">
         <h1 className="text-3xl font-bold text-center text-black mb-6">TheFantasy<span className="text-red-500">F1</span>game Rules & Game Flow <span role='img' aria-label='race car'>🏎️</span></h1>
         <div className="w-full text-black text-base space-y-4 min-h-[250px] pb-24 mb-4 flex flex-col items-center justify-center transition-all duration-500">
           <h2 className="font-semibold text-lg mb-2 text-center text-black">{rulesSections[current].title}</h2>
