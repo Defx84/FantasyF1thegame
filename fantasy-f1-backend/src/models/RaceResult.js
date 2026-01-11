@@ -174,7 +174,11 @@ const raceResultSchema = new mongoose.Schema({
       type: Number,
       required: true
     }
-  }]
+  }],
+  manuallyEntered: {
+    type: Boolean,
+    default: false
+  }
 }, {
   timestamps: true
 });

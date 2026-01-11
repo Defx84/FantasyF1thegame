@@ -79,4 +79,12 @@ router.post('/trigger-scraper', adminController.triggerManualScraper);
 // Assign real points to all users in a league for a given round
 router.post('/assign-real-points-league', adminController.assignRealPointsToLeague);
 
+// Manual race results entry endpoints
+router.get('/races-list', adminController.getRacesList);
+router.get('/drivers-teams/:season', adminController.getDriversAndTeams);
+router.post('/manual-race-results', adminController.saveManualRaceResults);
+
+// Cleanup test leagues
+router.post('/cleanup-test-leagues', adminController.cleanupTestLeagues);
+
 module.exports = router; 

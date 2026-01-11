@@ -8,6 +8,7 @@ import { api } from '../services/api';
 import AvatarTestingPanel from '../components/Avatar/AvatarTestingPanel';
 import AvatarImage from '../components/Avatar/AvatarImage';
 import PastLeagueResultsModal from '../components/PastLeagueResultsModal';
+import ManualRaceResults from '../components/ManualRaceResults';
 
 const ProfilePage: React.FC = () => {
   const { user, logout, getToken } = useAuth();
@@ -37,6 +38,9 @@ const ProfilePage: React.FC = () => {
   const [testConnectionLoading, setTestConnectionLoading] = useState<boolean>(false);
   const [selectedPastLeague, setSelectedPastLeague] = useState<{ id: string; name: string; season: number } | null>(null);
   const [activeTab, setActiveTab] = useState<'active' | 'past'>('active');
+  const [showManualRaceResults, setShowManualRaceResults] = useState<boolean>(false);
+  const [cleanupLoading, setCleanupLoading] = useState<boolean>(false);
+  const [cleanupStatus, setCleanupStatus] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchLeagues = async () => {
@@ -240,6 +244,31 @@ const ProfilePage: React.FC = () => {
       setReminderError(error.response?.data?.error || 'Failed to test email connection');
     } finally {
       setTestConnectionLoading(false);
+    }
+  };
+
+  const handleCleanupTestLeagues = async () => {
+    if (!window.confirm('Are you sure you want to delete all "Comprehensive Season Test" leagues? This action cannot be undone.')) {
+      return;
+    }
+
+    setCleanupLoading(true);
+    setCleanupStatus(null);
+    setAdminError(null);
+    
+    try {
+      const response = await api.post('/api/admin/cleanup-test-leagues');
+      setCleanupStatus(response.data.message || `Deleted ${response.data.deletedCount} test league(s).`);
+      
+      // Refresh the leagues list
+      if (user?.isAppAdmin) {
+        const res = await api.get('/api/admin/all-leagues');
+        setAllLeagues(res.data);
+      }
+    } catch (error: any) {
+      setAdminError(error.response?.data?.message || 'Failed to cleanup test leagues');
+    } finally {
+      setCleanupLoading(false);
     }
   };
 
@@ -699,6 +728,13 @@ const ProfilePage: React.FC = () => {
                           </>
                         )}
                       </button>
+                      <button
+                        onClick={() => setShowManualRaceResults(true)}
+                        className="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-all hover:shadow-lg hover:scale-[1.02] flex items-center justify-center w-44 h-10"
+                      >
+                        <IconWrapper icon={FaKey} size={16} className="mr-2" />
+                        Manual Entry
+                      </button>
                       {scrapeStatus && (
                         <div className="text-green-400 text-sm bg-green-500/10 p-2 rounded-lg border border-green-500/20">
                           {scrapeStatus}
@@ -709,6 +745,41 @@ const ProfilePage: React.FC = () => {
                           {adminError}
                         </div>
                       )}
+                    </div>
+                  </div>
+
+                  {/* Cleanup Test Leagues Section */}
+                  <div className="mt-6 bg-white/5 rounded-xl p-4 border border-white/10">
+                    <h3 className="text-lg font-bold mb-2 text-white/90 flex items-center">
+                      <IconWrapper icon={FaTrash} size={16} className="mr-2" />
+                      Cleanup Test Leagues
+                    </h3>
+                    <div className="flex flex-col gap-2">
+                      <button
+                        onClick={handleCleanupTestLeagues}
+                        disabled={cleanupLoading}
+                        className="bg-orange-500 text-white px-4 py-2 rounded-lg hover:bg-orange-600 disabled:opacity-50 disabled:cursor-not-allowed transition-all hover:shadow-lg hover:scale-[1.02] flex items-center justify-center w-44 h-10"
+                      >
+                        {cleanupLoading ? (
+                          <>
+                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
+                            Cleaning...
+                          </>
+                        ) : (
+                          <>
+                            <IconWrapper icon={FaTrash} size={16} className="mr-2" />
+                            Delete Test Leagues
+                          </>
+                        )}
+                      </button>
+                      {cleanupStatus && (
+                        <div className="text-green-400 text-sm bg-green-500/10 p-2 rounded-lg border border-green-500/20">
+                          {cleanupStatus}
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-xs text-white/60 mt-2">
+                      Removes all "Comprehensive Season Test" leagues and their data
                     </div>
                   </div>
                 </div>
@@ -729,6 +800,11 @@ const ProfilePage: React.FC = () => {
             </div>
           )}
       </div>
+      
+      {/* Manual Race Results Modal */}
+      {showManualRaceResults && (
+        <ManualRaceResults onClose={() => setShowManualRaceResults(false)} />
+      )}
     </div>
   );
 };

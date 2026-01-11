@@ -1,10 +1,104 @@
 const mongoose = require('mongoose');
 const RaceSelection = require('../models/RaceSelection');
 const RaceResult = require('../models/RaceResult');
+const RaceCalendar = require('../models/RaceCalendar');
 const League = require('../models/League');
 const UsedSelection = require('../models/UsedSelection');
 const { normalizedDrivers, normalizedTeams } = require('../utils/validation');
 const { handleError } = require('../utils/errorHandler');
+const { getAllF1Data } = require('../constants/f1DataLoader');
+const { calculateTeamPoints } = require('../utils/scoringUtils');
+
+// Helper function to get driver's team
+function getDriverTeam(driverName, season) {
+  try {
+    const f1Data = getAllF1Data(season);
+    const driver = f1Data.drivers.find(d => 
+      d.name === driverName || 
+      d.shortName === driverName ||
+      (d.alternateNames && d.alternateNames.includes(driverName))
+    );
+    return driver?.team || null;
+  } catch (error) {
+    console.error('Error getting driver team:', error);
+    return null;
+  }
+}
+
+// Cleanup test leagues (Comprehensive Season Test leagues)
+exports.cleanupTestLeagues = async (req, res) => {
+  try {
+    const RaceSelection = require('../models/RaceSelection');
+    const LeagueLeaderboard = require('../models/LeagueLeaderboard');
+    const UsedSelection = require('../models/UsedSelection');
+
+    // Find all test leagues with various naming patterns
+    const testLeaguePatterns = [
+      /^Comprehensive Season Test/i,
+      /^Multi-Player Season Test/i,
+      /^Season Test League/i,
+      /^Full Season Test/i,
+      /^Mystery Test League/i,
+      /^Test Card League/i,
+      /test.*league/i,
+      /.*test.*season/i
+    ];
+    
+    // Build query to match any test pattern
+    const testLeagues = await League.find({
+      $or: testLeaguePatterns.map(pattern => ({
+        name: { $regex: pattern }
+      }))
+    });
+
+    if (testLeagues.length === 0) {
+      return res.json({ 
+        message: 'No test leagues found.',
+        deletedCount: 0 
+      });
+    }
+
+    let deletedCount = 0;
+    let errorCount = 0;
+    const errors = [];
+
+    for (const league of testLeagues) {
+      try {
+        const leagueId = league._id.toString();
+        
+        // Delete all related data
+        await Promise.all([
+          RaceSelection.deleteMany({ league: leagueId }),
+          LeagueLeaderboard.deleteMany({ league: leagueId }),
+          UsedSelection.deleteMany({ league: leagueId })
+        ]);
+
+        // Delete the league itself
+        await League.findByIdAndDelete(leagueId);
+        
+        deletedCount++;
+      } catch (error) {
+        console.error(`Error deleting league ${league.name}:`, error);
+        errors.push({ league: league.name, error: error.message });
+        errorCount++;
+      }
+    }
+
+    res.json({ 
+      message: `Cleanup complete. Deleted ${deletedCount} test league(s).`,
+      deletedCount,
+      errorCount,
+      errors: errors.length > 0 ? errors : undefined
+    });
+
+  } catch (error) {
+    console.error('Error in cleanupTestLeagues:', error);
+    res.status(500).json({ 
+      message: 'Error cleaning up test leagues', 
+      error: error.message 
+    });
+  }
+};
 
 // Helper function to check if a driver/team can be reused
 const canReuseSelection = async (userId, leagueId, mainDriver, reserveDriver, team) => {
@@ -447,6 +541,251 @@ exports.triggerManualScraper = async (req, res) => {
     console.error('Error in triggerManualScraper:', error);
     res.status(500).json({ 
       message: 'Error triggering manual scraper', 
+      error: error.message 
+    });
+  }
+};
+
+// Get list of races for manual entry dropdown
+exports.getRacesList = async (req, res) => {
+  try {
+    const { season } = req.query;
+    const seasonYear = season ? parseInt(season) : new Date().getFullYear();
+    
+    // Get races from RaceCalendar (scheduled races) instead of RaceResult (races with results)
+    // This ensures we show all races for the season, not just those with results
+    const calendarRaces = await RaceCalendar.find({ season: seasonYear })
+      .sort({ round: 1 })
+      .select('round raceName date status season isSprintWeekend _id');
+    
+    // Also get existing race results to merge status information
+    const raceResults = await RaceResult.find({ season: seasonYear })
+      .select('round status manuallyEntered');
+    
+    // Create a map of round -> race result status
+    const resultStatusMap = {};
+    raceResults.forEach(result => {
+      resultStatusMap[result.round] = {
+        status: result.status,
+        manuallyEntered: result.manuallyEntered
+      };
+    });
+    
+    // Merge calendar races with result status
+    const races = calendarRaces.map(race => ({
+      _id: race._id,
+      round: race.round,
+      raceName: race.raceName,
+      date: race.date,
+      season: race.season,
+      isSprintWeekend: race.isSprintWeekend,
+      status: resultStatusMap[race.round]?.status || 'scheduled',
+      manuallyEntered: resultStatusMap[race.round]?.manuallyEntered || false
+    }));
+    
+    res.json({ races });
+  } catch (error) {
+    console.error('Error in getRacesList:', error);
+    res.status(500).json({ 
+      message: 'Error fetching races list', 
+      error: error.message 
+    });
+  }
+};
+
+// Get drivers and teams for a season
+exports.getDriversAndTeams = async (req, res) => {
+  try {
+    const { season } = req.params;
+    const seasonYear = parseInt(season) || new Date().getFullYear();
+    
+    const f1Data = getAllF1Data(seasonYear);
+    const drivers = f1Data.drivers || [];
+    const teams = f1Data.teams || [];
+    
+    res.json({ 
+      drivers: drivers.map(d => ({
+        name: d.name,
+        shortName: d.shortName,
+        team: d.team
+      })),
+      teams: teams.map(t => ({
+        name: t.name,
+        shortName: t.shortName,
+        displayName: t.displayName
+      }))
+    });
+  } catch (error) {
+    console.error('Error in getDriversAndTeams:', error);
+    res.status(500).json({ 
+      message: 'Error fetching drivers and teams', 
+      error: error.message 
+    });
+  }
+};
+
+// Save manual race results
+exports.saveManualRaceResults = async (req, res) => {
+  try {
+    const { round, season, driverResults, teamResults, sprintResults, sprintTeamResults } = req.body;
+    
+    // Validate required fields
+    if (!round || !season || !driverResults || !teamResults) {
+      return res.status(400).json({ 
+        message: 'Missing required fields: round, season, driverResults, teamResults' 
+      });
+    }
+    
+    // Validate driver count (22 drivers)
+    if (driverResults.length !== 22) {
+      return res.status(400).json({ 
+        message: `Expected 22 drivers, received ${driverResults.length}` 
+      });
+    }
+    
+    // Validate team count (11 teams)
+    if (teamResults.length !== 11) {
+      return res.status(400).json({ 
+        message: `Expected 11 teams, received ${teamResults.length}` 
+      });
+    }
+    
+    // Validate sprint results if provided
+    if (sprintResults && sprintResults.length !== 22) {
+      return res.status(400).json({ 
+        message: `Expected 22 drivers for sprint, received ${sprintResults.length}` 
+      });
+    }
+    
+    if (sprintTeamResults && sprintTeamResults.length !== 11) {
+      return res.status(400).json({ 
+        message: `Expected 11 teams for sprint, received ${sprintTeamResults.length}` 
+      });
+    }
+    
+    // Get existing race to preserve metadata
+    const existingRace = await RaceResult.findOne({ round, season });
+    const raceName = existingRace?.raceName || `Race ${round}`;
+    const isSprintWeekend = existingRace?.isSprintWeekend || (sprintResults ? true : false);
+    
+    // Process driver results - convert to format expected by saveRaceResults
+    const processedDriverResults = driverResults.map(result => ({
+      driver: result.driver,
+      team: result.team || getDriverTeam(result.driver, season),
+      position: result.position || null,
+      rawPoints: result.points || 0,
+      points: result.points || 0,
+      status: result.status || 'Finished',
+      didNotFinish: result.status === 'DNF',
+      didNotStart: result.status === 'DNS',
+      disqualified: result.status === 'DSQ'
+    }));
+    
+    // Process sprint results if provided
+    const processedSprintResults = sprintResults ? sprintResults.map(result => ({
+      driver: result.driver,
+      team: result.team || getDriverTeam(result.driver, season),
+      position: result.position || null,
+      rawPoints: result.points || 0,
+      points: result.points || 0,
+      status: result.status || 'Finished',
+      didNotFinish: result.status === 'DNF',
+      didNotStart: result.status === 'DNS',
+      disqualified: result.status === 'DSQ'
+    })) : null;
+    
+    // Calculate team points using existing utility
+    const calculatedTeamResults = calculateTeamPoints(processedDriverResults, [], season);
+    const calculatedSprintTeamResults = processedSprintResults 
+      ? calculateTeamPoints(processedSprintResults, [], season)
+      : null;
+    
+    // Use manually provided team results if available, otherwise use calculated
+    let finalTeamResults = calculatedTeamResults;
+    if (teamResults && teamResults.length > 0) {
+      // Use provided team results, but ensure sprint points are included
+      finalTeamResults = teamResults.map((tr) => {
+        const racePoints = tr.racePoints || tr.points || 0;
+        // Try to find matching sprint team result
+        const matchingSprintTeam = calculatedSprintTeamResults?.find(t => {
+          // Try exact match first, then normalized comparison
+          return t.team === tr.team || 
+                 t.team.toLowerCase() === tr.team.toLowerCase() ||
+                 (tr.sprintPoints !== undefined && tr.sprintPoints !== null);
+        });
+        const sprintPoints = tr.sprintPoints !== undefined && tr.sprintPoints !== null 
+          ? tr.sprintPoints 
+          : (matchingSprintTeam?.sprintPoints || 0);
+        const totalPoints = racePoints + sprintPoints;
+        
+        // Find position from calculated results if available
+        const calculatedTeam = calculatedTeamResults.find(t => 
+          t.team === tr.team || t.team.toLowerCase() === tr.team.toLowerCase()
+        );
+        
+        return {
+          team: tr.team,
+          position: calculatedTeam?.position || 1,
+          racePoints: racePoints,
+          sprintPoints: sprintPoints,
+          totalPoints: totalPoints
+        };
+      });
+      
+      // Sort by total points descending to set correct positions
+      finalTeamResults.sort((a, b) => b.totalPoints - a.totalPoints);
+      finalTeamResults = finalTeamResults.map((tr, index) => ({
+        ...tr,
+        position: index + 1
+      }));
+    }
+    
+    // Prepare race data
+    const raceData = {
+      round,
+      raceName,
+      season,
+      results: processedDriverResults,
+      teamResults: finalTeamResults,
+      sprintResults: processedSprintResults,
+      sprintTeamResults: calculatedSprintTeamResults,
+      status: 'completed', // CRITICAL: Triggers post-save hook for point calculation
+      isSprintWeekend,
+      manuallyEntered: true,
+      lastUpdated: new Date()
+    };
+    
+    // Check if race already exists and warn
+    if (existingRace && existingRace.status === 'completed') {
+      console.warn(`[Manual Entry] Overwriting existing completed race results for ${raceName} (round ${round})`);
+    }
+    
+    // Save race results
+    const race = await RaceResult.findOneAndUpdate(
+      { round, season },
+      raceData,
+      { upsert: true, new: true }
+    );
+    
+    console.log(`[Manual Entry] ✅ Saved manual race results for ${raceName} (round ${round}, season ${season})`);
+    console.log(`[Manual Entry] 🎯 Post-save hook will trigger automatic points calculation with power cards`);
+    
+    res.json({ 
+      message: 'Manual race results saved successfully. Points calculation triggered.',
+      race: {
+        round: race.round,
+        raceName: race.raceName,
+        status: race.status,
+        manuallyEntered: race.manuallyEntered,
+        resultsCount: race.results?.length || 0,
+        teamResultsCount: race.teamResults?.length || 0
+      }
+    });
+    
+  } catch (error) {
+    console.error('Error in saveManualRaceResults:', error);
+    res.status(500).json({ 
+      message: 'Error saving manual race results', 
       error: error.message 
     });
   }
