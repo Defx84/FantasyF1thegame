@@ -327,11 +327,13 @@ const Welcome: React.FC = () => {
                   </div>
 
                   <div>
-                    <h3 className="font-bold text-lg mb-2">🔹 Play With Friends</h3>
+                    <h3 className="font-bold text-lg mb-2">🔹 Play With Friends -</h3>
                     <ul className="list-disc list-outside space-y-1 text-white/90 pl-5">
+                      <li>Sign up</li>
+                      <li>Choose your avatar</li>
                       <li>Create or join a league</li>
                       <li>Share a league code and compete head-to-head</li>
-                      <li>League admins can manage missed selections if needed</li>
+                      <li>Explore all the features</li>
                     </ul>
                   </div>
                 </div>
