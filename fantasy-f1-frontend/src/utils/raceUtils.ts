@@ -44,13 +44,14 @@ export const isSelectionsLocked = (race: RaceTiming): boolean => {
     return true;
   }
 
-  const now = new Date();
-  const isLocked = now >= lockTime;
+  const nowMs = Date.now();
+  const lockTimeMs = lockTime.getTime();
+  const isLocked = nowMs >= lockTimeMs;
   
   console.log('[Race Utils] Lock status check:', {
     raceName: race.raceName,
     lockTime: lockTime.toISOString(),
-    currentTime: now.toISOString(),
+    currentTime: new Date(nowMs).toISOString(),
     isLocked
   });
   
@@ -65,8 +66,8 @@ export const getTimeUntilLock = (race: RaceTiming): number => {
   const lockTime = getLockTime(race);
   if (!lockTime) return 0;
   
-  const now = new Date();
-  return Math.max(0, lockTime.getTime() - now.getTime());
+  const nowMs = Date.now();
+  return Math.max(0, lockTime.getTime() - nowMs);
 };
 
 /**

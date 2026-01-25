@@ -60,24 +60,41 @@ const register = async (req, res) => {
     try {
       await sendEmail({
         to: email,
-        subject: '🏁 Welcome to TheFantasyF1Game — Your Race Starts Now!',
-        text: `Hi ${username},\n\nWelcome to TheFantasyF1Game — where Formula 1 passion meets strategy and competition.\nYou're officially on the grid, and it's time to prove your skills.\n\nEach race weekend, you'll choose your Main Driver, Reserve Driver, and Team. Will you play it safe or go bold for big points? The podium awaits.\n\n🔥 What's next?\n- Join or create a league with friends\n- Lock in your race selections before qualifying\n- Track your points and chase the title\n\n🏎️ For updates, tips, and behind-the-scenes action:\nFollow us on Instagram → @thefantasyf1game\n\nThanks for joining the race.\nStart your engines — the championship is calling. (click here to join)\n\n— TheFantasyF1Game Team`,
+        subject: '🏁 Welcome to theFantasyF1game 2026',
+        text: `Hi ${username},\n\nWelcome to theFantasyF1game 2026,\n\nThe new season is here, bringing a new Formula 1 era with updated cars, drivers, and strategies.\n\nWhether you are joining for the first time or returning for another season, theFantasyF1game is designed to make every race weekend matter. Every selection, every point, and every strategic choice can change the outcome of your league.\n\nWhat’s new for 2026\n\nHere is a quick overview of the main updates for the 2026 season:\n\n- All-new 2026 Formula 1 era\n- Updated driver lineup and teams\n- New selection system\n- New Power Cards system\n- More strategic decision making\n- Enhanced league experience\n- Clearer race history and results breakdowns\n- Improved admin tools to ensure fair play and consistency\n\nHow the game works (quick reminder)\n\n- Join or create a League\n- Build your Power Cards deck\n- Select one Main Driver, one Reserve Driver, and one Team for each race weekend\n- Use Power Cards strategically throughout the season\n- Compete in both the Driver Championship and Constructors Championship\n- Climb the leaderboard by outscoring your rivals\n\nYou can join or create a League now, and make your first selections for the season.\n\nGood luck,\n\ntheFantasyF1game Team\nhttps://thefantasyf1game.com`,
         html: `
-    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa; border-radius: 10px;">
-      <h2 style="color: #dc2626; text-align: center;">🏁 Welcome to TheFantasyF1Game — Your Race Starts Now!</h2>
+    <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto; padding: 24px; background-color: #f8f9fa; border-radius: 10px;">
+      <div style="text-align: center; margin-bottom: 16px;">
+        <img src="https://thefantasyf1game.com/App_Logo.png" alt="theFantasyF1game" style="max-width: 200px; height: auto;" />
+      </div>
+      <h2 style="color: #dc2626; text-align: center; margin-top: 0;">🏁 Welcome to theFantasyF1game 2026</h2>
       <p>Hi <b>${username}</b>,</p>
-      <p>Welcome to <b>TheFantasyF1Game</b> — where Formula 1 passion meets strategy and competition.<br />You're officially on the grid, and it's time to prove your skills.</p>
-      <p>Each race weekend, you'll choose your Main Driver, Reserve Driver, and Team. Will you play it safe or go bold for big points? The podium awaits.</p>
-      <h3>🔥 What's next?</h3>
-      <ul style="font-size: 1.1em;">
-        <li>Join or create a league with friends</li>
-        <li>Lock in your race selections before qualifying</li>
-        <li>Track your points and chase the title</li>
+      <p>The new season is here, bringing a new Formula 1 era with updated cars, drivers, and strategies.</p>
+      <p>Whether you are joining for the first time or returning for another season, <b>theFantasyF1game</b> is designed to make every race weekend matter. Every selection, every point, and every strategic choice can change the outcome of your league.</p>
+      <h3 style="margin-bottom: 6px;">What’s new for 2026</h3>
+      <p style="margin-top: 0;">Here is a quick overview of the main updates for the 2026 season:</p>
+      <ul style="font-size: 1.05em;">
+        <li>All-new 2026 Formula 1 era</li>
+        <li>Updated driver lineup and teams</li>
+        <li>New selection system</li>
+        <li>New Power Cards system</li>
+        <li>More strategic decision making</li>
+        <li>Enhanced league experience</li>
+        <li>Clearer race history and results breakdowns</li>
+        <li>Improved admin tools to ensure fair play and consistency</li>
       </ul>
-      <p>🏎️ For updates, tips, and behind-the-scenes action:<br />
-      Follow us on Instagram → <a href="https://instagram.com/thefantasyf1game" target="_blank">@thefantasyf1game</a></p>
-      <p style="margin-top:2em;">Thanks for joining the race.<br />Start your engines — the championship is calling. <a href="https://thefantasyf1game.com" target="_blank">(click here to join)</a></p>
-      <p><b>— TheFantasyF1Game Team</b></p>
+      <h3 style="margin-bottom: 6px;">How the game works (quick reminder)</h3>
+      <ul style="font-size: 1.05em;">
+        <li>Join or create a League</li>
+        <li>Build your Power Cards deck</li>
+        <li>Select one Main Driver, one Reserve Driver, and one Team for each race weekend</li>
+        <li>Use Power Cards strategically throughout the season</li>
+        <li>Compete in both the Driver Championship and Constructors Championship</li>
+        <li>Climb the leaderboard by outscoring your rivals</li>
+      </ul>
+      <p>You can join or create a League now, and make your first selections for the season.</p>
+      <p style="margin-top: 24px;">Good luck,<br /><b>theFantasyF1game Team</b></p>
+      <p><a href="https://thefantasyf1game.com" target="_blank">www.thefantasyf1game.com</a></p>
     </div>
   `
       });
@@ -294,11 +311,31 @@ const forgotPassword = async (req, res) => {
       { expiresIn: '1h' }
     );
 
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
+
     // Send reset email
     await sendEmail({
       to: email,
       subject: 'Password Reset Request',
-      text: `Click this link to reset your password: ${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`
+      text: `Hi,\n\nWe received a request to reset your theFantasyF1game password.\n\nReset your password: ${resetUrl}\n\nIf you didn’t request this, you can safely ignore this email.\n\n— theFantasyF1game Team\nhttps://thefantasyf1game.com`,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 640px; margin: 0 auto; padding: 24px; background-color: #f8f9fa; border-radius: 10px;">
+          <div style="text-align: center; margin-bottom: 16px;">
+            <img src="https://thefantasyf1game.com/App_Logo.png" alt="theFantasyF1game" style="max-width: 200px; height: auto;" />
+          </div>
+          <h2 style="color: #dc2626; text-align: center; margin-top: 0;">Password Reset Request</h2>
+          <p>Hi,</p>
+          <p>We received a request to reset your <b>theFantasyF1game</b> password.</p>
+          <div style="text-align: center; margin: 24px 0;">
+            <a href="${resetUrl}" target="_blank" style="display: inline-block; padding: 12px 20px; background-color: #dc2626; color: #ffffff; text-decoration: none; border-radius: 6px; font-weight: bold;">
+              Reset your password
+            </a>
+          </div>
+          <p>If you did not request this, you can safely ignore this email.</p>
+          <p style="margin-top: 24px;">— theFantasyF1game Team</p>
+          <p><a href="https://thefantasyf1game.com" target="_blank">www.thefantasyf1game.com</a></p>
+        </div>
+      `
     });
 
     res.json({ message: 'Password reset email sent' });

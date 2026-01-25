@@ -2,6 +2,7 @@ const { sendEmail } = require('../utils/email');
 const User = require('../models/User');
 const RaceCalendar = require('../models/RaceCalendar');
 const { format, addDays, isSameDay } = require('date-fns');
+const { formatInTimeZone } = require('date-fns-tz');
 
 // Country to flag emoji mapping
 const COUNTRY_FLAGS = {
@@ -35,13 +36,9 @@ function getCountryFlag(country) {
   return COUNTRY_FLAGS[country] || '🏁';
 }
 
-// Format time for UK timezone (simplified approach)
+// Format time for UK timezone (handles GMT/BST automatically)
 function formatUKTime(date) {
-  // Convert to UK time (UTC+1 in summer, UTC+0 in winter)
-  // This is a simplified approach - for production, consider using a proper timezone library
-  const ukOffset = 1; // BST offset (adjust for GMT in winter)
-  const ukTime = new Date(date.getTime() + (ukOffset * 60 * 60 * 1000));
-  return format(ukTime, 'EEEE, MMMM do \'at\' HH:mm');
+  return formatInTimeZone(date, 'Europe/London', "EEEE, MMMM do 'at' HH:mm");
 }
 
 // Generate email HTML template

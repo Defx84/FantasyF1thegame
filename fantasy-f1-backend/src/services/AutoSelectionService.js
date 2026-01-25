@@ -32,8 +32,8 @@ class AutoSelectionService {
       }
 
       // Check if deadline has passed (qualifying start time)
-      const now = new Date();
-      if (now < race.qualifyingStart) {
+      const nowMs = Date.now();
+      if (nowMs < new Date(race.qualifyingStart).getTime()) {
         console.log(`[AutoSelection] Deadline has not passed yet for round ${round}. Deadline: ${race.qualifyingStart}`);
         return {
           success: false,

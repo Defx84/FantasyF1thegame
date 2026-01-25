@@ -253,7 +253,7 @@ const NextRaceSelections: React.FC = () => {
 
     const updateLockStatus = () => {
       try {
-        const now = new Date();
+        const nowMs = Date.now();
         console.log('[NextRaceSelections] Checking lock status:', {
           raceName: raceData.raceName,
           status: raceStatus,
@@ -262,8 +262,8 @@ const NextRaceSelections: React.FC = () => {
         });
 
         // Only advance to next race after endOfWeekend
-        const endOfWeekend = raceData.endOfWeekend ? new Date(raceData.endOfWeekend) : null;
-        if (endOfWeekend && now > endOfWeekend) {
+        const endOfWeekendMs = raceData.endOfWeekend ? new Date(raceData.endOfWeekend).getTime() : null;
+        if (endOfWeekendMs && nowMs > endOfWeekendMs) {
           console.log('[NextRaceSelections] Locking due to end of weekend');
           setIsLocked(true);
           return;

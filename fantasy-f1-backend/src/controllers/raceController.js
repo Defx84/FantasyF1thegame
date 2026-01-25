@@ -13,11 +13,11 @@ const AutoSelectionService = require('../services/AutoSelectionService');
  * Check if selections should be visible for a race
  */
 const shouldShowSelections = (race) => {
-    const now = new Date();
+    const nowMs = Date.now();
     const lockTime = race.sprintQualifying 
         ? race.sprintQualifying
         : race.qualifyingStart;
-    return now >= lockTime;
+    return nowMs >= new Date(lockTime).getTime();
 };
 
 /**
@@ -56,6 +56,7 @@ const getNextRaceTiming = async (req, res) => {
     console.log('🔍 getNextRaceTiming controller called');
     try {
         const now = new Date();
+        const nowMs = now.getTime();
         console.log('Current time:', now);
         
         // Check if we should auto-assign selections for the current race
@@ -73,8 +74,9 @@ const getNextRaceTiming = async (req, res) => {
         // Utility to calculate endOfWeekend (Sunday at 23:59)
         function getEndOfWeekend(raceDate) {
             const end = new Date(raceDate);
-            end.setDate(end.getDate() + (7 - end.getDay()) % 7); // Move to Sunday if not already
-            end.setHours(23, 59, 0, 0); // 23:59:00
+            const day = end.getUTCDay();
+            end.setUTCDate(end.getUTCDate() + (7 - day) % 7); // Move to Sunday if not already (UTC)
+            end.setUTCHours(23, 59, 0, 0); // 23:59:00 UTC
             return end;
         }
 
@@ -95,7 +97,7 @@ const getNextRaceTiming = async (req, res) => {
         console.log('Current race found:', currentRace);
         if (currentRace) {
             const endOfWeekend = getEndOfWeekend(currentRace.raceStart || currentRace.date);
-            if (now < endOfWeekend) {
+            if (nowMs < endOfWeekend.getTime()) {
                 // Find the race result for this round to get the status
                 let raceStatus = 'scheduled';
                 const raceResult = await RaceResult.findOne({ 
@@ -113,19 +115,19 @@ const getNextRaceTiming = async (req, res) => {
                     season: currentRace.season,
                     qualifying: {
                         startTime: currentRace.qualifyingStart,
-                        timeUntil: Math.max(0, new Date(currentRace.qualifyingStart).getTime() - now.getTime())
+                        timeUntil: Math.max(0, new Date(currentRace.qualifyingStart).getTime() - nowMs)
                     },
                     race: {
                         startTime: currentRace.raceStart,
-                        timeUntil: Math.max(0, new Date(currentRace.raceStart).getTime() - now.getTime())
+                        timeUntil: Math.max(0, new Date(currentRace.raceStart).getTime() - nowMs)
                     },
                     sprintQualifying: currentRace.sprintQualifyingStart ? {
                         startTime: currentRace.sprintQualifyingStart,
-                        timeUntil: Math.max(0, new Date(currentRace.sprintQualifyingStart).getTime() - now.getTime())
+                        timeUntil: Math.max(0, new Date(currentRace.sprintQualifyingStart).getTime() - nowMs)
                     } : undefined,
                     sprint: currentRace.sprintStart ? {
                         startTime: currentRace.sprintStart,
-                        timeUntil: Math.max(0, new Date(currentRace.sprintStart).getTime() - now.getTime())
+                        timeUntil: Math.max(0, new Date(currentRace.sprintStart).getTime() - nowMs)
                     } : undefined,
                     isSprintWeekend: currentRace.isSprintWeekend,
                     status: raceStatus,
@@ -165,19 +167,19 @@ const getNextRaceTiming = async (req, res) => {
             season: nextRace.season,
             qualifying: {
                 startTime: nextRace.qualifyingStart,
-                timeUntil: Math.max(0, new Date(nextRace.qualifyingStart).getTime() - now.getTime())
+                timeUntil: Math.max(0, new Date(nextRace.qualifyingStart).getTime() - nowMs)
             },
             race: {
                 startTime: nextRace.raceStart,
-                timeUntil: Math.max(0, new Date(nextRace.raceStart).getTime() - now.getTime())
+                timeUntil: Math.max(0, new Date(nextRace.raceStart).getTime() - nowMs)
             },
             sprintQualifying: nextRace.sprintQualifyingStart ? {
                 startTime: nextRace.sprintQualifyingStart,
-                timeUntil: Math.max(0, new Date(nextRace.sprintQualifyingStart).getTime() - now.getTime())
+                timeUntil: Math.max(0, new Date(nextRace.sprintQualifyingStart).getTime() - nowMs)
             } : undefined,
             sprint: nextRace.sprintStart ? {
                 startTime: nextRace.sprintStart,
-                timeUntil: Math.max(0, new Date(nextRace.sprintStart).getTime() - now.getTime())
+                timeUntil: Math.max(0, new Date(nextRace.sprintStart).getTime() - nowMs)
             } : undefined,
             isSprintWeekend: nextRace.isSprintWeekend,
             status: raceStatus,
@@ -243,6 +245,7 @@ const getRaceStatus = async (req, res) => {
         }
 
         const now = new Date();
+        const nowMs = now.getTime();
         const status = {
             raceId: race._id,
             round: race.round,
@@ -256,11 +259,11 @@ const getRaceStatus = async (req, res) => {
                 raceStart: race.raceStart,
                 sprintStart: race.sprintStart
             },
-            isLocked: now >= race.qualifyingStart,
+            isLocked: nowMs >= new Date(race.qualifyingStart).getTime(),
             timeUntil: {
-                selectionDeadline: Math.max(0, race.qualifyingStart - now),
-                raceStart: Math.max(0, race.raceStart - now),
-                sprintStart: race.sprintStart ? Math.max(0, race.sprintStart - now) : null
+                selectionDeadline: Math.max(0, new Date(race.qualifyingStart).getTime() - nowMs),
+                raceStart: Math.max(0, new Date(race.raceStart).getTime() - nowMs),
+                sprintStart: race.sprintStart ? Math.max(0, new Date(race.sprintStart).getTime() - nowMs) : null
             }
         };
 

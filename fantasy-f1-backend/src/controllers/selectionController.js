@@ -337,8 +337,8 @@ const saveSelections = async (req, res) => {
         }
 
         // Check if selections can still be made
-        const raceDate = new Date(nextRace.date);
-        if (now >= raceDate) {
+        const raceDateMs = new Date(nextRace.date).getTime();
+        if (Date.now() >= raceDateMs) {
             return res.status(400).json({ 
                 error: 'Selections can no longer be made for this race' 
             });

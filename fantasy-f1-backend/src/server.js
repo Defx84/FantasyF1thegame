@@ -201,7 +201,7 @@ app.listen(port, async () => {
             } catch (error) {
                 console.error('❌ Error during reminder emails:', error);
             }
-        });
+        }, { timezone: 'Europe/London' });
         
         // Helper function to process season archive for completed leagues
         const processSeasonArchive = async (season, triggerReason = 'scheduled') => {
@@ -264,11 +264,11 @@ app.listen(port, async () => {
             }
         };
 
-        // Schedule season archive PDF generation for December 7th at 20:40 (8:40 PM) local time
+        // Schedule season archive PDF generation for December 7th at 20:40 UK time
         // Using cron for reliability (runs daily, but only processes on December 7th)
         // Cron: minute 40, hour 20, day 7, month 12 (December), any day of week
         cron.schedule('40 20 7 12 *', async () => {
-            console.log('📧 Running scheduled season archive PDF generation on December 7th at 20:40...');
+            console.log('📧 Running scheduled season archive PDF generation on December 7th at 20:40 UK time...');
             try {
                 const currentYear = new Date().getFullYear();
                 const today = new Date();
@@ -279,20 +279,18 @@ app.listen(port, async () => {
                     return;
                 }
                 
-                await processSeasonArchive(currentYear, 'December 7th at 20:40 (cron)');
+                await processSeasonArchive(currentYear, 'December 7th at 20:40 UK time (cron)');
             } catch (error) {
                 console.error('❌ Error during scheduled season archive generation:', error);
             }
-        });
+        }, { timezone: 'Europe/London' });
         
-        console.log('📧 Season archive email scheduled via cron for December 7th at 20:40');
+        console.log('📧 Season archive email scheduled via cron for December 7th at 20:40 UK time');
 
         // Schedule season archive PDF generation (run on December 8th at 8am UK time)
-        // Note: UK time is GMT in December (UTC+0), so 8am UK = 8am UTC
         // Cron: minute 0, hour 8, day 8, month 12 (December), any day of week
-        // This will run on December 8th at 8am UTC, but only process the current year's season
         cron.schedule('0 8 8 12 *', async () => {
-            console.log('📧 Running scheduled season archive PDF generation on December 8th at 8am UTC...');
+            console.log('📧 Running scheduled season archive PDF generation on December 8th at 8am UK time...');
             const currentYear = new Date().getFullYear();
             const today = new Date();
             
@@ -302,8 +300,8 @@ app.listen(port, async () => {
                 return;
             }
             
-            await processSeasonArchive(currentYear, 'December 8th at 8am UTC');
-        });
+            await processSeasonArchive(currentYear, 'December 8th at 8am UK time');
+        }, { timezone: 'Europe/London' });
         
         // Schedule one-time slug discovery for 12:30 GMT
         const now = new Date();

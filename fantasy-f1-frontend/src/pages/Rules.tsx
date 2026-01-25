@@ -63,6 +63,7 @@ const rulesSections = [
         <li>Team points are calculated for the team you selected (your driver selection won't influence your team scoring).</li>
         <li>On a sprint race weekend the main driver will be awarded the points for the main race and the reserve driver will be awarded the points for the sprint race.</li>
         <li>On a sprint race weekend the team will collect all the points from both the sprint and the main race.</li>
+        <li>Points and standings are updated by the end of the day after each race.</li>
       </ul>
     ),
   },
