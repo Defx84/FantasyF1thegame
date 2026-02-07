@@ -5,7 +5,7 @@ const { auth } = require('../middleware/auth');
 const isAppAdmin = require('../middleware/isAppAdmin');
 const { initializeLeaderboard } = require('../utils/initializeLeaderboard');
 const League = require('../models/League');
-const { processRace } = require('../scripts/updateRaceResults');
+const { processRace } = require('../services/updateRaceResultsService');
 
 // Apply auth middleware to all routes
 router.use(auth);
@@ -63,9 +63,8 @@ router.post('/update-race-results/:round', async (req, res) => {
 // Add route for triggering the scraper for all missing or incomplete race results
 router.post('/scrape-missing-races', async (req, res) => {
     try {
-        // Import the main scraping function
-        const { scrapeRaceResults } = require('../../scripts/scrapeRaceResults');
-        await scrapeRaceResults();
+        const { runScraper } = require('../scrapers/motorsportScraper');
+        await runScraper();
         res.json({ message: 'Scraping triggered for all missing or incomplete race results.' });
     } catch (error) {
         console.error('Error triggering race results scraping:', error);
