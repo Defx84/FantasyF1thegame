@@ -87,12 +87,20 @@ const getNextRaceTiming = async (req, res) => {
         }
 
         if (!activeSeason) {
-            // Find the most recent season with future races (prioritize current/future seasons)
-            const currentYear = new Date().getFullYear();
-            const seasons = await RaceCalendar.distinct('season');
-            activeSeason = seasons
-                .filter(s => s >= currentYear - 1) // Only consider current year or last year
-                .sort((a, b) => b - a)[0]; // Get the most recent season
+            // No league/season context (e.g. main Dashboard): find the next upcoming race globally
+            // so we always show a countdown to the actual next race (e.g. first 2026 race).
+            const nextUpcoming = await RaceCalendar.findOne({
+                qualifyingStart: { $gt: now }
+            }).sort({ qualifyingStart: 1 });
+            if (nextUpcoming) {
+                activeSeason = nextUpcoming.season;
+            } else {
+                const currentYear = new Date().getFullYear();
+                const seasons = await RaceCalendar.distinct('season');
+                activeSeason = seasons
+                    .filter(s => s >= currentYear - 1)
+                    .sort((a, b) => b - a)[0];
+            }
         }
 
         // Run auto-assign in background when this API is called (e.g. when countdown reaches zero on dashboard or selection page).
@@ -165,13 +173,22 @@ const getNextRaceTiming = async (req, res) => {
         }
 
         // 2. Otherwise, find the next upcoming race (for the active season)
-        const nextRace = await RaceCalendar.findOne({ 
+        let nextRace = await RaceCalendar.findOne({ 
             ...seasonFilter,
             qualifyingStart: { $gt: now } 
         }).sort({ qualifyingStart: 1 });
-        console.log('Next race found:', nextRace);
+        // Fallback: if no race in active season (e.g. prod DB or season mismatch), use next race globally
         if (!nextRace) {
-            console.log('No upcoming races found');
+            nextRace = await RaceCalendar.findOne({
+                qualifyingStart: { $gt: now }
+            }).sort({ qualifyingStart: 1 });
+            if (nextRace) {
+                console.log('Next race found via global fallback:', nextRace.raceName, 'season:', nextRace.season);
+            }
+        }
+        console.log('Next race found:', nextRace ? nextRace.raceName : null, 'activeSeason:', activeSeason);
+        if (!nextRace) {
+            console.log('No upcoming races found (seasonFilter:', JSON.stringify(seasonFilter), ')');
             return res.status(404).json({ 
                 message: 'No upcoming races found',
                 hasUpcomingRace: false
