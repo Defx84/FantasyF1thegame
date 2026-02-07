@@ -31,13 +31,15 @@ class AutoSelectionService {
         throw new Error(`Race not found for round ${round}`);
       }
 
-      // Check if deadline has passed (qualifying start time)
+      // Check if lock time has passed (5 minutes before sprint qualifying if present, otherwise qualifying)
       const nowMs = Date.now();
-      if (nowMs < new Date(race.qualifyingStart).getTime()) {
-        console.log(`[AutoSelection] Deadline has not passed yet for round ${round}. Deadline: ${race.qualifyingStart}`);
+      const deadline = race.sprintQualifyingStart || race.qualifyingStart;
+      const lockTimeMs = new Date(deadline).getTime() - 5 * 60 * 1000;
+      if (nowMs < lockTimeMs) {
+        console.log(`[AutoSelection] Lock time has not passed yet for round ${round}. Lock time: ${new Date(lockTimeMs).toISOString()}`);
         return {
           success: false,
-          message: 'Deadline has not passed yet',
+          message: 'Lock time has not passed yet',
           assigned: 0,
           skipped: 0
         };
@@ -121,8 +123,10 @@ class AutoSelectionService {
                 mainDriver: mainDriver,
                 reserveDriver: reserveDriver,
                 team: team,
-                status: 'admin-assigned',
-                isAdminAssigned: true,
+                status: 'auto-assigned',
+                isAdminAssigned: false,
+                isAutoAssigned: true,
+                assignedAt: new Date(),
                 notes: 'Automatically assigned due to missed deadline',
                 createdAt: new Date(),
                 updatedAt: new Date()
@@ -132,9 +136,11 @@ class AutoSelectionService {
               selection.mainDriver = mainDriver;
               selection.reserveDriver = reserveDriver;
               selection.team = team;
-              selection.status = 'admin-assigned';
-              selection.isAdminAssigned = true;
+              selection.status = 'auto-assigned';
+              selection.isAdminAssigned = false;
+              selection.isAutoAssigned = true;
               selection.notes = 'Automatically assigned due to missed deadline';
+              selection.assignedAt = new Date();
               selection.updatedAt = new Date();
             }
 
@@ -187,15 +193,20 @@ class AutoSelectionService {
    * Auto-assign selections for the next upcoming race
    * @returns {Object} - Summary of auto-assignments
    */
-  async autoAssignSelectionsForNextRace() {
+  async autoAssignSelectionsForNextRace(targetSeason = null) {
     try {
       const now = new Date();
       
       // Find the next race whose deadline has passed
+      const seasonFilter = targetSeason ? { season: targetSeason } : { season: { $gte: new Date().getFullYear() - 1 } };
+      const deadlineField = targetSeason ? 'sprintQualifyingStart' : 'qualifyingStart';
       const nextRace = await RaceCalendar.findOne({
-        qualifyingStart: { $lte: now },
-        season: { $gte: new Date().getFullYear() - 1 }
-      }).sort({ qualifyingStart: -1 });
+        $or: [
+          { sprintQualifyingStart: { $lte: new Date(now.getTime() + 5 * 60 * 1000) } },
+          { qualifyingStart: { $lte: new Date(now.getTime() + 5 * 60 * 1000) } }
+        ],
+        ...seasonFilter
+      }).sort({ [deadlineField]: -1, qualifyingStart: -1 });
 
       if (!nextRace) {
         return {
@@ -206,17 +217,7 @@ class AutoSelectionService {
         };
       }
 
-      // Check if we've already processed this race
-      const existingSelections = await RaceSelection.find({
-        round: nextRace.round,
-        status: 'admin-assigned',
-        isAdminAssigned: true
-      });
-
-      if (existingSelections.length > 0) {
-        console.log(`[AutoSelection] Race ${nextRace.round} (${nextRace.raceName}) already has auto-assigned selections`);
-      }
-
+      // Run auto-assign for this round; autoAssignSelectionsForRace skips users who already have valid selections
       return await this.autoAssignSelectionsForRace(nextRace.round, nextRace._id);
 
     } catch (error) {

@@ -6,8 +6,8 @@ const League = require('../models/League');
 const UsedSelection = require('../models/UsedSelection');
 const { normalizedDrivers, normalizedTeams } = require('../utils/validation');
 const { handleError } = require('../utils/errorHandler');
-const { getAllF1Data } = require('../constants/f1DataLoader');
-const { calculateTeamPoints } = require('../utils/scoringUtils');
+const { getAllF1Data, getF1Validation } = require('../constants/f1DataLoader');
+const { calculateTeamPoints, calculatePoints } = require('../utils/scoringUtils');
 
 // Helper function to get driver's team
 function getDriverTeam(driverName, season) {
@@ -148,13 +148,19 @@ exports.assignMissedSelection = async (req, res) => {
       return res.status(400).json({ message: 'Driver or team has already been used' });
     }
 
-    // Create or update selection
+    // Normalize so stored names match user selections (same canonical form)
+    const { normalizeDriverName, normalizeTeamName } = getF1Validation(league.season);
+    const normalizedMain = normalizeDriverName(mainDriver);
+    const normalizedReserve = normalizeDriverName(reserveDriver);
+    const normalizedTeam = normalizeTeamName(team);
+
+    // Create or update selection (store normalized names)
     const selection = await RaceSelection.findOneAndUpdate(
       { user: userId, league: leagueId, race: raceId },
       {
-        mainDriver,
-        reserveDriver,
-        team,
+        mainDriver: normalizedMain,
+        reserveDriver: normalizedReserve,
+        team: normalizedTeam,
         isAdminAssigned: true,
         assignedBy: adminId,
         assignedAt: new Date()
@@ -197,8 +203,13 @@ exports.assignLateJoinSelection = async (req, res) => {
       return res.status(404).json({ message: 'Race not found' });
     }
 
-    // Calculate points based on race results
-    const driverResult = race.results.find(r => r.driver === driver);
+    // Normalize so stored names match user selections (same canonical form)
+    const { normalizeDriverName, normalizeTeamName } = getF1Validation(league.season);
+    const normalizedDriver = normalizeDriverName(driver);
+    const normalizedTeam = normalizeTeamName(team);
+
+    // Calculate points based on race results (match by normalized name)
+    const driverResult = race.results.find(r => normalizeDriverName(r.driver) === normalizedDriver || r.driver === normalizedDriver || r.driver === driver);
     const points = driverResult ? driverResult.points : 0;
 
     // Check if selection can be reused
@@ -215,10 +226,10 @@ exports.assignLateJoinSelection = async (req, res) => {
     });
 
     if (selection) {
-      // Update existing selection
-      selection.mainDriver = driver;
+      // Update existing selection (store normalized names)
+      selection.mainDriver = normalizedDriver;
       selection.reserveDriver = 'None';
-      selection.team = team;
+      selection.team = normalizedTeam;
       selection.points = points;
       selection.isAdminAssigned = true;
       selection.isLateJoin = true;
@@ -248,9 +259,9 @@ exports.assignLateJoinSelection = async (req, res) => {
         league: leagueId
       });
     }
-    await usedSelection.addUsedMainDriver(driver);
+    await usedSelection.addUsedMainDriver(normalizedDriver);
     await usedSelection.addUsedReserveDriver('None');
-    await usedSelection.addUsedTeam(team);
+    await usedSelection.addUsedTeam(normalizedTeam);
     await usedSelection.save();
 
     res.status(200).json({
@@ -430,9 +441,12 @@ exports.assignRealPointsToLeague = async (req, res) => {
           leagueId: leagueId
         });
         selection.points = pointsData.totalPoints;
-        selection.pointBreakdown = pointsData.breakdown;
-        selection.status = 'admin-assigned';
-        selection.isAdminAssigned = true;
+        const breakdown = pointsData.breakdown;
+        const bp = breakdown.basePoints;
+        const driverCardPoints = bp ? Math.max(0, (breakdown.mainDriverPoints + breakdown.reserveDriverPoints) - (bp.mainDriverPoints + bp.reserveDriverPoints)) : 0;
+        const teamCardPoints = bp ? Math.max(0, (breakdown.teamPoints || 0) - (bp.teamPoints || 0)) : 0;
+        selection.pointBreakdown = { ...breakdown, driverCardPoints, teamCardPoints };
+        // Do not change status/isAdminAssigned when only assigning points; leave as user-submitted / auto-assigned / etc.
         selection.assignedAt = new Date();
         await selection.save();
         updatedCount++;
@@ -627,12 +641,12 @@ exports.getDriversAndTeams = async (req, res) => {
 // Save manual race results
 exports.saveManualRaceResults = async (req, res) => {
   try {
-    const { round, season, driverResults, teamResults, sprintResults, sprintTeamResults } = req.body;
+    const { round, season, driverResults, teamResults, sprintResults } = req.body;
     
     // Validate required fields
-    if (!round || !season || !driverResults || !teamResults) {
+    if (!round || !season || !driverResults) {
       return res.status(400).json({ 
-        message: 'Missing required fields: round, season, driverResults, teamResults' 
+        message: 'Missing required fields: round, season, driverResults' 
       });
     }
     
@@ -643,13 +657,6 @@ exports.saveManualRaceResults = async (req, res) => {
       });
     }
     
-    // Validate team count (11 teams)
-    if (teamResults.length !== 11) {
-      return res.status(400).json({ 
-        message: `Expected 11 teams, received ${teamResults.length}` 
-      });
-    }
-    
     // Validate sprint results if provided
     if (sprintResults && sprintResults.length !== 22) {
       return res.status(400).json({ 
@@ -657,42 +664,51 @@ exports.saveManualRaceResults = async (req, res) => {
       });
     }
     
-    if (sprintTeamResults && sprintTeamResults.length !== 11) {
-      return res.status(400).json({ 
-        message: `Expected 11 teams for sprint, received ${sprintTeamResults.length}` 
+    // Get existing race to preserve metadata
+    const existingRace = await RaceResult.findOne({ round, season });
+    const calendarRace = await RaceCalendar.findOne({ round, season });
+    const raceName = existingRace?.raceName || calendarRace?.raceName || `Race ${round}`;
+    const isSprintWeekend = existingRace?.isSprintWeekend ?? calendarRace?.isSprintWeekend ?? !!sprintResults;
+    
+    if (isSprintWeekend && !sprintResults) {
+      return res.status(400).json({
+        message: 'Sprint results are required for sprint weekends'
       });
     }
     
-    // Get existing race to preserve metadata
-    const existingRace = await RaceResult.findOne({ round, season });
-    const raceName = existingRace?.raceName || `Race ${round}`;
-    const isSprintWeekend = existingRace?.isSprintWeekend || (sprintResults ? true : false);
-    
     // Process driver results - convert to format expected by saveRaceResults
-    const processedDriverResults = driverResults.map(result => ({
-      driver: result.driver,
-      team: result.team || getDriverTeam(result.driver, season),
-      position: result.position || null,
-      rawPoints: result.points || 0,
-      points: result.points || 0,
-      status: result.status || 'Finished',
-      didNotFinish: result.status === 'DNF',
-      didNotStart: result.status === 'DNS',
-      disqualified: result.status === 'DSQ'
-    }));
+    const processedDriverResults = driverResults.map(result => {
+      const position = result.position ?? null;
+      const points = calculatePoints(position, false);
+      return {
+        driver: result.driver,
+        team: result.team || getDriverTeam(result.driver, season),
+        position: position,
+        rawPoints: points,
+        points: points,
+        status: result.status || 'Finished',
+        didNotFinish: result.status === 'DNF',
+        didNotStart: result.status === 'DNS',
+        disqualified: result.status === 'DSQ'
+      };
+    });
     
     // Process sprint results if provided
-    const processedSprintResults = sprintResults ? sprintResults.map(result => ({
-      driver: result.driver,
-      team: result.team || getDriverTeam(result.driver, season),
-      position: result.position || null,
-      rawPoints: result.points || 0,
-      points: result.points || 0,
-      status: result.status || 'Finished',
-      didNotFinish: result.status === 'DNF',
-      didNotStart: result.status === 'DNS',
-      disqualified: result.status === 'DSQ'
-    })) : null;
+    const processedSprintResults = sprintResults ? sprintResults.map(result => {
+      const position = result.position ?? null;
+      const points = calculatePoints(position, true);
+      return {
+        driver: result.driver,
+        team: result.team || getDriverTeam(result.driver, season),
+        position: position,
+        rawPoints: points,
+        points: points,
+        status: result.status || 'Finished',
+        didNotFinish: result.status === 'DNF',
+        didNotStart: result.status === 'DNS',
+        disqualified: result.status === 'DSQ'
+      };
+    }) : null;
     
     // Calculate team points using existing utility
     const calculatedTeamResults = calculateTeamPoints(processedDriverResults, [], season);
@@ -700,47 +716,10 @@ exports.saveManualRaceResults = async (req, res) => {
       ? calculateTeamPoints(processedSprintResults, [], season)
       : null;
     
-    // Use manually provided team results if available, otherwise use calculated
-    let finalTeamResults = calculatedTeamResults;
-    if (teamResults && teamResults.length > 0) {
-      // Use provided team results, but ensure sprint points are included
-      finalTeamResults = teamResults.map((tr) => {
-        const racePoints = tr.racePoints || tr.points || 0;
-        // Try to find matching sprint team result
-        const matchingSprintTeam = calculatedSprintTeamResults?.find(t => {
-          // Try exact match first, then normalized comparison
-          return t.team === tr.team || 
-                 t.team.toLowerCase() === tr.team.toLowerCase() ||
-                 (tr.sprintPoints !== undefined && tr.sprintPoints !== null);
-        });
-        const sprintPoints = tr.sprintPoints !== undefined && tr.sprintPoints !== null 
-          ? tr.sprintPoints 
-          : (matchingSprintTeam?.sprintPoints || 0);
-        const totalPoints = racePoints + sprintPoints;
-        
-        // Find position from calculated results if available
-        const calculatedTeam = calculatedTeamResults.find(t => 
-          t.team === tr.team || t.team.toLowerCase() === tr.team.toLowerCase()
-        );
-        
-        return {
-          team: tr.team,
-          position: calculatedTeam?.position || 1,
-          racePoints: racePoints,
-          sprintPoints: sprintPoints,
-          totalPoints: totalPoints
-        };
-      });
-      
-      // Sort by total points descending to set correct positions
-      finalTeamResults.sort((a, b) => b.totalPoints - a.totalPoints);
-      finalTeamResults = finalTeamResults.map((tr, index) => ({
-        ...tr,
-        position: index + 1
-      }));
-    }
+    // Always use calculated team results
+    const finalTeamResults = calculatedTeamResults;
     
-    // Prepare race data
+    // Prepare race data (include required RaceResult fields from calendar so .save() works)
     const raceData = {
       round,
       raceName,
@@ -749,10 +728,17 @@ exports.saveManualRaceResults = async (req, res) => {
       teamResults: finalTeamResults,
       sprintResults: processedSprintResults,
       sprintTeamResults: calculatedSprintTeamResults,
-      status: 'completed', // CRITICAL: Triggers post-save hook for point calculation
+      status: 'completed', // CRITICAL: Post-save hook uses this to run points + leaderboard update
       isSprintWeekend,
       manuallyEntered: true,
-      lastUpdated: new Date()
+      lastUpdated: new Date(),
+      circuit: calendarRace?.circuit ?? existingRace?.circuit ?? '',
+      date: calendarRace?.date ?? existingRace?.date ?? new Date(),
+      raceStart: calendarRace?.raceStart ?? existingRace?.raceStart ?? new Date(),
+      raceEnd: calendarRace?.raceStart ? new Date(new Date(calendarRace.raceStart).getTime() + 2 * 60 * 60 * 1000) : (existingRace?.raceEnd ?? new Date()),
+      qualifyingStart: calendarRace?.qualifyingStart ?? existingRace?.qualifyingStart,
+      sprintQualifyingStart: calendarRace?.sprintQualifyingStart ?? existingRace?.sprintQualifyingStart,
+      sprintStart: calendarRace?.sprintStart ?? existingRace?.sprintStart
     };
     
     // Check if race already exists and warn
@@ -760,15 +746,19 @@ exports.saveManualRaceResults = async (req, res) => {
       console.warn(`[Manual Entry] Overwriting existing completed race results for ${raceName} (round ${round})`);
     }
     
-    // Save race results
-    const race = await RaceResult.findOneAndUpdate(
-      { round, season },
-      raceData,
-      { upsert: true, new: true }
-    );
+    // Save using .save() so Mongoose post-save hook runs (points assignment + leaderboard update).
+    // findOneAndUpdate does NOT trigger post-save hooks.
+    let race;
+    if (existingRace) {
+      Object.assign(existingRace, raceData);
+      race = await existingRace.save();
+    } else {
+      race = new RaceResult(raceData);
+      race = await race.save();
+    }
     
     console.log(`[Manual Entry] ✅ Saved manual race results for ${raceName} (round ${round}, season ${season})`);
-    console.log(`[Manual Entry] 🎯 Post-save hook will trigger automatic points calculation with power cards`);
+    console.log(`[Manual Entry] 🎯 Post-save hook triggered automatic points calculation and leaderboard update`);
     
     res.json({ 
       message: 'Manual race results saved successfully. Points calculation triggered.',

@@ -48,12 +48,51 @@ const getLeagueLeaderboard = async (req, res) => {
         if (!leaderboard) {
             console.log('Initializing new leaderboard...');
             leaderboard = await initializeLeaderboard(id, parseInt(season));
+            // Ensure user is populated for card lookup (same as findOne path)
+            if (leaderboard && leaderboard.driverStandings?.length > 0) {
+                await leaderboard.populate('driverStandings.user constructorStandings.user', 'username');
+            }
         }
 
         if (!leaderboard) {
             console.error('Failed to create leaderboard');
             return res.status(404).json({ message: 'No leaderboard found for this league and season' });
         }
+
+        // For 2026+ seasons, enrich race results with card usage (driver/team card + targets)
+        const requestedSeason = parseInt(season, 10) || league.season;
+        let cardMap = new Map(); // key: `${userId}-${round}` -> { driverCard, teamCard, ... }
+        if (requestedSeason >= 2026) {
+            require('../models/Card'); // ensure Card model is registered for populate
+            const RaceCardSelection = require('../models/RaceCardSelection');
+            const cardSelections = await RaceCardSelection.find({ league: id })
+                .populate('driverCard', 'name')
+                .populate('teamCard', 'name')
+                .populate('targetPlayer', 'username')
+                .populate('mysteryTransformedCard', 'name')
+                .populate('randomTransformedCard', 'name')
+                .lean();
+            cardSelections.forEach(cs => {
+                const key = `${String(cs.user)}-${Number(cs.round)}`;
+                cardMap.set(key, {
+                    driverCard: cs.driverCard ? { name: cs.driverCard.name } : null,
+                    teamCard: cs.teamCard ? { name: cs.teamCard.name } : null,
+                    targetTeam: cs.targetTeam || null,
+                    targetDriver: cs.targetDriver || null,
+                    targetPlayer: cs.targetPlayer ? { username: cs.targetPlayer.username } : null,
+                    mysteryTransformedCardName: cs.mysteryTransformedCard?.name || null,
+                    randomTransformedCardName: cs.randomTransformedCard?.name || null
+                });
+            });
+        }
+
+        // Normalize userId and round for card lookup (works for both populated and non-populated user)
+        const getCardsForResult = (standing, r) => {
+            const userIdRaw = standing.user?._id ?? standing.user;
+            const userIdStr = userIdRaw != null ? String(userIdRaw) : '';
+            const roundNum = r.round != null ? Number(r.round) : r.round;
+            return cardMap.get(`${userIdStr}-${roundNum}`);
+        };
 
         // Format the response
         const formattedLeaderboard = {
@@ -62,19 +101,27 @@ const getLeagueLeaderboard = async (req, res) => {
             lastUpdated: leaderboard.lastUpdated,
             driverStandings: leaderboard.driverStandings.map(standing => ({
                 user: {
-                    _id: standing.user._id,
+                    _id: standing.user?._id ?? standing.user,
                     username: standing.username
                 },
                 totalPoints: standing.totalPoints,
-                raceResults: standing.raceResults
+                raceResults: (standing.raceResults || []).map(r => {
+                    const cards = getCardsForResult(standing, r);
+                    const result = r.toObject ? r.toObject() : { ...r };
+                    return { ...result, cards: cards || null };
+                })
             })),
             constructorStandings: leaderboard.constructorStandings.map(standing => ({
                 user: {
-                    _id: standing.user._id,
+                    _id: standing.user?._id ?? standing.user,
                     username: standing.username
                 },
                 totalPoints: standing.totalPoints,
-                raceResults: standing.raceResults
+                raceResults: (standing.raceResults || []).map(r => {
+                    const cards = getCardsForResult(standing, r);
+                    const result = r.toObject ? r.toObject() : { ...r };
+                    return { ...result, cards: cards || null };
+                })
             }))
         };
 

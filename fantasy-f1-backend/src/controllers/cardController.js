@@ -921,6 +921,8 @@ const getRaceCards = async (req, res) => {
     })
       .populate('driverCard')
       .populate('teamCard')
+      .populate('mysteryTransformedCard', 'name')
+      .populate('randomTransformedCard', 'name')
       .populate('targetPlayer', 'username');
     
     // If not found by race ID, try by round (in case cards were saved with wrong race)
@@ -933,6 +935,8 @@ const getRaceCards = async (req, res) => {
       })
         .populate('driverCard')
         .populate('teamCard')
+        .populate('mysteryTransformedCard', 'name')
+        .populate('randomTransformedCard', 'name')
         .populate('targetPlayer', 'username');
       
       // If found by round but race is wrong, update it to the correct race

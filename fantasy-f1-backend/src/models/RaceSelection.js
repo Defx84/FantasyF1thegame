@@ -12,6 +12,13 @@ function normalizeTeamName(name) {
   return normalizeTeam(name);
 }
 
+const basePointsSchema = new mongoose.Schema({
+  mainDriverPoints: Number,
+  reserveDriverPoints: Number,
+  teamPoints: Number,
+  total: Number
+}, { _id: false });
+
 const pointBreakdownSchema = new mongoose.Schema({
   mainDriver: String,
   reserveDriver: String,
@@ -19,7 +26,13 @@ const pointBreakdownSchema = new mongoose.Schema({
   isSprintWeekend: Boolean,
   mainDriverPoints: Number,
   reserveDriverPoints: Number,
-  teamPoints: Number
+  teamPoints: Number,
+  /** Points gained from driver card effects (driver+reserve final - base) for statistics */
+  driverCardPoints: Number,
+  /** Points gained from team card effects (team final - base) for statistics */
+  teamCardPoints: Number,
+  /** Base points before card effects (for debug and display) */
+  basePoints: basePointsSchema
 }, { _id: false });
 
 const raceSelectionSchema = new mongoose.Schema({
@@ -60,10 +73,15 @@ const raceSelectionSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['empty', 'user-submitted', 'admin-assigned'],
+    enum: ['empty', 'user-submitted', 'admin-assigned', 'auto-assigned'],
     default: 'empty'
   },
   isAdminAssigned: {
+    type: Boolean,
+    default: false
+  },
+  /** True only when selection was auto-assigned due to missed deadline (Grid shows "Auto") */
+  isAutoAssigned: {
     type: Boolean,
     default: false
   },

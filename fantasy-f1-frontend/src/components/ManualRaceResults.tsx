@@ -176,20 +176,10 @@ const ManualRaceResults: React.FC<ManualRaceResultsProps> = ({ onClose }) => {
       return;
     }
 
-    // Validate team count
-    if (teamResults.length !== 11) {
-      setError(`Expected 11 teams, found ${teamResults.length}`);
-      return;
-    }
-
     // Validate sprint if it's a sprint weekend
     if (selectedRace.isSprintWeekend) {
       if (sprintDriverResults.length !== 22) {
         setError(`Expected 22 drivers for sprint, found ${sprintDriverResults.length}`);
-        return;
-      }
-      if (sprintTeamResults.length !== 11) {
-        setError(`Expected 11 teams for sprint, found ${sprintTeamResults.length}`);
         return;
       }
     }
@@ -206,25 +196,13 @@ const ManualRaceResults: React.FC<ManualRaceResultsProps> = ({ onClose }) => {
           driver: d.driver,
           team: d.team,
           position: d.position,
-          points: parseFloat(d.points.toString()) || 0,
           status: d.status
-        })),
-        teamResults: teamResults.map(t => ({
-          team: t.team,
-          racePoints: parseFloat(t.racePoints.toString()) || 0,
-          points: parseFloat(t.racePoints.toString()) || 0
         })),
         sprintResults: selectedRace.isSprintWeekend ? sprintDriverResults.map(d => ({
           driver: d.driver,
           team: d.team,
           position: d.position,
-          points: parseFloat(d.points.toString()) || 0,
           status: d.status
-        })) : null,
-        sprintTeamResults: selectedRace.isSprintWeekend ? sprintTeamResults.map(t => ({
-          team: t.team,
-          racePoints: parseFloat(t.racePoints.toString()) || 0,
-          sprintPoints: parseFloat(t.sprintPoints?.toString() || '0') || 0
         })) : null
       };
 
@@ -317,7 +295,6 @@ const ManualRaceResults: React.FC<ManualRaceResultsProps> = ({ onClose }) => {
                       <th className="border border-white/20 px-3 py-2 text-left text-white/90 text-sm">Driver</th>
                       <th className="border border-white/20 px-3 py-2 text-left text-white/90 text-sm">Team</th>
                       <th className="border border-white/20 px-3 py-2 text-left text-white/90 text-sm">Position</th>
-                      <th className="border border-white/20 px-3 py-2 text-left text-white/90 text-sm">Points</th>
                       <th className="border border-white/20 px-3 py-2 text-left text-white/90 text-sm">Status</th>
                     </tr>
                   </thead>
@@ -334,16 +311,6 @@ const ManualRaceResults: React.FC<ManualRaceResultsProps> = ({ onClose }) => {
                             className="w-20 px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-sm focus:outline-none focus:border-red-500"
                             min="1"
                             max="22"
-                          />
-                        </td>
-                        <td className="border border-white/20 px-3 py-2">
-                          <input
-                            type="number"
-                            step="0.5"
-                            value={result.points}
-                            onChange={(e) => handleDriverResultChange(index, 'points', parseFloat(e.target.value) || 0)}
-                            className="w-20 px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-sm focus:outline-none focus:border-red-500"
-                            min="0"
                           />
                         </td>
                         <td className="border border-white/20 px-3 py-2">
@@ -376,7 +343,6 @@ const ManualRaceResults: React.FC<ManualRaceResultsProps> = ({ onClose }) => {
                         <th className="border border-white/20 px-3 py-2 text-left text-white/90 text-sm">Driver</th>
                         <th className="border border-white/20 px-3 py-2 text-left text-white/90 text-sm">Team</th>
                         <th className="border border-white/20 px-3 py-2 text-left text-white/90 text-sm">Position</th>
-                        <th className="border border-white/20 px-3 py-2 text-left text-white/90 text-sm">Points</th>
                         <th className="border border-white/20 px-3 py-2 text-left text-white/90 text-sm">Status</th>
                       </tr>
                     </thead>
@@ -393,16 +359,6 @@ const ManualRaceResults: React.FC<ManualRaceResultsProps> = ({ onClose }) => {
                               className="w-20 px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-sm focus:outline-none focus:border-red-500"
                               min="1"
                               max="22"
-                            />
-                          </td>
-                          <td className="border border-white/20 px-3 py-2">
-                            <input
-                              type="number"
-                              step="0.5"
-                              value={result.points}
-                              onChange={(e) => handleSprintDriverResultChange(index, 'points', parseFloat(e.target.value) || 0)}
-                              className="w-20 px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-sm focus:outline-none focus:border-red-500"
-                              min="0"
                             />
                           </td>
                           <td className="border border-white/20 px-3 py-2">
@@ -425,71 +381,6 @@ const ManualRaceResults: React.FC<ManualRaceResultsProps> = ({ onClose }) => {
               </div>
             )}
 
-            {/* Team Results */}
-            <div className="mb-6">
-              <h3 className="text-xl font-bold text-white mb-4">Team Results (Race)</h3>
-              <div className="overflow-x-auto">
-                <table className="w-full border-collapse">
-                  <thead>
-                    <tr className="bg-white/10">
-                      <th className="border border-white/20 px-3 py-2 text-left text-white/90 text-sm">Team</th>
-                      <th className="border border-white/20 px-3 py-2 text-left text-white/90 text-sm">Race Points</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {teamResults.map((result, index) => (
-                      <tr key={index} className="bg-white/5 hover:bg-white/10">
-                        <td className="border border-white/20 px-3 py-2 text-white/90 text-sm">{result.team}</td>
-                        <td className="border border-white/20 px-3 py-2">
-                          <input
-                            type="number"
-                            step="0.5"
-                            value={result.racePoints}
-                            onChange={(e) => handleTeamResultChange(index, 'racePoints', parseFloat(e.target.value) || 0)}
-                            className="w-32 px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-sm focus:outline-none focus:border-red-500"
-                            min="0"
-                          />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-
-            {/* Sprint Team Results */}
-            {selectedRace.isSprintWeekend && (
-              <div className="mb-6">
-                <h3 className="text-xl font-bold text-white mb-4">Team Results (Sprint)</h3>
-                <div className="overflow-x-auto">
-                  <table className="w-full border-collapse">
-                    <thead>
-                      <tr className="bg-white/10">
-                        <th className="border border-white/20 px-3 py-2 text-left text-white/90 text-sm">Team</th>
-                        <th className="border border-white/20 px-3 py-2 text-left text-white/90 text-sm">Sprint Points</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {sprintTeamResults.map((result, index) => (
-                        <tr key={index} className="bg-white/5 hover:bg-white/10">
-                          <td className="border border-white/20 px-3 py-2 text-white/90 text-sm">{result.team}</td>
-                          <td className="border border-white/20 px-3 py-2">
-                            <input
-                              type="number"
-                              step="0.5"
-                              value={result.sprintPoints || 0}
-                              onChange={(e) => handleSprintTeamResultChange(index, 'sprintPoints', parseFloat(e.target.value) || 0)}
-                              className="w-32 px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-sm focus:outline-none focus:border-red-500"
-                              min="0"
-                            />
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            )}
 
             {/* Submit Button */}
             <div className="flex justify-end gap-4 mt-6">

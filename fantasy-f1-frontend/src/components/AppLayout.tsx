@@ -37,20 +37,24 @@ const AppLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
       return;
     }
     
-    // Case 2: League sub-pages (race, standings, grid, briefing, statistics)
-    // Navigate back to parent league overview for consistent hierarchy
+    // Case 2: Race detail (inside a specific race) → back to Race History
+    const raceDetailMatch = pathname.match(/^\/league\/([^/]+)\/race\/(\d+)$/);
+    if (raceDetailMatch) {
+      const leagueId = raceDetailMatch[1];
+      navigate(`/league/${leagueId}/race/history`, { replace: false });
+      return;
+    }
+
+    // Case 3: Other league sub-pages (race/history, standings, grid, briefing, statistics)
+    // Navigate back to parent league overview
     const leagueSubPageMatch = pathname.match(/^\/league\/([^/]+)\/(.+)$/);
     if (leagueSubPageMatch) {
       const leagueId = leagueSubPageMatch[1];
-      const subPage = leagueSubPageMatch[2];
-      
-      // Navigate to league overview (parent page)
-      // Using replace: false to allow going back further if needed
       navigate(`/league/${leagueId}`, { replace: false });
       return;
     }
     
-    // Case 3: For other pages (profile, rules, info, etc.), use normal back navigation
+    // Case 4: For other pages (profile, rules, info, etc.), use normal back navigation
     // Check if we have sufficient history to go back
     if (window.history.length > 2) {
       navigate(-1);

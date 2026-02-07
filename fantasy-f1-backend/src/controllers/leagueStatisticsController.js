@@ -93,9 +93,9 @@ const calculateDriverPerformance = async (race, userSelection) => {
 const getUserStatistics = async (req, res) => {
     try {
         const { leagueId, userId } = req.params;
-        // Get the current season (assume current year)
-        const season = new Date().getFullYear();
-        // Fetch the leaderboard for this league and season
+        // Use league's season (or activeSeason) so driver/team points match the league (e.g. 3026 test)
+        const league = await League.findById(leagueId).select('season activeSeason').lean();
+        const season = league?.activeSeason ?? league?.season ?? new Date().getFullYear();
         const leaderboard = await LeagueLeaderboard.findOne({
             league: leagueId,
             season: season
@@ -132,16 +132,23 @@ const getUserStatistics = async (req, res) => {
             .populate('highestPointsRaceId', 'name date')
             .populate('userId', 'username');
 
-        // Get the user's race-by-race history for this league
+        // Get the user's race-by-race history for this league (include pointBreakdown for powerCardPoints)
         const raceHistory = await RaceSelection.find({ league: leagueId, user: userId })
             .sort({ round: 1 })
-            .select('round points mainDriver reserveDriver team status')
+            .select('round points mainDriver reserveDriver team status isAdminAssigned isAutoAssigned pointBreakdown')
             .lean();
 
-        // Best Race (full details)
+        // Sum points gained from power cards (driver vs team, stored in pointBreakdown when points were assigned)
+        const powerCardPointsDriver = raceHistory.reduce((sum, r) => sum + (r.pointBreakdown?.driverCardPoints ?? 0), 0);
+        const powerCardPointsTeam = raceHistory.reduce((sum, r) => sum + (r.pointBreakdown?.teamCardPoints ?? 0), 0);
+        // Strip pointBreakdown from raceHistory for response (frontend only needs round, points, drivers, team, status)
+        const raceHistoryForResponse = raceHistory.map(({ pointBreakdown, ...r }) => r);
+
+        // Best Race (full details; strip pointBreakdown for response later)
         let bestRace = null;
         if (raceHistory.length > 0) {
-            bestRace = raceHistory.reduce((best, curr) => (curr.points > (best?.points || -Infinity) ? curr : best), null);
+            const bestRaceRaw = raceHistory.reduce((best, curr) => (curr.points > (best?.points || -Infinity) ? curr : best), null);
+            bestRace = bestRaceRaw && (() => { const { pointBreakdown, ...r } = bestRaceRaw; return r; })();
         }
 
         // Success Rate: % of races above league average
@@ -172,7 +179,7 @@ const getUserStatistics = async (req, res) => {
             return res.json({
                 totalPoints: totalPoints,
                 averagePoints: raceHistory.length > 0 ? totalPoints / raceHistory.length : 0,
-                raceHistory: raceHistory,
+                raceHistory: raceHistoryForResponse,
                 bestRace: bestRace,
                 successRate: successRate,
                 comebackCount: comebackCount,
@@ -181,13 +188,15 @@ const getUserStatistics = async (req, res) => {
                 teamPoints: teamPoints,
                 driverAverages: driverAverages,
                 teamAverages: teamAverages,
+                powerCardPointsDriver,
+                powerCardPointsTeam,
                 worstRace: null,
             });
         }
 
         res.json({
             ...statistics.toObject(),
-            raceHistory,
+            raceHistory: raceHistoryForResponse,
             bestRace,
             successRate,
             comebackCount,
@@ -195,7 +204,9 @@ const getUserStatistics = async (req, res) => {
             driverPoints,
             teamPoints,
             driverAverages,
-            teamAverages
+            teamAverages,
+            powerCardPointsDriver,
+            powerCardPointsTeam
         });
     } catch (error) {
         handleError(res, error);
@@ -253,7 +264,8 @@ const updateLeagueStatistics = async (req, res) => {
 const getChampionshipProgression = async (req, res) => {
     try {
         const { leagueId } = req.params;
-        const season = new Date().getFullYear();
+        const league = await League.findById(leagueId).select('season activeSeason').lean();
+        const season = league?.activeSeason ?? league?.season ?? new Date().getFullYear();
 
         // Fetch the leaderboard for this league and season
         const leaderboard = await LeagueLeaderboard.findOne({

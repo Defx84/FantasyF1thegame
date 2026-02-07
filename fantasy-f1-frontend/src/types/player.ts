@@ -9,11 +9,15 @@ export interface Player {
     reserveDriver: string | null;
     team: string | null;
   };
+  isAutoAssigned?: boolean;
   cards?: {
     driverCard: Card | null;
     teamCard: Card | null;
     mysteryTransformedCard?: Card | null;
     randomTransformedCard?: Card | null;
+    targetDriver?: string | null;   // Switcheroo: driver whose points are used
+    targetPlayer?: { username: string } | null;  // Mirror
+    targetTeam?: string | null;     // Espionage
   };
   selectionId?: string; // ID of the race selection for fetching cards
 } 

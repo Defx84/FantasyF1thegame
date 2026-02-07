@@ -77,4 +77,47 @@ export const getF1Teams = (season: number): Team[] => {
   return getF1Data(season).teams;
 };
 
+/** Test seasons (e.g. 3026) use 2026 data */
+function getDriverListForSeason(season: number): Driver[] {
+  const data = getF1Data(season >= 2026 ? 2026 : season);
+  return data.drivers;
+}
+
+function getTeamListForSeason(season: number): Team[] {
+  const data = getF1Data(season >= 2026 ? 2026 : season);
+  return data.teams;
+}
+
+/**
+ * Normalize a driver name to shortName for a given season.
+ * Used so used-drivers check matches backend (which stores short names).
+ */
+export function normalizeDriverForSeason(name: string | null | undefined, season: number): string {
+  if (!name || name === 'None') return '';
+  const key = name.toLowerCase().trim();
+  const drivers = getDriverListForSeason(season);
+  for (const d of drivers) {
+    if (d.name.toLowerCase().trim() === key) return d.shortName;
+    if (d.shortName.toLowerCase().trim() === key) return d.shortName;
+    if (d.alternateNames?.some(alt => alt.toLowerCase().trim() === key)) return d.shortName;
+    if (d.shortName.includes('.') && d.shortName.replace('.', '').toLowerCase().trim() === key) return d.shortName;
+  }
+  return key;
+}
+
+/**
+ * Normalize a team name to the canonical name (team.name) for a given season.
+ * Used so used-teams check matches backend (which stores canonical names).
+ */
+export function normalizeTeamForSeason(name: string | null | undefined, season: number): string {
+  if (!name || name === 'None') return '';
+  const key = name.toLowerCase().trim();
+  const teams = getTeamListForSeason(season);
+  for (const t of teams) {
+    if (t.name.toLowerCase().trim() === key) return t.name;
+    if (t.shortName.toLowerCase().trim() === key) return t.name;
+    if (t.alternateNames?.some(alt => alt.toLowerCase().trim() === key)) return t.name;
+  }
+  return key;
+}
 

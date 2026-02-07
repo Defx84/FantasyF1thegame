@@ -13,6 +13,8 @@ export interface UserStatistics {
   } | null;
   successRate?: number;
   comebackCount?: number;
+  powerCardPointsDriver?: number;
+  powerCardPointsTeam?: number;
   raceHistory: Array<{
     round: number;
     points: number;
@@ -20,6 +22,8 @@ export interface UserStatistics {
     reserveDriver?: string;
     team?: string;
     status?: string;
+    isAdminAssigned?: boolean;
+    isAutoAssigned?: boolean;
   }>;
 }
 

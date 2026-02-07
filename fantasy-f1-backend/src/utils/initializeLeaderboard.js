@@ -2,6 +2,7 @@ const LeagueLeaderboard = require('../models/LeagueLeaderboard');
 const League = require('../models/League');
 const RaceSelection = require('../models/RaceSelection');
 const RaceResult = require('../models/RaceResult');
+const RaceCalendar = require('../models/RaceCalendar');
 const mongoose = require('mongoose');
 
 /**
@@ -69,6 +70,12 @@ const initializeLeaderboard = async (leagueId, season) => {
 
         // Get all race results for this season only (CRITICAL: filter by season to avoid cross-season contamination)
         const raceResults = await RaceResult.find({ season: season }).sort({ round: 1 });
+        const calendarRaces = await RaceCalendar.find({ season: season })
+            .select('_id round')
+            .lean();
+        const raceIdByRound = new Map(
+            calendarRaces.map((race) => [race.round, race._id])
+        );
 
         // Initialize standings for each member
         for (const member of league.members) {
@@ -102,12 +109,22 @@ const initializeLeaderboard = async (leagueId, season) => {
                 leaderboard.constructorStandings.push(constructorStanding);
             }
 
+            // Reset existing results to avoid cross-season/duplicate rounds
+            driverStanding.raceResults = [];
+            driverStanding.totalPoints = 0;
+            constructorStanding.raceResults = [];
+            constructorStanding.totalPoints = 0;
+
             // Calculate points for each race
             for (const race of raceResults) {
+                const raceId = raceIdByRound.get(race.round);
+                if (!raceId) continue;
+
                 const selection = await RaceSelection.findOne({
                     user: member._id,
                     league: league._id,
-                    round: race.round
+                    round: race.round,
+                    race: raceId
                 });
                 if (!selection) continue;
                 if (race.status !== 'completed') continue;

@@ -5,6 +5,7 @@ import IconWrapper from '../utils/iconWrapper';
 import { api } from '../services/api';
 import { getLeague } from '../services/leagueService';
 import CountryFlag from 'react-country-flag';
+import AppLogoSpinner from '../components/AppLogoSpinner';
 
 // Mapping from country names to ISO country codes
 const COUNTRY_CODE_MAP: Record<string, string> = {
@@ -108,7 +109,7 @@ const RaceHistory: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
+        <AppLogoSpinner size="lg" />
       </div>
     );
   }

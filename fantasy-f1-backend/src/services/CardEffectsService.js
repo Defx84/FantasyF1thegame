@@ -74,7 +74,7 @@ class CardEffectsService {
                     break;
 
                 case 'mirror':
-                    // Mirror: Copy another player's entire weekend score
+                    // Mirror: Copy target's driver points only (main + reserve), including their driver card effects
                     if (raceCardSelection.targetPlayer) {
                         const mirroredPoints = await this.getMirroredPlayerPoints(
                             raceCardSelection.targetPlayer,
@@ -85,7 +85,7 @@ class CardEffectsService {
                         modifiedMainDriverPoints = mirroredPoints.mainDriverPoints || 0;
                         modifiedReserveDriverPoints = mirroredPoints.reserveDriverPoints || 0;
                         effectDetails.effectApplied = true;
-                        effectDetails.description = `Mirrored player's score: ${mirroredPoints.totalPoints || 0} points`;
+                        effectDetails.description = `Mirrored player's driver score: ${(mirroredPoints.mainDriverPoints || 0) + (mirroredPoints.reserveDriverPoints || 0)} points`;
                     }
                     break;
 
@@ -530,11 +530,12 @@ class CardEffectsService {
     }
 
     getTeammate(driver, season) {
-        const { getDriverTeam, getTeamDrivers } = require('../constants/f1DataLoader').getF1Validation(season);
+        const { getDriverTeam, getTeamDrivers, normalizeDriverName } = require('../constants/f1DataLoader').getF1Validation(season);
         const team = getDriverTeam(driver);
         if (!team) return null;
         const teammates = getTeamDrivers(team);
-        return teammates.find(t => t !== driver) || null;
+        const normalizedDriver = normalizeDriverName(driver);
+        return teammates.find(t => normalizeDriverName(t) !== normalizedDriver) || null;
     }
 
     getTeamDrivers(team, season) {
@@ -628,21 +629,45 @@ class CardEffectsService {
         // If still no selection after auto-assignment attempt, return 0 points
         if (!targetSelection) {
             console.log(`[CardEffects] Could not get or create selection for target player ${targetPlayerId}, returning 0 points`);
-            return { mainDriverPoints: 0, reserveDriverPoints: 0, totalPoints: 0 };
+            return { mainDriverPoints: 0, reserveDriverPoints: 0, teamPoints: 0, totalPoints: 0 };
         }
 
-        const raceResult = await require('../models/RaceResult').findOne({ round: round, season: season });
+        const RaceResult = require('../models/RaceResult');
+        const RaceCalendar = require('../models/RaceCalendar');
+        const raceResult = await RaceResult.findOne({ round: round, season: season });
         if (!raceResult) {
-            return { mainDriverPoints: 0, reserveDriverPoints: 0, totalPoints: 0 };
+            return { mainDriverPoints: 0, reserveDriverPoints: 0, teamPoints: 0, totalPoints: 0 };
+        }
+
+        const calendarRace = await RaceCalendar.findOne({ season: season, round: round }).select('_id').lean();
+        let targetRaceCardSelection = null;
+        if (calendarRace) {
+            targetRaceCardSelection = await RaceCardSelection.findOne({
+                user: targetPlayerId,
+                league: leagueId,
+                race: calendarRace._id
+            }).populate('driverCard teamCard');
+        }
+        if (!targetRaceCardSelection) {
+            targetRaceCardSelection = await RaceCardSelection.findOne({
+                user: targetPlayerId,
+                league: leagueId,
+                round: round
+            }).populate('driverCard teamCard');
         }
 
         const ScoringService = require('./ScoringService');
         const scoringService = new ScoringService();
-        const pointsData = scoringService.calculateRacePoints({
-            mainDriver: targetSelection.mainDriver,
-            reserveDriver: targetSelection.reserveDriver,
-            team: targetSelection.team
-        }, raceResult);
+        const pointsData = await scoringService.calculateRacePoints(
+            {
+                mainDriver: targetSelection.mainDriver,
+                reserveDriver: targetSelection.reserveDriver,
+                team: targetSelection.team
+            },
+            raceResult,
+            targetRaceCardSelection,
+            { userId: targetPlayerId, leagueId: leagueId }
+        );
 
         return {
             mainDriverPoints: pointsData.breakdown.mainDriverPoints,
@@ -653,31 +678,37 @@ class CardEffectsService {
     }
 
     async getEspionageTeamPoints(targetTeam, leagueId, round, season) {
-        // Find a selection with the target team in this league/round
-        const targetSelection = await RaceSelection.findOne({
-            league: leagueId,
-            round: round,
-            team: targetTeam
-        });
-
-        if (!targetSelection) {
-            return 0;
-        }
-
-        const raceResult = await require('../models/RaceResult').findOne({ round: round, season: season });
+        // Get the target team's points from the race result (not from another player's selection).
+        // Espionage copies the target team's actual weekend points from the race result.
+        const RaceResult = require('../models/RaceResult');
+        const raceResult = await RaceResult.findOne({ round: round, season: season });
         if (!raceResult) {
             return 0;
         }
-
-        const ScoringService = require('./ScoringService');
-        const scoringService = new ScoringService();
-        const pointsData = scoringService.calculateRacePoints({
-            mainDriver: targetSelection.mainDriver,
-            reserveDriver: targetSelection.reserveDriver,
-            team: targetSelection.team
-        }, raceResult);
-
-        return pointsData.breakdown.teamPoints || 0;
+        // 1) Try teamResults (matches by normalized name)
+        if (raceResult.teamResults && raceResult.teamResults.length > 0) {
+            const points = raceResult.getTeamPoints(targetTeam);
+            if (points != null && points > 0) {
+                return points;
+            }
+        }
+        // 2) Fallback: sum the two drivers' points for this team (handles name mismatch in teamResults)
+        const teamDrivers = this.getTeamDrivers(targetTeam, season);
+        if (!teamDrivers || teamDrivers.length === 0) {
+            return 0;
+        }
+        let total = 0;
+        for (const driver of teamDrivers) {
+            const raceRes = this.findDriverResult(driver, raceResult.results, season);
+            if (raceRes) total += raceRes.points || 0;
+        }
+        if (raceResult.isSprintWeekend && raceResult.sprintResults && raceResult.sprintResults.length > 0) {
+            for (const driver of teamDrivers) {
+                const sprintRes = this.findDriverResult(driver, raceResult.sprintResults, season);
+                if (sprintRes) total += sprintRes.points || 0;
+            }
+        }
+        return total;
     }
 
     async getRandomDriverCardEffect() {

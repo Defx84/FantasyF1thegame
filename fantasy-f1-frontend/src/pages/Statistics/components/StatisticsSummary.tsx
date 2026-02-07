@@ -21,9 +21,13 @@ interface UserStatistics {
     reserveDriver?: string;
     team?: string;
     status?: string;
+    isAdminAssigned?: boolean;
+    isAutoAssigned?: boolean;
   } | null;
   successRate?: number;
   comebackCount?: number;
+  powerCardPointsDriver?: number;
+  powerCardPointsTeam?: number;
   raceHistory: Array<{
     round: number;
     points: number;
@@ -31,6 +35,8 @@ interface UserStatistics {
     reserveDriver?: string;
     team?: string;
     status?: string;
+    isAdminAssigned?: boolean;
+    isAutoAssigned?: boolean;
   }>;
   driverPoints?: number;
   teamPoints?: number;
@@ -46,7 +52,7 @@ const StatisticsSummary: React.FC<StatisticsSummaryProps> = ({ userId, leagueId,
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isBestRaceFlipped, setIsBestRaceFlipped] = useState(false);
-  const [isComebackFlipped, setIsComebackFlipped] = useState(false);
+  const [isPowerCardFlipped, setIsPowerCardFlipped] = useState(false);
   const [isTotalPointsFlipped, setIsTotalPointsFlipped] = useState(false);
   const [isAveragePointsFlipped, setIsAveragePointsFlipped] = useState(false);
 
@@ -88,9 +94,6 @@ const StatisticsSummary: React.FC<StatisticsSummaryProps> = ({ userId, leagueId,
   }
 
   if (!stats) return null;
-
-  // For comebacks, fallback to empty array if not present
-  const comebackRounds = (stats as any).comebackRounds || [];
 
   // Calculate main driver and team points (now from backend fields)
   const mainDriverPoints = stats.driverPoints ?? 0;
@@ -195,43 +198,40 @@ const StatisticsSummary: React.FC<StatisticsSummaryProps> = ({ userId, leagueId,
               {stats.bestRace.mainDriver && <span className="text-sm text-white text-center">Main: {stats.bestRace.mainDriver}</span>}
               {stats.bestRace.reserveDriver && <span className="text-sm text-white text-center">Reserve: {stats.bestRace.reserveDriver}</span>}
               {stats.bestRace.team && <span className="text-sm text-white text-center">Team: {stats.bestRace.team}</span>}
-              {stats.bestRace.status && <span className="text-xs text-white text-center">{stats.bestRace.status}</span>}
+              {(stats.bestRace.isAdminAssigned || stats.bestRace.isAutoAssigned || stats.bestRace.status) && (
+                <span className="text-xs text-white text-center">
+                  {stats.bestRace.isAdminAssigned ? 'admin-assigned' : stats.bestRace.isAutoAssigned ? 'auto-assigned' : stats.bestRace.status}
+                </span>
+              )}
             </>
           ) : (
             <span className="text-2xl font-bold text-white text-center">-</span>
           )}
         </div>
       </ReactCardFlip>
-      {/* Comeback Count Card - Flippable */}
-      <ReactCardFlip isFlipped={isComebackFlipped} flipDirection="horizontal" flipSpeedBackToFront={0.6} flipSpeedFrontToBack={0.6}>
+      {/* Power Card Points Card - Flippable (driver vs team breakdown) */}
+      <ReactCardFlip isFlipped={isPowerCardFlipped} flipDirection="horizontal" flipSpeedBackToFront={0.6} flipSpeedFrontToBack={0.6}>
         {/* Front Side */}
         <div
-          key="front-comeback"
+          key="front-powercard"
           className="flex flex-col justify-center items-center p-6 h-40 rounded-lg shadow bg-red-200/30 border border-white/10 cursor-pointer relative"
-          onClick={() => setIsComebackFlipped(true)}
+          onClick={() => setIsPowerCardFlipped(true)}
         >
-          <h3 className="text-lg font-semibold mb-2 text-center text-white">Comebacks</h3>
-          <span className="text-3xl font-bold text-white text-center">{stats.comebackCount !== undefined ? stats.comebackCount : '-'}</span>
+          <h3 className="text-lg font-semibold mb-2 text-center text-white">Power Cards detail</h3>
           <span className="absolute bottom-2 inset-x-0 mx-auto w-fit text-red-400 opacity-70 animate-bounce">
             <ChevronIcon size={22} />
           </span>
         </div>
         {/* Back Side */}
         <div
-          key="back-comeback"
+          key="back-powercard"
           className="flex flex-col justify-center items-center p-6 h-40 rounded-lg shadow bg-red-200/30 border border-white/10 cursor-pointer"
-          onClick={() => setIsComebackFlipped(false)}
+          onClick={() => setIsPowerCardFlipped(false)}
         >
-          <h3 className="text-lg font-semibold mb-2 text-center text-white">Comeback Rounds</h3>
-          {comebackRounds.length > 0 ? (
-            <ul className="text-center text-sm text-white space-y-1">
-              {comebackRounds.map((round: number, idx: number) => (
-                <li key={idx}>Round {round}</li>
-              ))}
-            </ul>
-          ) : (
-            <span className="text-sm text-white text-center">No data</span>
-          )}
+          <div className="flex flex-col gap-2 text-center">
+            <span className="text-lg font-bold text-white whitespace-nowrap">Drivers: {stats.powerCardPointsDriver ?? 0} pts</span>
+            <span className="text-lg font-bold text-white whitespace-nowrap">Teams: {stats.powerCardPointsTeam ?? 0} pts</span>
+          </div>
         </div>
       </ReactCardFlip>
     </div>

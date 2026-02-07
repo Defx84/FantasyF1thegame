@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { getNextRaceTiming, RaceTiming } from '../services/raceService';
 import { getUsedSelections, saveSelections, getCurrentSelections, Selection, UsedSelections } from '../services/selectionService';
@@ -6,13 +6,15 @@ import { getLeague, getLeagueOpponents, Opponent } from '../services/leagueServi
 import { getPlayerDeck, activateCards, getRaceCards, getUsedCards, Card, RaceCardSelection } from '../services/cardService';
 import IconWrapper from '../utils/iconWrapper';
 import { FaLock, FaEdit, FaCheck, FaTimes, FaArrowLeft, FaPlus } from 'react-icons/fa';
-import { teamColors } from '../constants/teamColors';
+import { teamColors, getTeamColor } from '../constants/teamColors';
 import { getDrivers, getTeams, getDriverTeams } from '../utils/validation';
 import { getTimeUntilLock, isSelectionsLocked, formatTimeLeft } from '../utils/raceUtils';
 import { normalizeDriver, normalizeTeam } from '../utils/normalization';
+import { normalizeDriverForSeason } from '../constants/f1DataLoader';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { getCardImagePath } from '../utils/cardImageMapper';
+import AppLogoSpinner from '../components/AppLogoSpinner';
 
 interface Driver {
   id: string;
@@ -72,6 +74,7 @@ const NextRaceSelections: React.FC = () => {
   const [selectedTargetDriver, setSelectedTargetDriver] = useState<string | null>(null);
   const [leagueOpponents, setLeagueOpponents] = useState<Opponent[]>([]);
   const [loadingOpponents, setLoadingOpponents] = useState(false);
+  const deadlineTriggeredRef = useRef(false);
 
   // Get season-aware driver and team data
   const allDrivers = getDrivers(leagueSeason);
@@ -86,11 +89,11 @@ const NextRaceSelections: React.FC = () => {
     teamColor: teamColors[driverTeamsMap[name]] || '#FFFFFF'
   }));
 
-  // Map teams to our interface
+  // Map teams to our interface (use getTeamColor so fallback is consistent)
   const teams: Team[] = allTeams.map(name => ({
     id: name.toLowerCase(),
     name,
-    color: teamColors[name]
+    color: getTeamColor(name)
   }));
 
   const fetchData = async () => {
@@ -108,7 +111,7 @@ const NextRaceSelections: React.FC = () => {
       setLeagueSeason(season);
       
       // Fetch the next race timing
-      const raceTiming = await getNextRaceTiming();
+      const raceTiming = await getNextRaceTiming({ leagueId });
       // Use the round from raceTiming
       const round = raceTiming?.round;
       // Only fetch used selections if round is available
@@ -278,6 +281,14 @@ const NextRaceSelections: React.FC = () => {
 
         // Check time until deadline with a small buffer
         const BUFFER_MS = 1000; // 1 second buffer
+        const newTimeLeft = getTimeUntilLock(raceData);
+        const lockReached = timeUntilDeadline <= BUFFER_MS || newTimeLeft <= BUFFER_MS;
+        if (lockReached && leagueId && !deadlineTriggeredRef.current) {
+          deadlineTriggeredRef.current = true;
+          getNextRaceTiming({ leagueId })
+            .then(() => fetchData())
+            .catch(() => {});
+        }
         if (timeUntilDeadline <= BUFFER_MS) {
           console.log('[NextRaceSelections] Locking due to deadline');
           setIsLocked(true);
@@ -285,7 +296,6 @@ const NextRaceSelections: React.FC = () => {
         }
 
         // Update time and lock status
-        const newTimeLeft = getTimeUntilLock(raceData);
         setTimeUntilDeadline(newTimeLeft);
         const newLockStatus = isSelectionsLocked(raceData);
         if (newLockStatus !== isLocked) {
@@ -327,9 +337,10 @@ const NextRaceSelections: React.FC = () => {
     
     const currentMain = editingSelections.mainDriver;
     const currentReserve = editingSelections.reserveDriver;
-    const normalizedDriverId = normalizeDriver(driverId);
-    const normalizedMain = currentMain ? normalizeDriver(currentMain) : null;
-    const normalizedReserve = currentReserve ? normalizeDriver(currentReserve) : null;
+    const season = leagueSeason || 2026;
+    const normalizedDriverId = normalizeDriverForSeason(driverId, season);
+    const normalizedMain = currentMain ? normalizeDriverForSeason(currentMain, season) : null;
+    const normalizedReserve = currentReserve ? normalizeDriverForSeason(currentReserve, season) : null;
 
     // If clicking a selected driver, deselect it
     if (normalizedDriverId === normalizedMain) {
@@ -407,10 +418,12 @@ const NextRaceSelections: React.FC = () => {
     setIsEditing(false);
   };
 
+  const seasonForNormalize = leagueSeason || 2026;
+
   const isDriverUsed = (driverId: string): boolean => {
     const usedList = usedSelections.usedDrivers || [];
-    const normalizedDriverId = normalizeDriver(driverId);
-    const result = usedList.some(usedDriver => normalizeDriver(usedDriver) === normalizedDriverId);
+    const normalizedDriverId = normalizeDriverForSeason(driverId, seasonForNormalize);
+    const result = usedList.some(usedDriver => normalizeDriverForSeason(usedDriver, seasonForNormalize) === normalizedDriverId);
     return result;
   };
 
@@ -432,8 +445,9 @@ const NextRaceSelections: React.FC = () => {
   // Helper function to determine if an item is selected
   const isItemSelected = (type: keyof Selection, id: string) => {
     const currentValue = isEditing ? editingSelections[type] : currentSelections?.[type];
-    const normalizedCurrent = normalizeDriver(currentValue);
-    const normalizedId = normalizeDriver(id);
+    const norm = type === 'team' ? (x: string | null | undefined) => (x ? normalizeTeam(x) : '') : (x: string | null | undefined) => (x ? normalizeDriverForSeason(x, seasonForNormalize) : '');
+    const normalizedCurrent = norm(currentValue);
+    const normalizedId = type === 'team' ? normalizeTeam(id) : normalizeDriverForSeason(id, seasonForNormalize);
     const isSelected = normalizedCurrent === normalizedId;
     
     console.log(`Selection check for ${type}:`, { 
@@ -447,11 +461,12 @@ const NextRaceSelections: React.FC = () => {
     return isSelected;
   };
 
-  // Helper function to get item style
+  // Helper function to get item style (unselected = lighter tint of same color so it's visible on display)
   const getItemStyle = (type: keyof Selection, id: string, color: string) => {
     const selected = isItemSelected(type, id);
+    const c = color || '#FFFFFF';
     return {
-      backgroundColor: selected ? color : `${color}10`,
+      backgroundColor: selected ? c : `${c}40`,
       minHeight: '1.8rem', // Reduced from 2.5rem to 1.8rem
     };
   };
@@ -463,17 +478,17 @@ const NextRaceSelections: React.FC = () => {
 
     return `w-full px-2 py-1 rounded-lg border transition-all duration-200 relative ${
       selected ? 'border-2 border-white bg-opacity-100' : 'border border-white/20 hover:border-white/60'
-    } ${isUsed ? 'opacity-40 cursor-not-allowed filter grayscale before:absolute before:content-["" ] before:left-0 before:right-0 before:top-1/2 before:-translate-y-1/2 before:h-[2px] before:bg-[#FFD600] before:pointer-events-none' : 'hover:bg-opacity-100'}`;
+    } ${isUsed ? 'opacity-40 cursor-not-allowed filter grayscale' : 'hover:bg-opacity-100'}`;
   };
 
   // Helper to check if driver is selected in main or reserve slot
   const getDriverSlot = (driverId: string): 'main' | 'reserve' | null => {
     const currentMain = isEditing ? editingSelections.mainDriver : (currentSelections?.mainDriver || null);
     const currentReserve = isEditing ? editingSelections.reserveDriver : (currentSelections?.reserveDriver || null);
-    const normalizedDriverId = normalizeDriver(driverId);
+    const normalizedDriverId = normalizeDriverForSeason(driverId, seasonForNormalize);
     
-    if (currentMain && normalizeDriver(currentMain) === normalizedDriverId) return 'main';
-    if (currentReserve && normalizeDriver(currentReserve) === normalizedDriverId) return 'reserve';
+    if (currentMain && normalizeDriverForSeason(currentMain, seasonForNormalize) === normalizedDriverId) return 'main';
+    if (currentReserve && normalizeDriverForSeason(currentReserve, seasonForNormalize) === normalizedDriverId) return 'reserve';
     return null;
   };
 
@@ -508,7 +523,7 @@ const NextRaceSelections: React.FC = () => {
         onClick={() => handleDriverClick(driver.id)}
         className={getDriverButtonClassNames(driver.id)}
         style={{
-          backgroundColor: isSelected ? driver.teamColor : `${driver.teamColor}10`,
+          backgroundColor: isSelected ? driver.teamColor : `${driver.teamColor}50`,
           minHeight: '1.5rem',
           padding: '0.2rem 0.4rem',
         }}
@@ -557,12 +572,17 @@ const NextRaceSelections: React.FC = () => {
         }}
         disabled={isUsed || isLocked || !!(currentSelections && (currentSelections.mainDriver || currentSelections.reserveDriver || currentSelections.team) && !isEditing)}
       >
-        <div className="w-full flex items-center justify-center relative">
+        <div className="w-full flex items-center justify-between relative">
           <span className={`text-xs ${isItemSelected('team', team.id) ? 'text-white font-medium' : ''}`}>
             {team.name}
           </span>
           {isItemSelected('team', team.id) && (
-            <IconWrapper icon={FaCheck} className="absolute right-2 text-white text-xs z-10" />
+            <IconWrapper icon={FaCheck} className="text-white text-xs z-10 ml-2" />
+          )}
+          {isUsed && !isItemSelected('team', team.id) && (
+            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-600/50 text-red-200">
+              USED
+            </span>
           )}
         </div>
       </button>
@@ -581,11 +601,12 @@ const NextRaceSelections: React.FC = () => {
 
   // Debug logging
   useEffect(() => {
+    const season = leagueSeason || 2026;
     console.log('Used Selections:', {
-      drivers: (usedSelections.usedDrivers || []).map(d => ({ original: d, normalized: normalizeDriver(d) })),
+      drivers: (usedSelections.usedDrivers || []).map(d => ({ original: d, normalized: normalizeDriverForSeason(d, season) })),
       teams: usedSelections.usedTeams.map(t => ({ original: t, normalized: normalizeTeam(t) }))
     });
-  }, [usedSelections]);
+  }, [usedSelections, leagueSeason]);
 
   // Helper to chunk drivers into pairs
   function chunkArray<T>(arr: T[], size: number): T[][] {
@@ -598,6 +619,7 @@ const NextRaceSelections: React.FC = () => {
 
   // Card handlers
   const handleCardSlotClick = (type: 'driver' | 'team') => {
+    if (raceData?.isSprintWeekend) return;
     if (isLocked && !isCardEditing) return;
     setCardModalType(type);
     setIsCardModalOpen({ driver: type === 'driver', team: type === 'team' });
@@ -847,10 +869,10 @@ const NextRaceSelections: React.FC = () => {
                   <div className="min-h-[60px] flex items-center justify-center">
                     {getCurrentSelection('mainDriver') ? (() => {
                       const driverName = getCurrentSelection('mainDriver')!;
-                      // Find driver by matching normalized names
+                      const season = seasonForNormalize;
                       const driver = drivers.find(d => {
-                        const normalizedStored = normalizeDriver(driverName);
-                        const normalizedDriver = normalizeDriver(d.name);
+                        const normalizedStored = normalizeDriverForSeason(driverName, season);
+                        const normalizedDriver = normalizeDriverForSeason(d.name, season);
                         return normalizedStored === normalizedDriver;
                       });
                       return driver ? (
@@ -887,10 +909,10 @@ const NextRaceSelections: React.FC = () => {
                   <div className="min-h-[60px] flex items-center justify-center">
                     {getCurrentSelection('reserveDriver') ? (() => {
                       const driverName = getCurrentSelection('reserveDriver')!;
-                      // Find driver by matching normalized names
+                      const season = seasonForNormalize;
                       const driver = drivers.find(d => {
-                        const normalizedStored = normalizeDriver(driverName);
-                        const normalizedDriver = normalizeDriver(d.name);
+                        const normalizedStored = normalizeDriverForSeason(driverName, season);
+                        const normalizedDriver = normalizeDriverForSeason(d.name, season);
                         return normalizedStored === normalizedDriver;
                       });
                       return driver ? (
@@ -950,7 +972,10 @@ const NextRaceSelections: React.FC = () => {
 
               {/* Cards Column - Fixed width on the right */}
               <div className="w-full lg:w-64 flex flex-col justify-center min-h-0 flex-shrink-0">
-                  <div className="backdrop-blur-sm bg-black/20 rounded-lg p-4 text-center space-y-3 flex flex-col h-full">
+                  <div
+                    className={`backdrop-blur-sm bg-black/20 rounded-lg p-4 text-center space-y-3 flex flex-col h-full ${raceData?.isSprintWeekend ? 'opacity-80' : ''}`}
+                    title={raceData?.isSprintWeekend ? 'Power Cards not available during sprint weekends' : undefined}
+                  >
                 {/* Card slots (only for 2026+ seasons) */}
                 {leagueSeason >= 2026 && playerDeck && (
                   <div className="mb-6">
@@ -960,9 +985,13 @@ const NextRaceSelections: React.FC = () => {
                     <div className="flex flex-row gap-3 lg:flex-col lg:gap-4 lg:space-y-0">
                       {/* Driver Card Slot */}
                       <div
-                        onClick={() => !isLocked || isCardEditing ? handleCardSlotClick('driver') : undefined}
-                        className={`relative cursor-pointer transition-all flex-1 lg:flex-none ${
-                          !isLocked || isCardEditing ? 'hover:scale-105' : 'opacity-50 cursor-not-allowed'
+                        onClick={() => !raceData?.isSprintWeekend && (!isLocked || isCardEditing) ? handleCardSlotClick('driver') : undefined}
+                        className={`relative transition-all flex-1 lg:flex-none ${
+                          raceData?.isSprintWeekend
+                            ? 'opacity-60 cursor-not-allowed'
+                            : !isLocked || isCardEditing
+                              ? 'cursor-pointer hover:scale-105'
+                              : 'opacity-50 cursor-not-allowed'
                         }`}
                       >
                         <div className={`aspect-[3/4] rounded-lg border-2 overflow-hidden max-w-[140px] lg:max-w-none ${
@@ -1003,9 +1032,13 @@ const NextRaceSelections: React.FC = () => {
 
                       {/* Team Card Slot */}
                       <div
-                        onClick={() => !isLocked || isCardEditing ? handleCardSlotClick('team') : undefined}
-                        className={`relative cursor-pointer transition-all flex-1 lg:flex-none ${
-                          !isLocked || isCardEditing ? 'hover:scale-105' : 'opacity-50 cursor-not-allowed'
+                        onClick={() => !raceData?.isSprintWeekend && (!isLocked || isCardEditing) ? handleCardSlotClick('team') : undefined}
+                        className={`relative transition-all flex-1 lg:flex-none ${
+                          raceData?.isSprintWeekend
+                            ? 'opacity-60 cursor-not-allowed'
+                            : !isLocked || isCardEditing
+                              ? 'cursor-pointer hover:scale-105'
+                              : 'opacity-50 cursor-not-allowed'
                         }`}
                       >
                         <div className={`aspect-[3/4] rounded-lg border-2 overflow-hidden max-w-[140px] lg:max-w-none ${
@@ -1081,9 +1114,10 @@ const NextRaceSelections: React.FC = () => {
                         ) : (
                           <button
                             onClick={handleCardEdit}
-                            disabled={isLocked}
+                            disabled={isLocked || !!raceData?.isSprintWeekend}
+                            title={raceData?.isSprintWeekend ? 'Power Cards not available during sprint weekends' : undefined}
                             className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-bold ${
-                              isLocked
+                              isLocked || raceData?.isSprintWeekend
                                 ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                                 : 'bg-red-600 text-white hover:bg-red-700'
                             }`}
@@ -1266,7 +1300,7 @@ const NextRaceSelections: React.FC = () => {
                   <div>
                     {loadingOpponents ? (
                       <div className="flex items-center justify-center py-12">
-                        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
+                        <AppLogoSpinner size="lg" />
                       </div>
                     ) : leagueOpponents.length === 0 ? (
                       <div className="text-center text-white/70 py-8">
@@ -1338,10 +1372,10 @@ const NextRaceSelections: React.FC = () => {
                   // Driver selection for Switcheroo card
                   <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                     {allDrivers.map((driverName) => {
-                      const driver = drivers.find(d => normalizeDriver(d.name) === normalizeDriver(driverName));
+                      const driver = drivers.find(d => normalizeDriverForSeason(d.name, seasonForNormalize) === normalizeDriverForSeason(driverName, seasonForNormalize));
                       if (!driver) return null;
                       
-                      const isSelected = selectedTargetDriver && normalizeDriver(selectedTargetDriver) === normalizeDriver(driverName);
+                      const isSelected = selectedTargetDriver && normalizeDriverForSeason(selectedTargetDriver, seasonForNormalize) === normalizeDriverForSeason(driverName, seasonForNormalize);
                       return (
                         <button
                           key={driver.id}

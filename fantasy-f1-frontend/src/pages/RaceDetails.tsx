@@ -5,8 +5,9 @@ import IconWrapper from '../utils/iconWrapper';
 import { api } from '../services/api';
 import { getDrivers, getTeams } from '../utils/validation';
 import { adminOverrideSelection, getUsedSelections, UsedSelections } from '../services/selectionService';
-import { normalizeDriver, normalizeTeam } from '../utils/normalization';
+import { normalizeDriverForSeason, normalizeTeamForSeason } from '../constants/f1DataLoader';
 import type { FC } from 'react';
+import AppLogoSpinner from '../components/AppLogoSpinner';
 import AvatarImage from '../components/Avatar/AvatarImage';
 
 interface Selection {
@@ -76,27 +77,29 @@ const RaceDetails: React.FC = () => {
   const availableDrivers = getDrivers(leagueSeason);
   const availableTeams = getTeams(leagueSeason);
 
-  // Helper function to check if a driver is used (unified list for both main and reserve)
-  const isDriverUsed = (userId: string, driverId: string): boolean => {
+  // Helper: is driver "used" (so we disable it in dropdown). On admin override we allow re-selecting the current selection for this round.
+  const isDriverUsed = (userId: string, driverId: string, currentSelection?: Selection | null, role?: 'main' | 'reserve'): boolean => {
+    if (currentSelection && role) {
+      const current = role === 'main' ? currentSelection.mainDriver : currentSelection.reserveDriver;
+      if (current && normalizeDriverForSeason(current, leagueSeason) === normalizeDriverForSeason(driverId, leagueSeason)) return false; // allow current
+    }
     const userSelections = usedSelections[userId];
     if (!userSelections) return false;
     const usedList = userSelections.usedDrivers || [];
     if (!usedList) return false;
-    const normalizedDriverId = normalizeDriver(driverId);
-    const result = usedList.some(usedDriver => normalizeDriver(usedDriver) === normalizedDriverId);
-    return result;
+    const normalizedDriverId = normalizeDriverForSeason(driverId, leagueSeason);
+    return usedList.some(usedDriver => normalizeDriverForSeason(usedDriver, leagueSeason) === normalizedDriverId);
   };
 
-  // Helper function to check if a team is used
-  const isTeamUsed = (userId: string, teamId: string): boolean => {
+  // Helper: is team "used". On admin override we allow re-selecting the current team for this round.
+  const isTeamUsed = (userId: string, teamId: string, currentSelection?: Selection | null): boolean => {
+    if (currentSelection?.team && normalizeTeamForSeason(currentSelection.team, leagueSeason) === normalizeTeamForSeason(teamId, leagueSeason)) return false; // allow current
     const userSelections = usedSelections[userId];
     if (!userSelections) return false;
     const usedTeams = userSelections.usedTeams;
     if (!usedTeams) return false;
-    const normalizedTeamId = normalizeTeam(teamId);
-    const result = usedTeams.some(usedTeam => normalizeTeam(usedTeam) === normalizedTeamId);
-    console.log(`[Admin] Checking if team used: ${teamId} => ${normalizedTeamId} | result: ${result}`);
-    return result;
+    const normalizedTeamId = normalizeTeamForSeason(teamId, leagueSeason);
+    return usedTeams.some(usedTeam => normalizeTeamForSeason(usedTeam, leagueSeason) === normalizedTeamId);
   };
 
   const fetchData = async () => {
@@ -163,24 +166,24 @@ const RaceDetails: React.FC = () => {
     // Log all normalized driver options
     console.log('🔍 [Admin] Normalized Main Driver Options:');
     availableDrivers.forEach(driver => {
-      const normalized = normalizeDriver(driver);
+      const normalized = normalizeDriverForSeason(driver, leagueSeason);
       console.log(`[Admin] ${driver} => ${normalized}`);
     });
     // Log all normalized team options
     console.log('🔍 [Admin] Normalized Team Options:');
     availableTeams.forEach(team => {
-      const normalized = normalizeTeam(team);
+      const normalized = normalizeTeamForSeason(team, leagueSeason);
       console.log(`[Admin] ${team} => ${normalized}`);
     });
     // Log used selections from API for each user
     Object.entries(usedSelections).forEach(([userId, used]) => {
       if (used) {
         console.log(`📦 [Admin] Used Selections for user ${userId}:`, used);
-        console.log(`[Admin] 🧩 Normalized usedDrivers:`, used.usedDrivers?.map(normalizeDriver) || []);
-        console.log(`[Admin] 🧩 Normalized usedTeams:`, used.usedTeams?.map(normalizeTeam) || []);
+        console.log(`[Admin] 🧩 Normalized usedDrivers:`, used.usedDrivers?.map(d => normalizeDriverForSeason(d, leagueSeason)) || []);
+        console.log(`[Admin] 🧩 Normalized usedTeams:`, used.usedTeams?.map(t => normalizeTeamForSeason(t, leagueSeason)) || []);
       }
     });
-  }, [availableDrivers, availableTeams, usedSelections]);
+  }, [availableDrivers, availableTeams, usedSelections, leagueSeason]);
 
   const handleEdit = async (member: LeagueMember) => {
     if (!member.id) {
@@ -288,7 +291,7 @@ const RaceDetails: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
+        <AppLogoSpinner size="lg" />
       </div>
     );
   }
@@ -303,11 +306,11 @@ const RaceDetails: React.FC = () => {
 
   return (
     <>
-      {/* Background wrapper */}
+      {/* Background wrapper — match Race History */}
       <div 
         className="fixed inset-0 w-full h-full"
         style={{
-          backgroundImage: 'url("/RaceHistory.png")',
+          backgroundImage: 'url("/Race_history.png")',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -415,7 +418,7 @@ const RaceDetails: React.FC = () => {
                                 >
                                   <option value="">-</option>
                                   {availableDrivers.map(driver => {
-                                    const isUsed = isDriverUsed(member.id, driver);
+                                    const isUsed = isDriverUsed(member.id, driver, selection, 'main');
                                     return (
                                       <option 
                                         key={driver} 
@@ -432,7 +435,7 @@ const RaceDetails: React.FC = () => {
                                   })}
                                 </select>
                               ) : (
-                                selection?.mainDriver ? normalizeDriver(selection.mainDriver) : '-'
+                                selection?.mainDriver ? normalizeDriverForSeason(selection.mainDriver, leagueSeason) : '-'
                               )}
                             </td>
                             <td className="p-4">
@@ -453,7 +456,7 @@ const RaceDetails: React.FC = () => {
                                 >
                                   <option value="">-</option>
                                   {availableDrivers.map(driver => {
-                                    const isUsed = isDriverUsed(member.id, driver);
+                                    const isUsed = isDriverUsed(member.id, driver, selection, 'reserve');
                                     return (
                                       <option 
                                         key={driver} 
@@ -470,7 +473,7 @@ const RaceDetails: React.FC = () => {
                                   })}
                                 </select>
                               ) : (
-                                selection?.reserveDriver ? normalizeDriver(selection.reserveDriver) : '-'
+                                selection?.reserveDriver ? normalizeDriverForSeason(selection.reserveDriver, leagueSeason) : '-'
                               )}
                             </td>
                             <td className="p-4">
@@ -491,7 +494,7 @@ const RaceDetails: React.FC = () => {
                                 >
                                   <option value="">-</option>
                                   {availableTeams.map(team => {
-                                    const isUsed = isTeamUsed(member.id, team);
+                                    const isUsed = isTeamUsed(member.id, team, selection);
                                     return (
                                       <option 
                                         key={team} 
@@ -508,7 +511,7 @@ const RaceDetails: React.FC = () => {
                                   })}
                                 </select>
                               ) : (
-                                selection?.team ? normalizeTeam(selection.team) : '-'
+                                selection?.team ? normalizeTeamForSeason(selection.team, leagueSeason) : '-'
                               )}
                             </td>
                             <td className="p-4">
@@ -622,7 +625,7 @@ const RaceDetails: React.FC = () => {
                               >
                                 <option value="">-</option>
                                 {availableDrivers.map(driver => {
-                                  const isUsed = isDriverUsed(member.id, driver);
+                                  const isUsed = isDriverUsed(member.id, driver, selection, 'main');
                                   return (
                                     <option 
                                       key={driver} 
@@ -640,7 +643,7 @@ const RaceDetails: React.FC = () => {
                               </select>
                             ) : (
                               <span className="text-white text-sm">
-                                {selection?.mainDriver ? normalizeDriver(selection.mainDriver) : '-'}
+                                {selection?.mainDriver ? normalizeDriverForSeason(selection.mainDriver, leagueSeason) : '-'}
                               </span>
                             )}
                           </div>
@@ -665,7 +668,7 @@ const RaceDetails: React.FC = () => {
                               >
                                 <option value="">-</option>
                                 {availableDrivers.map(driver => {
-                                  const isUsed = isDriverUsed(member.id, driver);
+                                  const isUsed = isDriverUsed(member.id, driver, selection, 'reserve');
                                   return (
                                     <option 
                                       key={driver} 
@@ -683,7 +686,7 @@ const RaceDetails: React.FC = () => {
                               </select>
                             ) : (
                               <span className="text-white text-sm">
-                                {selection?.reserveDriver ? normalizeDriver(selection.reserveDriver) : '-'}
+                                {selection?.reserveDriver ? normalizeDriverForSeason(selection.reserveDriver, leagueSeason) : '-'}
                               </span>
                             )}
                           </div>
@@ -708,7 +711,7 @@ const RaceDetails: React.FC = () => {
                               >
                                 <option value="">-</option>
                                 {availableTeams.map(team => {
-                                  const isUsed = isTeamUsed(member.id, team);
+                                  const isUsed = isTeamUsed(member.id, team, selection);
                                   return (
                                     <option 
                                       key={team} 
@@ -726,7 +729,7 @@ const RaceDetails: React.FC = () => {
                               </select>
                             ) : (
                               <span className="text-white text-sm">
-                                {selection?.team ? normalizeTeam(selection.team) : '-'}
+                                {selection?.team ? normalizeTeamForSeason(selection.team, leagueSeason) : '-'}
                               </span>
                             )}
                           </div>

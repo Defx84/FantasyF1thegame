@@ -73,7 +73,9 @@ export const DRIVER_TEAMS: Record<string, string> = {
   'Gabriel Bortoleto': 'Stake F1 Team Kick Sauber'
 };
 
-export const getNextRaceTiming = async (): Promise<RaceTiming> => {
-  const response: AxiosResponse<RaceTiming> = await api.get('/api/race/next-race');
+export const getNextRaceTiming = async (params?: { season?: number; leagueId?: string }): Promise<RaceTiming> => {
+  const response: AxiosResponse<RaceTiming> = await api.get('/api/race/next-race', {
+    params: params?.leagueId ? { leagueId: params.leagueId } : params?.season ? { season: params.season } : undefined
+  });
   return response.data;
 }; 

@@ -5,6 +5,7 @@ import { useAuth } from '../context/AuthContext';
 import { api } from '../services/api';
 import IconWrapper from '../utils/iconWrapper';
 import AvatarImage from '../components/Avatar/AvatarImage';
+import AppLogoSpinner from '../components/AppLogoSpinner';
 import briefingBackground from '../assets/briefing-background.png';
 import { getTeamColor } from '../constants/teamColors';
 import { getF1Drivers } from '../constants/f1DataLoader';
@@ -16,6 +17,7 @@ interface Opponent {
   avatar?: string;
   remainingDrivers: number;
   remainingTeams: number;
+  /** Single shared pool; API still sends mainDrivers and reserveDrivers (same list). */
   remainingSelections: {
     mainDrivers: string[];
     reserveDrivers: string[];
@@ -85,29 +87,20 @@ const OpponentsBriefing: React.FC = () => {
     setExpandedOpponent(expandedOpponent === opponentId ? null : opponentId);
   };
 
-  const getTeamColor = (teamName: string): string => {
-    const teamColors: { [key: string]: string } = {
-      'Red Bull Racing': '#1E40AF',
-      'Ferrari': '#DC2626',
-      'McLaren': '#F59E0B',
-      'Mercedes': '#10B981',
-      'Aston Martin': '#059669',
-      'Alpine': '#3B82F6',
-      'Williams': '#8B5CF6',
-      'RB': '#1E40AF',
-      'Haas F1 Team': '#6B7280',
-      'Stake F1 Team Kick Sauber': '#EF4444'
-    };
-    return teamColors[teamName] || '#6B7280';
-  };
-
   const getDriverColor = (driverName: string): string => {
+    if (!driverName) return '#6B7280';
     const drivers = getF1Drivers(leagueSeason);
-    const driver = drivers.find(d => d.name === driverName);
+    const key = driverName.trim().toLowerCase();
+    const driver = drivers.find(
+      d =>
+        d.name.trim().toLowerCase() === key ||
+        d.shortName.trim().toLowerCase() === key ||
+        d.alternateNames?.some(alt => alt.trim().toLowerCase() === key)
+    );
     if (driver) {
       return getTeamColor(driver.team);
     }
-    return '#6B7280'; // Default color if driver not found
+    return '#6B7280';
   };
 
   if (loading) {
@@ -238,33 +231,14 @@ const OpponentsBriefing: React.FC = () => {
               {expandedOpponent === opponent.id && (
                 <div className="px-3 sm:px-4 pb-3 sm:pb-4 border-t border-white/20">
                   <div className="space-y-3 sm:space-y-4">
-                    {/* Main Drivers */}
+                    {/* Drivers (single shared pool for main and reserve picks) */}
                     <div>
                       <h4 className="text-xs sm:text-sm font-semibold text-white mb-2 flex items-center">
-                        <IconWrapper icon={FaCar} className="mr-2 text-red-400" />
-                        Main Drivers
+                        <IconWrapper icon={FaCar} className="mr-2 text-amber-400" />
+                        Drivers
                       </h4>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
-                        {opponent.remainingSelections.mainDrivers.map((driver, index) => (
-                          <div
-                            key={index}
-                            className="px-2 py-1 border border-white/20 text-white text-xs text-center"
-                            style={{ backgroundColor: getDriverColor(driver) + '40' }}
-                          >
-                            {driver}
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Reserve Drivers */}
-                    <div>
-                      <h4 className="text-xs sm:text-sm font-semibold text-white mb-2 flex items-center">
-                        <IconWrapper icon={FaCar} className="mr-2 text-blue-400" />
-                        Reserve Drivers
-                      </h4>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-1">
-                        {opponent.remainingSelections.reserveDrivers.map((driver, index) => (
+                        {(opponent.remainingSelections.mainDrivers ?? []).map((driver, index) => (
                           <div
                             key={index}
                             className="px-2 py-1 border border-white/20 text-white text-xs text-center"

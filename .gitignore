@@ -10,3 +10,7 @@ dist/
 npm-debug.log
 yarn-debug.log
 yarn-error.log
+
+# Backend scripts (not required for app to run; keep locally for maintenance only)
+fantasy-f1-backend/scripts/
+fantasy-f1-backend/src/scripts/

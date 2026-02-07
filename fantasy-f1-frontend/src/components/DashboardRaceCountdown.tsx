@@ -1,5 +1,4 @@
-// DEBUG: Triggering a visible change for git detection
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { getNextRaceTiming, RaceTiming } from '../services/raceService';
 import { FaFlagCheckered, FaStopwatch, FaRunning } from 'react-icons/fa';
 
@@ -25,16 +24,22 @@ const FaFlagCheckeredIcon = FaFlagCheckered as React.FC<{ className?: string }>;
 const FaStopwatchIcon = FaStopwatch as React.FC<{ className?: string }>;
 const FaRunningIcon = FaRunning as React.FC<{ className?: string }>;
 
-const DashboardRaceCountdown: React.FC = () => {
+interface DashboardRaceCountdownProps {
+  /** When provided, passed to getNextRaceTiming so auto-assign runs for this league's season */
+  leagueId?: string;
+}
+
+const DashboardRaceCountdown: React.FC<DashboardRaceCountdownProps> = ({ leagueId }) => {
   const [raceData, setRaceData] = useState<RaceTiming | null>(null);
   const [timeLeft, setTimeLeft] = useState({ days: 0, hours: 0, minutes: 0, seconds: 0 });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const deadlineTriggeredRef = useRef(false);
 
   useEffect(() => {
     const fetchRace = async () => {
       try {
-        const data = await getNextRaceTiming();
+        const data = await getNextRaceTiming(leagueId ? { leagueId } : undefined);
         setRaceData(data);
         if (data && data.race && data.race.startTime) {
           const now = Date.now();
@@ -108,10 +113,17 @@ const DashboardRaceCountdown: React.FC = () => {
     }
     
     const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft(target));
+      const next = calculateTimeLeft(target);
+      setTimeLeft(next);
+      // When countdown reaches zero, trigger backend auto-assign (once)
+      const atDeadline = next.days === 0 && next.hours === 0 && next.minutes === 0 && next.seconds === 0;
+      if (atDeadline && !deadlineTriggeredRef.current) {
+        deadlineTriggeredRef.current = true;
+        getNextRaceTiming(leagueId ? { leagueId } : undefined).catch(() => {});
+      }
     }, 1000);
     return () => clearInterval(timer);
-  }, [raceData]);
+  }, [raceData, leagueId]);
 
   if (loading) {
     return <div className="backdrop-blur-xl bg-white/10 rounded-xl p-6 border border-white/10 animate-pulse"><div className="h-24 bg-white/20 rounded-lg"></div></div>;
@@ -154,7 +166,7 @@ const DashboardRaceCountdown: React.FC = () => {
           <div className="text-xs text-white/80">Seconds</div>
         </div>
       </div>
-      <div className="space-y-3">
+      <div className="space-y-2">
         {events.map((event, idx) => (
           <div key={idx} className="flex items-center justify-between text-sm">
             <div className="flex items-center space-x-2">

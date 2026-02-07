@@ -39,6 +39,7 @@ export interface RaceSelection {
   points: number;
   status: string;
   isAdminAssigned: boolean;
+  isAutoAssigned?: boolean;
   assignedBy?: string;
   assignedAt?: Date;
   notes?: string;

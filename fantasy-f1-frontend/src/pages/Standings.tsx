@@ -7,6 +7,18 @@ import { api } from '../services/api';
 import { getF1Drivers } from '../constants/f1DataLoader';
 import { getTeamColor } from '../constants/teamColors';
 import AvatarImage from '../components/Avatar/AvatarImage';
+import AppLogoSpinner from '../components/AppLogoSpinner';
+import { getCardImagePath } from '../utils/cardImageMapper';
+
+interface RaceResultCards {
+  driverCard?: { name: string } | null;
+  teamCard?: { name: string } | null;
+  targetTeam?: string | null;
+  targetDriver?: string | null;
+  targetPlayer?: { username: string } | null;
+  mysteryTransformedCardName?: string | null;
+  randomTransformedCardName?: string | null;
+}
 
 interface RaceResult {
   round: number;
@@ -23,6 +35,7 @@ interface RaceResult {
     teamPoints: number;
     isSprintWeekend: boolean;
   };
+  cards?: RaceResultCards | null;
 }
 
 interface DriverRaceResult extends RaceResult {
@@ -47,7 +60,7 @@ interface DriverStanding extends Standing {
 }
 
 interface TeamStanding extends Standing {
-  raceResults: TeamRaceResult[];
+  raceResults: (TeamRaceResult & { cards?: RaceResultCards | null })[];
 }
 
 interface LeaderboardData {
@@ -74,10 +87,18 @@ const Standings: React.FC = () => {
     const fetchStandings = async () => {
       try {
         setLoading(true);
-        // Get season from leaderboard data or default to current year
-        const currentYear = new Date().getFullYear();
-        const response = await api.get(`/api/league/${leagueId}/standings/${currentYear}`);
-        setLeaderboard(response.data);
+        const leagueResponse = await api.get(`/api/league/${leagueId}`);
+        const leagueSeason = leagueResponse.data?.activeSeason
+          ?? leagueResponse.data?.season
+          ?? new Date().getFullYear();
+        const response = await api.get(`/api/league/${leagueId}/standings/${leagueSeason}`);
+        const data = response.data;
+        // Debug: verify constructor standings have cards (remove once team cards show)
+        if (data?.constructorStandings?.[0]?.raceResults?.[0]) {
+          const first = data.constructorStandings[0].raceResults[0];
+          console.log('[Standings] First constructor result cards:', first.cards, 'teamCard:', first.cards?.teamCard?.name);
+        }
+        setLeaderboard(data);
       } catch (err) {
         console.error('Error fetching standings:', err);
         setError('Failed to load standings');
@@ -92,7 +113,7 @@ const Standings: React.FC = () => {
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
+        <AppLogoSpinner size="lg" />
       </div>
     );
   }
@@ -256,28 +277,52 @@ const Standings: React.FC = () => {
                         } hover:bg-gray-600 border-b border-gray-900 pl-3`}
                         style={{ minWidth: 0 }}
                       >
-                        <div className="flex flex-col w-full">
-                          {/* Two-column layout for mobile */}
-                          <div className="flex flex-row w-full">
-                            <div className="min-w-[80px] w-20 font-semibold text-white/90 border-r-2 border-white/20 pr-2 flex flex-col gap-1">
-                              <div>Round:</div>
-                              <div>Race:</div>
-                              <div>Main:</div>
-                              <div>Reserve:</div>
-                              <div>Points:</div>
-                            </div>
-                            <div className="flex-1 pl-3 flex flex-col gap-1">
-                              <div>{result.round}</div>
-                              <div>{result.raceName.replace('Grand Prix', 'GP')}{' '}
-                                {result.breakdown?.isSprintWeekend && (
-                                  <span className="ml-2 px-2 py-0.5 text-xs bg-yellow-600/20 text-yellow-400 rounded">Sprint</span>
-                                )}
+                        <div className="flex flex-row w-full items-start gap-3">
+                          <div className="flex flex-col flex-1 min-w-0">
+                            <div className="flex flex-row w-full">
+                              <div className="min-w-[80px] w-20 font-semibold text-white/90 border-r-2 border-white/20 pr-2 flex flex-col gap-1">
+                                <div>Round:</div>
+                                <div>Race:</div>
+                                <div>Main:</div>
+                                <div>Reserve:</div>
+                                <div>Points:</div>
                               </div>
-                              <div style={{color: mainTeam ? getTeamColor(mainTeam) : undefined}}>{formatDriverName(result.mainDriver || result.breakdown?.mainDriver)}</div>
-                              <div style={{color: reserveTeam ? getTeamColor(reserveTeam) : undefined}}>{formatDriverName(result.reserveDriver || result.breakdown?.reserveDriver)}</div>
-                              <div>{typeof result.mainRacePoints === 'number' || typeof result.sprintPoints === 'number' ? `${(result.mainRacePoints || 0) + (result.sprintPoints || 0)} pts` : '-'}</div>
+                              <div className="flex-1 pl-3 flex flex-col gap-1">
+                                <div>{result.round}</div>
+                                <div>{result.raceName.replace('Grand Prix', 'GP')}{' '}
+                                  {result.breakdown?.isSprintWeekend && (
+                                    <span className="ml-2 px-2 py-0.5 text-xs bg-yellow-600/20 text-yellow-400 rounded">Sprint</span>
+                                  )}
+                                </div>
+                                <div style={{color: mainTeam ? getTeamColor(mainTeam) : undefined}}>{formatDriverName(result.mainDriver || result.breakdown?.mainDriver)}</div>
+                                <div style={{color: reserveTeam ? getTeamColor(reserveTeam) : undefined}}>{formatDriverName(result.reserveDriver || result.breakdown?.reserveDriver)}</div>
+                                <div>{typeof result.mainRacePoints === 'number' || typeof result.sprintPoints === 'number' ? `${(result.mainRacePoints || 0) + (result.sprintPoints || 0)} pts` : '-'}</div>
+                              </div>
                             </div>
                           </div>
+                          {/* Driver card only (driver standings) */}
+                          {result.cards?.driverCard && (
+                            <div className="flex items-center gap-3 flex-shrink-0 border-l border-white/20 pl-3">
+                              <div className="flex flex-col items-center">
+                                <img
+                                  src={getCardImagePath(result.cards.driverCard.name, 'driver')}
+                                  alt={result.cards.driverCard.name}
+                                  className="w-12 h-16 object-cover rounded border border-white/30"
+                                  title={result.cards.driverCard.name}
+                                />
+                                {(result.cards.targetPlayer?.username || result.cards.targetDriver) && (
+                                  <span className="text-[10px] text-white/70 mt-1 text-center max-w-[72px] truncate" title={(result.cards.targetPlayer?.username || result.cards.targetDriver) ?? undefined}>
+                                    {result.cards.targetPlayer?.username || result.cards.targetDriver}
+                                  </span>
+                                )}
+                                {(result.cards.driverCard.name === 'Mystery Card' && result.cards.mysteryTransformedCardName) && (
+                                  <span className="text-[10px] text-white/70 mt-1 text-center max-w-[72px] truncate" title={result.cards.mysteryTransformedCardName ?? undefined}>
+                                    → {result.cards.mysteryTransformedCardName}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          )}
                         </div>
                       </div>
                     );
@@ -335,30 +380,54 @@ const Standings: React.FC = () => {
                       } hover:bg-gray-600 border-b border-gray-900 pl-3`}
                       style={{ minWidth: 0 }}
                     >
-                      <div className="flex flex-col w-full">
-                        {/* Two-column layout for mobile */}
-                        <div className="flex flex-row w-full">
-                          <div className="min-w-[80px] w-20 font-semibold text-white/90 border-r-2 border-white/20 pr-2 flex flex-col gap-1">
-                            <div>Round:</div>
-                            <div>Race:</div>
-                            <div>Team:</div>
-                            <div>Points:</div>
-                          </div>
-                          <div className="flex-1 pl-3 flex flex-col gap-1">
-                            <div>{result.round}</div>
-                            <div>{result.raceName.replace('Grand Prix', 'GP')}{' '}
-                              {result.breakdown?.isSprintWeekend && (
-                                <span className="ml-2 px-2 py-0.5 text-xs bg-yellow-600/20 text-yellow-400 rounded">Sprint</span>
-                              )}
+                      <div className="flex flex-row w-full items-start gap-3">
+                        <div className="flex flex-col flex-1 min-w-0">
+                          <div className="flex flex-row w-full">
+                            <div className="min-w-[80px] w-20 font-semibold text-white/90 border-r-2 border-white/20 pr-2 flex flex-col gap-1">
+                              <div>Round:</div>
+                              <div>Race:</div>
+                              <div>Team:</div>
+                              <div>Points:</div>
                             </div>
-                            <div style={{
-                              color: getTeamColor((result.team || result.breakdown?.team) || '')
-                            }}>
-                              {result.team || result.breakdown?.team || '-'}
+                            <div className="flex-1 pl-3 flex flex-col gap-1">
+                              <div>{result.round}</div>
+                              <div>{result.raceName.replace('Grand Prix', 'GP')}{' '}
+                                {result.breakdown?.isSprintWeekend && (
+                                  <span className="ml-2 px-2 py-0.5 text-xs bg-yellow-600/20 text-yellow-400 rounded">Sprint</span>
+                                )}
+                              </div>
+                              <div style={{
+                                color: getTeamColor((result.team || result.breakdown?.team) || '')
+                              }}>
+                                {result.team || result.breakdown?.team || '-'}
+                              </div>
+                              <div>{typeof result.totalPoints === 'number' ? `${result.totalPoints} pts` : '-'}</div>
                             </div>
-                            <div>{typeof result.totalPoints === 'number' ? `${result.totalPoints} pts` : '-'}</div>
                           </div>
                         </div>
+                        {/* Team card only (team/constructor standings) */}
+                        {result.cards?.teamCard && (
+                          <div className="flex items-center gap-3 flex-shrink-0 border-l border-white/20 pl-3">
+                            <div className="flex flex-col items-center">
+                              <img
+                                src={getCardImagePath(result.cards.teamCard.name, 'team')}
+                                alt={result.cards.teamCard.name}
+                                className="w-12 h-16 object-cover rounded border border-white/30"
+                                title={result.cards.teamCard.name}
+                              />
+                              {result.cards.targetTeam && (
+                                <span className="text-[10px] text-white/70 mt-1 text-center max-w-[72px] truncate" title={result.cards.targetTeam}>
+                                  {result.cards.targetTeam}
+                                </span>
+                              )}
+                              {(result.cards.teamCard.name === 'Mystery Card' && result.cards.randomTransformedCardName) && (
+                                <span className="text-[10px] text-white/70 mt-1 text-center max-w-[72px] truncate" title={result.cards.randomTransformedCardName ?? undefined}>
+                                  → {result.cards.randomTransformedCardName}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
                     </div>
                   ))}
@@ -393,7 +462,7 @@ const Standings: React.FC = () => {
           <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-2">Championship Standings</h1>
           <div className="flex items-center justify-between mb-4">
             <div className="text-lg text-white/80 flex items-center gap-2">
-              Season 2025
+              Season {leaderboard.season}
               <div className="relative group ml-2">
                 <FaInfoCircleIcon className="text-yellow-300 text-xl cursor-pointer" />
                 <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-3 w-72 bg-black/90 text-white text-sm rounded-lg shadow-lg px-4 py-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-200 z-50 border border-yellow-300"

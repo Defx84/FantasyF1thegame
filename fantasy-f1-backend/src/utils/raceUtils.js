@@ -3,52 +3,52 @@ const League = require('../models/League');
 const RaceCalendar = require('../models/RaceCalendar');
 
 /**
- * Initialize empty race selections for all members of a league for a specific race
- * @param {string} leagueId - The ID of the league
- * @param {string} raceId - The ID of the race
- * @param {number} round - The round number of the race
+ * Initialize empty race selections for all members of a league for a specific race.
+ * If a member already has a selection for this (league, round) with a different race _id
+ * (e.g. calendar was wiped and re-created), we heal it to the current raceId instead of
+ * creating a duplicate, so we avoid orphaned refs and unique-index violations.
  */
 const initializeRaceSelections = async (leagueId, raceId, round) => {
     try {
-        // Get the league with its members
         const league = await League.findById(leagueId).lean();
-
         if (!league) {
             throw new Error(`League not found: ${leagueId}`);
         }
 
-        // Get the race to verify it exists
         const race = await RaceCalendar.findById(raceId);
         if (!race) {
             throw new Error(`Race not found: ${raceId}`);
         }
 
-        // Create empty selections for each member
-        const bulkOps = league.members.map(memberId => ({
-            updateOne: {
-                filter: {
-                    user: memberId,
-                    league: leagueId,
-                    race: raceId,
-                    round: round
-                },
-                update: {
-                    $setOnInsert: {
-                        mainDriver: null,
-                        reserveDriver: null,
-                        team: null,
-                        points: 0,
-                        status: 'empty',
-                        isAdminAssigned: false,
-                        notes: ''
-                    }
-                },
-                upsert: true
-            }
-        }));
+        for (const memberId of league.members) {
+            const existing = await RaceSelection.findOne({
+                league: leagueId,
+                user: memberId,
+                round: round
+            });
 
-        if (bulkOps.length > 0) {
-            await RaceSelection.bulkWrite(bulkOps);
+            if (existing) {
+                if (existing.race && existing.race.toString() !== raceId.toString()) {
+                    existing.race = raceId;
+                    await existing.save();
+                }
+            } else {
+                await RaceSelection.updateOne(
+                    { user: memberId, league: leagueId, race: raceId, round: round },
+                    {
+                        $setOnInsert: {
+                            mainDriver: null,
+                            reserveDriver: null,
+                            team: null,
+                            points: 0,
+                            status: 'empty',
+                            isAdminAssigned: false,
+                            notes: ''
+                        }
+                    },
+                    { upsert: true }
+                );
+            }
         }
 
         return true;

@@ -6,19 +6,22 @@
  * @returns {Object} Object containing F1_DRIVERS, F1_TEAMS, and helper functions for that season
  */
 const getF1Data = (season) => {
-  switch(season) {
+  switch (season) {
     case 2025:
       return require('./f1Data2025');
     case 2026:
       return require('./f1Data2026');
     default:
+      // Test seasons (e.g., 3026) should use the latest available data
+      if (season >= 2026) {
+        return require('./f1Data2026');
+      }
       // Default to current year, or fallback to most recent available season
       const currentYear = new Date().getFullYear();
       if (currentYear >= 2026) {
         return require('./f1Data2026');
-      } else {
-        return require('./f1Data2025');
       }
+      return require('./f1Data2025');
   }
 };
 
@@ -30,7 +33,14 @@ const getF1Data = (season) => {
 const getF1Drivers = (season) => {
   const data = getF1Data(season);
   // Handle season-specific naming (F1_DRIVERS_2025, F1_DRIVERS_2026, etc.)
-  return data[`F1_DRIVERS_${season}`] || data.F1_DRIVERS || [];
+  if (data[`F1_DRIVERS_${season}`]) {
+    return data[`F1_DRIVERS_${season}`];
+  }
+  // For test seasons (e.g., 3026), fall back to the latest available list
+  if (season >= 2026 && data.F1_DRIVERS_2026) {
+    return data.F1_DRIVERS_2026;
+  }
+  return data.F1_DRIVERS || [];
 };
 
 /**
@@ -41,7 +51,14 @@ const getF1Drivers = (season) => {
 const getF1Teams = (season) => {
   const data = getF1Data(season);
   // Handle season-specific naming (F1_TEAMS_2025, F1_TEAMS_2026, etc.)
-  return data[`F1_TEAMS_${season}`] || data.F1_TEAMS || [];
+  if (data[`F1_TEAMS_${season}`]) {
+    return data[`F1_TEAMS_${season}`];
+  }
+  // For test seasons (e.g., 3026), fall back to the latest available list
+  if (season >= 2026 && data.F1_TEAMS_2026) {
+    return data.F1_TEAMS_2026;
+  }
+  return data.F1_TEAMS || [];
 };
 
 /**

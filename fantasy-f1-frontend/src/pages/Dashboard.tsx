@@ -7,6 +7,7 @@ import { createLeague, joinLeague, getUserLeagues, League } from '../services/le
 import DashboardRaceCountdown from '../components/DashboardRaceCountdown';
 import BulletinBoard from '../components/BulletinBoard';
 import AvatarImage from '../components/Avatar/AvatarImage';
+import AppLogoSpinner from '../components/AppLogoSpinner';
 import Footer from '../components/Footer';
 
 const TypedInstagramIcon = FaInstagram as unknown as React.FC<{ size?: number; className?: string }>;
@@ -175,7 +176,7 @@ const Dashboard: React.FC = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
+        <AppLogoSpinner size="lg" />
       </div>
     );
   }
@@ -339,10 +340,10 @@ const Dashboard: React.FC = () => {
             </div>
 
             {/* Split layout for countdown, carousel, and bulletin board */}
-            <div ref={carouselSectionRef} className="flex flex-col md:flex-row gap-4 relative md:h-64 justify-center items-center mt-4">
-              {/* Next Race Countdown */}
-              <div className="w-full md:w-1/3 h-auto md:h-64 flex flex-col justify-center mb-4 md:mb-0">
-                <div className="backdrop-blur-sm bg-white/[0.02] rounded-xl p-2 border border-white/10 w-full h-full flex flex-col justify-center overflow-hidden">
+            <div ref={carouselSectionRef} className="flex flex-col md:flex-row gap-4 relative md:min-h-64 justify-center items-start mt-4">
+              {/* Next Race Countdown - allow card to grow on sprint weekends (4 events) */}
+              <div className="w-full md:w-1/3 min-h-64 flex flex-col mb-4 md:mb-0">
+                <div className="backdrop-blur-sm bg-white/[0.02] rounded-xl p-2 border border-white/10 w-full flex flex-col justify-center overflow-visible">
                   <DashboardRaceCountdown />
                 </div>
               </div>
@@ -433,7 +434,7 @@ const Dashboard: React.FC = () => {
                     <div className="min-w-full h-64 flex flex-col justify-center p-2 bg-white/[0.02] rounded-xl border border-white/10 overflow-y-auto">
                       {isLoadingLeagues ? (
                         <div className="flex justify-center">
-                          <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
+                          <AppLogoSpinner size="lg" />
                         </div>
                       ) : userLeagues.length === 0 ? (
                         <div className="text-center text-white">

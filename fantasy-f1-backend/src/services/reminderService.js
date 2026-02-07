@@ -165,15 +165,29 @@ async function getNextRace() {
   return race;
 }
 
+// Test seasons (e.g. 3026): do not send reminder emails to avoid spamming during tests
+const REMINDER_TEST_SEASON_MIN = 3000; // seasons >= this are considered test (e.g. 3026)
+
 // Send reminder emails to all opted-in users
 async function sendReminderEmails() {
   try {
     console.log('🔔 Starting reminder email process...');
+
+    if (process.env.SKIP_REMINDER_EMAILS === 'true' || process.env.SKIP_REMINDER_EMAILS === '1') {
+      console.log('📧 Reminders disabled (SKIP_REMINDER_EMAILS), skipping');
+      return { sent: 0, skipped: 0 };
+    }
     
     // Check if there's a race tomorrow
     const race = await getTomorrowsRace();
     if (!race) {
       console.log('📅 No race tomorrow, skipping reminders');
+      return { sent: 0, skipped: 0 };
+    }
+
+    const season = race.season != null ? Number(race.season) : null;
+    if (season !== null && season >= REMINDER_TEST_SEASON_MIN) {
+      console.log(`📧 Test season ${season}, skipping reminder emails`);
       return { sent: 0, skipped: 0 };
     }
     
@@ -327,11 +341,22 @@ async function sendTestReminder(userId) {
 async function sendRaceReminderByRound(round) {
   try {
     console.log(`🔔 Starting reminder email process for round ${round}...`);
+
+    if (process.env.SKIP_REMINDER_EMAILS === 'true' || process.env.SKIP_REMINDER_EMAILS === '1') {
+      console.log('📧 Reminders disabled (SKIP_REMINDER_EMAILS), skipping');
+      return { sent: 0, skipped: 0 };
+    }
     
     // Find the race by round
     const race = await RaceCalendar.findOne({ round });
     if (!race) {
       throw new Error(`Race with round ${round} not found`);
+    }
+
+    const season = race.season != null ? Number(race.season) : null;
+    if (season !== null && season >= REMINDER_TEST_SEASON_MIN) {
+      console.log(`📧 Test season ${season}, skipping reminder emails`);
+      return { sent: 0, skipped: 0 };
     }
     
     console.log(`🏁 Found race: ${race.raceName} at ${race.circuit}`);

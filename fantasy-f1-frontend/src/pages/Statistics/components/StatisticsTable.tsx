@@ -14,6 +14,8 @@ interface RaceHistory {
   reserveDriver?: string;
   team?: string;
   status?: string;
+  isAdminAssigned?: boolean;
+  isAutoAssigned?: boolean;
 }
 
 const StatisticsTable: React.FC<StatisticsTableProps> = ({ userId, leagueId, glassShade = 'bg-white/20' }) => {
@@ -105,7 +107,9 @@ const StatisticsTable: React.FC<StatisticsTableProps> = ({ userId, leagueId, gla
               <td className="py-3 px-4 text-white">{race.mainDriver || '-'}</td>
               <td className="py-3 px-4 text-white">{race.reserveDriver || '-'}</td>
               <td className="py-3 px-4 text-white">{race.team || '-'}</td>
-              <td className="py-3 px-4 text-white">{race.status || '-'}</td>
+              <td className="py-3 px-4 text-white">
+                {race.isAdminAssigned ? 'admin-assigned' : race.isAutoAssigned ? 'auto-assigned' : (race.status || '-')}
+              </td>
             </tr>
           ))}
         </tbody>

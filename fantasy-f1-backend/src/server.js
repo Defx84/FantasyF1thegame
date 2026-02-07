@@ -18,10 +18,12 @@ const {
 // const { cleanupExpiredTokens } = require('./utils/tokenUtils.js');
 const { ROUND_TO_RACE } = require('./constants/roundMapping');
 const RaceResult = require('./models/RaceResult');
+const RaceCalendar = require('./models/RaceCalendar');
 const League = require('./models/League');
 const User = require('./models/User');
 const { processRawResults, calculateTeamPoints } = require('./utils/scoringUtils');
 const { sendReminderEmails } = require('./services/reminderService');
+const AutoSelectionService = require('./services/AutoSelectionService');
 
 const app = require('./app');
 

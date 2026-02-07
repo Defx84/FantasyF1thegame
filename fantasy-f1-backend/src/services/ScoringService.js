@@ -50,16 +50,24 @@ class ScoringService {
             console.log('Reserve driver points (DNS):', { driver: selection.reserveDriver, points: reserveDriverPoints });
         }
 
-        // Calculate team points
+        // Calculate team points – match team by normalized name (case-insensitive, same as RaceResult.getTeamResult)
         const userTeam = normalizeTeamName(selection.team);
-        const teamResult = raceResult.teamResults?.find(t => 
-            normalizeTeamName(t.team) === userTeam
-        );
-        console.log('Team result found:', teamResult);
+        if (!userTeam) {
+            console.warn('ScoringService: selection.team did not normalize to a valid team:', selection.team);
+        }
+        const teamResult = raceResult.teamResults?.find(t => {
+            const tNorm = normalizeTeamName(t.team);
+            return tNorm && userTeam && tNorm.toLowerCase() === userTeam.toLowerCase();
+        });
+        console.log('Team result found:', teamResult ? { team: teamResult.team, racePoints: teamResult.racePoints, sprintPoints: teamResult.sprintPoints } : 'none');
 
-        const teamRacePoints = teamResult?.racePoints || teamResult?.points || 0;
-        const teamSprintPoints = isSprintWeekend ? (teamResult?.sprintPoints || 0) : 0;
-        const totalTeamPoints = teamRacePoints + teamSprintPoints;
+        const teamRacePoints = teamResult?.racePoints ?? teamResult?.points ?? 0;
+        const teamSprintPoints = isSprintWeekend ? (teamResult?.sprintPoints ?? 0) : 0;
+        let totalTeamPoints = teamRacePoints + teamSprintPoints;
+        // Fallback: if we found the team but racePoints/sprintPoints are missing, use totalPoints (e.g. from manual entry)
+        if (teamResult && totalTeamPoints === 0 && (teamResult.totalPoints != null && teamResult.totalPoints > 0)) {
+            totalTeamPoints = teamResult.totalPoints;
+        }
 
         console.log('Team points calculation:', {
             team: selection.team,

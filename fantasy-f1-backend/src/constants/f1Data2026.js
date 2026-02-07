@@ -18,7 +18,7 @@ const F1_TEAMS_2026 = [
         name: 'Mercedes',
         shortName: 'Mercedes',
         displayName: 'Mercedes',
-        alternateNames: ['Mercedes AMG', 'Mercedes']
+        alternateNames: ['Mercedes AMG', 'Mercedes-AMG', 'Mercedes']
     },
     {
         name: 'Ferrari',

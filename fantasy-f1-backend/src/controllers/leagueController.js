@@ -112,11 +112,25 @@ const getLeague = async (req, res) => {
             return res.status(404).json({ message: 'League not found' });
         }
 
+        const now = new Date();
+        const recentThreshold = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        const recentCompletedRace = await RaceResult.findOne({
+            status: 'completed',
+            updatedAt: { $gte: recentThreshold }
+        }).sort({ updatedAt: -1 }).select('season').lean();
+        const nextRace = await RaceCalendar.findOne({ date: { $gte: now } })
+            .sort({ date: 1 })
+            .select('season')
+            .lean();
+        const activeSeason = recentCompletedRace?.season || nextRace?.season || league.season;
+
         res.json({
             id: league._id,
             name: league.name,
             description: league.description,
             code: league.code,
+            season: league.season,
+            activeSeason,
             owner: {
                 id: league.owner._id,
                 username: league.owner.username,
@@ -424,46 +438,59 @@ const getLeagueOpponents = async (req, res) => {
             const usedSelection = usedSelections.find(us => us.user.toString() === userId);
             const futureSelections = futureSelectionsMap[userId] || { hasMainDriver: false, hasReserveDriver: false, hasTeam: false };
             
-            // Get current cycle usage
+            // Get current cycle usage: use unified driverCycles/teamCycles (fallback to legacy mainDriverCycles/reserveDriverCycles for migration)
             let usedMainDrivers = 0;
             let usedReserveDrivers = 0;
             let usedTeams = 0;
-            
+            let usedMainDriversList = [];
+            let usedReserveDriversList = [];
+            let usedTeamsList = [];
+
             if (usedSelection) {
-                // Get the last cycle for each type
-                const lastMainDriverCycleIndex = usedSelection.mainDriverCycles.length - 1;
-                const lastReserveDriverCycleIndex = usedSelection.reserveDriverCycles.length - 1;
-                const lastTeamCycleIndex = usedSelection.teamCycles.length - 1;
-                
-                usedMainDrivers = usedSelection.mainDriverCycles[lastMainDriverCycleIndex]?.length || 0;
-                usedReserveDrivers = usedSelection.reserveDriverCycles[lastReserveDriverCycleIndex]?.length || 0;
-                usedTeams = usedSelection.teamCycles[lastTeamCycleIndex]?.length || 0;
+                const lastDriverCycleIndex = (usedSelection.driverCycles && usedSelection.driverCycles.length > 0)
+                    ? usedSelection.driverCycles.length - 1
+                    : -1;
+                const lastTeamCycleIndex = (usedSelection.teamCycles && usedSelection.teamCycles.length > 0)
+                    ? usedSelection.teamCycles.length - 1
+                    : -1;
+
+                if (lastDriverCycleIndex >= 0) {
+                    const usedDriversInCycle = usedSelection.driverCycles[lastDriverCycleIndex] || [];
+                    usedMainDriversList = usedDriversInCycle;
+                    usedReserveDriversList = usedDriversInCycle;
+                    usedMainDrivers = usedDriversInCycle.length;
+                    usedReserveDrivers = usedDriversInCycle.length;
+                } else {
+                    const lastMainIdx = (usedSelection.mainDriverCycles && usedSelection.mainDriverCycles.length > 0)
+                        ? usedSelection.mainDriverCycles.length - 1 : -1;
+                    const lastReserveIdx = (usedSelection.reserveDriverCycles && usedSelection.reserveDriverCycles.length > 0)
+                        ? usedSelection.reserveDriverCycles.length - 1 : -1;
+                    usedMainDriversList = lastMainIdx >= 0 ? (usedSelection.mainDriverCycles[lastMainIdx] || []) : [];
+                    usedReserveDriversList = lastReserveIdx >= 0 ? (usedSelection.reserveDriverCycles[lastReserveIdx] || []) : [];
+                    usedMainDrivers = usedMainDriversList.length;
+                    usedReserveDrivers = usedReserveDriversList.length;
+                }
+
+                if (lastTeamCycleIndex >= 0) {
+                    usedTeamsList = usedSelection.teamCycles[lastTeamCycleIndex] || [];
+                    usedTeams = usedTeamsList.length;
+                } else {
+                    const lastTeamIdx = (usedSelection.teamCycles && usedSelection.teamCycles.length > 0)
+                        ? usedSelection.teamCycles.length - 1 : -1;
+                    usedTeamsList = lastTeamIdx >= 0 ? (usedSelection.teamCycles[lastTeamIdx] || []) : [];
+                    usedTeams = usedTeamsList.length;
+                }
             }
-            
+
             // Adjust for future race selections (hide them to maintain secrecy)
             if (futureSelections.hasMainDriver) usedMainDrivers -= 1;
             if (futureSelections.hasReserveDriver) usedReserveDrivers -= 1;
             if (futureSelections.hasTeam) usedTeams -= 1;
-            
+
             // Calculate remaining
             const remainingMainDrivers = Math.max(0, 20 - usedMainDrivers);
             const remainingReserveDrivers = Math.max(0, 20 - usedReserveDrivers);
             const remainingTeams = Math.max(0, 10 - usedTeams);
-            
-            // Get the actual used drivers/teams from cycles
-            let usedMainDriversList = [];
-            let usedReserveDriversList = [];
-            let usedTeamsList = [];
-            
-            if (usedSelection) {
-                const lastMainDriverCycleIndex = usedSelection.mainDriverCycles.length - 1;
-                const lastReserveDriverCycleIndex = usedSelection.reserveDriverCycles.length - 1;
-                const lastTeamCycleIndex = usedSelection.teamCycles.length - 1;
-                
-                usedMainDriversList = usedSelection.mainDriverCycles[lastMainDriverCycleIndex] || [];
-                usedReserveDriversList = usedSelection.reserveDriverCycles[lastReserveDriverCycleIndex] || [];
-                usedTeamsList = usedSelection.teamCycles[lastTeamCycleIndex] || [];
-            }
             
             // Convert short names to full names for drivers
             const usedMainDriversFull = usedMainDriversList.map(shortName => shortNameToFullName[shortName] || shortName);
@@ -479,22 +506,24 @@ const getLeagueOpponents = async (req, res) => {
             // If opponent has future selections, we need to add them back to the list
             // to maintain secrecy (opponents can't tell what was selected for future races)
             if (futureSelections.hasMainDriver) {
-                // Find the future selection and add it back to the list
                 const futureMainDriver = futureSelections.mainDriver;
-                if (futureMainDriver && !remainingMainDriversList.includes(futureMainDriver)) {
-                    remainingMainDriversList.push(futureMainDriver);
+                const futureMainFull = futureMainDriver ? (shortNameToFullName[futureMainDriver] || futureMainDriver) : null;
+                if (futureMainFull && !remainingMainDriversList.includes(futureMainFull)) {
+                    remainingMainDriversList.push(futureMainFull);
                 }
             }
             if (futureSelections.hasReserveDriver) {
                 const futureReserveDriver = futureSelections.reserveDriver;
-                if (futureReserveDriver && !remainingReserveDriversList.includes(futureReserveDriver)) {
-                    remainingReserveDriversList.push(futureReserveDriver);
+                const futureReserveFull = futureReserveDriver ? (shortNameToFullName[futureReserveDriver] || futureReserveDriver) : null;
+                if (futureReserveFull && !remainingReserveDriversList.includes(futureReserveFull)) {
+                    remainingReserveDriversList.push(futureReserveFull);
                 }
             }
             if (futureSelections.hasTeam) {
                 const futureTeam = futureSelections.team;
-                if (futureTeam && !remainingTeamsList.includes(futureTeam)) {
-                    remainingTeamsList.push(futureTeam);
+                const futureTeamCanonical = futureTeam ? (teamNameMapping[futureTeam] || futureTeam) : null;
+                if (futureTeamCanonical && !remainingTeamsList.includes(futureTeamCanonical)) {
+                    remainingTeamsList.push(futureTeamCanonical);
                 }
             }
             

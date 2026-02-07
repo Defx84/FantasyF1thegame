@@ -159,7 +159,8 @@ const login = async (req, res) => {
       user: {
         id: user._id,
         username: user.username,
-        email: user.email
+        email: user.email,
+        isAppAdmin: !!user.isAppAdmin
       },
       accessToken, // Include accessToken for cross-domain compatibility
       refreshToken // Include refreshToken for cross-domain compatibility
@@ -207,7 +208,8 @@ const refreshToken = async (req, res) => {
       user: {
         id: user._id,
         username: user.username,
-        email: user.email
+        email: user.email,
+        isAppAdmin: !!user.isAppAdmin
       }
     });
   } catch (error) {

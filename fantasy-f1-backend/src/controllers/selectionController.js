@@ -16,6 +16,29 @@ const { getF1Validation } = require('../constants/f1DataLoader');
 const scoringService = new ScoringService();
 const leaderboardService = new LeaderboardService();
 
+const getNextRaceByLockTime = async (season, now = new Date()) => {
+    const candidates = await RaceCalendar.find({
+        season,
+        $or: [
+            { sprintQualifyingStart: { $gt: now } },
+            { qualifyingStart: { $gt: now } }
+        ]
+    }).sort({ qualifyingStart: 1, sprintQualifyingStart: 1 });
+
+    let nextRace = null;
+    let nextLockMs = null;
+    for (const race of candidates) {
+        const lockTime = race.sprintQualifyingStart || race.qualifyingStart;
+        const lockMs = new Date(lockTime).getTime();
+        if (lockMs <= now.getTime()) continue;
+        if (!nextLockMs || lockMs < nextLockMs) {
+            nextLockMs = lockMs;
+            nextRace = race;
+        }
+    }
+    return nextRace;
+};
+
 /**
  * Get selections for a race
  */
@@ -60,8 +83,11 @@ const getRaceSelections = async (req, res) => {
             });
         }
 
-        // Get race details
-        const race = await RaceCalendar.findOne({ round: parseInt(round) });
+        // Get race details scoped to league season
+        const race = await RaceCalendar.findOne({ 
+            round: parseInt(round),
+            season: league.season
+        });
         if (!race) {
             console.error('Race not found for round:', round);
             return res.status(404).json({ 
@@ -94,6 +120,7 @@ const getRaceSelections = async (req, res) => {
             points: selection.points,
             status: selection.status,
             isAdminAssigned: selection.isAdminAssigned,
+            isAutoAssigned: selection.isAutoAssigned,
             assignedBy: selection.assignedBy?.username,
             assignedAt: selection.assignedAt,
             notes: selection.notes
@@ -121,7 +148,7 @@ const getRaceSelections = async (req, res) => {
 const getUsedSelections = async (req, res) => {
     try {
         const { leagueId, round, userId } = req.query;
-        const numericRound = parseInt(round);
+        const numericRound = round !== undefined && round !== '' ? parseInt(round, 10) : NaN;
         const targetUserId = userId || req.user._id; // Use provided userId or current user's id
 
         // If requesting another user's selections, verify admin status
@@ -131,9 +158,9 @@ const getUsedSelections = async (req, res) => {
                 return res.status(404).json({ message: 'League not found' });
             }
 
-            const isAdmin = league.owner?.toString() === req.user._id.toString() || 
-                          league.members.some(member => 
-                            member.user?.toString() === req.user._id.toString() && 
+            const isAdmin = league.owner?.toString() === req.user._id.toString() ||
+                          league.members.some(member =>
+                            member.user?.toString() === req.user._id.toString() &&
                             member.isAdmin
                           );
 
@@ -142,6 +169,81 @@ const getUsedSelections = async (req, res) => {
             }
         }
 
+        // When round is provided (next race round), derive used drivers/teams from actual
+        // RaceSelection documents for rounds 1..round-1 so counts are always correct.
+        // Normalize driver names to shortName and dedupe so "A. Lindblad" and "Arvid Lindblad"
+        // count as one driver (same for teams) and the count matches what the UI expects.
+        // Also backfill UsedSelection when it's missing entries (e.g. auto-assign saved
+        // the selection but UsedSelection.save failed), so the next round's auto-assign
+        // and other logic see the correct used list.
+        if (!isNaN(numericRound) && numericRound >= 1) {
+            const leagueDoc = await League.findById(leagueId).select('season').lean();
+            const season = (leagueDoc && leagueDoc.season) ? leagueDoc.season : 2026;
+            const { normalizeDriverName, normalizeTeamName } = getF1Validation(season);
+
+            const pastSelections = await RaceSelection.find({
+                user: targetUserId,
+                league: leagueId,
+                round: { $gte: 1, $lt: numericRound },
+                mainDriver: { $nin: [null, ''] },
+                reserveDriver: { $nin: [null, ''] },
+                team: { $nin: [null, ''] }
+            }).select('mainDriver reserveDriver team').lean();
+
+            const rawDrivers = pastSelections.flatMap(s => [s.mainDriver, s.reserveDriver].filter(Boolean));
+            const usedDrivers = [...new Set(rawDrivers.map(d => normalizeDriverName(d)).filter(Boolean))];
+            const rawTeams = pastSelections.map(s => s.team).filter(Boolean);
+            const usedTeams = [...new Set(rawTeams.map(t => normalizeTeamName(t)).filter(Boolean))];
+
+            // Backfill UsedSelection so it stays in sync (e.g. after auto-assign path failed to save)
+            try {
+                let usedSelection = await UsedSelection.findOne({
+                    user: targetUserId,
+                    league: leagueId
+                });
+                if (!usedSelection) {
+                    usedSelection = new UsedSelection({
+                        user: targetUserId,
+                        league: leagueId,
+                        driverCycles: [[]],
+                        teamCycles: [[]],
+                        mainDriverCycles: [[]],
+                        reserveDriverCycles: [[]]
+                    });
+                }
+                const lastDriverCycle = usedSelection.driverCycles?.length
+                    ? usedSelection.driverCycles[usedSelection.driverCycles.length - 1]
+                    : [];
+                const lastTeamCycle = usedSelection.teamCycles?.length
+                    ? usedSelection.teamCycles[usedSelection.teamCycles.length - 1]
+                    : [];
+                let changed = false;
+                for (const d of usedDrivers) {
+                    if (d && d !== 'None' && !lastDriverCycle.includes(d)) {
+                        await usedSelection.addUsedDriver(d);
+                        changed = true;
+                    }
+                }
+                for (const t of usedTeams) {
+                    if (t && t !== 'None' && !lastTeamCycle.includes(t)) {
+                        await usedSelection.addUsedTeam(t);
+                        changed = true;
+                    }
+                }
+                if (changed) await usedSelection.save();
+            } catch (syncErr) {
+                console.warn('[getUsedSelections] UsedSelection backfill failed (response still correct):', syncErr.message);
+            }
+
+            return res.json({
+                usedDrivers,
+                usedTeams,
+                usedMainDrivers: usedDrivers,
+                usedReserveDrivers: usedDrivers
+            });
+        }
+
+        // Fallback: use UsedSelection cycles (when round not provided or invalid)
         // Get or create UsedSelection document for this user and league
         let usedSelection = await UsedSelection.findOne({
             user: targetUserId,
@@ -208,12 +310,22 @@ const getCurrentSelections = async (req, res) => {
         }
         let roundNumber = round ? parseInt(round) : null;
         let raceQuery = {};
+
+        const league = await League.findById(leagueId).select('season').lean();
+        if (!league) {
+            return res.status(404).json({ error: 'League not found' });
+        }
+
         if (roundNumber) {
-            raceQuery = { round: roundNumber };
+            raceQuery = { round: roundNumber, season: league.season };
         } else {
-            // Fallback to next race by date
+            // Fallback to next race by lock time (sprint qualifying/qualifying)
             const now = new Date();
-            raceQuery = { date: { $gt: now } };
+            const nextRace = await getNextRaceByLockTime(league.season, now);
+            if (!nextRace) {
+                return res.json({ mainDriver: null, reserveDriver: null, team: null });
+            }
+            raceQuery = { _id: nextRace._id };
         }
         const race = await RaceCalendar.findOne(raceQuery).sort({ date: 1 });
         if (!race) {
@@ -281,10 +393,7 @@ const saveSelections = async (req, res) => {
         // Get the next race to determine the round number
         // IMPORTANT: Filter by league season to ensure we get the correct race (2026, not 2025)
         const now = new Date();
-        const nextRace = await RaceCalendar.findOne({
-            season: league.season,
-            date: { $gt: now }
-        }).sort({ date: 1 });
+        const nextRace = await getNextRaceByLockTime(league.season, now);
 
         if (!nextRace) {
             return res.status(404).json({ 
@@ -337,8 +446,9 @@ const saveSelections = async (req, res) => {
         }
 
         // Check if selections can still be made
-        const raceDateMs = new Date(nextRace.date).getTime();
-        if (Date.now() >= raceDateMs) {
+        const lockTime = nextRace.sprintQualifyingStart || nextRace.qualifyingStart;
+        const lockTimeMs = new Date(lockTime).getTime();
+        if (Date.now() >= lockTimeMs) {
             return res.status(400).json({ 
                 error: 'Selections can no longer be made for this race' 
             });
@@ -371,10 +481,13 @@ const saveSelections = async (req, res) => {
                 };
             }
             
-            // Update existing selection
+            // Update existing selection (always point to current calendar so we avoid orphaned refs if calendar was recreated)
             selection.mainDriver = normalizedMainDriver;
             selection.reserveDriver = normalizedReserveDriver;
             selection.team = normalizedTeam;
+            selection.race = nextRace._id;
+            selection.status = 'user-submitted';
+            selection.isAutoAssigned = false; // user explicitly saved picks – Grid must not show "Auto"
             selection.updatedAt = new Date();
         } else {
             // Create new selection
@@ -387,6 +500,7 @@ const saveSelections = async (req, res) => {
                 reserveDriver: normalizedReserveDriver,
                 team: normalizedTeam,
                 status: 'user-submitted',
+                isAutoAssigned: false,
                 createdAt: new Date()
             });
         }
@@ -493,6 +607,12 @@ const adminOverrideSelection = async (req, res) => {
             });
         }
 
+        // Normalize incoming names so stored values match user selections (same canonical form)
+        const { normalizeDriverName, normalizeTeamName } = getF1Validation(league.season);
+        const normalizedMainDriver = normalizeDriverName(mainDriver);
+        const normalizedReserveDriver = normalizeDriverName(reserveDriver);
+        const normalizedTeamName = normalizeTeamName(team);
+
         // Check if selections can be reused
         // Bypassing the 'already used' check for admin override
         console.log('Bypassing used selection check for admin override');
@@ -502,35 +622,46 @@ const adminOverrideSelection = async (req, res) => {
         let pointBreakdown = null;
         
         if (assignPoints) {
-            // Get race results and calculate points
-            const raceResult = await RaceResult.findOne({ round: race.round });
+            // Get race results for this season (same as calendar) – was bug: round-only loaded wrong season (e.g. 2026 instead of 3026)
+            const raceResult = await RaceResult.findOne({ round: race.round, season: race.season });
             if (raceResult) {
-                // Get race card selection if season is 2026+
+                // Get race card selection for the selection's owner (userId), not the admin doing the override
                 let raceCardSelection = null;
                 if (raceResult.season >= 2026) {
                     const RaceCardSelection = require('../models/RaceCardSelection');
                     raceCardSelection = await RaceCardSelection.findOne({
-                        user: req.user._id,
+                        user: userId,
                         league: leagueId,
                         round: race.round
                     }).populate('driverCard teamCard');
+                    if (!raceCardSelection) {
+                        raceCardSelection = await RaceCardSelection.findOne({
+                            user: userId,
+                            league: leagueId,
+                            race: raceId
+                        }).populate('driverCard teamCard');
+                    }
                 }
 
                 const pointsData = await scoringService.calculateRacePoints(
-                    { mainDriver, reserveDriver, team },
+                    { mainDriver: normalizedMainDriver, reserveDriver: normalizedReserveDriver, team: normalizedTeamName },
                     raceResult,
                     raceCardSelection,
-                    { userId: req.user._id, leagueId: leagueId }
+                    { userId: userId, leagueId: leagueId }
                 );
                 points = pointsData.totalPoints;
-                pointBreakdown = pointsData.breakdown;
+                const b = pointsData.breakdown;
+                const bp = b.basePoints;
+                const driverCardPoints = bp ? Math.max(0, (b.mainDriverPoints + b.reserveDriverPoints) - (bp.mainDriverPoints + bp.reserveDriverPoints)) : 0;
+                const teamCardPoints = bp ? Math.max(0, (b.teamPoints || 0) - (bp.teamPoints || 0)) : 0;
+                pointBreakdown = { ...b, driverCardPoints, teamCardPoints };
             }
         } else {
-            // Create default pointBreakdown structure when assignPoints is false
+            // Create default pointBreakdown structure when assignPoints is false (use normalized names)
             pointBreakdown = {
-                mainDriver,
-                reserveDriver,
-                team,
+                mainDriver: normalizedMainDriver,
+                reserveDriver: normalizedReserveDriver,
+                team: normalizedTeamName,
                 mainDriverPoints: 0,
                 reserveDriverPoints: 0,
                 teamPoints: 0,
@@ -539,27 +670,34 @@ const adminOverrideSelection = async (req, res) => {
             };
         }
 
-        // Find or create selection
+        // Find selection by race _id; if not found (e.g. selection linked to old calendar), find by round
         let selection = await RaceSelection.findOne({
             user: userId,
             league: leagueId,
             race: raceId
         });
-
-        // Get season-aware validation functions
-        const { normalizeDriverName, normalizeTeamName } = getF1Validation(league.season);
+        if (!selection) {
+            selection = await RaceSelection.findOne({
+                user: userId,
+                league: leagueId,
+                round: race.round
+            });
+            if (selection) {
+                selection.race = raceId; // heal ref to current calendar
+            }
+        }
 
         let oldSelections = null;
         if (!selection) {
-            // Create new selection
+            // Create new selection (store normalized names for consistency)
             selection = new RaceSelection({
                 user: userId,
                 league: leagueId,
                 race: raceId,
                 round: race.round,
-                mainDriver,
-                reserveDriver,
-                team,
+                mainDriver: normalizedMainDriver,
+                reserveDriver: normalizedReserveDriver,
+                team: normalizedTeamName,
                 points,
                 status: 'admin-assigned',
                 isAdminAssigned: true,
@@ -576,10 +714,10 @@ const adminOverrideSelection = async (req, res) => {
                 team: normalizeTeamName(selection.team)
             };
             
-            // Update existing selection
-            selection.mainDriver = mainDriver;
-            selection.reserveDriver = reserveDriver;
-            selection.team = team;
+            // Update existing selection (store normalized names)
+            selection.mainDriver = normalizedMainDriver;
+            selection.reserveDriver = normalizedReserveDriver;
+            selection.team = normalizedTeamName;
             selection.points = points;
             selection.status = 'admin-assigned';
             selection.isAdminAssigned = true;
@@ -609,10 +747,8 @@ const adminOverrideSelection = async (req, res) => {
             });
         }
 
-        // Validate that main and reserve drivers are different using season-aware normalization
-        const normalizedMain = normalizeDriverName(mainDriver);
-        const normalizedReserve = normalizeDriverName(reserveDriver);
-        if (normalizedMain === normalizedReserve) {
+        // Validate that main and reserve drivers are different
+        if (normalizedMainDriver === normalizedReserveDriver) {
             return res.status(400).json({ 
                 error: 'Main driver and reserve driver cannot be the same' 
             });
@@ -621,21 +757,22 @@ const adminOverrideSelection = async (req, res) => {
         // If updating existing selection, remove old selections first
         if (oldSelections) {
             console.log(`[adminOverrideSelection] Removing old selections: ${oldSelections.mainDriver}, ${oldSelections.reserveDriver}, ${oldSelections.team}`);
-            // Only remove if the driver is different from the new selection
-            if (normalizeDriverName(oldSelections.mainDriver) !== normalizedMain) {
+            if (oldSelections.mainDriver !== normalizedMainDriver) {
                 await usedSelection.removeUsedDriver(oldSelections.mainDriver);
             }
-            if (normalizeDriverName(oldSelections.reserveDriver) !== normalizedReserve) {
+            if (oldSelections.reserveDriver !== normalizedReserveDriver) {
                 await usedSelection.removeUsedDriver(oldSelections.reserveDriver);
             }
-            await usedSelection.removeUsedTeam(oldSelections.team);
+            if (oldSelections.team !== normalizedTeamName) {
+                await usedSelection.removeUsedTeam(oldSelections.team);
+            }
         }
 
-        // Add the selections to the unified cycle
-        console.log(`[adminOverrideSelection] Adding new selections: ${mainDriver}, ${reserveDriver}, ${team}`);
-        await usedSelection.addUsedDriver(mainDriver);
-        await usedSelection.addUsedDriver(reserveDriver);
-        await usedSelection.addUsedTeam(team);
+        // Add the selections to the unified cycle (use normalized names)
+        console.log(`[adminOverrideSelection] Adding new selections: ${normalizedMainDriver}, ${normalizedReserveDriver}, ${normalizedTeamName}`);
+        await usedSelection.addUsedDriver(normalizedMainDriver);
+        await usedSelection.addUsedDriver(normalizedReserveDriver);
+        await usedSelection.addUsedTeam(normalizedTeamName);
         await usedSelection.save();
 
         console.log(`[Admin Override] Updated usage tracking for user ${userId} in league ${league.name}`);

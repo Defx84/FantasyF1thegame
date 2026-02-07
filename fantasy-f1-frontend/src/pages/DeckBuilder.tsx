@@ -5,6 +5,7 @@ import { getLeague } from '../services/leagueService';
 import { FaLock, FaCheck, FaTimes, FaRedo, FaChevronLeft, FaChevronRight, FaEdit } from 'react-icons/fa';
 import IconWrapper from '../utils/iconWrapper';
 import { api } from '../services/api';
+import AppLogoSpinner from '../components/AppLogoSpinner';
 import { getCardImagePath } from '../utils/cardImageMapper';
 
 interface DeckBuilderProps {
@@ -387,7 +388,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ leagueId: propLeagueId }) => 
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-500"></div>
+        <AppLogoSpinner size="lg" />
       </div>
     );
   }

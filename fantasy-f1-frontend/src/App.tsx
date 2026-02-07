@@ -45,7 +45,7 @@ const GridPageWrapper: React.FC = () => {
     if (leagueId && user) {
       const fetchData = async () => {
         try {
-          const raceData = await getNextRaceTiming();
+          const raceData = await getNextRaceTiming({ leagueId });
           console.log('Race data:', raceData);
 
           // Get race selections for the current race
@@ -73,6 +73,7 @@ const GridPageWrapper: React.FC = () => {
                   userSelection?.reserveDriver &&
                   userSelection?.team
                 ),
+                isAutoAssigned: userSelection?.isAutoAssigned === true,
                 selections: {
                   mainDriver: userSelection?.mainDriver || null,
                   reserveDriver: userSelection?.reserveDriver || null,
@@ -88,17 +89,16 @@ const GridPageWrapper: React.FC = () => {
                   const raceCards = await getRaceCards(userSelection._id);
                   console.log(`[GridPage] Cards for ${standing.user.username}:`, raceCards);
                   if (raceCards.raceCardSelection) {
-                    // Use transformed cards if available (for Mystery/Random), otherwise use original
-                    const driverCard = raceCards.raceCardSelection.mysteryTransformedCard || 
-                                     raceCards.raceCardSelection.driverCard;
-                    const teamCard = raceCards.raceCardSelection.randomTransformedCard || 
-                                   raceCards.raceCardSelection.teamCard;
-                    
+                    // Pass originals for image (so Mystery card keeps showing Mystery image); pass transformed for label
+                    const rs = raceCards.raceCardSelection;
                     cards = {
-                      driverCard: driverCard,
-                      teamCard: teamCard,
-                      mysteryTransformedCard: raceCards.raceCardSelection.mysteryTransformedCard,
-                      randomTransformedCard: raceCards.raceCardSelection.randomTransformedCard
+                      driverCard: rs.driverCard,
+                      teamCard: rs.teamCard,
+                      mysteryTransformedCard: rs.mysteryTransformedCard,
+                      randomTransformedCard: rs.randomTransformedCard,
+                      targetDriver: rs.targetDriver ?? null,
+                      targetPlayer: rs.targetPlayer ?? null,
+                      targetTeam: rs.targetTeam ?? null
                     };
                     console.log(`[GridPage] Processed cards for ${standing.user.username}:`, cards);
                   } else {

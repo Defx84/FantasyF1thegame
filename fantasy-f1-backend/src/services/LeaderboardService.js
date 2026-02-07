@@ -3,6 +3,7 @@ const RaceSelection = require('../models/RaceSelection');
 const League = require('../models/League');
 const User = require('../models/User');
 const RaceResult = require('../models/RaceResult');
+const RaceCalendar = require('../models/RaceCalendar');
 const { getF1Validation } = require('../constants/f1DataLoader');
 
 class LeaderboardService {
@@ -27,7 +28,13 @@ class LeaderboardService {
             // Get ALL race selections for the league (each league is unique to a single season)
             const selections = await RaceSelection.find({ league: leagueId })
                 .populate('user', 'username')
-                .populate('race', 'round raceName');
+                .populate('race', 'round raceName season');
+
+            // Completed rounds: include selections by round, not by race _id, so orphaned refs (e.g. calendar recreated) still count
+            const completedRaceResults = await RaceResult.find({ season: league.season, status: 'completed' })
+                .select('round raceName')
+                .lean();
+            const completedByRound = new Map(completedRaceResults.map(r => [r.round, r]));
 
             // Get season-aware normalization
             const { normalizeTeamName } = getF1Validation(league.season);
@@ -63,23 +70,16 @@ class LeaderboardService {
 
                 let skippedCount = 0;
                 for (const selection of memberSelections) {
-                    // Only process if all required fields are present and selection.race is not null
-                    if (!selection.mainDriver || !selection.reserveDriver || !selection.team || !selection.race) {
+                    // Only process if all required fields are present (race ref can be orphaned; we use round)
+                    if (!selection.mainDriver || !selection.reserveDriver || !selection.team) {
                         skippedCount++;
                         continue;
                     }
-                    
-                    // Only process if the race is completed (check RaceResult)
-                    // CRITICAL: Filter by both round AND season to avoid cross-season contamination
-                    const raceResult = await RaceResult.findOne({ 
-                        round: selection.round,
-                        season: league.season 
-                    });
-                    if (!raceResult) {
-                        skippedCount++;
-                        continue;
-                    }
-                    if (raceResult.status !== "completed") {
+
+                    // Include by round: if there's a completed RaceResult for this round, count the selection
+                    // (avoids skipping when selection.race points to an old calendar _id after calendar was recreated)
+                    const raceResultForRound = completedByRound.get(selection.round);
+                    if (!raceResultForRound) {
                         skippedCount++;
                         continue;
                     }
@@ -96,10 +96,13 @@ class LeaderboardService {
                         mainDriverStatus: 'FINISHED'
                     };
 
+                    // Race name from selection.race or completed RaceResult (for orphaned refs)
+                    const raceName = (selection.race && selection.race.raceName) || raceResultForRound.raceName || '';
+
                     // Driver race result - always create an entry
                     const driverResult = {
                         round: selection.round,
-                        raceName: selection.race ? selection.race.raceName : '',
+                        raceName,
                         mainDriver: selection.mainDriver,
                         reserveDriver: selection.reserveDriver,
                         mainRacePoints: pb.mainDriverPoints || 0,
@@ -115,7 +118,7 @@ class LeaderboardService {
                     const normalizedTeam = normalizeTeamName(selection.team);
                     const constructorResult = {
                         round: selection.round,
-                        raceName: selection.race ? selection.race.raceName : '',
+                        raceName,
                         team: normalizedTeam,
                         mainRacePoints: pb.teamPoints || 0,
                         sprintPoints: 0,

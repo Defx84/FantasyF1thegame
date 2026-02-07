@@ -4,7 +4,8 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Player } from '../types/player';
 import { getTimeUntilLock, formatTimeLeft } from '../utils/raceUtils';
 import AvatarImage from '../components/Avatar/AvatarImage';
-import { FaQuestionCircle, FaIdCard } from 'react-icons/fa';
+import { FaQuestionCircle } from 'react-icons/fa';
+import { getCardImagePath } from '../utils/cardImageMapper';
 import IconWrapper from '../utils/iconWrapper';
 import { RaceTiming } from '../services/raceService';
 
@@ -37,12 +38,11 @@ const GridPage: React.FC<GridPageProps> = ({ players, raceData, leaderboard, cur
     return () => clearInterval(interval);
   }, [raceData]);
 
-  // Check if cards should be revealed (when race has started)
+  // Check if cards should be revealed (when selections lock)
   useEffect(() => {
-    if (raceData?.race?.startTime) {
-      const raceStartTime = new Date(raceData.race.startTime);
-      const now = new Date();
-      setCardsRevealed(now >= raceStartTime);
+    if (raceData) {
+      const timeUntilLock = getTimeUntilLock(raceData);
+      setCardsRevealed(timeUntilLock <= 0);
     }
   }, [raceData]);
 
@@ -90,70 +90,111 @@ const GridPage: React.FC<GridPageProps> = ({ players, raceData, leaderboard, cur
               {/* Top section with status indicator and username */}
               <div className="flex items-center justify-between mb-3">
                 <h2 className="text-lg font-semibold text-white truncate flex-1">{player.username}</h2>
-                <div
-                  className={`w-4 h-4 rounded-full flex-shrink-0 ${
-                    player.selectionMade ? 'bg-green-500' : 'bg-red-500'
-                  }`}
-                />
+                <div className="flex items-center gap-2">
+                  {player.selectionMade && player.isAutoAssigned && (
+                    <span className="text-xs text-white/70">Auto</span>
+                  )}
+                  <div
+                    className={`w-4 h-4 rounded-full flex-shrink-0 ${
+                      player.selectionMade ? 'bg-green-500' : 'bg-red-500'
+                    }`}
+                  />
+                </div>
               </div>
 
-              {/* Large Avatar Section */}
-              <div className="flex justify-center mb-4 relative">
-                <AvatarImage 
-                  userId={player.id} 
-                  username={player.username} 
-                  size={120} 
-                  className="shadow-lg" 
-                />
-                {/* Card Icons next to Avatar */}
-                {player.cards && (
-                  <div className="absolute -right-2 top-1/2 -translate-y-1/2 flex flex-col gap-2">
-                    {/* Driver Card Icon */}
-                    {player.cards.driverCard ? (
-                      cardsRevealed ? (
-                        <div 
-                          className={`w-8 h-8 rounded flex items-center justify-center text-xs font-bold shadow-lg ${
-                            player.cards.driverCard.tier === 'gold' ? 'bg-yellow-500/90 text-yellow-900' :
-                            player.cards.driverCard.tier === 'silver' ? 'bg-gray-400/90 text-gray-900' :
-                            'bg-amber-600/90 text-amber-900'
-                          }`}
-                          title={player.cards.driverCard.name}
-                        >
-                          <IconWrapper icon={FaIdCard} size={14} />
-                        </div>
-                      ) : (
-                        <div 
-                          className="w-8 h-8 rounded flex items-center justify-center bg-white/30 text-white/80 shadow-lg border border-white/40"
-                          title="Driver card selected (hidden until race starts)"
-                        >
-                          <IconWrapper icon={FaQuestionCircle} size={16} />
-                        </div>
-                      )
-                    ) : null}
-                    {/* Team Card Icon */}
-                    {player.cards.teamCard ? (
-                      cardsRevealed ? (
-                        <div 
-                          className={`w-8 h-8 rounded flex items-center justify-center text-xs font-bold shadow-lg ${
-                            player.cards.teamCard.tier === 'gold' ? 'bg-yellow-500/90 text-yellow-900' :
-                            player.cards.teamCard.tier === 'silver' ? 'bg-gray-400/90 text-gray-900' :
-                            'bg-amber-600/90 text-amber-900'
-                          }`}
-                          title={player.cards.teamCard.name}
-                        >
-                          <IconWrapper icon={FaIdCard} size={14} />
-                        </div>
-                      ) : (
-                        <div 
-                          className="w-8 h-8 rounded flex items-center justify-center bg-white/30 text-white/80 shadow-lg border border-white/40"
-                          title="Team card selected (hidden until race starts)"
-                        >
-                          <IconWrapper icon={FaQuestionCircle} size={16} />
-                        </div>
-                      )
-                    ) : null}
-                  </div>
-                )}
+              {/* Avatar + Cards (side-by-side) — extra gap when cards hidden so they don’t overlap avatar */}
+              <div className="flex justify-center mb-4">
+                <div className="flex flex-col sm:flex-row items-center justify-center gap-6 sm:gap-8">
+                  <AvatarImage 
+                    userId={player.id} 
+                    username={player.username} 
+                    size={96} 
+                    className="shadow-lg flex-shrink-0 sm:scale-[1.25] sm:origin-left" 
+                  />
+                  {player.cards && (
+                    <div className="flex flex-row items-start justify-center gap-4 flex-shrink-0">
+                      {/* Driver Card */}
+                      {player.cards.driverCard ? (
+                        cardsRevealed ? (
+                          <div className="flex flex-col items-center min-h-[152px] sm:min-h-[144px]">
+                            <div
+                              className={`rounded shadow-lg border ${
+                                player.cards.driverCard.tier === 'gold'
+                                  ? 'border-yellow-500'
+                                  : player.cards.driverCard.tier === 'silver'
+                                    ? 'border-gray-300'
+                                    : 'border-amber-600'
+                              }`}
+                              title={player.cards.driverCard.name}
+                            >
+                              <img
+                                src={getCardImagePath(player.cards.driverCard.name, 'driver')}
+                                alt={player.cards.driverCard.name}
+                                className="w-[96px] h-[128px] sm:w-[90px] sm:h-[120px] object-cover object-center rounded"
+                              />
+                            </div>
+                            <div className="min-h-[20px] mt-1 flex items-center justify-center w-full">
+                              {player.cards.driverCard.name === 'Mystery Card' && (player.cards.mysteryTransformedCard?.name != null) && (
+                                <span className="text-[10px] text-white/80 text-center max-w-[96px] truncate" title={player.cards.mysteryTransformedCard?.name ?? undefined}>
+                                  → {player.cards.mysteryTransformedCard.name}
+                                </span>
+                              )}
+                              {player.cards.driverCard.name === 'Switcheroo' && (player.cards.targetDriver != null && player.cards.targetDriver !== '') && (
+                                <span className="text-[10px] text-white/80 text-center max-w-[96px] truncate" title={player.cards.targetDriver}>
+                                  → {player.cards.targetDriver}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <div
+                            className="w-[96px] h-[128px] sm:w-[90px] sm:h-[120px] rounded flex items-center justify-center bg-white/30 text-white/80 shadow-lg border border-white/40"
+                            title="Driver card selected (hidden until selections lock)"
+                          >
+                            <IconWrapper icon={FaQuestionCircle} size={24} />
+                          </div>
+                        )
+                      ) : null}
+                      {/* Team Card */}
+                      {player.cards.teamCard ? (
+                        cardsRevealed ? (
+                          <div className="flex flex-col items-center min-h-[152px] sm:min-h-[144px]">
+                            <div
+                              className={`rounded shadow-lg border ${
+                                player.cards.teamCard.tier === 'gold'
+                                  ? 'border-yellow-500'
+                                  : player.cards.teamCard.tier === 'silver'
+                                    ? 'border-gray-300'
+                                    : 'border-amber-600'
+                              }`}
+                              title={player.cards.teamCard.name}
+                            >
+                              <img
+                                src={getCardImagePath(player.cards.teamCard.name, 'team')}
+                                alt={player.cards.teamCard.name}
+                                className="w-[96px] h-[128px] sm:w-[90px] sm:h-[120px] object-cover object-center rounded"
+                              />
+                            </div>
+                            <div className="min-h-[20px] mt-1 flex items-center justify-center w-full">
+                              {player.cards.teamCard.name === 'Mystery Card' && (player.cards.randomTransformedCard?.name != null) && (
+                                <span className="text-[10px] text-white/80 text-center max-w-[96px] truncate" title={player.cards.randomTransformedCard?.name ?? undefined}>
+                                  → {player.cards.randomTransformedCard.name}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ) : (
+                          <div
+                            className="w-[96px] h-[128px] sm:w-[90px] sm:h-[120px] rounded flex items-center justify-center bg-white/30 text-white/80 shadow-lg border border-white/40"
+                            title="Team card selected (hidden until selections lock)"
+                          >
+                            <IconWrapper icon={FaQuestionCircle} size={24} />
+                          </div>
+                        )
+                      ) : null}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Selections section - compact */}
@@ -162,30 +203,6 @@ const GridPage: React.FC<GridPageProps> = ({ players, raceData, leaderboard, cur
                   <div className="truncate flex items-center gap-2">
                     <span className="font-medium text-white/80">Main:</span>
                     <span className="text-white flex-1">{player.selections?.mainDriver}</span>
-                    {/* Driver Card Icon */}
-                    {player.cards && (
-                      <div className="flex-shrink-0">
-                        {cardsRevealed && player.cards.driverCard ? (
-                          <div 
-                            className={`w-6 h-6 rounded flex items-center justify-center text-xs font-bold ${
-                              player.cards.driverCard.tier === 'gold' ? 'bg-yellow-500/80 text-yellow-900' :
-                              player.cards.driverCard.tier === 'silver' ? 'bg-gray-400/80 text-gray-900' :
-                              'bg-amber-600/80 text-amber-900'
-                            }`}
-                            title={player.cards.driverCard.name}
-                          >
-                            <IconWrapper icon={FaIdCard} size={12} />
-                          </div>
-                        ) : player.cards.driverCard ? (
-                          <div 
-                            className="w-6 h-6 rounded flex items-center justify-center bg-white/20 text-white/60"
-                            title="Card selected (hidden until race starts)"
-                          >
-                            <IconWrapper icon={FaQuestionCircle} size={12} />
-                          </div>
-                        ) : null}
-                      </div>
-                    )}
                   </div>
                   <div className="truncate flex items-center gap-2">
                     <span className="font-medium text-white/80">Reserve:</span>
@@ -194,30 +211,6 @@ const GridPage: React.FC<GridPageProps> = ({ players, raceData, leaderboard, cur
                   <div className="truncate flex items-center gap-2">
                     <span className="font-medium text-white/80">Team:</span>
                     <span className="text-white flex-1">{player.selections?.team}</span>
-                    {/* Team Card Icon */}
-                    {player.cards && (
-                      <div className="flex-shrink-0">
-                        {cardsRevealed && player.cards.teamCard ? (
-                          <div 
-                            className={`w-6 h-6 rounded flex items-center justify-center text-xs font-bold ${
-                              player.cards.teamCard.tier === 'gold' ? 'bg-yellow-500/80 text-yellow-900' :
-                              player.cards.teamCard.tier === 'silver' ? 'bg-gray-400/80 text-gray-900' :
-                              'bg-amber-600/80 text-amber-900'
-                            }`}
-                            title={player.cards.teamCard.name}
-                          >
-                            <IconWrapper icon={FaIdCard} size={12} />
-                          </div>
-                        ) : player.cards.teamCard ? (
-                          <div 
-                            className="w-6 h-6 rounded flex items-center justify-center bg-white/20 text-white/60"
-                            title="Card selected (hidden until race starts)"
-                          >
-                            <IconWrapper icon={FaQuestionCircle} size={12} />
-                          </div>
-                        ) : null}
-                      </div>
-                    )}
                   </div>
                 </div>
               )}
