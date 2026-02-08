@@ -187,9 +187,9 @@ const Dashboard: React.FC = () => {
       <div
         className="fixed inset-0 w-full h-full dashboard-bg dashboard-bg-mobile"
         style={{
-          backgroundImage: isMobile ? 'url("/Dashboard_mobile.png")' : 'url("/Background_dashboard.png")',
+          backgroundImage: isMobile ? 'url("/Background_mobile_9x16.png")' : 'url("/Background_Ultrawide2.0.png")',
           backgroundSize: 'cover',
-          backgroundPosition: 'center center',
+          backgroundPosition: 'center top',
           backgroundRepeat: 'no-repeat',
           backgroundColor: '#000000'
         }}

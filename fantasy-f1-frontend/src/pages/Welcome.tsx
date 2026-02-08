@@ -59,7 +59,7 @@ const Welcome: React.FC = () => {
       <div 
         className="fixed inset-0 bg-black welcome-bg"
         style={{
-          backgroundImage: 'url("/Bacgkground_Ultrawide.png")',
+          backgroundImage: 'url("/Background_Ultrawide2.0.png")',
           backgroundSize: 'cover',
           backgroundPosition: 'center center',
           backgroundRepeat: 'no-repeat',
