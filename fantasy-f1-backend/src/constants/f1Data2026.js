@@ -6,74 +6,19 @@ const driverNormalization2026 = createDriverNormalization(F1_DRIVERS_2026);
 const normalizeDriverName = driverNormalization2026.normalizeDriverName;
 const isValidDriver = driverNormalization2026.isValidDriver;
 
-// 2026 F1 Teams with all their representations
+// 2026 F1 Teams – order follows 2025 constructor standings (McLaren 1st … Alpine 10th), then 2026 entries
 const F1_TEAMS_2026 = [
-    {
-        name: 'Red Bull Racing',
-        shortName: 'Red Bull',
-        displayName: 'Red Bull',
-        alternateNames: ['Red Bull', 'Red Bull Racing']
-    },
-    {
-        name: 'Mercedes',
-        shortName: 'Mercedes',
-        displayName: 'Mercedes',
-        alternateNames: ['Mercedes AMG', 'Mercedes-AMG', 'Mercedes']
-    },
-    {
-        name: 'Ferrari',
-        shortName: 'Ferrari',
-        displayName: 'Ferrari',
-        alternateNames: ['Ferrari']
-    },
-    {
-        name: 'McLaren',
-        shortName: 'McLaren',
-        displayName: 'McLaren',
-        alternateNames: ['McLaren Mercedes', 'McLaren']
-    },
-    {
-        name: 'Aston Martin',
-        shortName: 'Aston Martin',
-        displayName: 'Aston Martin',
-        alternateNames: ['Aston Martin Aramco', 'Aston Martin Racing']
-    },
-    {
-        name: 'Alpine',
-        shortName: 'Alpine',
-        displayName: 'Alpine',
-        alternateNames: ['Alpine Renault', 'Alpine']
-    },
-    {
-        name: 'Williams',
-        shortName: 'Williams',
-        displayName: 'Williams',
-        alternateNames: ['Williams Mercedes', 'Williams']
-    },
-    {
-        name: 'RB',
-        shortName: 'RB',
-        displayName: 'RB',
-        alternateNames: ['Racing Bulls', 'Visa Cash App RB', 'VCARB', 'Visa Cash App Racing Bulls']
-    },
-    {
-        name: 'Haas F1 Team',
-        shortName: 'Haas',
-        displayName: 'Haas',
-        alternateNames: ['Haas Ferrari', 'Haas', 'MoneyGram Haas F1 Team', 'MoneyGram Haas']
-    },
-    {
-        name: 'Audi',
-        shortName: 'Audi',
-        displayName: 'Audi',
-        alternateNames: ['Audi', 'Audi F1 Team', 'Audi Sport']
-    },
-    {
-        name: 'Cadillac',
-        shortName: 'Cadillac',
-        displayName: 'Cadillac',
-        alternateNames: ['Cadillac', 'Cadillac F1 Team', 'Cadillac Racing']
-    }
+    { name: 'McLaren', shortName: 'McLaren', displayName: 'McLaren', alternateNames: ['McLaren Mercedes', 'McLaren'] },
+    { name: 'Mercedes', shortName: 'Mercedes', displayName: 'Mercedes', alternateNames: ['Mercedes AMG', 'Mercedes-AMG', 'Mercedes'] },
+    { name: 'Red Bull Racing', shortName: 'Red Bull', displayName: 'Red Bull', alternateNames: ['Red Bull', 'Red Bull Racing'] },
+    { name: 'Ferrari', shortName: 'Ferrari', displayName: 'Ferrari', alternateNames: ['Ferrari'] },
+    { name: 'Williams', shortName: 'Williams', displayName: 'Williams', alternateNames: ['Williams Mercedes', 'Williams'] },
+    { name: 'RB', shortName: 'RB', displayName: 'RB', alternateNames: ['Racing Bulls', 'Visa Cash App RB', 'VCARB', 'Visa Cash App Racing Bulls'] },
+    { name: 'Aston Martin', shortName: 'Aston Martin', displayName: 'Aston Martin', alternateNames: ['Aston Martin Aramco', 'Aston Martin Racing'] },
+    { name: 'Haas F1 Team', shortName: 'Haas', displayName: 'Haas', alternateNames: ['Haas Ferrari', 'Haas', 'MoneyGram Haas F1 Team', 'MoneyGram Haas'] },
+    { name: 'Audi', shortName: 'Audi', displayName: 'Audi', alternateNames: ['Audi', 'Audi F1 Team', 'Audi Sport', 'Kick Sauber', 'Stake F1 Team Kick Sauber'] },
+    { name: 'Alpine', shortName: 'Alpine', displayName: 'Alpine', alternateNames: ['Alpine Renault', 'Alpine'] },
+    { name: 'Cadillac', shortName: 'Cadillac', displayName: 'Cadillac', alternateNames: ['Cadillac', 'Cadillac F1 Team', 'Cadillac Racing'] }
 ];
 
 // Create a set of all valid team names (normalized)

@@ -1,10 +1,10 @@
-// 2026 F1 Teams with all their representations
+// 2026 F1 Teams – order follows 2025 constructor standings (McLaren 1st … Alpine 10th), then 2026 entries
 export const F1_TEAMS_2026 = [
     {
-        name: 'Red Bull Racing',
-        shortName: 'Red Bull',
-        displayName: 'Red Bull',
-        alternateNames: ['Red Bull', 'Red Bull Racing']
+        name: 'McLaren',
+        shortName: 'McLaren',
+        displayName: 'McLaren',
+        alternateNames: ['McLaren Mercedes', 'McLaren']
     },
     {
         name: 'Mercedes',
@@ -13,28 +13,16 @@ export const F1_TEAMS_2026 = [
         alternateNames: ['Mercedes AMG', 'Mercedes']
     },
     {
+        name: 'Red Bull Racing',
+        shortName: 'Red Bull',
+        displayName: 'Red Bull',
+        alternateNames: ['Red Bull', 'Red Bull Racing']
+    },
+    {
         name: 'Ferrari',
         shortName: 'Ferrari',
         displayName: 'Ferrari',
         alternateNames: ['Ferrari']
-    },
-    {
-        name: 'McLaren',
-        shortName: 'McLaren',
-        displayName: 'McLaren',
-        alternateNames: ['McLaren Mercedes', 'McLaren']
-    },
-    {
-        name: 'Aston Martin',
-        shortName: 'Aston Martin',
-        displayName: 'Aston Martin',
-        alternateNames: ['Aston Martin Aramco', 'Aston Martin Racing']
-    },
-    {
-        name: 'Alpine',
-        shortName: 'Alpine',
-        displayName: 'Alpine',
-        alternateNames: ['Alpine Renault', 'Alpine']
     },
     {
         name: 'Williams',
@@ -49,6 +37,12 @@ export const F1_TEAMS_2026 = [
         alternateNames: ['Racing Bulls', 'Visa Cash App RB', 'VCARB', 'Visa Cash App Racing Bulls']
     },
     {
+        name: 'Aston Martin',
+        shortName: 'Aston Martin',
+        displayName: 'Aston Martin',
+        alternateNames: ['Aston Martin Aramco', 'Aston Martin Racing']
+    },
+    {
         name: 'Haas F1 Team',
         shortName: 'Haas',
         displayName: 'Haas',
@@ -58,7 +52,13 @@ export const F1_TEAMS_2026 = [
         name: 'Audi',
         shortName: 'Audi',
         displayName: 'Audi',
-        alternateNames: ['Audi', 'Audi F1 Team', 'Audi Sport']
+        alternateNames: ['Audi', 'Audi F1 Team', 'Audi Sport', 'Kick Sauber', 'Stake F1 Team Kick Sauber']
+    },
+    {
+        name: 'Alpine',
+        shortName: 'Alpine',
+        displayName: 'Alpine',
+        alternateNames: ['Alpine Renault', 'Alpine']
     },
     {
         name: 'Cadillac',
@@ -68,140 +68,28 @@ export const F1_TEAMS_2026 = [
     }
 ];
 
-// 2026 F1 Drivers with their teams
+// 2026 F1 Drivers – order by team following 2025 constructor standings
 export const F1_DRIVERS_2026 = [
-    {
-        name: 'Max Verstappen',
-        team: 'Red Bull Racing',
-        shortName: 'M. Verstappen',
-        alternateNames: ['M. Verstappen']
-    },
-    {
-        name: 'Isack Hadjar',
-        team: 'Red Bull Racing',
-        shortName: 'I. Hadjar',
-        alternateNames: ['I. Hadjar']
-    },
-    {
-        name: 'George Russell',
-        team: 'Mercedes',
-        shortName: 'G. Russell',
-        alternateNames: ['G. Russell']
-    },
-    {
-        name: 'Kimi Antonelli',
-        team: 'Mercedes',
-        shortName: 'K. Antonelli',
-        alternateNames: ['K. Antonelli', 'A. Antonelli']
-    },
-    {
-        name: 'Charles Leclerc',
-        team: 'Ferrari',
-        shortName: 'C. Leclerc',
-        alternateNames: ['C. Leclerc']
-    },
-    {
-        name: 'Lewis Hamilton',
-        team: 'Ferrari',
-        shortName: 'L. Hamilton',
-        alternateNames: ['L. Hamilton']
-    },
-    {
-        name: 'Lando Norris',
-        team: 'McLaren',
-        shortName: 'L. Norris',
-        alternateNames: ['L. Norris']
-    },
-    {
-        name: 'Oscar Piastri',
-        team: 'McLaren',
-        shortName: 'O. Piastri',
-        alternateNames: ['O. Piastri']
-    },
-    {
-        name: 'Alex Albon',
-        team: 'Williams',
-        shortName: 'A. Albon',
-        alternateNames: ['A. Albon']
-    },
-    {
-        name: 'Carlos Sainz',
-        team: 'Williams',
-        shortName: 'C. Sainz',
-        alternateNames: ['C. Sainz']
-    },
-    {
-        name: 'Liam Lawson',
-        team: 'RB',
-        shortName: 'L. Lawson',
-        alternateNames: ['L. Lawson']
-    },
-    {
-        name: 'Arvid Lindblad',
-        team: 'RB',
-        shortName: 'A. Lindblad',
-        alternateNames: ['A. Lindblad']
-    },
-    {
-        name: 'Fernando Alonso',
-        team: 'Aston Martin',
-        shortName: 'F. Alonso',
-        alternateNames: ['F. Alonso']
-    },
-    {
-        name: 'Lance Stroll',
-        team: 'Aston Martin',
-        shortName: 'L. Stroll',
-        alternateNames: ['L. Stroll']
-    },
-    {
-        name: 'Esteban Ocon',
-        team: 'Haas F1 Team',
-        shortName: 'E. Ocon',
-        alternateNames: ['E. Ocon']
-    },
-    {
-        name: 'Oliver Bearman',
-        team: 'Haas F1 Team',
-        shortName: 'O. Bearman',
-        alternateNames: ['O. Bearman']
-    },
-    {
-        name: 'Nico Hülkenberg',
-        team: 'Audi',
-        shortName: 'N. Hulkenberg',
-        alternateNames: ['N. Hulkenberg', 'N. Hülkenberg']
-    },
-    {
-        name: 'Gabriel Bortoleto',
-        team: 'Audi',
-        shortName: 'G. Bortoleto',
-        alternateNames: ['G. Bortoleto']
-    },
-    {
-        name: 'Pierre Gasly',
-        team: 'Alpine',
-        shortName: 'P. Gasly',
-        alternateNames: ['P. Gasly']
-    },
-    {
-        name: 'Franco Colapinto',
-        team: 'Alpine',
-        shortName: 'F. Colapinto',
-        alternateNames: ['F. Colapinto']
-    },
-    {
-        name: 'Sergio Pérez',
-        team: 'Cadillac',
-        shortName: 'S. Perez',
-        alternateNames: ['S. Perez', 'S. Pérez']
-    },
-    {
-        name: 'Valtteri Bottas',
-        team: 'Cadillac',
-        shortName: 'V. Bottas',
-        alternateNames: ['V. Bottas']
-    }
+    { name: 'Lando Norris', team: 'McLaren', shortName: 'L. Norris', alternateNames: ['L. Norris'] },
+    { name: 'Oscar Piastri', team: 'McLaren', shortName: 'O. Piastri', alternateNames: ['O. Piastri'] },
+    { name: 'George Russell', team: 'Mercedes', shortName: 'G. Russell', alternateNames: ['G. Russell'] },
+    { name: 'Kimi Antonelli', team: 'Mercedes', shortName: 'K. Antonelli', alternateNames: ['K. Antonelli', 'A. Antonelli'] },
+    { name: 'Max Verstappen', team: 'Red Bull Racing', shortName: 'M. Verstappen', alternateNames: ['M. Verstappen'] },
+    { name: 'Isack Hadjar', team: 'Red Bull Racing', shortName: 'I. Hadjar', alternateNames: ['I. Hadjar'] },
+    { name: 'Charles Leclerc', team: 'Ferrari', shortName: 'C. Leclerc', alternateNames: ['C. Leclerc'] },
+    { name: 'Lewis Hamilton', team: 'Ferrari', shortName: 'L. Hamilton', alternateNames: ['L. Hamilton'] },
+    { name: 'Alex Albon', team: 'Williams', shortName: 'A. Albon', alternateNames: ['A. Albon'] },
+    { name: 'Carlos Sainz', team: 'Williams', shortName: 'C. Sainz', alternateNames: ['C. Sainz'] },
+    { name: 'Liam Lawson', team: 'RB', shortName: 'L. Lawson', alternateNames: ['L. Lawson'] },
+    { name: 'Arvid Lindblad', team: 'RB', shortName: 'A. Lindblad', alternateNames: ['A. Lindblad'] },
+    { name: 'Fernando Alonso', team: 'Aston Martin', shortName: 'F. Alonso', alternateNames: ['F. Alonso'] },
+    { name: 'Lance Stroll', team: 'Aston Martin', shortName: 'L. Stroll', alternateNames: ['L. Stroll'] },
+    { name: 'Esteban Ocon', team: 'Haas F1 Team', shortName: 'E. Ocon', alternateNames: ['E. Ocon'] },
+    { name: 'Oliver Bearman', team: 'Haas F1 Team', shortName: 'O. Bearman', alternateNames: ['O. Bearman'] },
+    { name: 'Nico Hülkenberg', team: 'Audi', shortName: 'N. Hulkenberg', alternateNames: ['N. Hulkenberg', 'N. Hülkenberg'] },
+    { name: 'Gabriel Bortoleto', team: 'Audi', shortName: 'G. Bortoleto', alternateNames: ['G. Bortoleto'] },
+    { name: 'Pierre Gasly', team: 'Alpine', shortName: 'P. Gasly', alternateNames: ['P. Gasly'] },
+    { name: 'Franco Colapinto', team: 'Alpine', shortName: 'F. Colapinto', alternateNames: ['F. Colapinto'] },
+    { name: 'Sergio Pérez', team: 'Cadillac', shortName: 'S. Perez', alternateNames: ['S. Perez', 'S. Pérez'] },
+    { name: 'Valtteri Bottas', team: 'Cadillac', shortName: 'V. Bottas', alternateNames: ['V. Bottas'] }
 ];
-
-
