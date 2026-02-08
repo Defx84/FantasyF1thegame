@@ -35,7 +35,9 @@ const createLeague = async (req, res) => {
     try {
         const { name, description } = req.body;
         const code = await generateLeagueCode();
-        const season = new Date().getFullYear();
+        // New leagues use 2026 season (explicit so server date/cache never yields test year e.g. 3026)
+        const currentYear = new Date().getFullYear();
+        const season = (currentYear >= 2025 && currentYear <= 2026) ? 2026 : currentYear;
 
         const league = new League({
             name,

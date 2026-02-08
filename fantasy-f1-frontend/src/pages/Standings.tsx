@@ -462,7 +462,7 @@ const Standings: React.FC = () => {
           <h1 className="text-3xl md:text-4xl font-extrabold text-white mb-2">Championship Standings</h1>
           <div className="flex items-center justify-between mb-4">
             <div className="text-lg text-white/80 flex items-center gap-2">
-              Season {leaderboard.season}
+              Season {leaderboard.season >= 3000 ? 2026 : leaderboard.season}
               <div className="relative group ml-2">
                 <FaInfoCircleIcon className="text-yellow-300 text-xl cursor-pointer" />
                 <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-3 w-72 bg-black/90 text-white text-sm rounded-lg shadow-lg px-4 py-2 opacity-0 group-hover:opacity-100 pointer-events-none group-hover:pointer-events-auto transition-opacity duration-200 z-50 border border-yellow-300"
