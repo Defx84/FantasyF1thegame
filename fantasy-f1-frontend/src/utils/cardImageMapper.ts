@@ -9,33 +9,33 @@ interface CardImageMap {
   [key: string]: string;
 }
 
-// Driver card name to image filename mapping
+// Driver card name to image filename mapping (using _2 versions)
 const driverCardImageMap: CardImageMap = {
-  '2× Points': 'Gold_X2.png',
-  'Mirror': 'Gold_Mirror.png',
-  'Switcheroo': 'Gold_Switcheroo.png',
-  'Teamwork': 'Gold_Teamwork.png',
-  'Team Orders': 'Silver_Team_Orders.png',
-  'The lift': 'Silver_The_Lift.png',
-  'Mystery Card': 'Silver_Mistery.png', // Note: image is "Mistery" not "Mystery"
-  'Top 5 Boost': 'Silver_Top_5.png',
-  'Top 10 Boost': 'Bronze_Top_10.png',
-  '+3 Points': 'Bronze_+3.png',
-  'Competitiveness': 'Bronze_Competitiveness.png',
-  'Bottom 5': 'Bronze_Bottom_5.png'
+  '2× Points': 'Gold_X2_2.png',
+  'Mirror': 'Gold_Mirror_2.png',
+  'Switcheroo': 'Gold_Switcheroo_2.png',
+  'Teamwork': 'Gold_Teamwork_2.png',
+  'Team Orders': 'Silver_Team_Orders_2.png',
+  'The lift': 'Silver_The_Lift_2.png',
+  'Mystery Card': 'Silver_Mistery_2.png', // Note: image is "Mistery" not "Mystery"
+  'Top 5 Boost': 'Silver_Top_5_2.png',
+  'Top 10 Boost': 'Bronze_Top_10_2.png',
+  '+3 Points': 'Bronze_+3_2.png',
+  'Competitiveness': 'Bronze_Competitiveness_2.png',
+  'Bottom 5': 'Bronze_Bottom_5_2.png'
 };
 
-// Team card name to image filename mapping
+// Team card name to image filename mapping (using _2 versions)
 const teamCardImageMap: CardImageMap = {
-  'Espionage': 'Gold_Espionage.png',
-  'Podium': 'Gold_Podium.png',
-  'Top 5': 'Gold_Top_5.png',
-  'Undercut': 'Silver_Undercut.png',
-  'Top 10': 'Silver_Top_10.png',
-  'Mystery Card': 'Silver_Mistery.png',
-  'Sponsors': 'Bronze_Spomsors.png', // Note: filename has typo "Spomsors"
-  'Bottom 5': 'Bronze_Bottom_5.png',
-  'Last Place Bonus': 'Bronze_Last_but_not_least.png' // Actual filename differs
+  'Espionage': 'Gold_Espionage_2.png',
+  'Podium': 'Gold_Podium_2.png',
+  'Top 5': 'Gold_Top_5_2.png',
+  'Undercut': 'Silver_Undercut_2.png',
+  'Top 10': 'Silver_Top_10_2.png',
+  'Mystery Card': 'Silver_Mistery_2.png',
+  'Sponsors': 'Bronze_Spomsors_2.png', // Note: filename has typo "Spomsors"
+  'Bottom 5': 'Bronze_Bottom_5_2.png',
+  'Last Place Bonus': 'Bronze_Last_but_not_least_2.png'
 };
 
 /**

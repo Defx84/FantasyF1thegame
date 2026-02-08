@@ -424,10 +424,10 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ leagueId: propLeagueId }) => 
       />
 
       {/* Content */}
-      <div className="relative z-10 min-h-screen flex flex-col px-4 py-2 md:px-6 md:py-4" style={{ overflow: 'visible', overflowX: 'hidden', overflowY: 'visible' }}>
+      <div className="relative z-10 min-h-screen flex flex-col px-4 py-1 md:px-6 md:py-2" style={{ overflow: 'visible', overflowX: 'hidden', overflowY: 'visible' }}>
         {/* Header */}
-        <div className="mb-2 flex-shrink-0 max-w-7xl mx-auto w-full">
-          <h1 className="text-2xl md:text-3xl font-bold text-white mb-1">Build Your Power Card Deck</h1>
+        <div className="mb-1 flex-shrink-0 max-w-7xl mx-auto w-full">
+          <h1 className="text-xl md:text-2xl font-bold text-white mb-0">Build Your Power Card Deck</h1>
           {isDeckLocked && (
             <div className="flex items-center gap-2 text-yellow-400 mb-2 text-sm">
               <IconWrapper icon={FaLock} />
@@ -439,17 +439,17 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ leagueId: propLeagueId }) => 
         {/* Success/Error Messages */}
         <div className="max-w-7xl mx-auto w-full">
           {successMessage && (
-            <div className="mb-2 p-2 bg-green-500/20 border border-green-500/50 rounded-lg text-green-300 text-sm flex-shrink-0">
+            <div className="mb-1 p-1.5 bg-green-500/20 border border-green-500/50 rounded-lg text-green-300 text-xs flex-shrink-0">
               {successMessage}
             </div>
           )}
           {error && (
-            <div className="mb-2 p-2 bg-red-500/20 border border-red-500/50 rounded-lg text-red-300 text-sm flex-shrink-0">
+            <div className="mb-1 p-1.5 bg-red-500/20 border border-red-500/50 rounded-lg text-red-300 text-xs flex-shrink-0">
               {error}
             </div>
           )}
           {validationErrors.length > 0 && (
-            <div className="mb-2 p-2 bg-red-500/20 border border-red-500/50 rounded-lg flex-shrink-0">
+            <div className="mb-1 p-1.5 bg-red-500/20 border border-red-500/50 rounded-lg flex-shrink-0">
               <ul className="list-disc list-inside text-red-300">
                 {validationErrors.map((err, idx) => (
                   <li key={idx}>{err}</li>
@@ -473,7 +473,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ leagueId: propLeagueId }) => 
           </button>
           <button
             onClick={() => setActiveTab('team')}
-            className={`px-4 py-2 md:px-6 md:py-3 rounded-lg font-bold text-sm md:text-base transition-all backdrop-blur-sm border-2 ${
+            className={`px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-bold text-sm transition-all backdrop-blur-sm border-2 ${
               activeTab === 'team'
                 ? 'bg-red-600 text-white border-red-500 shadow-lg'
                 : 'bg-white/10 text-white/70 hover:bg-white/20 border-white/20'
@@ -484,31 +484,31 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ leagueId: propLeagueId }) => 
         </div>
 
         {/* Stats Bar */}
-        <div className="mb-2 backdrop-blur-sm bg-black/20 rounded-lg p-2 md:p-3 border border-white/10 flex-shrink-0 max-w-7xl mx-auto w-full">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="mb-1 backdrop-blur-sm bg-black/20 rounded-lg px-2 py-1.5 md:px-3 md:py-2 border border-white/10 flex-shrink-0 max-w-7xl mx-auto w-full">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-3">
             <div>
-              <div className="text-white/70 text-sm mb-1">Cards Selected</div>
-              <div className="text-2xl font-bold text-white">
+              <div className="text-white/70 text-xs md:text-sm mb-0.5">Cards Selected</div>
+              <div className="text-lg md:text-xl font-bold text-white">
                 {cardsCount}
               </div>
             </div>
             <div>
               <div className="text-white/70 text-sm mb-1">Slots Used</div>
-              <div className={`text-2xl font-bold ${slotsUsed === maxSlots ? 'text-green-400' : slotsUsed > maxSlots ? 'text-red-400' : 'text-white'}`}>
+              <div className={`text-lg md:text-xl font-bold ${slotsUsed === maxSlots ? 'text-green-400' : slotsUsed > maxSlots ? 'text-red-400' : 'text-white'}`}>
                 {slotsUsed}/{maxSlots}
               </div>
             </div>
             <div>
-              <div className="text-white/70 text-sm mb-1">Slots Remaining</div>
-              <div className={`text-2xl font-bold ${slotsRemaining === 0 ? 'text-green-400' : slotsRemaining < 0 ? 'text-red-400' : 'text-yellow-400'}`}>
+              <div className="text-white/70 text-xs md:text-sm mb-0.5">Slots Remaining</div>
+              <div className={`text-lg md:text-xl font-bold ${slotsRemaining === 0 ? 'text-green-400' : slotsRemaining < 0 ? 'text-red-400' : 'text-yellow-400'}`}>
                 {slotsRemaining}
               </div>
             </div>
             <div>
-              <div className="text-white/70 text-sm mb-1">
+              <div className="text-white/70 text-xs md:text-sm mb-0.5">
                 {activeTab === 'driver' ? 'Gold Driver Cards' : 'Gold Team Cards'}
               </div>
-              <div className={`text-2xl font-bold ${
+              <div className={`text-lg md:text-xl font-bold ${
                 activeTab === 'driver' 
                   ? (goldDriverCardsCount <= 2 ? 'text-green-400' : 'text-red-400')
                   : (goldTeamCardsCount <= 1 ? 'text-green-400' : 'text-red-400')
@@ -521,23 +521,23 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ leagueId: propLeagueId }) => 
 
         {/* Cards Carousel */}
         {currentCards.length === 0 ? (
-          <div className="text-center text-white/70 py-8 flex items-center justify-center max-w-7xl mx-auto w-full">
-            <p className="text-lg">No cards available</p>
+          <div className="text-center text-white/70 py-4 flex items-center justify-center max-w-7xl mx-auto w-full">
+            <p className="text-base">No cards available</p>
           </div>
         ) : (
-          <div className="relative mb-2 max-w-7xl mx-auto w-full" style={{ paddingTop: '20px', paddingBottom: '20px', overflow: 'visible', position: 'relative', zIndex: 10 }}>
+          <div className="relative mb-1 max-w-7xl mx-auto w-full" style={{ paddingTop: '8px', paddingBottom: '8px', overflow: 'visible', position: 'relative', zIndex: 10 }}>
             {/* Cards Container */}
             <div
               ref={carouselRef}
-              className="flex gap-4 overflow-x-auto scrollbar-hide snap-x snap-mandatory cursor-grab relative"
+              className="flex gap-2 md:gap-3 overflow-x-auto scrollbar-hide snap-x snap-mandatory cursor-grab relative"
               style={{
                 scrollBehavior: 'smooth',
                 overflowY: 'visible',
                 overflowX: 'auto',
-                paddingTop: '20px',
-                paddingBottom: '50px',
-                paddingLeft: '16px',
-                paddingRight: '16px',
+                paddingTop: '8px',
+                paddingBottom: '36px',
+                paddingLeft: '12px',
+                paddingRight: '12px',
                 alignItems: 'flex-start'
               }}
               onMouseDown={handleMouseDown}
@@ -566,10 +566,10 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ leagueId: propLeagueId }) => 
                 <div
                   key={card._id}
                   onClick={() => !isDisabled && handleCardClick(card._id, activeTab)}
-                  className={`rounded-lg border-2 transition-all duration-300 snap-center flex flex-col ${
+                  className={`rounded-lg border-2 transition-all duration-300 snap-center flex flex-col bg-transparent ${
                     isCenterCard 
-                      ? 'md:w-56 lg:w-64 z-20 shadow-2xl' 
-                      : 'md:w-40 lg:w-44 z-10'
+                      ? 'md:w-48 lg:w-56 z-20 shadow-2xl' 
+                      : 'md:w-36 lg:w-40 z-10'
                   } ${
                     isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'
                   } ${
@@ -579,23 +579,24 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ leagueId: propLeagueId }) => 
                   }`}
                   style={{
                     borderColor: isSelected ? tierColors[card.tier] : undefined,
-                    transform: isCenterCard ? 'scale(1.1) translateY(-15px)' : 'scale(1)',
+                    transform: isCenterCard ? 'scale(1.05) translateY(-8px)' : 'scale(1)',
                     width: isCenterCard 
-                      ? 'min(88vw, 360px)' 
-                      : 'min(75vw, 300px)',
+                      ? 'min(85vw, 280px)' 
+                      : 'min(72vw, 240px)',
                     aspectRatio: '744 / 1039',
                     height: 'auto',
                     flex: '0 0 auto',
                     flexShrink: 0,
-                    transformOrigin: 'center center'
+                    transformOrigin: 'center center',
+                    backgroundColor: 'transparent'
                   }}
                 >
-                  {/* Card Image Container - Uniform sizing */}
-                  <div className="w-full h-full rounded-lg overflow-hidden relative">
+                  {/* Card Image Container - no background; multiply blends out white from card art */}
+                  <div className="w-full h-full rounded-lg overflow-hidden relative bg-transparent" style={{ mixBlendMode: 'multiply' }}>
                     <img
                       src={getCardImagePath(card.name, activeTab)}
                       alt={card.name}
-                      className="w-full h-full object-contain object-center"
+                      className="w-full h-full object-contain object-center bg-transparent"
                       onError={(e) => {
                         // Fallback to data URI placeholder if image doesn't exist
                         const target = e.target as HTMLImageElement;
@@ -632,7 +633,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ leagueId: propLeagueId }) => 
             </div>
 
             {/* Navigation Arrows - At bottom of cards container */}
-            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 z-20 flex gap-4">
+            <div className="absolute bottom-1 left-1/2 -translate-x-1/2 z-20 flex gap-2">
               <button
                 onClick={() => {
                   if (carouselRef.current) {
@@ -660,7 +661,7 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ leagueId: propLeagueId }) => 
         )}
 
         {/* Action Buttons */}
-        <div className="flex gap-4 justify-center flex-shrink-0 mt-2 max-w-7xl mx-auto w-full">
+        <div className="flex gap-3 justify-center flex-shrink-0 mt-1 max-w-7xl mx-auto w-full">
           {existingDeck && !isEditing && (
             <button
               onClick={() => setIsEditing(true)}
