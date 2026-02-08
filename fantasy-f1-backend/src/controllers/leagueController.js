@@ -77,6 +77,11 @@ const joinLeague = async (req, res) => {
             return res.status(400).json({ message: 'Already a member of this league' });
         }
 
+        const maxMembers = league.settings?.maxMembers ?? 20;
+        if (league.members.length >= maxMembers) {
+            return res.status(400).json({ message: 'League is full' });
+        }
+
         league.members.push(userId);
         await league.save();
 
