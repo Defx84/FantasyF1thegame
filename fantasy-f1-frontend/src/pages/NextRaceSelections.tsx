@@ -29,6 +29,17 @@ interface Team {
   color: string;
 }
 
+/** Returns true if the hex color is light (use black text for contrast when selected). */
+function isLightColor(hex: string): boolean {
+  const h = (hex || '').replace('#', '');
+  if (h.length !== 6) return false;
+  const r = parseInt(h.slice(0, 2), 16) / 255;
+  const g = parseInt(h.slice(2, 4), 16) / 255;
+  const b = parseInt(h.slice(4, 6), 16) / 255;
+  const luminance = 0.299 * r + 0.587 * g + 0.114 * b;
+  return luminance > 0.7;
+}
+
 const API_BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
 const NextRaceSelections: React.FC = () => {
@@ -516,6 +527,8 @@ const NextRaceSelections: React.FC = () => {
     const slot = getDriverSlot(driver.id);
     const isUsed = isDriverUsed(driver.id);
     const isSelected = slot !== null;
+    const useDarkText = isSelected && isLightColor(driver.teamColor);
+    const textClass = useDarkText ? 'text-black' : (isSelected ? 'text-white' : 'text-white/90');
     
     return (
       <button
@@ -530,14 +543,14 @@ const NextRaceSelections: React.FC = () => {
         disabled={isUsed || isLocked || !!(currentSelections && (currentSelections.mainDriver || currentSelections.reserveDriver || currentSelections.team) && !isEditing)}
       >
         <div className="flex items-center justify-between w-full">
-          <span className={`text-xs font-medium ${isSelected ? 'text-white' : 'text-white/90'}`}>
+          <span className={`text-xs font-medium ${textClass}`}>
             {driver.name}
           </span>
           {isSelected && (
-            <IconWrapper icon={FaCheck} className="text-white text-sm z-10 ml-2" />
+            <IconWrapper icon={FaCheck} className={`${useDarkText ? 'text-black' : 'text-white'} text-sm z-10 ml-2`} />
           )}
           {slot && (
-            <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-white/20 text-white">
+            <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded ${useDarkText ? 'bg-black/20 text-black' : 'bg-white/20 text-white'}`}>
               {slot === 'main' ? 'M' : 'R'}
             </span>
           )}
@@ -554,6 +567,9 @@ const NextRaceSelections: React.FC = () => {
   // Update the renderTeamButton function
   const renderTeamButton = (team: Team) => {
     const isUsed = isTeamUsed(team.id);
+    const teamSelected = isItemSelected('team', team.id);
+    const useDarkText = teamSelected && isLightColor(team.color);
+    const textClass = teamSelected ? (useDarkText ? 'text-black font-medium' : 'text-white font-medium') : '';
     // Debug log
     console.log(`[team] Button:`, {
       teamId: team.id,
@@ -573,11 +589,11 @@ const NextRaceSelections: React.FC = () => {
         disabled={isUsed || isLocked || !!(currentSelections && (currentSelections.mainDriver || currentSelections.reserveDriver || currentSelections.team) && !isEditing)}
       >
         <div className="w-full flex items-center justify-between relative">
-          <span className={`text-xs ${isItemSelected('team', team.id) ? 'text-white font-medium' : ''}`}>
+          <span className={`text-xs ${textClass}`}>
             {team.name}
           </span>
-          {isItemSelected('team', team.id) && (
-            <IconWrapper icon={FaCheck} className="text-white text-xs z-10 ml-2" />
+          {teamSelected && (
+            <IconWrapper icon={FaCheck} className={`${useDarkText ? 'text-black' : 'text-white'} text-xs z-10 ml-2`} />
           )}
           {isUsed && !isItemSelected('team', team.id) && (
             <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-red-600/50 text-red-200">
