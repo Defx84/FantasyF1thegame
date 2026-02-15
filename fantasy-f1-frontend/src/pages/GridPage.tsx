@@ -23,6 +23,20 @@ const GridPage: React.FC<GridPageProps> = ({ players, raceData, leaderboard, cur
   const navigate = useNavigate();
   const { leagueId } = useParams<{ leagueId: string }>();
 
+  // Scroll to top when grid content appears (fixes mobile opening halfway after async load)
+  useEffect(() => {
+    const scrollToTop = () => {
+      window.scrollTo(0, 0);
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+      const root = document.getElementById('root');
+      if (root) root.scrollTop = 0;
+    };
+    scrollToTop();
+    const t = setTimeout(scrollToTop, 150);
+    return () => clearTimeout(t);
+  }, []);
+
   useEffect(() => {
     const updateCountdown = () => {
       const timeUntilLock = getTimeUntilLock(raceData);
