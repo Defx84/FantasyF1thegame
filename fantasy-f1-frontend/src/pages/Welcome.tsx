@@ -2,7 +2,6 @@ import React, { useState, memo } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEnvelope, FaLock, FaTrophy, FaChartLine, FaCar, FaInstagram, FaTimes, FaLayerGroup } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
-import Footer from '../components/Footer';
 
 const TypedEnvelopeIcon = FaEnvelope as unknown as React.FC<{ size?: number; className?: string }>;
 const TypedLockIcon = FaLock as unknown as React.FC<{ size?: number; className?: string }>;
@@ -74,13 +73,13 @@ const Welcome: React.FC = () => {
         }}
       />
 
-      {/* Content wrapper - pb ensures footer never covers Sign up link on mobile */}
-      <div className="relative min-h-screen min-h-[100dvh] h-full overflow-x-hidden flex flex-col md:flex-row pb-28 md:pb-0">
+      {/* Content wrapper */}
+      <div className="relative min-h-screen h-full overflow-x-hidden flex flex-col md:flex-row">
         {/* Semi-transparent overlay */}
         <div className="absolute inset-0 bg-black bg-opacity-30 pointer-events-none" />
 
         {/* Login container */}
-        <div className="relative z-10 w-full md:w-[400px] p-4 md:p-8 flex items-center flex-1 min-h-0">
+        <div className="relative z-10 w-full md:w-[400px] p-4 md:p-8 flex items-center">
           <div className="w-full backdrop-blur-xl bg-white/20 rounded-xl p-8 border border-white/10">
             <div className="text-center mb-4">
               <h1 className="flex flex-col gap-2">
@@ -241,10 +240,6 @@ const Welcome: React.FC = () => {
             </div>
           </div>
         
-        {/* Footer - in flow so it never covers Sign up link on mobile */}
-        <div className="relative z-10 mt-auto shrink-0 w-full">
-          <Footer />
-        </div>
       </div>
 
       {/* How to Play Overlay */}
