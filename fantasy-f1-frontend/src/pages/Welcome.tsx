@@ -74,13 +74,13 @@ const Welcome: React.FC = () => {
         }}
       />
 
-      {/* Content wrapper */}
-      <div className="relative min-h-screen h-full overflow-x-hidden flex flex-col md:flex-row">
+      {/* Content wrapper - pb ensures footer never covers Sign up link on mobile */}
+      <div className="relative min-h-screen min-h-[100dvh] h-full overflow-x-hidden flex flex-col md:flex-row pb-28 md:pb-0">
         {/* Semi-transparent overlay */}
         <div className="absolute inset-0 bg-black bg-opacity-30 pointer-events-none" />
 
         {/* Login container */}
-        <div className="relative z-10 w-full md:w-[400px] p-4 md:p-8 flex items-center">
+        <div className="relative z-10 w-full md:w-[400px] p-4 md:p-8 flex items-center flex-1 min-h-0">
           <div className="w-full backdrop-blur-xl bg-white/20 rounded-xl p-8 border border-white/10">
             <div className="text-center mb-4">
               <h1 className="flex flex-col gap-2">
@@ -241,8 +241,8 @@ const Welcome: React.FC = () => {
             </div>
           </div>
         
-        {/* Footer - positioned inside main container */}
-        <div className="absolute bottom-0 left-0 right-0 z-10">
+        {/* Footer - in flow so it never covers Sign up link on mobile */}
+        <div className="relative z-10 mt-auto shrink-0 w-full">
           <Footer />
         </div>
       </div>
