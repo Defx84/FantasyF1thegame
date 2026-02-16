@@ -74,13 +74,13 @@ const Signup: React.FC = () => {
         }}
       />
 
-      {/* Content wrapper */}
-      <div className="relative min-h-screen flex">
+      {/* Content wrapper - pb ensures footer never covers Sign up button on small screens */}
+      <div className="relative min-h-screen flex flex-col md:flex-row pb-32 md:pb-0">
         {/* Semi-transparent overlay */}
         <div className="absolute inset-0 bg-black bg-opacity-30" />
 
         {/* Signup container */}
-        <div className="relative z-10 w-full md:w-[400px] p-4 md:p-8 flex items-center">
+        <div className="relative z-10 w-full md:w-[400px] p-4 md:p-8 flex items-center flex-1 min-h-0">
           <div className="w-full backdrop-blur-xl bg-white/20 rounded-xl p-8 border border-white/10">
             <div className="text-center mb-8">
               <h1 className="flex flex-col gap-2">
