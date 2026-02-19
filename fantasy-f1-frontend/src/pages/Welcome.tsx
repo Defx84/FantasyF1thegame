@@ -54,9 +54,9 @@ const Welcome: React.FC = () => {
 
   return (
     <>
-      {/* Background wrapper - responsive for mobile and desktop */}
+      {/* Background wrapper - desktop: center top so logo isn't cut; mobile: overridden in CSS */}
       <div 
-        className="fixed inset-0 bg-black welcome-bg"
+        className="fixed inset-0 bg-black welcome-bg welcome-bg-desktop"
         style={{
           backgroundImage: 'url("/Background_Ultrawide2.0.png")',
           backgroundSize: 'cover',
@@ -73,8 +73,8 @@ const Welcome: React.FC = () => {
         }}
       />
 
-      {/* Content wrapper */}
-      <div className="relative min-h-screen h-full overflow-x-hidden flex flex-col md:flex-row">
+      {/* Content wrapper - desktop only: top padding so logo/title not cut */}
+      <div className="relative min-h-screen h-full overflow-x-hidden flex flex-col md:flex-row md:pt-8">
         {/* Semi-transparent overlay */}
         <div className="absolute inset-0 bg-black bg-opacity-30 pointer-events-none" />
 

@@ -79,6 +79,13 @@ body {
   }
 }
 
+/* Desktop only: Welcome background position so logo area isn't cut at top */
+@media (min-width: 769px) {
+  .welcome-bg-desktop {
+    background-position: center top !important;
+  }
+}
+
 /* Mobile background optimization for Welcome page */
 @media (max-width: 768px) {
   .welcome-bg {
