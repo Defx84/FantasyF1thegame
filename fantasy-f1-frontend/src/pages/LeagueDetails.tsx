@@ -93,8 +93,8 @@ const LeagueDetails: React.FC = () => {
         <div className="relative z-10 w-full p-4 md:p-8 flex-1">
           <div className="max-w-6xl mx-auto">
             {/* League Header */}
-            <div className="backdrop-blur-sm bg-white/[0.02] rounded-xl p-6 border border-white/5 mb-6">
-              <h1 className="text-4xl font-bold text-white text-center mb-2">{league.name}</h1>
+            <div className="backdrop-blur-sm bg-white/[0.02] rounded-xl p-6 border border-white/5 mb-6 min-w-0">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white text-center mb-2 break-words hyphens-auto px-1">{league.name}</h1>
               <p className="text-lg text-center text-white/70">Season {league.season}</p>
               {isSeasonEnded && (
                 <div className="mt-4 px-4 py-3 bg-yellow-500/20 border-2 border-yellow-500/50 rounded-lg text-center">
