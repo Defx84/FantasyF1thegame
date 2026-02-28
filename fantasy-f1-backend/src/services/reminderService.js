@@ -411,6 +411,108 @@ async function sendRaceReminderByRound(round) {
   }
 }
 
+// Prizes announcement (one-off campaign: TheFantasyLeague2026 - Winning prizes)
+const PRIZES_ANNOUNCEMENT_SUBJECT = 'TheFantasyLeague2026 - Winning prizes';
+
+function generatePrizesAnnouncementHTML() {
+  return `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; background-color: #f8f9fa; border-radius: 10px;">
+      <!-- Banner (same as weekly reminder) -->
+      <img src="https://thefantasyf1game.com/email-banner.png" 
+           alt="TheFantasyF1Game" 
+           style="max-width: 100%; height: auto; display: block; margin: 0 auto 20px; border-radius: 8px;">
+      <!-- Content -->
+      <h2 style="color: #dc2626; text-align: center;">Hello everyone,</h2>
+      <p style="font-size: 16px; line-height: 1.6;">I am excited to announce that the <strong>Open League - TheFantasyLeague2026</strong>, will now have official prizes for this season.</p>
+      <p style="font-size: 16px; line-height: 1.6;">At the end of the championship:</p>
+      <ul style="font-size: 16px; line-height: 1.8;">
+        <li>The winner of the <strong>Driver's Championship</strong> will receive an official and personalized theFantasyF1game T-shirt.</li>
+        <li>The winner of the <strong>Team Championship</strong> will receive an official and personalized theFantasyF1game T-shirt.</li>
+      </ul>
+      <p style="font-size: 16px; line-height: 1.6;">There is now less than one week before the 2026 season begins, so this is the perfect time to secure your spot.</p>
+      <p style="font-size: 16px; line-height: 1.6;">If you would like to join the public league and compete for the prizes, use the code below inside the app:</p>
+      <p style="font-size: 1.2em; font-weight: bold; letter-spacing: 0.1em; color: #dc2626; text-align: center;">O50NQV</p>
+      <p style="font-size: 16px; line-height: 1.6;">This is our way of rewarding the most consistent and strategic players in the league. With the start approaching, every race weekend will matter from the very first lights out.</p>
+      <p style="font-size: 16px; line-height: 1.6;">If you're already competing, it's time to prepare.<br>If you haven't joined yet, now is the moment.</p>
+      <p style="font-size: 16px; line-height: 1.6;">Good luck to everyone — and may the best strategist win.</p>
+      <p style="font-size: 16px; line-height: 1.6;"><strong>Federico</strong><br>Founder, theFantasyF1game</p>
+      <hr style="border: none; border-top: 1px solid #ddd; margin: 30px 0;">
+      <p style="font-size: 14px; color: #666;">Follow us on Instagram at <a href="https://instagram.com/thefantasyf1game" style="color: #dc2626;">@thefantasyf1game</a></p>
+    </div>
+  `;
+}
+
+function generatePrizesAnnouncementText() {
+  return `Hello everyone,
+
+I am excited to announce that the Open League - TheFantasyLeague2026, will now have official prizes for this season.
+
+At the end of the championship:
+
+• The winner of the Driver's Championship will receive an official and personalized theFantasyF1game T-shirt.
+• The winner of the Team Championship will receive an official and personalized theFantasyF1game T-shirt.
+
+There is now less than one week before the 2026 season begins, so this is the perfect time to secure your spot.
+
+If you would like to join the public league and compete for the prizes, use the code below inside the app: O50NQV
+
+This is our way of rewarding the most consistent and strategic players in the league. With the start approaching, every race weekend will matter from the very first lights out.
+
+If you're already competing, it's time to prepare.
+If you haven't joined yet, now is the moment.
+
+Good luck to everyone — and may the best strategist win.
+
+Federico
+Founder, theFantasyF1game`;
+}
+
+/**
+ * Send prizes announcement email to all users with an email address.
+ * Used by cron on Sunday 1 March 2026 at 10:00 UK time.
+ */
+async function sendPrizesAnnouncementEmails() {
+  try {
+    console.log('📧 Starting prizes announcement email process...');
+
+    const users = await User.find({})
+      .select('email username')
+      .sort({ username: 1 })
+      .lean();
+
+    const withEmail = users.filter((u) => u.email && String(u.email).trim());
+    console.log(`👥 Found ${withEmail.length} users with email (total users: ${users.length})`);
+
+    const html = generatePrizesAnnouncementHTML();
+    const text = generatePrizesAnnouncementText();
+    let sent = 0;
+    let failed = 0;
+
+    for (const user of withEmail) {
+      try {
+        await sendEmail({
+          to: user.email.trim(),
+          subject: PRIZES_ANNOUNCEMENT_SUBJECT,
+          html,
+          text
+        });
+        sent++;
+        console.log(`✅ Sent to ${user.username} (${user.email})`);
+        await new Promise((r) => setTimeout(r, 100));
+      } catch (err) {
+        failed++;
+        console.error(`❌ Failed to send to ${user.email}:`, err.message);
+      }
+    }
+
+    console.log(`📧 Prizes announcement complete: ${sent} sent, ${failed} failed`);
+    return { sent, failed };
+  } catch (error) {
+    console.error('❌ Error in prizes announcement process:', error);
+    throw error;
+  }
+}
+
 module.exports = {
   sendReminderEmails,
   getTomorrowsRace,
@@ -419,5 +521,6 @@ module.exports = {
   sendTestReminder,
   generateEmailHTML,
   generateEmailText,
-  sendRaceReminderByRound
+  sendRaceReminderByRound,
+  sendPrizesAnnouncementEmails
 };

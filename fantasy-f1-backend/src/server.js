@@ -22,7 +22,7 @@ const RaceCalendar = require('./models/RaceCalendar');
 const League = require('./models/League');
 const User = require('./models/User');
 const { processRawResults, calculateTeamPoints } = require('./utils/scoringUtils');
-const { sendReminderEmails } = require('./services/reminderService');
+const { sendReminderEmails, sendPrizesAnnouncementEmails } = require('./services/reminderService');
 const AutoSelectionService = require('./services/AutoSelectionService');
 
 const app = require('./app');
@@ -286,6 +286,20 @@ app.listen(port, async () => {
                 console.error('❌ Error during scheduled season archive generation:', error);
             }
         }, { timezone: 'Europe/London' });
+
+        // Prizes announcement: Sunday 1 March 2026 at 10:00 UK time (one-off campaign)
+        cron.schedule('0 10 1 3 *', async () => {
+            const today = new Date();
+            if (today.getDate() !== 1 || today.getMonth() !== 2 || today.getFullYear() !== 2026) return;
+            console.log('📧 Running prizes announcement emails (1 March 2026 10:00 UK)...');
+            try {
+                const result = await sendPrizesAnnouncementEmails();
+                console.log(`✅ Prizes announcement: ${result.sent} sent, ${result.failed} failed`);
+            } catch (error) {
+                console.error('❌ Error during prizes announcement:', error);
+            }
+        }, { timezone: 'Europe/London' });
+        console.log('📧 Prizes announcement email scheduled for 1 March at 10:00 UK time');
         
         console.log('📧 Season archive email scheduled via cron for December 7th at 20:40 UK time');
 
