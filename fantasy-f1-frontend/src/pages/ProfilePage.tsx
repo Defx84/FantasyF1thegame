@@ -674,6 +674,8 @@ const ProfilePage: React.FC = () => {
                         <span className="font-semibold text-white/90 text-base leading-tight">{league.name}</span>
                         <span className="text-xs text-white/70 leading-tight">Season {league.season}</span>
                         <span className="text-xs text-white/50 leading-tight">Code: {league.code}</span>
+                        <span className="text-xs text-white/60 leading-tight">Players: {league.members?.length ?? 0}</span>
+                        <span className="text-xs text-white/60 leading-tight">League admin: {league.owner?.username ?? '—'}</span>
                       </div>
                       {/* Center: Round input + Assign Real Points and Update Board */}
                       <div className="flex flex-row items-center flex-1 justify-center gap-1">

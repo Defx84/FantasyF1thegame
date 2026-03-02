@@ -31,10 +31,13 @@ router.post('/initialize-leaderboard/:leagueId/:season', isAppAdmin, async (req,
   }
 });
 
-// Get all leagues (app admin only)
+// Get all leagues (app admin only) – include owner username and member count for admin panel
 router.get('/all-leagues', isAppAdmin, async (req, res) => {
   try {
-    const leagues = await League.find({}).sort({ createdAt: -1 });
+    const leagues = await League.find({})
+      .populate('owner', 'username')
+      .sort({ createdAt: -1 })
+      .lean();
     res.json(leagues);
   } catch (err) {
     res.status(500).json({ error: err.message });
