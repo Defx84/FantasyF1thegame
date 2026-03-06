@@ -174,9 +174,9 @@ const NextRaceSelections: React.FC = () => {
             teamCards: deck.teamCards || []
           });
 
-          // Fetch used cards for the season
+          // Fetch used cards for the season (exclude current round so selected cards don't show as used until round is played)
           try {
-            const usedCardsData = await getUsedCards(leagueId);
+            const usedCardsData = await getUsedCards(leagueId, round ?? undefined);
             setUsedCardIds(usedCardsData.usedCardIds || []);
           } catch (err) {
             console.error('Error fetching used cards:', err);

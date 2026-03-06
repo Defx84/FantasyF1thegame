@@ -166,11 +166,13 @@ const getPlayerCards = async (req, res) => {
 /**
  * Get used card IDs for a season
  * GET /api/leagues/:leagueId/cards/used
+ * Query: excludeRound (optional) - round number to exclude from results (e.g. current round so cards selected for this race don't show as used until played)
  */
 const getUsedCards = async (req, res) => {
   try {
     const leagueId = req.params.id || req.params.leagueId;
     const userId = req.user._id;
+    const excludeRound = req.query.excludeRound != null ? parseInt(req.query.excludeRound, 10) : null;
 
     // Verify league exists and user is a member
     const league = await League.findById(leagueId);
@@ -186,15 +188,23 @@ const getUsedCards = async (req, res) => {
     }
 
     // Get used cards for this season
-    const usedCards = await CardUsage.find({
+    const query = {
       user: userId,
       league: leagueId,
       season: league.season
-    }).select('card'); // Only select the card ID field
+    };
+    // Exclude current round so cards selected for this race don't show as "used" until the round is played/locked
+    if (typeof excludeRound === 'number' && !isNaN(excludeRound)) {
+      query.race = { $ne: excludeRound };
+    }
+
+    const usedCards = await CardUsage.find(query)
+      .select('card') // Only select the card ID field
+      .lean();
 
     // Extract used card IDs
     const usedCardIds = usedCards
-      .filter(uc => uc.card) // Filter out any null/undefined cards
+      .filter(uc => uc.card)
       .map(uc => uc.card.toString()); // Convert ObjectId to string
 
     res.json({

@@ -177,9 +177,14 @@ export interface UsedCardsResponse {
   season: number;
 }
 
-export const getUsedCards = async (leagueId: string): Promise<UsedCardsResponse> => {
+/**
+ * Get used card IDs for a season
+ * @param excludeRound - optional round to exclude (e.g. current round so cards selected for this race don't show as used until played)
+ */
+export const getUsedCards = async (leagueId: string, excludeRound?: number): Promise<UsedCardsResponse> => {
   try {
-    const response = await api.get(`/api/league/${leagueId}/cards/used`);
+    const params = excludeRound != null ? { params: { excludeRound } } : undefined;
+    const response = await api.get(`/api/league/${leagueId}/cards/used`, params);
     return response.data;
   } catch (error) {
     throw error;
