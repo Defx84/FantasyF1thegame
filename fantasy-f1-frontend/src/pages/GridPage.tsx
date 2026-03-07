@@ -195,6 +195,11 @@ const GridPage: React.FC<GridPageProps> = ({ players, raceData, leaderboard, cur
                                   → {player.cards.randomTransformedCard.name}
                                 </span>
                               )}
+                              {player.cards.teamCard.name === 'Espionage' && (player.cards.targetTeam != null && player.cards.targetTeam !== '') && (
+                                <span className="text-[10px] text-white/80 text-center max-w-[96px] truncate" title={player.cards.targetTeam}>
+                                  → {player.cards.targetTeam}
+                                </span>
+                              )}
                             </div>
                           </div>
                         ) : (
