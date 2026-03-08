@@ -1,10 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { getPlayerCards, getPlayerDeck, selectDeck, Card } from '../services/cardService';
+import { getPlayerCards, getPlayerDeck, getDeckLockStatus, selectDeck, Card } from '../services/cardService';
 import { getLeague } from '../services/leagueService';
 import { FaLock, FaCheck, FaTimes, FaRedo, FaChevronLeft, FaChevronRight, FaEdit } from 'react-icons/fa';
 import IconWrapper from '../utils/iconWrapper';
-import { api } from '../services/api';
 import AppLogoSpinner from '../components/AppLogoSpinner';
 import { getCardImagePath } from '../utils/cardImageMapper';
 
@@ -143,28 +142,12 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ leagueId: propLeagueId }) => 
         return;
       }
 
-      // Check if deck is locked (before first race deadline - 5 minutes before first race qualifying)
-      // Get the first race of the season to check the deadline
+      // Deck lock status from backend (includes extension until next race for authorized users)
       try {
-        const racesResponse = await api.get(`/api/race/league/${leagueId}`);
-        const races = racesResponse.data;
-        if (Array.isArray(races) && races.length > 0) {
-          // Find the first race (lowest round number)
-          const firstRace = races.sort((a: any, b: any) => a.round - b.round)[0];
-          if (firstRace) {
-            // Use sprint qualifying if sprint weekend, otherwise regular qualifying
-            const qualifyingTime = firstRace.isSprintWeekend && firstRace.sprintQualifyingStart
-              ? new Date(firstRace.sprintQualifyingStart)
-              : new Date(firstRace.qualifyingStart);
-            
-            const deadline = new Date(qualifyingTime.getTime() - 5 * 60 * 1000); // 5 minutes before
-            const now = new Date();
-            setIsDeckLocked(now >= deadline);
-          }
-        }
-      } catch (error) {
-        console.error('Error checking deck lock status:', error);
-        // If we can't check, assume unlocked (safer default)
+        const lockStatus = await getDeckLockStatus(leagueId);
+        setIsDeckLocked(!lockStatus.allowedToBuild);
+      } catch (err) {
+        console.error('Error checking deck lock status:', err);
         setIsDeckLocked(false);
       }
 

@@ -218,6 +218,89 @@ const getUsedCards = async (req, res) => {
 };
 
 /**
+ * Get deck lock status for the current user (for 2026+ leagues).
+ * Returns whether the deck is locked and whether the user is allowed to build (e.g. extension until next race).
+ * GET /api/leagues/:leagueId/cards/deck-lock-status
+ */
+const getDeckLockStatus = async (req, res) => {
+  try {
+    const leagueId = req.params.id || req.params.leagueId;
+    const userId = req.user._id;
+    const username = (req.user.username || '').toLowerCase();
+
+    const league = await League.findById(leagueId);
+    if (!league) {
+      return res.status(404).json({ error: 'League not found' });
+    }
+
+    const isMember = league.members.some(member =>
+      member.toString() === userId.toString()
+    );
+    if (!isMember && league.owner.toString() !== userId.toString()) {
+      return res.status(403).json({ error: 'You must be a member of this league' });
+    }
+
+    if (league.season < 2026) {
+      return res.json({
+        success: true,
+        locked: false,
+        allowedToBuild: true,
+        nextExtensionDeadline: null
+      });
+    }
+
+    const currentDate = new Date();
+    const firstRace = await RaceCalendar.findOne({ season: league.season }).sort({ date: 1 });
+    let locked = false;
+    let allowedToBuild = true;
+    let nextExtensionDeadline = null;
+
+    if (firstRace) {
+      const qualifyingTime = firstRace.isSprintWeekend && firstRace.sprintQualifyingStart
+        ? new Date(firstRace.sprintQualifyingStart)
+        : new Date(firstRace.qualifyingStart);
+      const firstRaceLockTime = new Date(qualifyingTime.getTime() - 5 * 60 * 1000);
+      locked = currentDate >= firstRaceLockTime;
+
+      if (locked) {
+        const extensionUsers = (process.env.DECK_BUILD_EXTENSION_USERS || '')
+          .split(',')
+          .map(u => u.trim().toLowerCase())
+          .filter(Boolean);
+        const hasExtension = extensionUsers.includes(username);
+        if (hasExtension) {
+          const nextRace = await RaceCalendar.findOne({
+            season: league.season,
+            $or: [
+              { qualifyingStart: { $gt: currentDate } },
+              { sprintQualifyingStart: { $gt: currentDate } }
+            ]
+          }).sort({ qualifyingStart: 1 });
+          if (nextRace) {
+            const nextQualifying = nextRace.isSprintWeekend && nextRace.sprintQualifyingStart
+              ? new Date(nextRace.sprintQualifyingStart)
+              : new Date(nextRace.qualifyingStart);
+            nextExtensionDeadline = new Date(nextQualifying.getTime() - 5 * 60 * 1000);
+            allowedToBuild = currentDate < nextExtensionDeadline;
+          }
+        } else {
+          allowedToBuild = false;
+        }
+      }
+    }
+
+    res.json({
+      success: true,
+      locked,
+      allowedToBuild,
+      nextExtensionDeadline: nextExtensionDeadline ? nextExtensionDeadline.toISOString() : null
+    });
+  } catch (error) {
+    handleError(res, error);
+  }
+};
+
+/**
  * Get player's current deck
  * GET /api/leagues/:leagueId/cards/deck
  */
@@ -294,6 +377,7 @@ const selectDeck = async (req, res) => {
   try {
     const leagueId = req.params.id || req.params.leagueId;
     const userId = req.user._id;
+    const username = req.user.username || '';
     const { driverCardIds, teamCardIds } = req.body;
 
     // Verify league exists and user is a member
@@ -320,13 +404,36 @@ const selectDeck = async (req, res) => {
       const qualifyingTime = firstRace.isSprintWeekend && firstRace.sprintQualifyingStart
         ? new Date(firstRace.sprintQualifyingStart)
         : new Date(firstRace.qualifyingStart);
-      
-      const lockTime = new Date(qualifyingTime.getTime() - 5 * 60 * 1000); // 5 minutes before
+      const firstRaceLockTime = new Date(qualifyingTime.getTime() - 5 * 60 * 1000); // 5 minutes before
 
-      if (currentDate >= lockTime) {
-        return res.status(400).json({ 
-          error: 'Deck cannot be changed after the first race selection deadline. The deck is locked for the entire season.' 
-        });
+      if (currentDate >= firstRaceLockTime) {
+        // Deck is locked; allow if user has deck-build extension until next race deadline
+        const extensionUsers = (process.env.DECK_BUILD_EXTENSION_USERS || '')
+          .split(',')
+          .map(u => u.trim().toLowerCase())
+          .filter(Boolean);
+        const hasExtension = extensionUsers.includes(username.toLowerCase());
+        let nextRaceLockTime = null;
+        if (hasExtension) {
+          const nextRace = await RaceCalendar.findOne({
+            season: league.season,
+            $or: [
+              { qualifyingStart: { $gt: currentDate } },
+              { sprintQualifyingStart: { $gt: currentDate } }
+            ]
+          }).sort({ qualifyingStart: 1 });
+          if (nextRace) {
+            const nextQualifying = nextRace.isSprintWeekend && nextRace.sprintQualifyingStart
+              ? new Date(nextRace.sprintQualifyingStart)
+              : new Date(nextRace.qualifyingStart);
+            nextRaceLockTime = new Date(nextQualifying.getTime() - 5 * 60 * 1000);
+          }
+        }
+        if (!hasExtension || !nextRaceLockTime || currentDate >= nextRaceLockTime) {
+          return res.status(400).json({
+            error: 'Deck cannot be changed after the first race selection deadline. The deck is locked for the entire season.'
+          });
+        }
       }
     }
 
@@ -971,6 +1078,7 @@ module.exports = {
   getPlayerCards,
   getPlayerDeck,
   getUsedCards,
+  getDeckLockStatus,
   selectDeck,
   activateCards,
   getRaceCards

@@ -89,6 +89,26 @@ export const getPlayerDeck = async (leagueId: string): Promise<DeckResponse> => 
 };
 
 /**
+ * Get deck lock status for the current user (whether they can build/edit deck).
+ * Extension users (e.g. joined after first race) may be allowedToBuild until next race deadline.
+ */
+export interface DeckLockStatusResponse {
+  success: boolean;
+  locked: boolean;
+  allowedToBuild: boolean;
+  nextExtensionDeadline: string | null;
+}
+
+export const getDeckLockStatus = async (leagueId: string): Promise<DeckLockStatusResponse> => {
+  try {
+    const response = await api.get(`/api/league/${leagueId}/cards/deck-lock-status`);
+    return response.data;
+  } catch (error) {
+    throw error;
+  }
+};
+
+/**
  * Save/select deck
  */
 export const selectDeck = async (leagueId: string, deck: SelectDeckRequest): Promise<void> => {

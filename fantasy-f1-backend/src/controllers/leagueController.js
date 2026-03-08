@@ -73,6 +73,22 @@ const joinLeague = async (req, res) => {
             return res.status(404).json({ message: 'League not found' });
         }
 
+        // Check if this league is closed to new joins (e.g. JOIN_LOCKED_LEAGUES=TheFantasyLeague2026)
+        const lockedList = (process.env.JOIN_LOCKED_LEAGUES || '')
+            .split(',')
+            .map(s => s.trim().toLowerCase())
+            .filter(Boolean);
+        const leagueNameMatch = (league.name || '').trim().toLowerCase();
+        const leagueCodeMatch = (league.code || '').trim().toLowerCase();
+        const isJoinLocked = lockedList.some(
+            key => key === leagueNameMatch || key === leagueCodeMatch
+        );
+        if (isJoinLocked) {
+            return res.status(400).json({
+                error: 'Sorry, the time to join this league has now expired. You can still create your own or join your friends'
+            });
+        }
+
         if (league.members.includes(userId)) {
             return res.status(400).json({ message: 'Already a member of this league' });
         }
