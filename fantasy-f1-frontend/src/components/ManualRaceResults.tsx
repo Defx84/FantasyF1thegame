@@ -57,8 +57,28 @@ const ManualRaceResults: React.FC<ManualRaceResultsProps> = ({ onClose }) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [positionConflict, setPositionConflict] = useState<string | null>(null);
   const [loadingRaces, setLoadingRaces] = useState(false);
   const [loadingDriversTeams, setLoadingDriversTeams] = useState(false);
+
+  const NON_UNIQUE_STATUSES = new Set(['DNF', 'DNS', 'DSQ']);
+
+  const findPositionConflictDriver = (
+    results: DriverResult[],
+    currentIndex: number,
+    position: number | null,
+    status: string
+  ) => {
+    if (position == null) return null;
+    if (NON_UNIQUE_STATUSES.has(status)) return null;
+
+    return results.find((r, idx) => {
+      if (idx === currentIndex) return false;
+      if (r.position == null) return false;
+      if (NON_UNIQUE_STATUSES.has(r.status)) return false;
+      return r.position === position;
+    });
+  };
 
   // Fetch races when season changes
   useEffect(() => {
@@ -141,8 +161,23 @@ const ManualRaceResults: React.FC<ManualRaceResultsProps> = ({ onClose }) => {
   }, [selectedRace, drivers, teams]);
 
   const handleDriverResultChange = (index: number, field: keyof DriverResult, value: any) => {
+    if (field === 'position') {
+      const nextPosition = value as number | null;
+      const currentStatus = driverResults[index]?.status ?? 'Finished';
+      const conflict = findPositionConflictDriver(driverResults, index, nextPosition, currentStatus);
+      if (conflict) {
+        setPositionConflict(`Position ${nextPosition} has already been assigned to ${conflict.driver}.`);
+        return;
+      }
+    }
+
     const updated = [...driverResults];
-    updated[index] = { ...updated[index], [field]: value };
+    const nextRow = { ...updated[index], [field]: value };
+    if (field === 'status' && NON_UNIQUE_STATUSES.has(String(value))) {
+      // If the driver is DNF/DNS/DSQ, position uniqueness shouldn't apply; keep existing position as-is.
+      // (We intentionally do not auto-clear position to avoid changing behavior unexpectedly.)
+    }
+    updated[index] = nextRow;
     setDriverResults(updated);
   };
 
@@ -153,6 +188,16 @@ const ManualRaceResults: React.FC<ManualRaceResultsProps> = ({ onClose }) => {
   };
 
   const handleSprintDriverResultChange = (index: number, field: keyof DriverResult, value: any) => {
+    if (field === 'position') {
+      const nextPosition = value as number | null;
+      const currentStatus = sprintDriverResults[index]?.status ?? 'Finished';
+      const conflict = findPositionConflictDriver(sprintDriverResults, index, nextPosition, currentStatus);
+      if (conflict) {
+        setPositionConflict(`(Sprint) Position ${nextPosition} has already been assigned to ${conflict.driver}.`);
+        return;
+      }
+    }
+
     const updated = [...sprintDriverResults];
     updated[index] = { ...updated[index], [field]: value };
     setSprintDriverResults(updated);
@@ -243,6 +288,41 @@ const ManualRaceResults: React.FC<ManualRaceResultsProps> = ({ onClose }) => {
         {success && (
           <div className="bg-green-500/20 border border-green-500/50 text-green-400 p-3 rounded-lg mb-4">
             {success}
+          </div>
+        )}
+
+        {positionConflict && (
+          <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+            <div
+              className="absolute inset-0 bg-black/70"
+              onClick={() => setPositionConflict(null)}
+            />
+            <div className="relative w-full max-w-md rounded-xl border border-white/20 bg-gray-900 p-5 shadow-2xl">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-lg font-bold text-white">Position already assigned</h3>
+                  <p className="mt-2 text-sm text-white/80">{positionConflict}</p>
+                  <p className="mt-2 text-xs text-white/60">
+                    Duplicate numeric positions are not allowed, except for DNS/DNF/DSQ.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setPositionConflict(null)}
+                  className="text-white/70 hover:text-white transition-colors"
+                  aria-label="Close"
+                >
+                  <IconWrapper icon={FaTimes} size={18} />
+                </button>
+              </div>
+              <div className="mt-5 flex justify-end">
+                <button
+                  onClick={() => setPositionConflict(null)}
+                  className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                >
+                  OK
+                </button>
+              </div>
+            </div>
           </div>
         )}
 
