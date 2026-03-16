@@ -14,8 +14,11 @@ async function saveRaceResults(round, raceName, raceResults, sprintResults) {
     const processedRaceResults = processRawResults(raceResults, false, season);
     const processedSprintResults = sprintResults ? processRawResults(sprintResults, true, season) : null;
 
-    const teamResults = calculateTeamPoints(processedRaceResults, [], season);
-    const sprintTeamResults = processedSprintResults ? calculateTeamPoints(processedSprintResults, [], season) : null;
+    const teamResults = calculateTeamPoints(
+        processedRaceResults,
+        processedSprintResults || [],
+        season
+    );
 
     const raceData = {
         round,
@@ -23,7 +26,6 @@ async function saveRaceResults(round, raceName, raceResults, sprintResults) {
         results: processedRaceResults,
         teamResults,
         sprintResults: processedSprintResults,
-        sprintTeamResults,
         status: 'completed',
         lastUpdated: new Date()
     };

@@ -279,7 +279,7 @@ async function scrapeMotorsportResultsByType(slug, type) {
             team: normalizeTeamName(result.team) || result.team
         }));
 
-        // Calculate team points using normalized team names
+        // Calculate team points (race-only within a single scrape call)
         const teamResults = calculateTeamPoints(normalizedResults, [], season);
         
         return {

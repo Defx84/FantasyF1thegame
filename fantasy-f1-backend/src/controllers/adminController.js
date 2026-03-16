@@ -710,14 +710,12 @@ exports.saveManualRaceResults = async (req, res) => {
       };
     }) : null;
     
-    // Calculate team points using existing utility
-    const calculatedTeamResults = calculateTeamPoints(processedDriverResults, [], season);
-    const calculatedSprintTeamResults = processedSprintResults 
-      ? calculateTeamPoints(processedSprintResults, [], season)
-      : null;
-    
-    // Always use calculated team results
-    const finalTeamResults = calculatedTeamResults;
+    // Calculate team points (race + sprint when available)
+    const finalTeamResults = calculateTeamPoints(
+      processedDriverResults,
+      processedSprintResults || [],
+      season
+    );
     
     // Prepare race data (include required RaceResult fields from calendar so .save() works)
     const raceData = {
@@ -727,7 +725,6 @@ exports.saveManualRaceResults = async (req, res) => {
       results: processedDriverResults,
       teamResults: finalTeamResults,
       sprintResults: processedSprintResults,
-      sprintTeamResults: calculatedSprintTeamResults,
       status: 'completed', // CRITICAL: Post-save hook uses this to run points + leaderboard update
       isSprintWeekend,
       manuallyEntered: true,

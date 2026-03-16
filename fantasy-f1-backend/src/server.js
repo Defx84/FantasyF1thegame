@@ -91,9 +91,8 @@ async function saveRaceResults(round, raceName, raceResults, sprintResults) {
         const existingRace = await RaceResult.findOne({ round });
         const season = existingRace?.season || new Date().getFullYear();
         
-        // Calculate team points for both race and sprint
-        const teamResults = calculateTeamPoints(raceResults, [], season);
-        const sprintTeamResults = sprintResults ? calculateTeamPoints(sprintResults, [], season) : null;
+        // Calculate team points (race + sprint when available)
+        const teamResults = calculateTeamPoints(raceResults, sprintResults || [], season);
 
         // Process driver results
         const processedRaceResults = raceResults.map(result => ({
@@ -115,7 +114,6 @@ async function saveRaceResults(round, raceName, raceResults, sprintResults) {
             results: processedRaceResults,
             teamResults,
             sprintResults: processedSprintResults,
-            sprintTeamResults,
             status: 'completed', // CRITICAL: Set status to completed to trigger post-save hook
             lastUpdated: new Date()
         };
