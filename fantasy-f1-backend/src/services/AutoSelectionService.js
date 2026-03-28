@@ -196,17 +196,32 @@ class AutoSelectionService {
   async autoAssignSelectionsForNextRace(targetSeason = null) {
     try {
       const now = new Date();
-      
-      // Find the next race whose deadline has passed
+      const graceEnd = new Date(now.getTime() + 5 * 60 * 1000);
+
+      // Find the most recent race whose selection lock has passed (same anchor as autoAssignSelectionsForRace:
+      // sprintQualifyingStart if present, else qualifyingStart; lock = that time minus 5 minutes).
+      //
+      // IMPORTANT: Do not sort by sprintQualifyingStart alone — non-sprint races have null there and sort
+      // after sprint weekends, so findOne keeps returning an old sprint round (e.g. China) instead of Japan.
       const seasonFilter = targetSeason ? { season: targetSeason } : { season: { $gte: new Date().getFullYear() - 1 } };
-      const deadlineField = targetSeason ? 'sprintQualifyingStart' : 'qualifyingStart';
-      const nextRace = await RaceCalendar.findOne({
+
+      const candidates = await RaceCalendar.find({
         $or: [
-          { sprintQualifyingStart: { $lte: new Date(now.getTime() + 5 * 60 * 1000) } },
-          { qualifyingStart: { $lte: new Date(now.getTime() + 5 * 60 * 1000) } }
+          { sprintQualifyingStart: { $lte: graceEnd } },
+          { qualifyingStart: { $lte: graceEnd } }
         ],
         ...seasonFilter
-      }).sort({ [deadlineField]: -1, qualifyingStart: -1 });
+      })
+        .sort({ qualifyingStart: -1, round: -1 })
+        .lean();
+
+      const nextRace =
+        candidates.find((r) => {
+          const anchor = r.sprintQualifyingStart || r.qualifyingStart;
+          if (!anchor) return false;
+          const lockMs = new Date(anchor).getTime() - 5 * 60 * 1000;
+          return Date.now() >= lockMs;
+        }) || null;
 
       if (!nextRace) {
         return {
