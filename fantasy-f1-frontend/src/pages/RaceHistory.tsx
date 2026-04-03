@@ -147,7 +147,7 @@ const RaceHistory: React.FC = () => {
               <div>
                 <h1 className="text-4xl font-bold text-white">Race History</h1>
                 <p className="mt-2 text-white/70 text-sm md:text-base max-w-2xl">
-                  Open a completed race to see every player&apos;s picks, total points, power cards played, and card targets (2026 rules).
+                  Open a completed race to see every player&apos;s picks, driver and team points, power cards played, and card targets (2026 rules).
                 </p>
               </div>
               {leagueSeason && (

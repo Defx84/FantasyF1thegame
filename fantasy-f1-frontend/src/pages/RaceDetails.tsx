@@ -85,14 +85,35 @@ function pointsBreakdownTitle(selection: Selection): string | undefined {
   const parts: string[] = [];
   if (pb.mainDriverPoints != null) parts.push(`Main: ${pb.mainDriverPoints}`);
   if (pb.reserveDriverPoints != null) parts.push(`Reserve: ${pb.reserveDriverPoints}`);
-  if (pb.teamPoints != null) parts.push(`Team: ${pb.teamPoints}`);
+  if (pb.teamPoints != null) parts.push(`Constructor: ${pb.teamPoints}`);
   if (pb.driverCardPoints != null && pb.driverCardPoints !== 0) {
-    parts.push(`Driver card: ${pb.driverCardPoints >= 0 ? '+' : ''}${pb.driverCardPoints}`);
+    parts.push(`Driver card Δ: ${pb.driverCardPoints >= 0 ? '+' : ''}${pb.driverCardPoints}`);
   }
   if (pb.teamCardPoints != null && pb.teamCardPoints !== 0) {
-    parts.push(`Team card: ${pb.teamCardPoints >= 0 ? '+' : ''}${pb.teamCardPoints}`);
+    parts.push(`Team card Δ: ${pb.teamCardPoints >= 0 ? '+' : ''}${pb.teamCardPoints}`);
   }
   return parts.length ? parts.join(' · ') : undefined;
+}
+
+/** Drivers column = main + reserve (final, including driver power-card effects). Team = constructor side. */
+function getPointsSplit(selection: Selection | undefined): {
+  drivers: number | null;
+  team: number | null;
+  hasBreakdown: boolean;
+} {
+  if (!selection || typeof selection.points !== 'number') {
+    return { drivers: null, team: null, hasBreakdown: false };
+  }
+  const pb = selection.pointBreakdown;
+  const hasNums =
+    pb &&
+    (pb.mainDriverPoints != null || pb.reserveDriverPoints != null || pb.teamPoints != null);
+  if (!hasNums) {
+    return { drivers: null, team: null, hasBreakdown: false };
+  }
+  const drivers = (pb!.mainDriverPoints ?? 0) + (pb!.reserveDriverPoints ?? 0);
+  const team = pb!.teamPoints ?? 0;
+  return { drivers, team, hasBreakdown: true };
 }
 
 function formatRaceCardsDisplay(
@@ -412,6 +433,10 @@ const RaceDetails: React.FC = () => {
             <div className="backdrop-blur-sm bg-white/[0.02] rounded-xl border border-white/5 overflow-visible relative">
               {/* Desktop Table View */}
               <div className="hidden md:block">
+                <p className="text-xs text-white/50 px-4 pt-4 leading-relaxed">
+                  <span className="text-cyan-200/85 font-medium">Drivers</span> = main + reserve (after driver power cards).{' '}
+                  <span className="text-violet-200/85 font-medium">Team</span> = constructor (after team power cards).
+                </p>
                 <table className="w-full text-white">
                   <thead>
                     <tr className="border-b border-white/10">
@@ -420,7 +445,18 @@ const RaceDetails: React.FC = () => {
                       <th className="p-4 text-left">Reserve Driver</th>
                       <th className="p-4 text-left">Team</th>
                       <th className="p-4 text-left">Status</th>
-                      <th className="p-4 text-left">Points</th>
+                      <th
+                        className="p-4 text-left"
+                        title="Main + reserve (after driver power cards, if any)"
+                      >
+                        Drivers
+                      </th>
+                      <th
+                        className="p-4 text-left"
+                        title="Constructor points (after team power cards, if any)"
+                      >
+                        Team
+                      </th>
                       <th className="p-4 text-left min-w-[12rem]">Power cards</th>
                       {isAdmin && <th className="p-2 md:p-4 text-left relative group">
                         <span className="flex items-center">
@@ -450,7 +486,7 @@ const RaceDetails: React.FC = () => {
                       if (!Array.isArray(leagueMembers) || leagueMembers.length === 0) {
                         return (
                           <tr>
-                            <td colSpan={isAdmin ? 8 : 7} className="p-4 text-center text-gray-500">
+                            <td colSpan={isAdmin ? 9 : 8} className="p-4 text-center text-gray-500">
                               No league members found
                             </td>
                           </tr>
@@ -604,13 +640,25 @@ const RaceDetails: React.FC = () => {
                                 '-'
                               )}
                             </td>
-                            <td className="p-4 tabular-nums">
-                              <span
-                                className="font-semibold text-emerald-300"
-                                title={selection ? pointsBreakdownTitle(selection) : undefined}
-                              >
-                                {selection && typeof selection.points === 'number' ? selection.points : '—'}
-                              </span>
+                            <td
+                              className="p-4 tabular-nums text-cyan-200/95"
+                              title={selection ? pointsBreakdownTitle(selection) : undefined}
+                            >
+                              {(() => {
+                                const split = getPointsSplit(selection);
+                                if (split.drivers === null) return <span className="text-white/40">—</span>;
+                                return <span className="font-medium">{split.drivers}</span>;
+                              })()}
+                            </td>
+                            <td
+                              className="p-4 tabular-nums text-violet-200/95"
+                              title={selection ? pointsBreakdownTitle(selection) : undefined}
+                            >
+                              {(() => {
+                                const split = getPointsSplit(selection);
+                                if (split.team === null) return <span className="text-white/40">—</span>;
+                                return <span className="font-medium">{split.team}</span>;
+                              })()}
                             </td>
                             <td className="p-4 align-top text-sm">
                               {formatRaceCardsDisplay(selection?.raceCards, leagueSeason)}
@@ -830,15 +878,46 @@ const RaceDetails: React.FC = () => {
 
                         {!isEditing && (
                           <div className="mt-4 pt-3 border-t border-white/10 space-y-3">
-                            <div className="flex flex-col">
-                              <span className="text-sm font-medium text-white/70 mb-1">Points</span>
-                              <span
-                                className="text-xl font-semibold text-emerald-300 tabular-nums"
-                                title={selection ? pointsBreakdownTitle(selection) : undefined}
-                              >
-                                {selection && typeof selection.points === 'number' ? selection.points : '—'}
-                              </span>
+                            <div
+                              className="grid grid-cols-2 gap-2 text-center"
+                              title={selection ? pointsBreakdownTitle(selection) : undefined}
+                            >
+                              <div className="flex flex-col">
+                                <span
+                                  className="text-xs font-medium text-white/60 mb-1"
+                                  title="Main + reserve (after driver power cards)"
+                                >
+                                  Drivers
+                                </span>
+                                <span className="text-lg font-medium text-cyan-200/95 tabular-nums">
+                                  {(() => {
+                                    const split = getPointsSplit(selection);
+                                    return split.drivers === null ? '—' : split.drivers;
+                                  })()}
+                                </span>
+                              </div>
+                              <div className="flex flex-col">
+                                <span
+                                  className="text-xs font-medium text-white/60 mb-1"
+                                  title="Constructor (after team power cards)"
+                                >
+                                  Team
+                                </span>
+                                <span className="text-lg font-medium text-violet-200/95 tabular-nums">
+                                  {(() => {
+                                    const split = getPointsSplit(selection);
+                                    return split.team === null ? '—' : split.team;
+                                  })()}
+                                </span>
+                              </div>
                             </div>
+                            {selection &&
+                              typeof selection.points === 'number' &&
+                              !getPointsSplit(selection).hasBreakdown && (
+                                <p className="text-xs text-white/50 text-center">
+                                  Driver/team split not stored for this race.
+                                </p>
+                              )}
                             <div className="flex flex-col">
                               <span className="text-sm font-medium text-white/70 mb-1">Power cards</span>
                               <div className="text-sm">
