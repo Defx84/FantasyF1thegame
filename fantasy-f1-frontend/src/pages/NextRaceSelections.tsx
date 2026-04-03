@@ -154,14 +154,20 @@ const NextRaceSelections: React.FC = () => {
         reserveDriver: null,
         team: null
       });
-      setIsEditing(!currentSelectionsData || 
-        (!currentSelectionsData.mainDriver && 
-         !currentSelectionsData.reserveDriver && 
-         !currentSelectionsData.team));
-      if (raceTiming) {
-        const timeLeft = getTimeUntilLock(raceTiming);
-        setTimeUntilDeadline(timeLeft);
-        setIsLocked(isSelectionsLocked(raceTiming));
+      if (raceTiming?.calendarStatus === 'cancelled') {
+        setIsLocked(true);
+        setIsEditing(false);
+        setTimeUntilDeadline(0);
+      } else {
+        setIsEditing(!currentSelectionsData || 
+          (!currentSelectionsData.mainDriver && 
+           !currentSelectionsData.reserveDriver && 
+           !currentSelectionsData.team));
+        if (raceTiming) {
+          const timeLeft = getTimeUntilLock(raceTiming);
+          setTimeUntilDeadline(timeLeft);
+          setIsLocked(isSelectionsLocked(raceTiming));
+        }
       }
 
       // Fetch player deck and race cards (only for 2026+ seasons)

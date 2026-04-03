@@ -12,33 +12,11 @@ const ScoringService = require('../services/ScoringService');
 const LeaderboardService = require('../services/LeaderboardService');
 const { getF1Validation } = require('../constants/f1DataLoader');
 const { isCalendarRaceCancelled } = require('../utils/raceCalendarUtils');
+const { resolveNextRaceCalendarDoc } = require('../services/nextRaceCalendarResolve');
 
 // Initialize services
 const scoringService = new ScoringService();
 const leaderboardService = new LeaderboardService();
-
-const getNextRaceByLockTime = async (season, now = new Date()) => {
-    const candidates = await RaceCalendar.find({
-        season,
-        $or: [
-            { sprintQualifyingStart: { $gt: now } },
-            { qualifyingStart: { $gt: now } }
-        ]
-    }).sort({ qualifyingStart: 1, sprintQualifyingStart: 1 });
-
-    let nextRace = null;
-    let nextLockMs = null;
-    for (const race of candidates) {
-        const lockTime = race.sprintQualifyingStart || race.qualifyingStart;
-        const lockMs = new Date(lockTime).getTime();
-        if (lockMs <= now.getTime()) continue;
-        if (!nextLockMs || lockMs < nextLockMs) {
-            nextLockMs = lockMs;
-            nextRace = race;
-        }
-    }
-    return nextRace;
-};
 
 /**
  * Get selections for a race
@@ -322,7 +300,7 @@ const getCurrentSelections = async (req, res) => {
         } else {
             // Fallback to next race by lock time (sprint qualifying/qualifying)
             const now = new Date();
-            const nextRace = await getNextRaceByLockTime(league.season, now);
+            const nextRace = await resolveNextRaceCalendarDoc({ season: league.season, now });
             if (!nextRace) {
                 return res.json({ mainDriver: null, reserveDriver: null, team: null });
             }
@@ -394,11 +372,17 @@ const saveSelections = async (req, res) => {
         // Get the next race to determine the round number
         // IMPORTANT: Filter by league season to ensure we get the correct race (2026, not 2025)
         const now = new Date();
-        const nextRace = await getNextRaceByLockTime(league.season, now);
+        const nextRace = await resolveNextRaceCalendarDoc({ season: league.season, now });
 
         if (!nextRace) {
             return res.status(404).json({ 
                 error: 'No upcoming races found for this season' 
+            });
+        }
+
+        if (isCalendarRaceCancelled(nextRace)) {
+            return res.status(400).json({
+                error: 'This race was cancelled; selections cannot be changed.'
             });
         }
 
