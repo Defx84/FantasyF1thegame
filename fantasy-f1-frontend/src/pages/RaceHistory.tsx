@@ -49,6 +49,7 @@ interface Race {
   date: string;
   round: number;
   season: number;
+  status?: 'scheduled' | 'cancelled';
 }
 
 const RaceHistory: React.FC = () => {
@@ -154,27 +155,36 @@ const RaceHistory: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {races.map((race) => {
                 const isPast = isPastRace(race);
+                const isCancelled = race.status === 'cancelled';
+                const openDetails = isPast && !isCancelled;
                 return (
                   <div
                     key={race._id}
-                    onClick={() => isPast ? navigate(`/league/${leagueId}/race/${race.round}`) : null}
-                    className={`rounded-lg p-6 border backdrop-blur-sm text-white ${
-                      isPast
-                        ? 'bg-white/[0.02] hover:bg-white/[0.05] cursor-pointer border-white/5'
-                        : 'bg-black/30 cursor-not-allowed border-white/5'
+                    onClick={() => (openDetails ? navigate(`/league/${leagueId}/race/${race.round}`) : null)}
+                    className={`rounded-lg p-6 border backdrop-blur-sm text-white relative overflow-hidden ${
+                      isCancelled
+                        ? 'bg-black/40 cursor-default border-white/10 saturate-0 opacity-75'
+                        : isPast
+                          ? 'bg-white/[0.02] hover:bg-white/[0.05] cursor-pointer border-white/5'
+                          : 'bg-black/30 cursor-not-allowed border-white/5'
                     } transition-colors`}
                   >
-                    <div className="flex items-center mb-4">
+                    {isCancelled && (
+                      <div className="pointer-events-none absolute inset-0 z-10 flex items-start justify-center pt-6">
+                        <img src="/Cancelled.svg" alt="" className="max-h-12 w-auto opacity-95" />
+                      </div>
+                    )}
+                    <div className={`flex items-center mb-4 ${isCancelled ? 'opacity-70' : ''}`}>
                       {race.country && COUNTRY_CODE_MAP[race.country] ? (
                         <CountryFlag countryCode={COUNTRY_CODE_MAP[race.country]} svg style={{ width: '2em', height: '2em', marginRight: '0.75em', borderRadius: '0.25em', boxShadow: '0 1px 4px rgba(0,0,0,0.15)' }} title={race.country} />
                       ) : (
                         <IconWrapper icon={isPast ? FaFlagCheckered : FaLock} className={`mr-3 ${isPast ? 'text-red-500' : 'text-gray-600'}`} />
                       )}
-                      <h2 className={`text-xl font-bold ${!isPast && 'text-gray-500'}`}>
+                      <h2 className={`text-xl font-bold ${!isPast && !isCancelled && 'text-gray-500'} ${isCancelled ? 'text-white/80' : ''}`}>
                         {race.raceName}
                       </h2>
                     </div>
-                    <div className="space-y-2">
+                    <div className={`space-y-2 ${isCancelled ? 'opacity-70' : ''}`}>
                       <p className="flex items-center">
                         <span className={`font-medium ${!isPast && 'text-gray-600'}`}>Circuit:</span>
                         <span className={`ml-2 ${!isPast && 'text-gray-500'}`}>{race.circuit}</span>

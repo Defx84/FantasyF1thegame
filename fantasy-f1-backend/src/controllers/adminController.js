@@ -8,6 +8,7 @@ const { normalizedDrivers, normalizedTeams } = require('../utils/validation');
 const { handleError } = require('../utils/errorHandler');
 const { getAllF1Data, getF1Validation } = require('../constants/f1DataLoader');
 const { calculateTeamPoints, calculatePoints } = require('../utils/scoringUtils');
+const { isCalendarRaceCancelled } = require('../utils/raceCalendarUtils');
 
 // Helper function to get driver's team
 function getDriverTeam(driverName, season) {
@@ -524,6 +525,11 @@ exports.triggerManualScraper = async (req, res) => {
 
     console.log(`[Manual Scraper] Found slug: ${slug} for ${raceName}`);
 
+    const calendarForScrape = await RaceCalendar.findOne({ round: parseInt(round, 10) }).sort({ season: -1 });
+    if (isCalendarRaceCancelled(calendarForScrape)) {
+      return res.status(400).json({ message: 'This race is cancelled; scraping is disabled.' });
+    }
+
     // Run the scraper
     console.log(`[Manual Scraper] Starting scraper for ${raceName}...`);
     await runScraper();
@@ -585,7 +591,7 @@ exports.getRacesList = async (req, res) => {
       };
     });
     
-    // Merge calendar races with result status
+    // Merge calendar races with result status (calendarStatus = cancellation; status = RaceResult completion)
     const races = calendarRaces.map(race => ({
       _id: race._id,
       round: race.round,
@@ -593,6 +599,7 @@ exports.getRacesList = async (req, res) => {
       date: race.date,
       season: race.season,
       isSprintWeekend: race.isSprintWeekend,
+      calendarStatus: race.status || 'scheduled',
       status: resultStatusMap[race.round]?.status || 'scheduled',
       manuallyEntered: resultStatusMap[race.round]?.manuallyEntered || false
     }));
@@ -667,6 +674,11 @@ exports.saveManualRaceResults = async (req, res) => {
     // Get existing race to preserve metadata
     const existingRace = await RaceResult.findOne({ round, season });
     const calendarRace = await RaceCalendar.findOne({ round, season });
+    if (isCalendarRaceCancelled(calendarRace)) {
+      return res.status(400).json({
+        message: 'This race is cancelled and cannot be updated.'
+      });
+    }
     const raceName = existingRace?.raceName || calendarRace?.raceName || `Race ${round}`;
     const isSprintWeekend = existingRace?.isSprintWeekend ?? calendarRace?.isSprintWeekend ?? !!sprintResults;
     

@@ -4,7 +4,32 @@ const RaceSelection = require('../models/RaceSelection');
 const RaceResult = require('../models/RaceResult');
 const { handleError } = require('../utils/errorHandler');
 const League = require('../models/League');
+const RaceCalendar = require('../models/RaceCalendar');
 const { initializeLeaderboard } = require('../utils/initializeLeaderboard');
+
+function mergeCancelledRoundsIntoStandings(standings, cancelledPastRaces) {
+    if (!cancelledPastRaces.length) return standings;
+    return standings.map((standing) => {
+        const byRound = new Map((standing.raceResults || []).map((r) => [r.round, r]));
+        for (const c of cancelledPastRaces) {
+            if (!byRound.has(c.round)) {
+                byRound.set(c.round, {
+                    round: c.round,
+                    raceName: c.raceName,
+                    mainRacePoints: 0,
+                    sprintPoints: 0,
+                    totalPoints: 0,
+                    mainDriver: '',
+                    reserveDriver: '',
+                    team: '',
+                    isCalendarCancelled: true
+                });
+            }
+        }
+        const merged = Array.from(byRound.values()).sort((a, b) => a.round - b.round);
+        return { ...standing, raceResults: merged };
+    });
+}
 
 /**
  * Update the league leaderboard with results from a new race
@@ -94,8 +119,17 @@ const getLeagueLeaderboard = async (req, res) => {
             return cardMap.get(`${userIdStr}-${roundNum}`);
         };
 
+        const now = new Date();
+        const cancelledPast = await RaceCalendar.find({
+            season: requestedSeason,
+            status: 'cancelled',
+            date: { $lte: now }
+        })
+            .select('round raceName date')
+            .lean();
+
         // Format the response
-        const formattedLeaderboard = {
+        let formattedLeaderboard = {
             league: leaderboard.league,
             season: leaderboard.season,
             lastUpdated: leaderboard.lastUpdated,
@@ -123,6 +157,12 @@ const getLeagueLeaderboard = async (req, res) => {
                     return { ...result, cards: cards || null };
                 })
             }))
+        };
+
+        formattedLeaderboard = {
+            ...formattedLeaderboard,
+            driverStandings: mergeCancelledRoundsIntoStandings(formattedLeaderboard.driverStandings, cancelledPast),
+            constructorStandings: mergeCancelledRoundsIntoStandings(formattedLeaderboard.constructorStandings, cancelledPast)
         };
 
         res.json(formattedLeaderboard);

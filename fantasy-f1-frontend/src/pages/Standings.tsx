@@ -23,9 +23,12 @@ interface RaceResultCards {
 interface RaceResult {
   round: number;
   raceName: string;
+  /** Stubs merged for UI when the calendar round was cancelled (no championship points). */
+  isCalendarCancelled?: boolean;
   mainRacePoints: number;
   sprintPoints: number;
   totalPoints: number;
+
   breakdown?: {
     mainDriver: string;
     reserveDriver: string;
@@ -269,12 +272,13 @@ const Standings: React.FC = () => {
                   {sortedResults.map((result, idx) => {
                     const mainTeam = getDriverTeam(result.mainDriver || result.breakdown?.mainDriver);
                     const reserveTeam = getDriverTeam(result.reserveDriver || result.breakdown?.reserveDriver);
+                    const rowCancelled = !!result.isCalendarCancelled;
                     return (
                       <div
                         key={idx}
                         className={`md:flex-row flex flex-col items-start md:items-center p-2 rounded transition-colors text-white text-xs md:text-sm whitespace-nowrap ${
                           idx % 2 === 0 ? 'bg-gray-800' : 'bg-gray-700'
-                        } hover:bg-gray-600 border-b border-gray-900 pl-3`}
+                        } ${rowCancelled ? 'opacity-60 saturate-0' : 'hover:bg-gray-600'} border-b border-gray-900 pl-3`}
                         style={{ minWidth: 0 }}
                       >
                         <div className="flex flex-row w-full items-start gap-3">
@@ -289,14 +293,24 @@ const Standings: React.FC = () => {
                               </div>
                               <div className="flex-1 pl-3 flex flex-col gap-1">
                                 <div>{result.round}</div>
-                                <div>{result.raceName.replace('Grand Prix', 'GP')}{' '}
+                                <div>
+                                  {result.raceName.replace('Grand Prix', 'GP')}{' '}
+                                  {result.isCalendarCancelled && (
+                                    <span className="px-2 py-0.5 text-xs bg-gray-600/80 text-white/90 rounded">Cancelled</span>
+                                  )}
                                   {result.breakdown?.isSprintWeekend && (
                                     <span className="ml-2 px-2 py-0.5 text-xs bg-yellow-600/20 text-yellow-400 rounded">Sprint</span>
                                   )}
                                 </div>
                                 <div style={{color: mainTeam ? getTeamColor(mainTeam) : undefined}}>{formatDriverName(result.mainDriver || result.breakdown?.mainDriver)}</div>
                                 <div style={{color: reserveTeam ? getTeamColor(reserveTeam) : undefined}}>{formatDriverName(result.reserveDriver || result.breakdown?.reserveDriver)}</div>
-                                <div>{typeof result.mainRacePoints === 'number' || typeof result.sprintPoints === 'number' ? `${(result.mainRacePoints || 0) + (result.sprintPoints || 0)} pts` : '-'}</div>
+                                <div>
+                                  {rowCancelled
+                                    ? '—'
+                                    : typeof result.mainRacePoints === 'number' || typeof result.sprintPoints === 'number'
+                                      ? `${(result.mainRacePoints || 0) + (result.sprintPoints || 0)} pts`
+                                      : '-'}
+                                </div>
                               </div>
                             </div>
                           </div>
@@ -372,12 +386,14 @@ const Standings: React.FC = () => {
             <div className="space-y-1 p-2">
               {sortedResults && sortedResults.length > 0 ? (
                 <div>
-                  {sortedResults.map((result, idx) => (
+                  {sortedResults.map((result, idx) => {
+                    const rowCancelled = !!result.isCalendarCancelled;
+                    return (
                     <div
                       key={idx}
                       className={`md:flex-row flex flex-col items-start md:items-center p-2 rounded transition-colors text-white text-xs md:text-sm whitespace-nowrap ${
                         idx % 2 === 0 ? 'bg-gray-800' : 'bg-gray-700'
-                      } hover:bg-gray-600 border-b border-gray-900 pl-3`}
+                      } ${rowCancelled ? 'opacity-60 saturate-0' : 'hover:bg-gray-600'} border-b border-gray-900 pl-3`}
                       style={{ minWidth: 0 }}
                     >
                       <div className="flex flex-row w-full items-start gap-3">
@@ -391,7 +407,11 @@ const Standings: React.FC = () => {
                             </div>
                             <div className="flex-1 pl-3 flex flex-col gap-1">
                               <div>{result.round}</div>
-                              <div>{result.raceName.replace('Grand Prix', 'GP')}{' '}
+                              <div>
+                                {result.raceName.replace('Grand Prix', 'GP')}{' '}
+                                {result.isCalendarCancelled && (
+                                  <span className="px-2 py-0.5 text-xs bg-gray-600/80 text-white/90 rounded">Cancelled</span>
+                                )}
                                 {result.breakdown?.isSprintWeekend && (
                                   <span className="ml-2 px-2 py-0.5 text-xs bg-yellow-600/20 text-yellow-400 rounded">Sprint</span>
                                 )}
@@ -401,7 +421,13 @@ const Standings: React.FC = () => {
                               }}>
                                 {result.team || result.breakdown?.team || '-'}
                               </div>
-                              <div>{typeof result.totalPoints === 'number' ? `${result.totalPoints} pts` : '-'}</div>
+                              <div>
+                                {rowCancelled
+                                  ? '—'
+                                  : typeof result.totalPoints === 'number'
+                                    ? `${result.totalPoints} pts`
+                                    : '-'}
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -430,7 +456,8 @@ const Standings: React.FC = () => {
                         )}
                       </div>
                     </div>
-                  ))}
+                  );
+                  })}
                 </div>
               ) : (
                 <div className="text-center text-white/40 py-4">

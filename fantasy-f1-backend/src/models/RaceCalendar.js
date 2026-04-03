@@ -43,6 +43,12 @@ const raceCalendarSchema = new mongoose.Schema({
   sprintQualifyingStart: { 
     type: Date 
   },
+  /** scheduled = normal; cancelled = no scoring, no auto-assign, no reminders, admin writes rejected */
+  status: {
+    type: String,
+    enum: ['scheduled', 'cancelled'],
+    default: 'scheduled'
+  },
   createdAt: { 
     type: Date, 
     default: Date.now 

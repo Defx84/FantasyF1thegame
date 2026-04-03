@@ -250,7 +250,8 @@ const getDeckLockStatus = async (req, res) => {
     }
 
     const currentDate = new Date();
-    const firstRace = await RaceCalendar.findOne({ season: league.season }).sort({ date: 1 });
+    // Deck locking must ignore cancelled calendar entries (treated as invisible).
+    const firstRace = await RaceCalendar.findOne({ season: league.season, status: 'scheduled' }).sort({ date: 1 });
     let locked = false;
     let allowedToBuild = true;
     let nextExtensionDeadline = null;
@@ -271,6 +272,7 @@ const getDeckLockStatus = async (req, res) => {
         if (hasExtension) {
           const nextRace = await RaceCalendar.findOne({
             season: league.season,
+            status: 'scheduled',
             $or: [
               { qualifyingStart: { $gt: currentDate } },
               { sprintQualifyingStart: { $gt: currentDate } }
@@ -393,10 +395,11 @@ const selectDeck = async (req, res) => {
       return res.status(403).json({ error: 'You must be a member of this league' });
     }
 
-    // Check if deck is locked (5 minutes before first race qualifying deadline)
+    // Check if deck is locked (5 minutes before first scheduled race qualifying deadline)
     const currentDate = new Date();
     const firstRace = await RaceCalendar.findOne({ 
-      season: league.season 
+      season: league.season,
+      status: 'scheduled'
     }).sort({ date: 1 });
 
     if (firstRace) {
@@ -417,6 +420,7 @@ const selectDeck = async (req, res) => {
         if (hasExtension) {
           const nextRace = await RaceCalendar.findOne({
             season: league.season,
+            status: 'scheduled',
             $or: [
               { qualifyingStart: { $gt: currentDate } },
               { sprintQualifyingStart: { $gt: currentDate } }

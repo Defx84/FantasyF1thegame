@@ -11,6 +11,7 @@ const { initializeRaceSelections, initializeAllRaceSelections } = require('../ut
 const ScoringService = require('../services/ScoringService');
 const LeaderboardService = require('../services/LeaderboardService');
 const { getF1Validation } = require('../constants/f1DataLoader');
+const { isCalendarRaceCancelled } = require('../utils/raceCalendarUtils');
 
 // Initialize services
 const scoringService = new ScoringService();
@@ -604,6 +605,12 @@ const adminOverrideSelection = async (req, res) => {
         if (!race) {
             return res.status(404).json({ 
                 error: 'Race not found' 
+            });
+        }
+
+        if (isCalendarRaceCancelled(race)) {
+            return res.status(400).json({
+                error: 'This race is cancelled; selections cannot be modified.'
             });
         }
 

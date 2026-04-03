@@ -5,11 +5,17 @@
 const { scrapeMotorsportResultsByType } = require('../scrapers/motorsportScraper');
 const { ROUND_TO_RACE } = require('../constants/roundMapping');
 const RaceResult = require('../models/RaceResult');
+const RaceCalendar = require('../models/RaceCalendar');
 const { calculateTeamPoints, processRawResults } = require('../utils/scoringUtils');
+const { isCalendarRaceCancelled } = require('../utils/raceCalendarUtils');
 
 async function saveRaceResults(round, raceName, raceResults, sprintResults) {
     const existingRace = await RaceResult.findOne({ round });
     const season = existingRace?.season || new Date().getFullYear();
+    const cal = await RaceCalendar.findOne({ round: parseInt(round, 10), season });
+    if (isCalendarRaceCancelled(cal)) {
+        throw new Error(`Round ${round} is cancelled; results cannot be saved.`);
+    }
 
     const processedRaceResults = processRawResults(raceResults, false, season);
     const processedSprintResults = sprintResults ? processRawResults(sprintResults, true, season) : null;

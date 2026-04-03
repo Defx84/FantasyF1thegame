@@ -267,6 +267,10 @@ const NextRaceSelections: React.FC = () => {
 
     const updateLockStatus = () => {
       try {
+        if (raceData.calendarStatus === 'cancelled') {
+          setIsLocked(true);
+          return;
+        }
         const nowMs = Date.now();
         console.log('[NextRaceSelections] Checking lock status:', {
           raceName: raceData.raceName,
@@ -331,8 +335,12 @@ const NextRaceSelections: React.FC = () => {
     return () => clearInterval(timer);
   }, [raceData, timeUntilDeadline, raceStatus]);
 
+  const seasonForNormalize = leagueSeason || 2026;
+  const isRaceCancelled = raceData?.calendarStatus === 'cancelled';
+  const selectionsDisabled = isLocked || !!isRaceCancelled;
+
   const handleDriverClick = (driverId: string) => {
-    if (isLocked) return;
+    if (selectionsDisabled) return;
     // Require editing mode only if selections already exist
     if (currentSelections && (currentSelections.mainDriver || currentSelections.reserveDriver || currentSelections.team)) {
       if (!isEditing) return;
@@ -383,7 +391,7 @@ const NextRaceSelections: React.FC = () => {
   };
 
   const handleSelection = (type: keyof Selection, id: string) => {
-    if (isLocked || !isEditing) return;
+    if (selectionsDisabled || !isEditing) return;
     
     // For drivers, use the new handler
     if (type === 'mainDriver' || type === 'reserveDriver') {
@@ -415,7 +423,7 @@ const NextRaceSelections: React.FC = () => {
   };
 
   const handleEdit = () => {
-    if (isLocked) return;
+    if (selectionsDisabled) return;
     setIsEditing(true);
     if (currentSelections) {
       setEditingSelections(currentSelections);
@@ -428,8 +436,6 @@ const NextRaceSelections: React.FC = () => {
     }
     setIsEditing(false);
   };
-
-  const seasonForNormalize = leagueSeason || 2026;
 
   const isDriverUsed = (driverId: string): boolean => {
     const usedList = usedSelections.usedDrivers || [];
@@ -489,7 +495,13 @@ const NextRaceSelections: React.FC = () => {
 
     return `w-full px-2 py-1 rounded-lg border transition-all duration-200 relative ${
       selected ? 'border-2 border-white bg-opacity-100' : 'border border-white/20 hover:border-white/60'
-    } ${isUsed ? 'opacity-40 cursor-not-allowed filter grayscale' : 'hover:bg-opacity-100'}`;
+    } ${
+      isUsed
+        ? 'opacity-40 cursor-not-allowed filter grayscale'
+        : selectionsDisabled
+          ? 'cursor-not-allowed opacity-50'
+          : 'hover:bg-opacity-100 cursor-pointer'
+    }`;
   };
 
   // Helper to check if driver is selected in main or reserve slot
@@ -516,7 +528,7 @@ const NextRaceSelections: React.FC = () => {
     } ${
       isUsed 
         ? 'opacity-40 cursor-not-allowed filter grayscale' 
-        : isLocked 
+        : selectionsDisabled 
           ? 'cursor-not-allowed opacity-50' 
           : 'hover:bg-opacity-100 cursor-pointer'
     }`;
@@ -540,7 +552,7 @@ const NextRaceSelections: React.FC = () => {
           minHeight: '1.5rem',
           padding: '0.2rem 0.4rem',
         }}
-        disabled={isUsed || isLocked || !!(currentSelections && (currentSelections.mainDriver || currentSelections.reserveDriver || currentSelections.team) && !isEditing)}
+        disabled={isUsed || selectionsDisabled || !!(currentSelections && (currentSelections.mainDriver || currentSelections.reserveDriver || currentSelections.team) && !isEditing)}
       >
         <div className="flex items-center justify-between w-full">
           <span className={`text-xs font-medium ${textClass}`}>
@@ -586,7 +598,7 @@ const NextRaceSelections: React.FC = () => {
           minHeight: '3rem',
           padding: '0.75rem 1rem',
         }}
-        disabled={isUsed || isLocked || !!(currentSelections && (currentSelections.mainDriver || currentSelections.reserveDriver || currentSelections.team) && !isEditing)}
+        disabled={isUsed || selectionsDisabled || !!(currentSelections && (currentSelections.mainDriver || currentSelections.reserveDriver || currentSelections.team) && !isEditing)}
       >
         <div className="w-full flex items-center justify-between relative">
           <span className={`text-xs ${textClass}`}>
@@ -636,7 +648,8 @@ const NextRaceSelections: React.FC = () => {
   // Card handlers
   const handleCardSlotClick = (type: 'driver' | 'team') => {
     if (raceData?.isSprintWeekend) return;
-    if (isLocked && !isCardEditing) return;
+    if (raceData?.calendarStatus === 'cancelled') return;
+    if (selectionsDisabled && !isCardEditing) return;
     setCardModalType(type);
     setIsCardModalOpen({ driver: type === 'driver', team: type === 'team' });
   };
@@ -862,21 +875,38 @@ const NextRaceSelections: React.FC = () => {
 
           {/* Deadline countdown */}
           <div className="w-full max-w-5xl mx-auto mb-4">
-            <div className="backdrop-blur-sm bg-black/20 rounded-lg p-2">
+            <div
+              className={`backdrop-blur-sm rounded-lg p-2 relative overflow-hidden ${
+                isRaceCancelled ? 'bg-black/35 opacity-80' : 'bg-black/20'
+              }`}
+            >
+              {isRaceCancelled && (
+                <div className="pointer-events-none absolute inset-0 z-10 flex items-start justify-center pt-1">
+                  <img src="/Cancelled.svg" alt="" className="max-h-14 w-auto drop-shadow-lg" />
+                </div>
+              )}
               {raceData && (
-                <div className="mb-2 text-center">
+                <div className={`mb-2 text-center ${isRaceCancelled ? 'text-white/50' : ''}`}>
                   <div className="text-xl font-bold text-white">{raceData.raceName}</div>
                 </div>
               )}
               <h2 className="text-lg font-bold">Selection Deadline</h2>
               <p className="text-sm text-white/90">
-                {isLocked ? 'Selections locked' : `Time remaining: ${formatTimeLeft(timeUntilDeadline)}`}
+                {isRaceCancelled
+                  ? 'This Grand Prix was cancelled — selections are closed.'
+                  : isLocked
+                    ? 'Selections locked'
+                    : `Time remaining: ${formatTimeLeft(timeUntilDeadline)}`}
               </p>
             </div>
           </div>
 
           {/* Main content area with three equal columns */}
-          <div className="flex flex-col max-w-7xl mx-auto gap-3">
+          <div
+            className={`flex flex-col max-w-7xl mx-auto gap-3 ${
+              isRaceCancelled ? 'opacity-45 saturate-0 pointer-events-none' : ''
+            }`}
+          >
             {/* Two slots at top - spans full width */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Main Driver Slot */}
@@ -894,7 +924,7 @@ const NextRaceSelections: React.FC = () => {
                       return driver ? (
                         <div className="flex items-center justify-between w-full px-4 py-3 rounded-lg" style={{ backgroundColor: `${driver.teamColor}20`, border: `2px solid ${driver.teamColor}` }}>
                           <span className="text-white font-semibold">{driver.name}</span>
-                          {!isLocked && (
+                          {!selectionsDisabled && (
                             <button
                               onClick={() => {
                                 setIsEditing(true);
@@ -934,7 +964,7 @@ const NextRaceSelections: React.FC = () => {
                       return driver ? (
                         <div className="flex items-center justify-between w-full px-4 py-3 rounded-lg" style={{ backgroundColor: `${driver.teamColor}20`, border: `2px solid ${driver.teamColor}` }}>
                           <span className="text-white font-semibold">{driver.name}</span>
-                          {!isLocked && (
+                          {!selectionsDisabled && (
                             <button
                               onClick={() => {
                                 setIsEditing(true);
@@ -1001,11 +1031,11 @@ const NextRaceSelections: React.FC = () => {
                     <div className="flex flex-row gap-3 lg:flex-col lg:gap-4 lg:space-y-0">
                       {/* Driver Card Slot */}
                       <div
-                        onClick={() => !raceData?.isSprintWeekend && (!isLocked || isCardEditing) ? handleCardSlotClick('driver') : undefined}
+                        onClick={() => !raceData?.isSprintWeekend && (!selectionsDisabled || isCardEditing) ? handleCardSlotClick('driver') : undefined}
                         className={`relative transition-all flex-1 lg:flex-none ${
                           raceData?.isSprintWeekend
                             ? 'opacity-60 cursor-not-allowed'
-                            : !isLocked || isCardEditing
+                            : !selectionsDisabled || isCardEditing
                               ? 'cursor-pointer hover:scale-105'
                               : 'opacity-50 cursor-not-allowed'
                         }`}
@@ -1048,11 +1078,11 @@ const NextRaceSelections: React.FC = () => {
 
                       {/* Team Card Slot */}
                       <div
-                        onClick={() => !raceData?.isSprintWeekend && (!isLocked || isCardEditing) ? handleCardSlotClick('team') : undefined}
+                        onClick={() => !raceData?.isSprintWeekend && (!selectionsDisabled || isCardEditing) ? handleCardSlotClick('team') : undefined}
                         className={`relative transition-all flex-1 lg:flex-none ${
                           raceData?.isSprintWeekend
                             ? 'opacity-60 cursor-not-allowed'
-                            : !isLocked || isCardEditing
+                            : !selectionsDisabled || isCardEditing
                               ? 'cursor-pointer hover:scale-105'
                               : 'opacity-50 cursor-not-allowed'
                         }`}
@@ -1130,10 +1160,10 @@ const NextRaceSelections: React.FC = () => {
                         ) : (
                           <button
                             onClick={handleCardEdit}
-                            disabled={isLocked || !!raceData?.isSprintWeekend}
+                            disabled={selectionsDisabled || !!raceData?.isSprintWeekend}
                             title={raceData?.isSprintWeekend ? 'Power Cards not available during sprint weekends' : undefined}
                             className={`w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-bold ${
-                              isLocked || raceData?.isSprintWeekend
+                              selectionsDisabled || raceData?.isSprintWeekend
                                 ? 'bg-gray-600 text-gray-400 cursor-not-allowed'
                                 : 'bg-red-600 text-white hover:bg-red-700'
                             }`}
@@ -1153,7 +1183,7 @@ const NextRaceSelections: React.FC = () => {
 
           {/* Main action buttons - full width below columns */}
           <div className="flex flex-col gap-3 max-w-7xl mx-auto">
-                  {!isLocked && (
+                  {!selectionsDisabled && (
                     <>
                       {isEditing ? (
                         <>

@@ -3,6 +3,7 @@ const RaceCalendar = require('../models/RaceCalendar');
 const League = require('../models/League');
 const UsedSelection = require('../models/UsedSelection');
 const { initializeRaceSelections } = require('../utils/raceUtils');
+const { isCalendarRaceCancelled } = require('../utils/raceCalendarUtils');
 
 /**
  * Auto-assignment service for race selections
@@ -29,6 +30,16 @@ class AutoSelectionService {
       
       if (!race) {
         throw new Error(`Race not found for round ${round}`);
+      }
+
+      if (isCalendarRaceCancelled(race)) {
+        console.log(`[AutoSelection] Round ${round} (${race.raceName}) is cancelled — skipping auto-assign`);
+        return {
+          success: false,
+          message: 'Race is cancelled',
+          assigned: 0,
+          skipped: 0
+        };
       }
 
       // Check if lock time has passed (5 minutes before sprint qualifying if present, otherwise qualifying)
@@ -217,6 +228,7 @@ class AutoSelectionService {
 
       const nextRace =
         candidates.find((r) => {
+          if (isCalendarRaceCancelled(r)) return false;
           const anchor = r.sprintQualifyingStart || r.qualifyingStart;
           if (!anchor) return false;
           const lockMs = new Date(anchor).getTime() - 5 * 60 * 1000;

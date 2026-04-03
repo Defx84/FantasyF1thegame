@@ -88,7 +88,11 @@ const DashboardRaceCountdown: React.FC<DashboardRaceCountdownProps> = ({ leagueI
 
   useEffect(() => {
     if (!raceData?.race?.startTime) return;
-    
+    if (raceData.calendarStatus === 'cancelled') {
+      deadlineTriggeredRef.current = true;
+      return;
+    }
+
     const now = Date.now();
     
     // For sprint weekends, prioritize sprint qualifying if it's the next event
@@ -132,6 +136,8 @@ const DashboardRaceCountdown: React.FC<DashboardRaceCountdownProps> = ({ leagueI
     return <div className="backdrop-blur-xl bg-white/10 rounded-xl p-6 border border-white/10"><p className="text-white text-center">{error || 'No upcoming races scheduled'}</p></div>;
   }
 
+  const isCancelled = raceData.calendarStatus === 'cancelled';
+
   const events = [
     raceData?.qualifying ? { label: 'Qualifying', icon: <FaStopwatchIcon className="text-yellow-400" />, time: raceData.qualifying.startTime } : null,
     raceData?.sprintQualifying ? { label: 'Sprint Qualifying', icon: <FaRunningIcon className="text-green-400" />, time: raceData.sprintQualifying.startTime } : null,
@@ -140,33 +146,42 @@ const DashboardRaceCountdown: React.FC<DashboardRaceCountdownProps> = ({ leagueI
   ].filter((e): e is { label: string; icon: JSX.Element; time: string } => !!e);
 
   return (
-    <div className="bg-red-200/30 rounded-lg p-6 shadow-lg">
-      <div className="text-center mb-6">
+    <div
+      className={`rounded-lg p-6 shadow-lg ${
+        isCancelled ? 'bg-gray-700/50 saturate-0 opacity-85' : 'bg-red-200/30'
+      } relative overflow-hidden`}
+    >
+      {isCancelled && (
+        <div className="pointer-events-none absolute inset-0 z-10 flex items-start justify-center pt-4">
+          <img src="/Cancelled.svg" alt="" className="max-h-16 w-auto drop-shadow-lg" />
+        </div>
+      )}
+      <div className={`text-center mb-6 relative ${isCancelled ? 'opacity-60' : ''}`}>
         <h2 className="text-2xl font-bold text-white mb-2">{raceData.raceName || 'Next Race'}</h2>
         <div className="flex items-center justify-center space-x-2 text-white/70">
           <FaFlagCheckeredIcon className="text-red-500" />
-          <span>Race Countdown</span>
+          <span>{isCancelled ? 'Grand Prix cancelled' : 'Race Countdown'}</span>
         </div>
       </div>
-      <div className="grid grid-cols-4 gap-4 mb-6">
+      <div className={`grid grid-cols-4 gap-4 mb-6 ${isCancelled ? 'opacity-50 pointer-events-none' : ''}`}>
         <div className="text-center">
-          <div className="text-xl font-bold text-white drop-shadow-md">{timeLeft.days}</div>
+          <div className="text-xl font-bold text-white drop-shadow-md">{isCancelled ? '—' : timeLeft.days}</div>
           <div className="text-xs text-white/80">Days</div>
         </div>
         <div className="text-center">
-          <div className="text-xl font-bold text-white drop-shadow-md">{timeLeft.hours}</div>
+          <div className="text-xl font-bold text-white drop-shadow-md">{isCancelled ? '—' : timeLeft.hours}</div>
           <div className="text-xs text-white/80">Hours</div>
         </div>
         <div className="text-center">
-          <div className="text-xl font-bold text-white drop-shadow-md">{timeLeft.minutes}</div>
+          <div className="text-xl font-bold text-white drop-shadow-md">{isCancelled ? '—' : timeLeft.minutes}</div>
           <div className="text-xs text-white/80">Minutes</div>
         </div>
         <div className="text-center">
-          <div className="text-xl font-bold text-white drop-shadow-md">{timeLeft.seconds}</div>
+          <div className="text-xl font-bold text-white drop-shadow-md">{isCancelled ? '—' : timeLeft.seconds}</div>
           <div className="text-xs text-white/80">Seconds</div>
         </div>
       </div>
-      <div className="space-y-2">
+      <div className={`space-y-2 ${isCancelled ? 'opacity-55' : ''}`}>
         {events.map((event, idx) => (
           <div key={idx} className="flex items-center justify-between text-sm">
             <div className="flex items-center space-x-2">

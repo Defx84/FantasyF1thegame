@@ -310,6 +310,13 @@ async function triggerRaceUpdate(round, label) {
             return;
         }
 
+        const RaceCalendar = require('../models/RaceCalendar');
+        const cal = await RaceCalendar.findOne({ round: parseInt(round, 10), season: race.season }).select('status');
+        if (cal && cal.status === 'cancelled') {
+            console.log(`⏭️ [${label}] Round ${round} is cancelled on the calendar; skipping update`);
+            return;
+        }
+
         // Get race name from race document
         const raceName = race.raceName;
         if (!raceName) {

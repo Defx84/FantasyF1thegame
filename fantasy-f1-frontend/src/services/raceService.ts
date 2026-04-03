@@ -5,6 +5,9 @@ export interface RaceTiming {
   hasUpcomingRace: boolean;
   raceName: string;
   round: number;
+  season?: number;
+  /** From RaceCalendar — cancelled races still appear in countdown / next-race slot. */
+  calendarStatus?: 'scheduled' | 'cancelled';
   isSprintWeekend: boolean;
   qualifying: {
     startTime: string;

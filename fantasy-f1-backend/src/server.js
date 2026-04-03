@@ -24,6 +24,7 @@ const User = require('./models/User');
 const { processRawResults, calculateTeamPoints } = require('./utils/scoringUtils');
 const { sendReminderEmails, sendPrizesAnnouncementEmails } = require('./services/reminderService');
 const AutoSelectionService = require('./services/AutoSelectionService');
+const { isCalendarRaceCancelled } = require('./utils/raceCalendarUtils');
 
 const app = require('./app');
 
@@ -90,6 +91,12 @@ async function saveRaceResults(round, raceName, raceResults, sprintResults) {
         // Get existing race result to determine season, or use current year as default
         const existingRace = await RaceResult.findOne({ round });
         const season = existingRace?.season || new Date().getFullYear();
+
+        const cal = await RaceCalendar.findOne({ round: parseInt(round, 10), season });
+        if (isCalendarRaceCancelled(cal)) {
+            console.log(`⏭️ Round ${round} (${season}) is cancelled; skipping saveRaceResults`);
+            return null;
+        }
         
         // Calculate team points (race + sprint when available)
         const teamResults = calculateTeamPoints(raceResults, sprintResults || [], season);

@@ -311,6 +311,12 @@ raceResultSchema.post('save', async function(doc) {
       return;
     }
 
+    const calendarRow = await RaceCalendar.findOne({ season: doc.season, round: doc.round }).select('status').lean();
+    if (calendarRow && calendarRow.status === 'cancelled') {
+      console.log(`[RaceResult Post-Save] Round ${doc.round} is cancelled on the calendar — skipping points assignment.`);
+      return;
+    }
+
     console.log(`[RaceResult Post-Save] Processing race ${doc.raceName} (round ${doc.round})...`);
     console.log(`[RaceResult Post-Save] Race data:`, {
       isSprintWeekend: doc.isSprintWeekend,

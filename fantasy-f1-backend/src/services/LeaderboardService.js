@@ -36,6 +36,11 @@ class LeaderboardService {
                 .lean();
             const completedByRound = new Map(completedRaceResults.map(r => [r.round, r]));
 
+            const cancelledCalendarRounds = await RaceCalendar.find({ season: league.season, status: 'cancelled' })
+                .select('round')
+                .lean();
+            const cancelledRoundSet = new Set(cancelledCalendarRounds.map((c) => c.round));
+
             // Get season-aware normalization
             const { normalizeTeamName } = getF1Validation(league.season);
 
@@ -72,6 +77,12 @@ class LeaderboardService {
                 for (const selection of memberSelections) {
                     // Only process if all required fields are present (race ref can be orphaned; we use round)
                     if (!selection.mainDriver || !selection.reserveDriver || !selection.team) {
+                        skippedCount++;
+                        continue;
+                    }
+
+                    // Cancelled Grands Prix do not score (invisible for championship totals)
+                    if (cancelledRoundSet.has(selection.round)) {
                         skippedCount++;
                         continue;
                     }

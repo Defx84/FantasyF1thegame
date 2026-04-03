@@ -8,6 +8,7 @@ const RaceSelection = require('../models/RaceSelection');
 const ScoringService = require('../services/ScoringService');
 const LeaderboardService = require('../services/LeaderboardService');
 const AutoSelectionService = require('../services/AutoSelectionService');
+const { assertCalendarRaceNotCancelled } = require('../utils/raceCalendarUtils');
 
 /**
  * Check if selections should be visible for a race
@@ -148,6 +149,7 @@ const getNextRaceTiming = async (req, res) => {
                     raceName: currentRace.raceName,
                     round: currentRace.round,
                     season: currentRace.season,
+                    calendarStatus: currentRace.status || 'scheduled',
                     qualifying: {
                         startTime: currentRace.qualifyingStart,
                         timeUntil: Math.max(0, new Date(currentRace.qualifyingStart).getTime() - nowMs)
@@ -209,6 +211,7 @@ const getNextRaceTiming = async (req, res) => {
             raceName: nextRace.raceName,
             round: nextRace.round,
             season: nextRace.season,
+            calendarStatus: nextRace.status || 'scheduled',
             qualifying: {
                 startTime: nextRace.qualifyingStart,
                 timeUntil: Math.max(0, new Date(nextRace.qualifyingStart).getTime() - nowMs)
@@ -340,6 +343,12 @@ const updateRaceResults = async (req, res) => {
             return res.status(404).json({
                 error: `Race not found in calendar for round ${round}${bodySeason != null ? ` season ${bodySeason}` : ''}`
             });
+        }
+
+        try {
+            assertCalendarRaceNotCancelled(raceCalendarEntry, `Round ${round}`);
+        } catch (e) {
+            return res.status(e.statusCode || 400).json({ error: e.message });
         }
 
         // Build race points aggregation
@@ -552,7 +561,7 @@ const getLeagueRaces = async (req, res) => {
 
         // Get races from the calendar filtered by the league's season
         const races = await RaceCalendar.find({ season: league.season })
-            .select('raceName circuit country raceStart date round season isSprintWeekend qualifyingStart sprintStart sprintQualifyingStart')
+            .select('raceName circuit country raceStart date round season isSprintWeekend qualifyingStart sprintStart sprintQualifyingStart status')
             .sort({ date: 1 });
 
         res.json(races);
@@ -590,7 +599,8 @@ const getRaceByLeagueAndRound = async (req, res) => {
             circuit: race.circuit,
             country: race.country,
             date: race.date,
-            round: race.round
+            round: race.round,
+            status: race.status || 'scheduled'
         });
     } catch (error) {
         console.error('Error in getRaceByLeagueAndRound:', error);

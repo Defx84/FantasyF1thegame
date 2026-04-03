@@ -140,8 +140,9 @@ async function getTomorrowsRace() {
   const tomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
   const dayAfterTomorrow = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 2);
   
-  // Get all races that have qualifying tomorrow
+  // Get all races that have qualifying tomorrow (skip cancelled)
   const races = await RaceCalendar.find({
+    status: { $ne: 'cancelled' },
     $or: [
       { qualifyingStart: { $gte: tomorrow, $lt: dayAfterTomorrow } },
       { sprintQualifyingStart: { $gte: tomorrow, $lt: dayAfterTomorrow } }
@@ -156,6 +157,7 @@ async function getNextRace() {
   const now = new Date();
   
   const race = await RaceCalendar.findOne({
+    status: { $ne: 'cancelled' },
     $or: [
       { qualifyingStart: { $gte: now } },
       { sprintQualifyingStart: { $gte: now } }
