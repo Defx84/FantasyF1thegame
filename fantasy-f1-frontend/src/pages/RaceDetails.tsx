@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FaArrowLeft, FaEdit, FaCheck, FaTimes, FaUserShield, FaInfoCircle } from 'react-icons/fa';
+import { FaArrowLeft, FaEdit, FaCheck, FaTimes, FaUserShield, FaInfoCircle, FaChevronDown, FaChevronUp } from 'react-icons/fa';
 import IconWrapper from '../utils/iconWrapper';
 import { api } from '../services/api';
 import { getDrivers, getTeams } from '../utils/validation';
@@ -169,6 +169,8 @@ const RaceDetails: React.FC = () => {
   const [showTooltip, setShowTooltip] = useState(false);
   const tooltipTimeout = useRef<NodeJS.Timeout | null>(null);
   const [leagueSeason, setLeagueSeason] = useState<number>(2026); // Default to 2026
+  /** Mobile: collapsed cards show only user + points; expanded shows selections & power cards */
+  const [mobileCardExpanded, setMobileCardExpanded] = useState<Record<string, boolean>>({});
 
   // Get available drivers and teams based on season
   const availableDrivers = getDrivers(leagueSeason);
@@ -722,30 +724,100 @@ const RaceDetails: React.FC = () => {
                     
                     const selection = selections.find(s => s.userId === member.id);
                     const isEditing = !!editForms[member.id];
+                    const showMobileDetails = isEditing || !!mobileCardExpanded[member.id];
 
                     return (
                       <div key={member.id} className="bg-white/[0.05] rounded-lg p-4 border border-white/10">
-                        {/* Player Name Header */}
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center">
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center min-w-0">
                             <AvatarImage 
                               userId={member.id} 
                               username={member.username} 
                               size={48} 
-                              className="mr-3" 
+                              className="mr-3 shrink-0" 
                             />
-                            <h3 className="text-lg font-semibold text-white">{member.username}</h3>
+                            <h3 className="text-lg font-semibold text-white truncate">{member.username}</h3>
                           </div>
                           {selection?.isAdminAssigned && (
-                            <span className="flex items-center text-yellow-500 text-sm">
+                            <span className="flex items-center text-yellow-500 text-sm shrink-0 ml-2">
                               <IconWrapper icon={FaUserShield} className="mr-1" />
                               Admin
                             </span>
                           )}
                         </div>
 
+                        {/* Points — always visible on mobile */}
+                        <div
+                          className="grid grid-cols-2 gap-2 text-center"
+                          title={selection ? pointsBreakdownTitle(selection) : undefined}
+                        >
+                          <div className="flex flex-col">
+                            <span
+                              className="text-xs font-medium text-white/60 mb-1"
+                              title="Main + reserve (after driver power cards)"
+                            >
+                              Drivers
+                            </span>
+                            <span className="text-lg font-medium text-cyan-200/95 tabular-nums">
+                              {(() => {
+                                const split = getPointsSplit(selection);
+                                return split.drivers === null ? '—' : split.drivers;
+                              })()}
+                            </span>
+                          </div>
+                          <div className="flex flex-col">
+                            <span
+                              className="text-xs font-medium text-white/60 mb-1"
+                              title="Constructor (after team power cards)"
+                            >
+                              Team
+                            </span>
+                            <span className="text-lg font-medium text-violet-200/95 tabular-nums">
+                              {(() => {
+                                const split = getPointsSplit(selection);
+                                return split.team === null ? '—' : split.team;
+                              })()}
+                            </span>
+                          </div>
+                        </div>
+                        {selection &&
+                          typeof selection.points === 'number' &&
+                          !getPointsSplit(selection).hasBreakdown && (
+                            <p className="text-xs text-white/50 text-center mt-2">
+                              Driver/team split not stored for this race.
+                            </p>
+                          )}
+
+                        {!isEditing && (
+                          <button
+                            type="button"
+                            className="w-full mt-3 flex items-center justify-center gap-2 py-2.5 px-3 rounded-lg border border-white/15 bg-white/[0.04] text-white/90 text-sm font-medium active:bg-white/10"
+                            onClick={() =>
+                              setMobileCardExpanded(prev => ({
+                                ...prev,
+                                [member.id]: !prev[member.id]
+                              }))
+                            }
+                            aria-expanded={!!mobileCardExpanded[member.id]}
+                          >
+                            {mobileCardExpanded[member.id] ? (
+                              <>
+                                Hide details
+                                <IconWrapper icon={FaChevronUp} className="opacity-80" />
+                              </>
+                            ) : (
+                              <>
+                                Details
+                                <IconWrapper icon={FaChevronDown} className="opacity-80" />
+                              </>
+                            )}
+                          </button>
+                        )}
+
+                        {showMobileDetails && (
+                          <>
                         {/* Selections */}
-                        <div className="space-y-3">
+                        <div className="space-y-3 mt-3 pt-3 border-t border-white/10">
                           {/* Main Driver */}
                           <div className="flex flex-col">
                             <label className="text-sm font-medium text-white/70 mb-1">Main Driver</label>
@@ -877,52 +949,10 @@ const RaceDetails: React.FC = () => {
                         </div>
 
                         {!isEditing && (
-                          <div className="mt-4 pt-3 border-t border-white/10 space-y-3">
-                            <div
-                              className="grid grid-cols-2 gap-2 text-center"
-                              title={selection ? pointsBreakdownTitle(selection) : undefined}
-                            >
-                              <div className="flex flex-col">
-                                <span
-                                  className="text-xs font-medium text-white/60 mb-1"
-                                  title="Main + reserve (after driver power cards)"
-                                >
-                                  Drivers
-                                </span>
-                                <span className="text-lg font-medium text-cyan-200/95 tabular-nums">
-                                  {(() => {
-                                    const split = getPointsSplit(selection);
-                                    return split.drivers === null ? '—' : split.drivers;
-                                  })()}
-                                </span>
-                              </div>
-                              <div className="flex flex-col">
-                                <span
-                                  className="text-xs font-medium text-white/60 mb-1"
-                                  title="Constructor (after team power cards)"
-                                >
-                                  Team
-                                </span>
-                                <span className="text-lg font-medium text-violet-200/95 tabular-nums">
-                                  {(() => {
-                                    const split = getPointsSplit(selection);
-                                    return split.team === null ? '—' : split.team;
-                                  })()}
-                                </span>
-                              </div>
-                            </div>
-                            {selection &&
-                              typeof selection.points === 'number' &&
-                              !getPointsSplit(selection).hasBreakdown && (
-                                <p className="text-xs text-white/50 text-center">
-                                  Driver/team split not stored for this race.
-                                </p>
-                              )}
-                            <div className="flex flex-col">
-                              <span className="text-sm font-medium text-white/70 mb-1">Power cards</span>
-                              <div className="text-sm">
-                                {formatRaceCardsDisplay(selection?.raceCards, leagueSeason)}
-                              </div>
+                          <div className="pt-3 border-t border-white/10 mt-3">
+                            <span className="text-sm font-medium text-white/70 mb-1 block">Power cards</span>
+                            <div className="text-sm">
+                              {formatRaceCardsDisplay(selection?.raceCards, leagueSeason)}
                             </div>
                           </div>
                         )}
@@ -960,6 +990,8 @@ const RaceDetails: React.FC = () => {
                               </button>
                             )}
                           </div>
+                        )}
+                          </>
                         )}
                       </div>
                     );
