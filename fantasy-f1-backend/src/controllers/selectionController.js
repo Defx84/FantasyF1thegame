@@ -7,6 +7,7 @@ const { handleError } = require('../utils/errorHandler');
 const { normalizedDrivers, normalizedTeams, isValidDriver, isValidTeam, normalizeDriver, normalizeTeam } = require('../utils/validation');
 const { checkTeamReuse, checkDriverReuse } = require('../utils/selectionHelpers');
 const RaceCalendar = require('../models/RaceCalendar');
+const RaceCardSelection = require('../models/RaceCardSelection');
 const { initializeRaceSelections, initializeAllRaceSelections } = require('../utils/raceUtils');
 const ScoringService = require('../services/ScoringService');
 const LeaderboardService = require('../services/LeaderboardService');
@@ -86,6 +87,43 @@ const getRaceSelections = async (req, res) => {
         .populate('assignedBy', 'username')
         .lean();
 
+        const roundNum = parseInt(round, 10);
+        const raceCardSelections = await RaceCardSelection.find({
+            league: leagueId,
+            round: roundNum
+        })
+            .populate('driverCard', 'name type tier')
+            .populate('teamCard', 'name type tier')
+            .populate('mysteryTransformedCard', 'name')
+            .populate('randomTransformedCard', 'name')
+            .populate('targetPlayer', 'username')
+            .lean();
+
+        const pickCard = (c) =>
+            c && typeof c === 'object'
+                ? { _id: c._id, name: c.name, type: c.type, tier: c.tier }
+                : null;
+
+        const cardsByUserId = new Map();
+        for (const rc of raceCardSelections) {
+            const uid = rc.user.toString();
+            cardsByUserId.set(uid, {
+                driverCard: pickCard(rc.driverCard),
+                teamCard: pickCard(rc.teamCard),
+                mysteryTransformedCard: rc.mysteryTransformedCard
+                    ? { name: rc.mysteryTransformedCard.name }
+                    : null,
+                randomTransformedCard: rc.randomTransformedCard
+                    ? { name: rc.randomTransformedCard.name }
+                    : null,
+                targetPlayer: rc.targetPlayer
+                    ? { username: rc.targetPlayer.username }
+                    : null,
+                targetDriver: rc.targetDriver || null,
+                targetTeam: rc.targetTeam || null
+            });
+        }
+
         // Format selections for frontend
         const formattedSelections = selections
           .filter(selection => selection.user)
@@ -97,12 +135,14 @@ const getRaceSelections = async (req, res) => {
             reserveDriver: selection.reserveDriver,
             team: selection.team,
             points: selection.points,
+            pointBreakdown: selection.pointBreakdown || null,
             status: selection.status,
             isAdminAssigned: selection.isAdminAssigned,
             isAutoAssigned: selection.isAutoAssigned,
             assignedBy: selection.assignedBy?.username,
             assignedAt: selection.assignedAt,
-            notes: selection.notes
+            notes: selection.notes,
+            raceCards: cardsByUserId.get(selection.user._id.toString()) || null
         }));
 
         return res.json({

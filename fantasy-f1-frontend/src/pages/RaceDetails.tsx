@@ -10,6 +10,24 @@ import type { FC } from 'react';
 import AppLogoSpinner from '../components/AppLogoSpinner';
 import AvatarImage from '../components/Avatar/AvatarImage';
 
+interface PointBreakdown {
+  mainDriverPoints?: number;
+  reserveDriverPoints?: number;
+  teamPoints?: number;
+  driverCardPoints?: number;
+  teamCardPoints?: number;
+}
+
+interface RaceCardsPayload {
+  driverCard: { name: string; type?: string; tier?: string } | null;
+  teamCard: { name: string; type?: string; tier?: string } | null;
+  mysteryTransformedCard: { name: string } | null;
+  randomTransformedCard: { name: string } | null;
+  targetPlayer?: { username: string } | null;
+  targetDriver?: string | null;
+  targetTeam?: string | null;
+}
+
 interface Selection {
   _id: string;
   userId: string;
@@ -18,7 +36,10 @@ interface Selection {
   reserveDriver: string;
   team: string;
   points: number;
+  pointBreakdown?: PointBreakdown | null;
+  raceCards?: RaceCardsPayload | null;
   isAdminAssigned: boolean;
+  isAutoAssigned?: boolean;
   assignedBy?: string;
   assignedAt?: string;
   notes?: string;
@@ -57,6 +78,61 @@ interface UsedSelectionsMap {
 }
 
 const InfoIcon = FaInfoCircle as unknown as FC<{ size?: number }>;
+
+function pointsBreakdownTitle(selection: Selection): string | undefined {
+  const pb = selection.pointBreakdown;
+  if (!pb) return undefined;
+  const parts: string[] = [];
+  if (pb.mainDriverPoints != null) parts.push(`Main: ${pb.mainDriverPoints}`);
+  if (pb.reserveDriverPoints != null) parts.push(`Reserve: ${pb.reserveDriverPoints}`);
+  if (pb.teamPoints != null) parts.push(`Team: ${pb.teamPoints}`);
+  if (pb.driverCardPoints != null && pb.driverCardPoints !== 0) {
+    parts.push(`Driver card: ${pb.driverCardPoints >= 0 ? '+' : ''}${pb.driverCardPoints}`);
+  }
+  if (pb.teamCardPoints != null && pb.teamCardPoints !== 0) {
+    parts.push(`Team card: ${pb.teamCardPoints >= 0 ? '+' : ''}${pb.teamCardPoints}`);
+  }
+  return parts.length ? parts.join(' · ') : undefined;
+}
+
+function formatRaceCardsDisplay(
+  rc: RaceCardsPayload | null | undefined,
+  season: number
+): React.ReactNode {
+  if (!rc) return <span className="text-white/50">—</span>;
+  const lines: React.ReactNode[] = [];
+  if (rc.driverCard?.name) {
+    const extra = rc.mysteryTransformedCard?.name ? ` → ${rc.mysteryTransformedCard.name}` : '';
+    lines.push(
+      <div key="d" className="text-white">
+        <span className="text-white/60">Driver:</span> {rc.driverCard.name}
+        {extra}
+      </div>
+    );
+  }
+  if (rc.teamCard?.name) {
+    const extra = rc.randomTransformedCard?.name ? ` → ${rc.randomTransformedCard.name}` : '';
+    lines.push(
+      <div key="t" className="text-white">
+        <span className="text-white/60">Team:</span> {rc.teamCard.name}
+        {extra}
+      </div>
+    );
+  }
+  const targets: string[] = [];
+  if (rc.targetPlayer?.username) targets.push(`@${rc.targetPlayer.username}`);
+  if (rc.targetDriver) targets.push(normalizeDriverForSeason(rc.targetDriver, season));
+  if (rc.targetTeam) targets.push(normalizeTeamForSeason(rc.targetTeam, season));
+  if (targets.length) {
+    lines.push(
+      <div key="x" className="text-white/70 text-xs mt-1">
+        {targets.join(' · ')}
+      </div>
+    );
+  }
+  if (lines.length === 0) return <span className="text-white/50">—</span>;
+  return <div className="space-y-1">{lines}</div>;
+}
 
 const RaceDetails: React.FC = () => {
   const { leagueId, round } = useParams<{ leagueId: string; round: string }>();
@@ -344,6 +420,8 @@ const RaceDetails: React.FC = () => {
                       <th className="p-4 text-left">Reserve Driver</th>
                       <th className="p-4 text-left">Team</th>
                       <th className="p-4 text-left">Status</th>
+                      <th className="p-4 text-left">Points</th>
+                      <th className="p-4 text-left min-w-[12rem]">Power cards</th>
                       {isAdmin && <th className="p-2 md:p-4 text-left relative group">
                         <span className="flex items-center">
                           Actions
@@ -372,7 +450,7 @@ const RaceDetails: React.FC = () => {
                       if (!Array.isArray(leagueMembers) || leagueMembers.length === 0) {
                         return (
                           <tr>
-                            <td colSpan={6} className="p-4 text-center text-gray-500">
+                            <td colSpan={isAdmin ? 8 : 7} className="p-4 text-center text-gray-500">
                               No league members found
                             </td>
                           </tr>
@@ -520,7 +598,22 @@ const RaceDetails: React.FC = () => {
                                   <IconWrapper icon={FaUserShield} className="mr-1" />
                                   Admin Assigned
                                 </span>
-                              ) : '-'}
+                              ) : selection?.isAutoAssigned ? (
+                                <span className="text-amber-400/90 text-sm">Auto-assigned</span>
+                              ) : (
+                                '-'
+                              )}
+                            </td>
+                            <td className="p-4 tabular-nums">
+                              <span
+                                className="font-semibold text-emerald-300"
+                                title={selection ? pointsBreakdownTitle(selection) : undefined}
+                              >
+                                {selection && typeof selection.points === 'number' ? selection.points : '—'}
+                              </span>
+                            </td>
+                            <td className="p-4 align-top text-sm">
+                              {formatRaceCardsDisplay(selection?.raceCards, leagueSeason)}
                             </td>
                             {isAdmin && (
                               <td className="p-2 md:p-4">
@@ -734,6 +827,26 @@ const RaceDetails: React.FC = () => {
                             )}
                           </div>
                         </div>
+
+                        {!isEditing && (
+                          <div className="mt-4 pt-3 border-t border-white/10 space-y-3">
+                            <div className="flex flex-col">
+                              <span className="text-sm font-medium text-white/70 mb-1">Points</span>
+                              <span
+                                className="text-xl font-semibold text-emerald-300 tabular-nums"
+                                title={selection ? pointsBreakdownTitle(selection) : undefined}
+                              >
+                                {selection && typeof selection.points === 'number' ? selection.points : '—'}
+                              </span>
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="text-sm font-medium text-white/70 mb-1">Power cards</span>
+                              <div className="text-sm">
+                                {formatRaceCardsDisplay(selection?.raceCards, leagueSeason)}
+                              </div>
+                            </div>
+                          </div>
+                        )}
 
                         {/* Admin Actions */}
                         {isAdmin && (

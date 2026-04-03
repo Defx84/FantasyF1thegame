@@ -143,10 +143,15 @@ const RaceHistory: React.FC = () => {
         {/* Main content */}
         <div className="relative z-10 w-full p-4 md:p-8">
           <div className="max-w-6xl mx-auto">
-            <div className="flex items-center justify-between mb-8">
-              <h1 className="text-4xl font-bold text-white">Race History</h1>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between mb-6">
+              <div>
+                <h1 className="text-4xl font-bold text-white">Race History</h1>
+                <p className="mt-2 text-white/70 text-sm md:text-base max-w-2xl">
+                  Open a completed race to see every player&apos;s picks, total points, power cards played, and card targets (2026 rules).
+                </p>
+              </div>
               {leagueSeason && (
-                <span className="text-xl font-semibold text-white/70">
+                <span className="text-xl font-semibold text-white/70 shrink-0">
                   Season {leagueSeason}
                 </span>
               )}
