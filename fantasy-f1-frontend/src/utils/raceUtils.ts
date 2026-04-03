@@ -79,4 +79,34 @@ export const formatTimeLeft = (ms: number): string => {
   const minutes = Math.floor((ms % (1000 * 60 * 60)) / (1000 * 60));
   const seconds = Math.floor((ms % (1000 * 60)) / 1000);
   return `${days}d ${hours}h ${minutes}m ${seconds}s`;
-}; 
+};
+
+/** Minimal race row from GET /api/race/league/:leagueId */
+export interface CalendarRaceForLastResult {
+  round: number;
+  status?: string;
+}
+
+/**
+ * Round number for "last race result" on the selections page: the highest calendar round
+ * strictly before the current next race that is not cancelled. Skips cancelled GPs when
+ * walking back (e.g. Bahrain + Jeddah cancelled → Japan until Miami is the latest completed).
+ */
+export function getLastRaceResultRound(
+  races: CalendarRaceForLastResult[],
+  nextRaceRound: number
+): number | null {
+  if (!races?.length || nextRaceRound == null || nextRaceRound <= 1) {
+    return null;
+  }
+  const prevRounds = races
+    .filter(
+      (r) =>
+        r.round < nextRaceRound && (r.status || 'scheduled') !== 'cancelled'
+    )
+    .map((r) => r.round);
+  if (prevRounds.length === 0) {
+    return null;
+  }
+  return Math.max(...prevRounds);
+} 

@@ -8,7 +8,7 @@ import IconWrapper from '../utils/iconWrapper';
 import { FaLock, FaEdit, FaCheck, FaTimes, FaArrowLeft, FaPlus } from 'react-icons/fa';
 import { teamColors, getTeamColor } from '../constants/teamColors';
 import { getDrivers, getTeams, getDriverTeams } from '../utils/validation';
-import { getTimeUntilLock, isSelectionsLocked, formatTimeLeft } from '../utils/raceUtils';
+import { getTimeUntilLock, isSelectionsLocked, formatTimeLeft, getLastRaceResultRound } from '../utils/raceUtils';
 import { normalizeDriver, normalizeTeam } from '../utils/normalization';
 import { normalizeDriverForSeason } from '../constants/f1DataLoader';
 import { api } from '../services/api';
@@ -86,6 +86,8 @@ const NextRaceSelections: React.FC = () => {
   const [leagueOpponents, setLeagueOpponents] = useState<Opponent[]>([]);
   const [loadingOpponents, setLoadingOpponents] = useState(false);
   const deadlineTriggeredRef = useRef(false);
+  /** Round for Race History deep-link (latest non-cancelled race before current next race) */
+  const [lastRaceResultRound, setLastRaceResultRound] = useState<number | null>(null);
 
   // Get season-aware driver and team data
   const allDrivers = getDrivers(leagueSeason);
@@ -121,8 +123,21 @@ const NextRaceSelections: React.FC = () => {
       const season = leagueData.season || 2026;
       setLeagueSeason(season);
       
-      // Fetch the next race timing
+      // Fetch the next race timing and full season calendar (for "Last race result" link)
       const raceTiming = await getNextRaceTiming({ leagueId });
+      let calendarRaces: { round: number; status?: string }[] = [];
+      try {
+        const calendarRes = await api.get(`/api/race/league/${leagueId}`);
+        calendarRaces = Array.isArray(calendarRes.data) ? calendarRes.data : [];
+      } catch (calErr) {
+        console.error('[fetchData] Failed to load race calendar for last result link', calErr);
+      }
+      const lastRound =
+        raceTiming?.round != null
+          ? getLastRaceResultRound(calendarRaces, raceTiming.round)
+          : null;
+      setLastRaceResultRound(lastRound);
+
       // Use the round from raceTiming
       const round = raceTiming?.round;
       // Only fetch used selections if round is available
@@ -259,6 +274,7 @@ const NextRaceSelections: React.FC = () => {
     } catch (err) {
       console.error('Error fetching data:', err);
       setError('Failed to load data');
+      setLastRaceResultRound(null);
     } finally {
       setLoading(false);
     }
@@ -1236,10 +1252,21 @@ const NextRaceSelections: React.FC = () => {
                   </button>
                   <button
                     onClick={() => navigate(`/league/${leagueId}/briefing`)}
-                    className="w-full min-w-[160px] flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-bold transition-colors duration-200"
+                    className="w-full min-w-[160px] flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-bold transition-colors duration-200"
                   >
                     🎯 Opponents Briefing
                   </button>
+                  {lastRaceResultRound != null && (
+                    <button
+                      type="button"
+                      onClick={() =>
+                        navigate(`/league/${leagueId}/race/${lastRaceResultRound}`)
+                      }
+                      className="w-full min-w-[160px] flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-bold transition-colors duration-200"
+                    >
+                      Last race result
+                    </button>
+                  )}
                 </div>
           </div>
         </div>
