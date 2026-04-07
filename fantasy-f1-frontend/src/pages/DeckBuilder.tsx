@@ -41,6 +41,8 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ leagueId: propLeagueId }) => 
   // Deck state
   const [existingDeck, setExistingDeck] = useState<{ driverCards: Card[]; teamCards: Card[] } | null>(null);
   const [isDeckLocked, setIsDeckLocked] = useState(false);
+  /** ISO deadline when user joined mid-season — build before next race selection lock */
+  const [deckBuildDeadline, setDeckBuildDeadline] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState(false);
   const [leagueSeason, setLeagueSeason] = useState<number>(2026);
   
@@ -146,9 +148,11 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ leagueId: propLeagueId }) => 
       try {
         const lockStatus = await getDeckLockStatus(leagueId);
         setIsDeckLocked(!lockStatus.allowedToBuild);
+        setDeckBuildDeadline(lockStatus.nextExtensionDeadline || null);
       } catch (err) {
         console.error('Error checking deck lock status:', err);
         setIsDeckLocked(false);
+        setDeckBuildDeadline(null);
       }
 
       // Fetch all cards
@@ -415,6 +419,17 @@ const DeckBuilder: React.FC<DeckBuilderProps> = ({ leagueId: propLeagueId }) => 
             <div className="flex items-center gap-2 text-yellow-400 mb-2 text-sm">
               <IconWrapper icon={FaLock} />
               <span>Deck is locked. The season has started.</span>
+            </div>
+          )}
+          {!isDeckLocked && deckBuildDeadline && (
+            <div className="text-sky-200/90 mb-2 text-sm">
+              Build or update your deck before the next race selection deadline:{' '}
+              <span className="font-semibold">
+                {new Date(deckBuildDeadline).toLocaleString(undefined, {
+                  dateStyle: 'medium',
+                  timeStyle: 'short'
+                })}
+              </span>
             </div>
           )}
         </div>

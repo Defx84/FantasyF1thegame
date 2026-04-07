@@ -25,6 +25,18 @@ const leagueSchema = new mongoose.Schema({
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   }],
+  /** When each user joined this league (for deck-build grace until next race deadline) */
+  memberJoinDates: [{
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'User',
+      required: true
+    },
+    joinedAt: {
+      type: Date,
+      default: Date.now
+    }
+  }],
   season: {
     type: Number,
     required: true

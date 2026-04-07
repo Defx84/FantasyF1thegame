@@ -39,11 +39,13 @@ const createLeague = async (req, res) => {
         const currentYear = new Date().getFullYear();
         const season = (currentYear >= 2025 && currentYear <= 2026) ? 2026 : currentYear;
 
+        const now = new Date();
         const league = new League({
             name,
             description,
             owner: req.user._id,
             members: [req.user._id],
+            memberJoinDates: [{ user: req.user._id, joinedAt: now }],
             code,
             season
         });
@@ -99,6 +101,10 @@ const joinLeague = async (req, res) => {
         }
 
         league.members.push(userId);
+        if (!league.memberJoinDates) {
+            league.memberJoinDates = [];
+        }
+        league.memberJoinDates.push({ user: userId, joinedAt: new Date() });
         await league.save();
 
         // Return the league immediately, initialize race selections in the background
@@ -351,8 +357,13 @@ const abandonLeague = async (req, res) => {
         if (league.owner.toString() === userId.toString()) {
             return res.status(400).json({ message: 'League owner cannot abandon their own league. Delete the league instead.' });
         }
-        // Remove user from members array
+        // Remove user from members array and join tracking
         league.members = league.members.filter(memberId => memberId.toString() !== userId.toString());
+        if (league.memberJoinDates && league.memberJoinDates.length) {
+            league.memberJoinDates = league.memberJoinDates.filter(
+                (e) => e.user && e.user.toString() !== userId.toString()
+            );
+        }
         await league.save();
         // Delete all user data for this league
         await Promise.all([

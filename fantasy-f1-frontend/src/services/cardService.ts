@@ -90,7 +90,8 @@ export const getPlayerDeck = async (leagueId: string): Promise<DeckResponse> => 
 
 /**
  * Get deck lock status for the current user (whether they can build/edit deck).
- * Extension users (e.g. joined after first race) may be allowedToBuild until next race deadline.
+ * Mid-season joiners may build until the selection deadline of the first scheduled race after they joined;
+ * `nextExtensionDeadline` is that instant (also used for DECK_BUILD_EXTENSION_USERS).
  */
 export interface DeckLockStatusResponse {
   success: boolean;
