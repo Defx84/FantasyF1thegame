@@ -44,6 +44,8 @@ const rulesSections = [
         <li>No card can be duplicated inside the deck.</li>
         <li>Each card is single use only.</li>
         <li>The decks can be edited until -5 min to the first qualifying session of 2026.</li>
+        <li>If you create a league when the season has started, you can create your deck until the first race selection deadline.</li>
+        <li>If you join a league when the season has started, you can create your deck until the first race selection deadline after you joined.</li>
         <li>Before each race, the players will decide if they want to use a power card for that weekend, this will be done in the selection page.</li>
         <li>The choice can be edited until -5 minutes to the qualifying session.</li>
         <li>Drivers' cards and teams' cards can be played separately.</li>
