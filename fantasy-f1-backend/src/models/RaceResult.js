@@ -300,100 +300,100 @@ raceResultSchema.pre('save', async function(next) {
   next();
 });
 
-// Add post-save hook to trigger points assignment when race is completed
-raceResultSchema.post('save', async function(doc) {
+/**
+ * Assign fantasy points to all league members for a completed round and refresh leaderboards.
+ * Used after race results are persisted. Must run for both .save() and findOneAndUpdate paths
+ * (Mongoose post('save') does NOT run for findOneAndUpdate / findByIdAndUpdate).
+ */
+async function assignPointsAfterRaceCompleted(doc) {
   try {
-    console.log(`[RaceResult Post-Save] Hook triggered for race ${doc.raceName} (round ${doc.round}) with status: ${doc.status}`);
-    
-    // Only proceed if the race is completed
+    if (!doc) {
+      return;
+    }
+
+    console.log(`[RaceResult Points] Triggered for race ${doc.raceName} (round ${doc.round}) with status: ${doc.status}`);
+
     if (doc.status !== 'completed') {
-      console.log(`[RaceResult Post-Save] Race ${doc.raceName} (round ${doc.round}) is not completed, skipping points assignment.`);
+      console.log(`[RaceResult Points] Race ${doc.raceName} (round ${doc.round}) is not completed, skipping points assignment.`);
       return;
     }
 
     const calendarRow = await RaceCalendar.findOne({ season: doc.season, round: doc.round }).select('status').lean();
     if (calendarRow && calendarRow.status === 'cancelled') {
-      console.log(`[RaceResult Post-Save] Round ${doc.round} is cancelled on the calendar — skipping points assignment.`);
+      console.log(`[RaceResult Points] Round ${doc.round} is cancelled on the calendar — skipping points assignment.`);
       return;
     }
 
-    console.log(`[RaceResult Post-Save] Processing race ${doc.raceName} (round ${doc.round})...`);
-    console.log(`[RaceResult Post-Save] Race data:`, {
+    console.log(`[RaceResult Points] Processing race ${doc.raceName} (round ${doc.round})...`);
+    console.log(`[RaceResult Points] Race data:`, {
       isSprintWeekend: doc.isSprintWeekend,
       resultsCount: doc.results?.length || 0,
       sprintResultsCount: doc.sprintResults?.length || 0,
       teamResultsCount: doc.teamResults?.length || 0
     });
 
-    // ENHANCED SAFEGUARD: Check if race results are actually available
     if (!doc.results || doc.results.length === 0) {
-      console.error(`[RaceResult Post-Save] ⚠️ Race ${doc.raceName} (round ${doc.round}) marked as completed but has no results! Skipping points assignment.`);
+      console.error(`[RaceResult Points] ⚠️ Race ${doc.raceName} (round ${doc.round}) marked as completed but has no results! Skipping points assignment.`);
       return;
     }
 
     if (!doc.teamResults || doc.teamResults.length === 0) {
-      console.error(`[RaceResult Post-Save] ⚠️ Race ${doc.raceName} (round ${doc.round}) marked as completed but has no team results! Skipping points assignment.`);
+      console.error(`[RaceResult Points] ⚠️ Race ${doc.raceName} (round ${doc.round}) marked as completed but has no team results! Skipping points assignment.`);
       return;
     }
 
-    // ENHANCED SAFEGUARD: Validate minimum expected results
-    const expectedDriverCount = 20; // F1 has 20 drivers
-    const expectedTeamCount = 10;   // F1 has 10 teams
-    
+    const expectedDriverCount = 20;
+    const expectedTeamCount = 10;
+
     if (doc.results.length < expectedDriverCount) {
-      console.warn(`[RaceResult Post-Save] ⚠️ Race ${doc.raceName} (round ${doc.round}) has only ${doc.results.length} driver results (expected ${expectedDriverCount}). Results may be incomplete.`);
+      console.warn(`[RaceResult Points] ⚠️ Race ${doc.raceName} (round ${doc.round}) has only ${doc.results.length} driver results (expected ${expectedDriverCount}). Results may be incomplete.`);
     }
-    
+
     if (doc.teamResults.length < expectedTeamCount) {
-      console.warn(`[RaceResult Post-Save] ⚠️ Race ${doc.raceName} (round ${doc.round}) has only ${doc.teamResults.length} team results (expected ${expectedTeamCount}). Results may be incomplete.`);
+      console.warn(`[RaceResult Points] ⚠️ Race ${doc.raceName} (round ${doc.round}) has only ${doc.teamResults.length} team results (expected ${expectedTeamCount}). Results may be incomplete.`);
     }
 
-    console.log(`[RaceResult Post-Save] ✅ Race data validation passed. Proceeding with points assignment.`);
+    console.log(`[RaceResult Points] ✅ Race data validation passed. Proceeding with points assignment.`);
 
-    // Initialize services
     const scoringService = new (require('../services/ScoringService'))();
     const leaderboardService = new (require('../services/LeaderboardService'))();
     const PointsUpdateLog = require('./PointsUpdateLog');
     const UsedSelection = require('./UsedSelection');
 
     const RaceSelection = mongoose.model('RaceSelection');
-    const RaceCalendar = mongoose.model('RaceCalendar');
-    const calendarRace = await RaceCalendar.findOne({
+    const RaceCalendarModel = mongoose.model('RaceCalendar');
+    const calendarRace = await RaceCalendarModel.findOne({
       season: doc.season,
       round: doc.round
     }).select('_id');
 
     if (!calendarRace) {
-      console.error(`[RaceResult Post-Save] RaceCalendar not found for season ${doc.season}, round ${doc.round}. Skipping points assignment.`);
+      console.error(`[RaceResult Points] RaceCalendar not found for season ${doc.season}, round ${doc.round}. Skipping points assignment.`);
       return;
     }
 
-    // Find all leagues for this season
     const leagues = await mongoose.model('League')
       .find({ season: doc.season })
       .populate('members');
-    
-    console.log(`[RaceResult Post-Save] Found ${leagues.length} leagues to process for season ${doc.season}, round ${doc.round}`);
+
+    console.log(`[RaceResult Points] Found ${leagues.length} leagues to process for season ${doc.season}, round ${doc.round}`);
 
     let totalUpdated = 0;
     for (const league of leagues) {
       if (!league) {
-        console.error('[RaceResult Post-Save] League not found in season query');
+        console.error('[RaceResult Points] League not found in season query');
         continue;
       }
 
       let updatedCount = 0;
       let noSelectionCount = 0;
-      
+
       for (const member of league.members) {
-        // Find by (league, user, round) so we get the selection regardless of calendar _id.
-        // If calendar was ever recreated, selections can point to old race _id; we heal below.
         const roundSelections = await RaceSelection.find({
           user: member._id,
           league: league._id,
           round: doc.round
         });
-        // Prefer the one that has picks (mainDriver, reserveDriver, team)
         let selection = roundSelections.find(s => s.mainDriver && s.reserveDriver && s.team) || roundSelections[0];
 
         if (!selection) {
@@ -401,19 +401,14 @@ raceResultSchema.post('save', async function(doc) {
           continue;
         }
 
-        // Skip empty selections (no drivers or team selected)
         if (!selection.mainDriver || !selection.reserveDriver || !selection.team) {
           noSelectionCount++;
           continue;
         }
 
-        // Heal race ref: if this selection points to a different calendar entry (e.g. calendar was recreated),
-        // point it to the current one so points and leaderboard stay correct.
         if (selection.race && selection.race.toString() !== calendarRace._id.toString()) {
           const selectionDoc = await RaceSelection.findById(selection._id);
           if (selectionDoc) {
-            // Remove any other selection for (user, league, round) that already has race = calendarRace._id
-            // to avoid unique index (user, league, race) violation when we update.
             await RaceSelection.deleteMany({
               league: league._id,
               user: member._id,
@@ -427,7 +422,6 @@ raceResultSchema.post('save', async function(doc) {
           }
         }
 
-        // Get race card selection if season is 2026+
         let raceCardSelection = null;
         if (doc.season >= 2026) {
           raceCardSelection = await RaceCardSelection.findOne({
@@ -437,7 +431,6 @@ raceResultSchema.post('save', async function(doc) {
           }).populate('driverCard teamCard');
         }
 
-        // Calculate new points (with card effects if applicable)
         const pointsData = await scoringService.calculateRacePoints({
           mainDriver: selection.mainDriver,
           reserveDriver: selection.reserveDriver,
@@ -447,20 +440,16 @@ raceResultSchema.post('save', async function(doc) {
           leagueId: league._id
         });
 
-        // Validate points against race results
         const mainDriverResult = doc.getDriverResult(selection.mainDriver);
         const reserveDriverResult = doc.getDriverResult(selection.reserveDriver);
         const teamResult = doc.getTeamResult(selection.team);
 
-        // Verify base points match what's in race results (before card effects)
-        // Note: Final points may differ due to card effects
         const expectedBasePoints = {
           mainDriver: mainDriverResult?.points || 0,
           reserveDriver: reserveDriverResult?.points || 0,
           team: teamResult?.totalPoints || 0
         };
 
-        // Check base points (before card effects) if available
         const basePoints = pointsData.breakdown.basePoints;
         if (basePoints) {
           if (basePoints.mainDriverPoints !== expectedBasePoints.mainDriver ||
@@ -482,7 +471,6 @@ raceResultSchema.post('save', async function(doc) {
             });
           }
         } else {
-          // Fallback for 2025 seasons (no card effects)
           if (pointsData.breakdown.mainDriverPoints !== expectedBasePoints.mainDriver ||
               pointsData.breakdown.reserveDriverPoints !== expectedBasePoints.reserveDriver ||
               pointsData.breakdown.teamPoints !== expectedBasePoints.team) {
@@ -503,19 +491,16 @@ raceResultSchema.post('save', async function(doc) {
           }
         }
 
-        // Check if points have changed
-        const pointsChanged = 
-          selection.points !== pointsData.totalPoints || 
+        const pointsChanged =
+          selection.points !== pointsData.totalPoints ||
           JSON.stringify(selection.pointBreakdown) !== JSON.stringify(pointsData.breakdown);
 
-        // FIXED: Handle both 'empty' and 'user-submitted' statuses for automation
-        const shouldUpdate = pointsChanged || 
-          !selection.pointBreakdown || 
-          selection.status === 'empty' || 
+        const shouldUpdate = pointsChanged ||
+          !selection.pointBreakdown ||
+          selection.status === 'empty' ||
           selection.status === 'user-submitted';
 
         if (shouldUpdate) {
-          // Log the points update
           await PointsUpdateLog.create({
             round: doc.round,
             raceName: doc.raceName,
@@ -532,13 +517,11 @@ raceResultSchema.post('save', async function(doc) {
           const driverCardPoints = bp ? Math.max(0, (breakdown.mainDriverPoints + breakdown.reserveDriverPoints) - (bp.mainDriverPoints + bp.reserveDriverPoints)) : 0;
           const teamCardPoints = bp ? Math.max(0, (breakdown.teamPoints || 0) - (bp.teamPoints || 0)) : 0;
           selection.pointBreakdown = { ...breakdown, driverCardPoints, teamCardPoints };
-          // Do not change status when only assigning points; leave as user-submitted / auto-assigned / etc.
-          selection.isAutoAssigned = false; // Points from manual results/scraper = not "Auto" on Grid
+          selection.isAutoAssigned = false;
           selection.assignedAt = new Date();
           await selection.save();
           updatedCount++;
 
-          // Update usage tracking
           let usedSelection = await UsedSelection.findOne({
             user: member._id,
             league: league._id
@@ -554,7 +537,6 @@ raceResultSchema.post('save', async function(doc) {
             });
           }
 
-          // Add the selections to the current cycles
           await usedSelection.addUsedMainDriver(selection.mainDriver);
           await usedSelection.addUsedReserveDriver(selection.reserveDriver);
           await usedSelection.addUsedTeam(selection.team);
@@ -562,40 +544,43 @@ raceResultSchema.post('save', async function(doc) {
         }
       }
 
-      // Always rebuild leaderboard for this season so standings reflect current RaceResult + RaceSelection
-      // (even when no selection was updated, e.g. re-save or calendar _id mismatch)
       await leaderboardService.updateStandings(league._id);
       if (updatedCount > 0) {
-        console.log(`[RaceResult Post-Save] League ${league.name}: Updated ${updatedCount} users, ${noSelectionCount} without selections for round ${doc.round}`);
+        console.log(`[RaceResult Points] League ${league.name}: Updated ${updatedCount} users, ${noSelectionCount} without selections for round ${doc.round}`);
         totalUpdated += updatedCount;
       } else if (noSelectionCount > 0) {
-        console.log(`[RaceResult Post-Save] League ${league.name}: No selection updates, ${noSelectionCount} users without selections for round ${doc.round}; leaderboard refreshed.`);
+        console.log(`[RaceResult Points] League ${league.name}: No selection updates, ${noSelectionCount} users without selections for round ${doc.round}; leaderboard refreshed.`);
       } else {
-        console.log(`[RaceResult Post-Save] League ${league.name}: Leaderboard refreshed for round ${doc.round}.`);
+        console.log(`[RaceResult Points] League ${league.name}: Leaderboard refreshed for round ${doc.round}.`);
       }
     }
 
     if (totalUpdated > 0) {
-      console.log(`[RaceResult Post-Save] Total users updated for round ${doc.round}: ${totalUpdated}`);
+      console.log(`[RaceResult Points] Total users updated for round ${doc.round}: ${totalUpdated}`);
     } else {
-      console.log(`[RaceResult Post-Save] No points changes detected for round ${doc.round}`);
+      console.log(`[RaceResult Points] No points changes detected for round ${doc.round}`);
     }
-
-    // Note: Season completion and PDF generation is now handled by a scheduled job
-    // that runs every Monday at 8am UK time (see server.js)
-
   } catch (error) {
-    console.error('[RaceResult Post-Save] Error assigning points:', error);
-    console.error('[RaceResult Post-Save] Error details:', {
-      raceName: doc.raceName,
-      round: doc.round,
-      status: doc.status,
+    console.error('[RaceResult Points] Error assigning points:', error);
+    console.error('[RaceResult Points] Error details:', {
+      raceName: doc?.raceName,
+      round: doc?.round,
+      status: doc?.status,
       errorMessage: error.message,
       errorStack: error.stack
     });
   }
+}
+
+raceResultSchema.post('save', async function(doc) {
+  await assignPointsAfterRaceCompleted(doc);
+});
+
+raceResultSchema.post('findOneAndUpdate', async function(doc) {
+  await assignPointsAfterRaceCompleted(doc);
 });
 
 const RaceResult = mongoose.model('RaceResult', raceResultSchema);
+RaceResult.assignPointsAfterRaceCompleted = assignPointsAfterRaceCompleted;
 
 module.exports = RaceResult;
