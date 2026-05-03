@@ -91,8 +91,9 @@ const Standings: React.FC = () => {
       try {
         setLoading(true);
         const leagueResponse = await api.get(`/api/league/${leagueId}`);
-        const leagueSeason = leagueResponse.data?.activeSeason
-          ?? leagueResponse.data?.season
+        // Leaderboards are stored per league.season; activeSeason can reflect other years if miscomputed.
+        const leagueSeason = leagueResponse.data?.season
+          ?? leagueResponse.data?.activeSeason
           ?? new Date().getFullYear();
         const response = await api.get(`/api/league/${leagueId}/standings/${leagueSeason}`);
         const data = response.data;

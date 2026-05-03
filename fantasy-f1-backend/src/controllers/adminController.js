@@ -388,9 +388,12 @@ exports.assignRealPointsToLeague = async (req, res) => {
       return res.status(404).json({ message: 'League not found' });
     }
 
-    const raceResult = await require('../models/RaceResult').findOne({ round });
+    const raceResult = await require('../models/RaceResult').findOne({
+      round: parseInt(round, 10),
+      season: league.season
+    });
     if (!raceResult) {
-      return res.status(404).json({ message: 'RaceResult not found for this round' });
+      return res.status(404).json({ message: 'RaceResult not found for this round and league season' });
     }
 
     // Check if race is completed
@@ -536,9 +539,12 @@ exports.triggerManualScraper = async (req, res) => {
     
     console.log(`[Manual Scraper] Scraper completed for ${raceName}`);
 
-    // Get updated race result
+    // Get updated race result (scope by season from calendar row to avoid wrong-year round match)
     const RaceResult = require('../models/RaceResult');
-    const updatedRace = await RaceResult.findOne({ round });
+    const updatedRace = await RaceResult.findOne({
+      round: parseInt(round, 10),
+      ...(calendarForScrape?.season != null ? { season: calendarForScrape.season } : {})
+    });
     
     if (updatedRace) {
       console.log(`[Manual Scraper] Race ${raceName} updated:`, {

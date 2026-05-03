@@ -142,16 +142,22 @@ const getLeague = async (req, res) => {
         }
 
         const now = new Date();
+        const leagueSeason = league.season;
         const recentThreshold = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        // Scope to this league's season so activeSeason never drifts (e.g. global 2025 result vs 2026 league).
         const recentCompletedRace = await RaceResult.findOne({
             status: 'completed',
+            season: leagueSeason,
             updatedAt: { $gte: recentThreshold }
         }).sort({ updatedAt: -1 }).select('season').lean();
-        const nextRace = await RaceCalendar.findOne({ date: { $gte: now } })
+        const nextRace = await RaceCalendar.findOne({
+            season: leagueSeason,
+            date: { $gte: now }
+        })
             .sort({ date: 1 })
             .select('season')
             .lean();
-        const activeSeason = recentCompletedRace?.season || nextRace?.season || league.season;
+        const activeSeason = recentCompletedRace?.season || nextRace?.season || leagueSeason;
 
         res.json({
             id: league._id,
