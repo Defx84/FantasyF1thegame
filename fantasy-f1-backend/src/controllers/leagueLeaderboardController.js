@@ -84,8 +84,40 @@ const getLeagueLeaderboard = async (req, res) => {
             return res.status(404).json({ message: 'No leaderboard found for this league and season' });
         }
 
-        // For 2026+ seasons, enrich race results with card usage (driver/team card + targets)
         const requestedSeason = parseInt(season, 10) || league.season;
+
+        // Self-heal: Mongo leaderboard can lag after new races (e.g. R6 Miami) while merge still shows R4–R5 cancelled stubs.
+        const maxCompletedAgg = await RaceResult.aggregate([
+            { $match: { season: requestedSeason, status: 'completed' } },
+            { $group: { _id: null, maxRound: { $max: '$round' } } }
+        ]);
+        const maxCompletedRound = maxCompletedAgg[0]?.maxRound ?? 0;
+        const maxStoredRound = leaderboard.driverStandings.reduce((mx, ds) => {
+            const rmax = (ds.raceResults || []).reduce((m, r) => Math.max(m, Number(r.round) || 0), 0);
+            return Math.max(mx, rmax);
+        }, 0);
+        if (maxCompletedRound > maxStoredRound) {
+            console.log(
+                '[Leaderboard API] Rebuilding stale leaderboard: max completed round',
+                maxCompletedRound,
+                'vs stored',
+                maxStoredRound,
+                'league',
+                id
+            );
+            const LeaderboardService = require('../services/LeaderboardService');
+            const leaderboardService = new LeaderboardService();
+            await leaderboardService.updateStandings(id);
+            leaderboard = await LeagueLeaderboard.findOne({
+                league: id,
+                season: parseInt(season, 10) || league.season
+            }).populate('driverStandings.user constructorStandings.user', 'username');
+            if (!leaderboard) {
+                return res.status(404).json({ message: 'No leaderboard found after rebuild' });
+            }
+        }
+
+        // For 2026+ seasons, enrich race results with card usage (driver/team card + targets)
         let cardMap = new Map(); // key: `${userId}-${round}` -> { driverCard, teamCard, ... }
         if (requestedSeason >= 2026) {
             require('../models/Card'); // ensure Card model is registered for populate
