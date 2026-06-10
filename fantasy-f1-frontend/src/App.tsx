@@ -27,6 +27,8 @@ import { getRaceCards } from './services/cardService';
 import { Player } from './types/player';
 import './App.css';
 import AppLayout from './components/AppLayout';
+import { Analytics } from '@vercel/analytics/react';
+import { FEATURES } from './config';
 
 interface GridData {
   players: Player[];
@@ -190,6 +192,7 @@ const App: React.FC = () => {
             <Route path="/info" element={<Info />} />
           </Route>
         </Routes>
+        {FEATURES.ENABLE_ANALYTICS && <Analytics />}
       </Router>
     </AuthProvider>
   );
