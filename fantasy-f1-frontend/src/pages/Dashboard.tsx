@@ -12,6 +12,24 @@ import Footer from '../components/Footer';
 
 const TypedInstagramIcon = FaInstagram as unknown as React.FC<{ size?: number; className?: string }>;
 
+function getLeagueSeason(league: { season?: number; league?: { season?: number } }): number | null {
+  const raw = league?.season ?? league?.league?.season;
+  if (typeof raw === 'number') return raw;
+  if (raw != null) {
+    const parsed = parseInt(String(raw), 10);
+    return Number.isNaN(parsed) ? null : parsed;
+  }
+  return null;
+}
+
+function leagueLandingPath(leagueId: string, league: { season?: number; league?: { season?: number } }): string {
+  const season = getLeagueSeason(league);
+  if (season !== null && season >= 2026) {
+    return `/league/${leagueId}?tab=deck`;
+  }
+  return `/league/${leagueId}`;
+}
+
 const Dashboard: React.FC = () => {
   const { user, logout, loading } = useAuth();
   const [activeTab, setActiveTab] = useState('create-league');
@@ -126,7 +144,7 @@ const Dashboard: React.FC = () => {
       // This prevents UI freeze
       setTimeout(() => {
         setIsSubmitting(false);
-        navigate(`/league/${leagueId}`);
+        navigate(leagueLandingPath(leagueId, newLeague));
       }, 0);
     } catch (err: any) {
       console.error('[Dashboard] League creation error:', err);
@@ -164,7 +182,7 @@ const Dashboard: React.FC = () => {
       // This prevents UI freeze
       setTimeout(() => {
         setIsSubmitting(false);
-        navigate(`/league/${leagueId}`);
+        navigate(leagueLandingPath(leagueId, joinedLeague));
       }, 0);
     } catch (err: any) {
       console.error('[Dashboard] League join error:', err);
