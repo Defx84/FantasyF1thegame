@@ -12,7 +12,13 @@ import Footer from '../components/Footer';
 
 const TypedInstagramIcon = FaInstagram as unknown as React.FC<{ size?: number; className?: string }>;
 
-function getLeagueSeason(league: { season?: number; league?: { season?: number } }): number | null {
+type LeagueActionResponse = {
+  _id?: string;
+  season?: number;
+  league?: { _id?: string; season?: number };
+};
+
+function getLeagueSeason(league: LeagueActionResponse): number | null {
   const raw = league?.season ?? league?.league?.season;
   if (typeof raw === 'number') return raw;
   if (raw != null) {
@@ -22,7 +28,7 @@ function getLeagueSeason(league: { season?: number; league?: { season?: number }
   return null;
 }
 
-function leagueLandingPath(leagueId: string, league: { season?: number; league?: { season?: number } }): string {
+function leagueLandingPath(leagueId: string, league: LeagueActionResponse): string {
   const season = getLeagueSeason(league);
   if (season !== null && season >= 2026) {
     return `/league/${leagueId}?tab=deck`;
@@ -97,7 +103,7 @@ const Dashboard: React.FC = () => {
 
     try {
       console.log('[Dashboard] Creating league:', leagueName);
-      let newLeague;
+      let newLeague: LeagueActionResponse | undefined;
       
       try {
         newLeague = await createLeague({
@@ -139,12 +145,14 @@ const Dashboard: React.FC = () => {
       // Reset form state immediately
       setLeagueName('');
       setShowCreateLeagueForm(false);
+
+      const leagueForNav = newLeague ?? {};
       
       // Use setTimeout to ensure state updates and navigation happen in next tick
       // This prevents UI freeze
       setTimeout(() => {
         setIsSubmitting(false);
-        navigate(leagueLandingPath(leagueId, newLeague));
+        navigate(leagueLandingPath(leagueId, leagueForNav));
       }, 0);
     } catch (err: any) {
       console.error('[Dashboard] League creation error:', err);
