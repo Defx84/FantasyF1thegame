@@ -25,6 +25,14 @@ interface Team {
   displayName: string;
 }
 
+const DARK_SELECT_CLASS =
+  'px-3 py-2 bg-gray-800 border border-white/20 rounded-lg text-white focus:outline-none focus:border-red-500 [color-scheme:dark]';
+
+const DARK_SELECT_SM_CLASS =
+  'px-2 py-1 bg-gray-800 border border-white/20 rounded text-white text-sm focus:outline-none focus:border-red-500 [color-scheme:dark]';
+
+const DARK_OPTION_CLASS = 'bg-gray-800 text-white';
+
 interface DriverResult {
   driver: string;
   team: string;
@@ -351,11 +359,11 @@ const ManualRaceResults: React.FC<ManualRaceResultsProps> = ({ onClose }) => {
                 const race = races.find(r => r._id === e.target.value);
                 setSelectedRace(race || null);
               }}
-              className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white focus:outline-none focus:border-red-500"
+              className={`w-full ${DARK_SELECT_CLASS}`}
             >
-              <option value="">-- Select a race --</option>
+              <option value="" className={DARK_OPTION_CLASS}>-- Select a race --</option>
               {races.map(race => (
-                <option key={race._id} value={race._id}>
+                <option key={race._id} value={race._id} className={DARK_OPTION_CLASS}>
                   Round {race.round}: {race.raceName} {race.isSprintWeekend ? '(Sprint)' : ''}
                 </option>
               ))}
@@ -397,12 +405,12 @@ const ManualRaceResults: React.FC<ManualRaceResultsProps> = ({ onClose }) => {
                           <select
                             value={result.status}
                             onChange={(e) => handleDriverResultChange(index, 'status', e.target.value)}
-                            className="w-32 px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-sm focus:outline-none focus:border-red-500"
+                            className={`w-32 ${DARK_SELECT_SM_CLASS}`}
                           >
-                            <option value="Finished">Finished</option>
-                            <option value="DNF">DNF</option>
-                            <option value="DNS">DNS</option>
-                            <option value="DSQ">DSQ</option>
+                            <option value="Finished" className={DARK_OPTION_CLASS}>Finished</option>
+                            <option value="DNF" className={DARK_OPTION_CLASS}>DNF</option>
+                            <option value="DNS" className={DARK_OPTION_CLASS}>DNS</option>
+                            <option value="DSQ" className={DARK_OPTION_CLASS}>DSQ</option>
                           </select>
                         </td>
                       </tr>
@@ -445,12 +453,12 @@ const ManualRaceResults: React.FC<ManualRaceResultsProps> = ({ onClose }) => {
                             <select
                               value={result.status}
                               onChange={(e) => handleSprintDriverResultChange(index, 'status', e.target.value)}
-                              className="w-32 px-2 py-1 bg-white/10 border border-white/20 rounded text-white text-sm focus:outline-none focus:border-red-500"
+                              className={`w-32 ${DARK_SELECT_SM_CLASS}`}
                             >
-                              <option value="Finished">Finished</option>
-                              <option value="DNF">DNF</option>
-                              <option value="DNS">DNS</option>
-                              <option value="DSQ">DSQ</option>
+                              <option value="Finished" className={DARK_OPTION_CLASS}>Finished</option>
+                              <option value="DNF" className={DARK_OPTION_CLASS}>DNF</option>
+                              <option value="DNS" className={DARK_OPTION_CLASS}>DNS</option>
+                              <option value="DSQ" className={DARK_OPTION_CLASS}>DSQ</option>
                             </select>
                           </td>
                         </tr>
