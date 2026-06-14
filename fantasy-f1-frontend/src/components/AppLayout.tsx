@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { FaBars, FaArrowLeft, FaUser, FaHome, FaUsers, FaSignOutAlt, FaTimes } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
+import { useSelectionsLeaveGuardOptional } from '../context/SelectionsLeaveGuardContext';
 import { getUserLeagues, League } from '../services/leagueService';
 import OverlayLoader from './OverlayLoader';
 import Footer from './Footer';
@@ -12,6 +13,7 @@ const AppLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const { logout, loading } = useAuth();
+  const leaveGuard = useSelectionsLeaveGuardOptional();
   const [menuOpen, setMenuOpen] = useState(false);
   const [isClosing, setIsClosing] = useState(false);
   const [leagues, setLeagues] = useState<League[]>([]);
@@ -20,9 +22,18 @@ const AppLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
   // Hide nav on excluded pages
   const hideNav = EXCLUDED_PATHS.includes(location.pathname);
 
+  const guardedNavigate = (action: () => void) => {
+    if (leaveGuard) {
+      leaveGuard.requestLeave(action);
+    } else {
+      action();
+    }
+  };
+
   // Back button: go back or to dashboard
   // Ensures coherent navigation behavior throughout the app
   const handleBack = () => {
+    guardedNavigate(() => {
     const pathname = location.pathname;
     const searchParams = new URLSearchParams(location.search);
     
@@ -62,12 +73,13 @@ const AppLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
       // No history or minimal history, go to dashboard as safe fallback
       navigate('/dashboard');
     }
+    });
   };
 
   // Menu actions
   const handleMenuClick = (path: string) => {
     setMenuOpen(false);
-    navigate(path);
+    guardedNavigate(() => navigate(path));
   };
 
   // Handle menu open/close with animation
@@ -177,7 +189,7 @@ const AppLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
                         onClick={() => {
                           setMenuOpen(false);
                           setLeaguesOpen(false);
-                          navigate(`/league/${league._id}`);
+                          guardedNavigate(() => navigate(`/league/${league._id}`));
                         }}
                       >
                         {league.name}
@@ -188,7 +200,7 @@ const AppLayout: React.FC<{ children?: React.ReactNode }> = ({ children }) => {
               )}
               <button
                 className="flex items-center gap-3 text-white text-lg hover:text-red-400 transition px-2 py-2 rounded-lg hover:bg-white/10"
-                onClick={logout}
+                onClick={() => guardedNavigate(logout)}
               >
                 {FaSignOutAlt({ className: "text-red-500" })} Logout
               </button>

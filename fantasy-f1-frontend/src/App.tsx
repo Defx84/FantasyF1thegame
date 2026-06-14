@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, useParams } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
+import { SelectionsLeaveGuardProvider } from './context/SelectionsLeaveGuardContext';
 import PrivateRoute from './components/PrivateRoute';
 import ScrollToTop from './components/ScrollToTop';
 import Dashboard from './pages/Dashboard';
@@ -169,6 +170,7 @@ const App: React.FC = () => {
   return (
     <AuthProvider>
       <Router>
+        <SelectionsLeaveGuardProvider>
         <ScrollToTop />
         <Routes>
           <Route path="/" element={<Welcome />} />
@@ -193,6 +195,7 @@ const App: React.FC = () => {
           </Route>
         </Routes>
         {FEATURES.ENABLE_ANALYTICS && <Analytics />}
+        </SelectionsLeaveGuardProvider>
       </Router>
     </AuthProvider>
   );

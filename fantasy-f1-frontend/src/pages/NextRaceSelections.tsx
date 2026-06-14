@@ -13,6 +13,7 @@ import { normalizeDriver, normalizeTeam } from '../utils/normalization';
 import { normalizeDriverForSeason } from '../constants/f1DataLoader';
 import { api } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import { useSelectionsLeaveGuard } from '../context/SelectionsLeaveGuardContext';
 import { getCardImagePath } from '../utils/cardImageMapper';
 import AppLogoSpinner from '../components/AppLogoSpinner';
 
@@ -46,6 +47,7 @@ const NextRaceSelections: React.FC = () => {
   const navigate = useNavigate();
   const { leagueId } = useParams<{ leagueId: string }>();
   const { user } = useAuth();
+  const { setIsActive, requestLeave } = useSelectionsLeaveGuard();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [raceData, setRaceData] = useState<RaceTiming | null>(null);
@@ -360,6 +362,16 @@ const NextRaceSelections: React.FC = () => {
   const seasonForNormalize = leagueSeason || 2026;
   const isRaceCancelled = raceData?.calendarStatus === 'cancelled';
   const selectionsDisabled = isLocked || !!isRaceCancelled;
+  const hasUnconfirmedSelections = !selectionsDisabled && isEditing;
+
+  useEffect(() => {
+    setIsActive(hasUnconfirmedSelections);
+    return () => setIsActive(false);
+  }, [hasUnconfirmedSelections, setIsActive]);
+
+  const guardedNavigate = (action: () => void) => {
+    requestLeave(action);
+  };
 
   const handleDriverClick = (driverId: string) => {
     if (selectionsDisabled) return;
@@ -1245,13 +1257,13 @@ const NextRaceSelections: React.FC = () => {
                     </>
                   )}
                   <button
-                    onClick={() => navigate(`/league/${leagueId}/grid`)}
+                    onClick={() => guardedNavigate(() => navigate(`/league/${leagueId}/grid`))}
                     className="w-full min-w-[160px] flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-bold transition-colors duration-200"
                   >
                     Go to Grid
                   </button>
                   <button
-                    onClick={() => navigate(`/league/${leagueId}/briefing`)}
+                    onClick={() => guardedNavigate(() => navigate(`/league/${leagueId}/briefing`))}
                     className="w-full min-w-[160px] flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-bold transition-colors duration-200"
                   >
                     🎯 Opponents Briefing
@@ -1260,7 +1272,7 @@ const NextRaceSelections: React.FC = () => {
                     <button
                       type="button"
                       onClick={() =>
-                        navigate(`/league/${leagueId}/race/${lastRaceResultRound}`)
+                        guardedNavigate(() => navigate(`/league/${leagueId}/race/${lastRaceResultRound}`))
                       }
                       className="w-full min-w-[160px] flex items-center justify-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-bold transition-colors duration-200"
                     >
