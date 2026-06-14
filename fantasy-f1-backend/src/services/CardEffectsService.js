@@ -149,7 +149,7 @@ class CardEffectsService {
                     // Move Up 1 Rank: Position adjustment (applies to active driver)
                     const driverForPosition = isReserveDriverActive ? selection.reserveDriver : selection.mainDriver;
                     const driverResult = this.findDriverResult(driverForPosition, raceResult.results, season);
-                    if (driverResult && driverResult.position) {
+                    if (this.isClassifiedFinisher(driverResult)) {
                         const newPosition = Math.max(1, driverResult.position - (card.effectValue || 1));
                         // Recalculate points based on new position
                         const adjustedPoints = this.calculatePointsFromPosition(newPosition, false);
@@ -208,7 +208,7 @@ class CardEffectsService {
                     const driverResultForConditional = this.findDriverResult(driverForConditional, raceResult.results, season);
 
                     if (condition === 'top5') {
-                        if (driverResultForConditional && driverResultForConditional.position && driverResultForConditional.position <= 5) {
+                        if (this.isClassifiedFinisher(driverResultForConditional) && driverResultForConditional.position <= 5) {
                             if (isReserveDriverActive) {
                                 modifiedReserveDriverPoints += bonus;
                             } else {
@@ -218,7 +218,7 @@ class CardEffectsService {
                             effectDetails.description = `${activeDriverName} Top 5 bonus: +${bonus} points`;
                         }
                     } else if (condition === 'top10') {
-                        if (driverResultForConditional && driverResultForConditional.position && driverResultForConditional.position <= 10) {
+                        if (this.isClassifiedFinisher(driverResultForConditional) && driverResultForConditional.position <= 10) {
                             if (isReserveDriverActive) {
                                 modifiedReserveDriverPoints += bonus;
                             } else {
@@ -231,8 +231,8 @@ class CardEffectsService {
                         const teammate = this.getTeammate(driverForConditional, season);
                         if (teammate) {
                             const teammateResult = this.findDriverResult(teammate, raceResult.results, season);
-                            if (driverResultForConditional && teammateResult && 
-                                driverResultForConditional.position && teammateResult.position &&
+                            if (this.isClassifiedFinisher(driverResultForConditional) &&
+                                this.isClassifiedFinisher(teammateResult) &&
                                 driverResultForConditional.position < teammateResult.position) {
                                 if (isReserveDriverActive) {
                                     modifiedReserveDriverPoints += bonus;
@@ -244,9 +244,7 @@ class CardEffectsService {
                             }
                         }
                     } else if (condition === 'bottom5') {
-                        const totalDrivers = raceResult.results?.length || 20;
-                        if (driverResultForConditional && driverResultForConditional.position && 
-                            driverResultForConditional.position > totalDrivers - 5) {
+                        if (this.isInBottom5AmongFinishers(driverResultForConditional, raceResult.results)) {
                             if (isReserveDriverActive) {
                                 modifiedReserveDriverPoints += bonus;
                             } else {
@@ -355,7 +353,7 @@ class CardEffectsService {
                     
                     teamDrivers.forEach(driver => {
                         const driverResult = this.findDriverResult(driver, raceResult.results, season);
-                        if (driverResult && driverResult.position && driverResult.position <= 3) {
+                        if (this.isClassifiedFinisher(driverResult) && driverResult.position <= 3) {
                             podiumCount++;
                         }
                     });
@@ -378,8 +376,7 @@ class CardEffectsService {
                     if (condition === 'both_top5') {
                         const driver1Result = this.findDriverResult(teamDrivers2[0], raceResult.results, season);
                         const driver2Result = this.findDriverResult(teamDrivers2[1], raceResult.results, season);
-                        if (driver1Result && driver2Result && 
-                            driver1Result.position && driver2Result.position &&
+                        if (this.isClassifiedFinisher(driver1Result) && this.isClassifiedFinisher(driver2Result) &&
                             driver1Result.position <= 5 && driver2Result.position <= 5) {
                             modifiedTeamPoints += bonus;
                             bonusApplied = true;
@@ -388,8 +385,7 @@ class CardEffectsService {
                     } else if (condition === 'both_top10') {
                         const driver1Result = this.findDriverResult(teamDrivers2[0], raceResult.results, season);
                         const driver2Result = this.findDriverResult(teamDrivers2[1], raceResult.results, season);
-                        if (driver1Result && driver2Result && 
-                            driver1Result.position && driver2Result.position &&
+                        if (this.isClassifiedFinisher(driver1Result) && this.isClassifiedFinisher(driver2Result) &&
                             driver1Result.position <= 10 && driver2Result.position <= 10) {
                             modifiedTeamPoints += bonus;
                             bonusApplied = true;
@@ -398,33 +394,26 @@ class CardEffectsService {
                     } else if (condition === 'both_outside_points') {
                         const driver1Result = this.findDriverResult(teamDrivers2[0], raceResult.results, season);
                         const driver2Result = this.findDriverResult(teamDrivers2[1], raceResult.results, season);
-                        if (driver1Result && driver2Result && 
-                            (!driver1Result.position || driver1Result.position > 10) &&
-                            (!driver2Result.position || driver2Result.position > 10)) {
+                        if (this.isClassifiedFinisher(driver1Result) && this.isClassifiedFinisher(driver2Result) &&
+                            driver1Result.position > 10 && driver2Result.position > 10) {
                             modifiedTeamPoints += bonus;
                             bonusApplied = true;
                             effectDetails.description = `Both cars outside points: +${bonus} points`;
                         }
                     } else if (condition === 'one_last_place') {
-                        const totalDrivers = raceResult.results?.length || 20;
                         teamDrivers2.forEach(driver => {
                             const driverResult = this.findDriverResult(driver, raceResult.results, season);
-                            if (driverResult && driverResult.position === totalDrivers) {
+                            if (this.isLastAmongFinishers(driverResult, raceResult.results)) {
                                 modifiedTeamPoints += bonus;
                                 bonusApplied = true;
                                 effectDetails.description = `One car last place: +${bonus} points`;
                             }
                         });
                     } else if (condition === 'both_bottom5') {
-                        // Bottom 5: Both cars finish in bottom 5 positions
-                        const totalDrivers = raceResult.results?.length || 20;
-                        const bottom5Threshold = totalDrivers - 4; // Positions that are in bottom 5 (e.g., 17-20 for 20 drivers)
                         const driver1Result = this.findDriverResult(teamDrivers2[0], raceResult.results, season);
                         const driver2Result = this.findDriverResult(teamDrivers2[1], raceResult.results, season);
-                        if (driver1Result && driver2Result && 
-                            driver1Result.position && driver2Result.position &&
-                            driver1Result.position >= bottom5Threshold && 
-                            driver2Result.position >= bottom5Threshold) {
+                        if (this.isInBottom5AmongFinishers(driver1Result, raceResult.results) &&
+                            this.isInBottom5AmongFinishers(driver2Result, raceResult.results)) {
                             modifiedTeamPoints += bonus;
                             bonusApplied = true;
                             effectDetails.description = `Both cars bottom 5: +${bonus} points`;
@@ -456,7 +445,7 @@ class CardEffectsService {
                         const driver1Result = this.findDriverResult(teamDrivers3[0], raceResult.results, season);
                         const driver2Result = this.findDriverResult(teamDrivers3[1], raceResult.results, season);
                         
-                        if (driver1Result && driver2Result && driver1Result.position && driver2Result.position) {
+                        if (this.isClassifiedFinisher(driver1Result) && this.isClassifiedFinisher(driver2Result)) {
                             // Find which driver finished better
                             const betterDriver = driver1Result.position < driver2Result.position ? driver1Result : driver2Result;
                             const worseDriver = driver1Result.position < driver2Result.position ? driver2Result : driver1Result;
@@ -522,6 +511,44 @@ class CardEffectsService {
     }
 
     // Helper methods
+
+    /**
+     * True when the driver has a numeric classified race finish (excludes DNF, DNS, DSQ).
+     */
+    isClassifiedFinisher(driverResult) {
+        if (!driverResult) return false;
+        const status = (driverResult.status || '').toUpperCase();
+        if (['DNF', 'DNS', 'DSQ', 'DQ'].includes(status)) return false;
+        if (driverResult.didNotFinish || driverResult.didNotStart || driverResult.disqualified) return false;
+        const position = Number(driverResult.position);
+        return Number.isFinite(position) && position > 0;
+    }
+
+    getClassifiedFinishers(results) {
+        if (!results) return [];
+        return results.filter((r) => this.isClassifiedFinisher(r));
+    }
+
+    getBottom5PositionsAmongFinishers(results) {
+        const positions = this.getClassifiedFinishers(results)
+            .map((r) => Number(r.position))
+            .sort((a, b) => a - b);
+        if (positions.length === 0) return new Set();
+        return new Set(positions.slice(-Math.min(5, positions.length)));
+    }
+
+    isInBottom5AmongFinishers(driverResult, results) {
+        if (!this.isClassifiedFinisher(driverResult)) return false;
+        return this.getBottom5PositionsAmongFinishers(results).has(Number(driverResult.position));
+    }
+
+    isLastAmongFinishers(driverResult, results) {
+        if (!this.isClassifiedFinisher(driverResult)) return false;
+        const positions = this.getClassifiedFinishers(results).map((r) => Number(r.position));
+        if (positions.length === 0) return false;
+        return Number(driverResult.position) === Math.max(...positions);
+    }
+
     findDriverResult(driver, results, season) {
         if (!driver || !results) return null;
         const { normalizeDriverName } = require('../constants/f1DataLoader').getF1Validation(season);

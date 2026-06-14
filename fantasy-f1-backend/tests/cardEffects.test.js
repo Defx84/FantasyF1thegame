@@ -359,6 +359,36 @@ describe('Card Effects Service', () => {
         expect(result.mainDriverPoints).toBe(2); // 0 + 2
         expect(result.driverCardEffect.effectApplied).toBe(true);
       });
+
+      it('should not add bonus for DNF driver even with classified position in bottom 5', async () => {
+        const raceResult = createMockRaceResult({
+          results: createMockRaceResult().results.map((r) =>
+            r.driver === 'Sergio Pérez'
+              ? { ...r, position: 19, status: 'DNF', didNotFinish: true, points: 0 }
+              : r
+          )
+        });
+        const selection = createMockSelection({ mainDriver: 'Sergio Pérez' });
+        const raceCardSelection = createMockRaceCardSelection({
+          name: 'Bottom 5',
+          tier: 'bronze',
+          effectType: 'conditional_bonus',
+          effectValue: { condition: 'bottom5', bonus: 2 }
+        });
+
+        const result = await cardEffectsService.applyDriverCardEffect({
+          baseMainDriverPoints: 0,
+          baseReserveDriverPoints: 0,
+          raceResult,
+          selection,
+          raceCardSelection,
+          leagueId: 'test-league',
+          userId: 'test-user'
+        });
+
+        expect(result.mainDriverPoints).toBe(0);
+        expect(result.driverCardEffect.effectApplied).toBe(false);
+      });
     });
   });
 
@@ -416,7 +446,7 @@ describe('Card Effects Service', () => {
     describe('Top 10 (Silver)', () => {
       it('should add +5 points if both cars finish Top 10', async () => {
         const raceResult = createMockRaceResult();
-        const selection = createMockSelection({ team: 'Racing Bulls' }); // Carlos P9, Liam P10
+        const selection = createMockSelection({ team: 'Mercedes' }); // Russell P6, Antonelli P7
         const raceCardSelection = createMockRaceCardSelection(null, {
           name: 'Top 10',
           tier: 'silver',
@@ -425,7 +455,7 @@ describe('Card Effects Service', () => {
         });
 
         const result = await cardEffectsService.applyTeamCardEffect({
-          baseTeamPoints: 3, // Racing Bulls team points
+          baseTeamPoints: 14, // Mercedes team points
           raceResult,
           selection,
           raceCardSelection,
@@ -433,7 +463,7 @@ describe('Card Effects Service', () => {
           userId: 'test-user'
         });
 
-        expect(result.teamPoints).toBe(8); // 3 + 5
+        expect(result.teamPoints).toBe(19); // 14 + 5
         expect(result.teamCardEffect.effectApplied).toBe(true);
       });
     });
@@ -533,6 +563,71 @@ describe('Card Effects Service', () => {
 
         expect(result.teamPoints).toBe(3); // 0 + 3
         expect(result.teamCardEffect.effectApplied).toBe(true);
+      });
+
+      it('should not add bonus when last classified position is a DNF', async () => {
+        const baseResults = createMockRaceResult().results;
+        const raceResult = createMockRaceResult({
+          results: baseResults.map((r) => {
+            if (r.driver === 'Valtteri Bottas') {
+              return { ...r, position: 20, status: 'DNF', didNotFinish: true, points: 0 };
+            }
+            if (r.driver === 'Sergio Pérez') {
+              return { ...r, position: 19, status: 'Finished', didNotFinish: false, points: 0 };
+            }
+            return r;
+          })
+        });
+        const selection = createMockSelection({ team: 'Cadillac' });
+        const raceCardSelection = createMockRaceCardSelection(null, {
+          name: 'Last Place Bonus',
+          tier: 'bronze',
+          effectType: 'conditional_bonus',
+          effectValue: { condition: 'one_last_place', bonus: 3 }
+        });
+
+        const result = await cardEffectsService.applyTeamCardEffect({
+          baseTeamPoints: 0,
+          raceResult,
+          selection,
+          raceCardSelection,
+          leagueId: 'test-league',
+          userId: 'test-user'
+        });
+
+        expect(result.teamPoints).toBe(3);
+        expect(result.teamCardEffect.effectApplied).toBe(true);
+      });
+
+      it('should not add bonus for DNF at last grid position when a finisher is behind fewer DNFs', async () => {
+        const baseResults = createMockRaceResult().results;
+        const raceResult = createMockRaceResult({
+          results: baseResults.map((r) => {
+            if (r.driver === 'Valtteri Bottas' || r.driver === 'Sergio Pérez') {
+              return { ...r, position: r.driver === 'Valtteri Bottas' ? 20 : 19, status: 'DNF', didNotFinish: true, points: 0 };
+            }
+            return r;
+          })
+        });
+        const selection = createMockSelection({ team: 'Cadillac' });
+        const raceCardSelection = createMockRaceCardSelection(null, {
+          name: 'Last Place Bonus',
+          tier: 'bronze',
+          effectType: 'conditional_bonus',
+          effectValue: { condition: 'one_last_place', bonus: 3 }
+        });
+
+        const result = await cardEffectsService.applyTeamCardEffect({
+          baseTeamPoints: 0,
+          raceResult,
+          selection,
+          raceCardSelection,
+          leagueId: 'test-league',
+          userId: 'test-user'
+        });
+
+        expect(result.teamPoints).toBe(0);
+        expect(result.teamCardEffect.effectApplied).toBe(false);
       });
     });
   });
