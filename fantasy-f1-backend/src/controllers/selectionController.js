@@ -161,6 +161,70 @@ const getRaceSelections = async (req, res) => {
 };
 
 /**
+ * Current-cycle used lists from a UsedSelection document.
+ * After a full pool is used, addUsedDriver/addUsedTeam push a new empty cycle —
+ * so the last cycle is what the UI must treat as "used".
+ */
+function getCurrentCycleUsedLists(usedSelection) {
+    const lastTeamCycleIndex = usedSelection.teamCycles?.length
+        ? usedSelection.teamCycles.length - 1
+        : -1;
+    const lastDriverCycleIndex = usedSelection.driverCycles?.length
+        ? usedSelection.driverCycles.length - 1
+        : -1;
+    const lastMainDriverCycleIndex = usedSelection.mainDriverCycles?.length
+        ? usedSelection.mainDriverCycles.length - 1
+        : -1;
+    const lastReserveDriverCycleIndex = usedSelection.reserveDriverCycles?.length
+        ? usedSelection.reserveDriverCycles.length - 1
+        : -1;
+
+    const usedTeams = lastTeamCycleIndex >= 0
+        ? (usedSelection.teamCycles[lastTeamCycleIndex] || [])
+        : [];
+
+    let usedDrivers = [];
+    if (usedSelection.driverCycles && usedSelection.driverCycles.length > 0) {
+        usedDrivers = usedSelection.driverCycles[lastDriverCycleIndex] || [];
+    } else {
+        const usedMainDrivers = usedSelection.mainDriverCycles?.[lastMainDriverCycleIndex] || [];
+        const usedReserveDrivers = usedSelection.reserveDriverCycles?.[lastReserveDriverCycleIndex] || [];
+        usedDrivers = [...new Set([...usedMainDrivers, ...usedReserveDrivers])];
+    }
+
+    return {
+        usedDrivers,
+        usedTeams,
+        usedMainDrivers: usedSelection.mainDriverCycles?.[lastMainDriverCycleIndex] || usedDrivers,
+        usedReserveDrivers: usedSelection.reserveDriverCycles?.[lastReserveDriverCycleIndex] || usedDrivers
+    };
+}
+
+/**
+ * Rebuild UsedSelection cycles from past RaceSelection docs (ordered by round).
+ * Ensures cycles match race history and that a completed pool starts a fresh empty cycle.
+ */
+async function rebuildUsedSelectionCyclesFromPast(usedSelection, pastSelections, normalizeDriverName, normalizeTeamName) {
+    usedSelection.driverCycles = [[]];
+    usedSelection.teamCycles = [[]];
+    usedSelection.markModified('driverCycles');
+    usedSelection.markModified('teamCycles');
+
+    const sorted = [...pastSelections].sort((a, b) => (a.round || 0) - (b.round || 0));
+    for (const s of sorted) {
+        if (s.mainDriver) {
+            await usedSelection.addUsedDriver(normalizeDriverName(s.mainDriver));
+        }
+        if (s.reserveDriver) {
+            await usedSelection.addUsedDriver(normalizeDriverName(s.reserveDriver));
+        }
+        if (s.team) {
+            await usedSelection.addUsedTeam(normalizeTeamName(s.team));
+        }
+    }
+}
+
+/**
  * Get used selections for a user
  * Updated to implement reset logic for teams and drivers
  */
@@ -188,13 +252,10 @@ const getUsedSelections = async (req, res) => {
             }
         }
 
-        // When round is provided (next race round), derive used drivers/teams from actual
-        // RaceSelection documents for rounds 1..round-1 so counts are always correct.
-        // Normalize driver names to shortName and dedupe so "A. Lindblad" and "Arvid Lindblad"
-        // count as one driver (same for teams) and the count matches what the UI expects.
-        // Also backfill UsedSelection when it's missing entries (e.g. auto-assign saved
-        // the selection but UsedSelection.save failed), so the next round's auto-assign
-        // and other logic see the correct used list.
+        // When round is provided (next race round), rebuild UsedSelection cycles from
+        // RaceSelection history for rounds 1..round-1, then return the *current* cycle only.
+        // Returning the full unique history incorrectly marked every driver/team as used
+        // after the pool was exhausted (cycle reset never appeared in the UI).
         if (!isNaN(numericRound) && numericRound >= 1) {
             const leagueDoc = await League.findById(leagueId).select('season').lean();
             const season = (leagueDoc && leagueDoc.season) ? leagueDoc.season : 2026;
@@ -207,59 +268,37 @@ const getUsedSelections = async (req, res) => {
                 mainDriver: { $nin: [null, ''] },
                 reserveDriver: { $nin: [null, ''] },
                 team: { $nin: [null, ''] }
-            }).select('mainDriver reserveDriver team').lean();
+            }).select('round mainDriver reserveDriver team').lean();
 
-            const rawDrivers = pastSelections.flatMap(s => [s.mainDriver, s.reserveDriver].filter(Boolean));
-            const usedDrivers = [...new Set(rawDrivers.map(d => normalizeDriverName(d)).filter(Boolean))];
-            const rawTeams = pastSelections.map(s => s.team).filter(Boolean);
-            const usedTeams = [...new Set(rawTeams.map(t => normalizeTeamName(t)).filter(Boolean))];
-
-            // Backfill UsedSelection so it stays in sync (e.g. after auto-assign path failed to save)
-            try {
-                let usedSelection = await UsedSelection.findOne({
+            let usedSelection = await UsedSelection.findOne({
+                user: targetUserId,
+                league: leagueId
+            });
+            if (!usedSelection) {
+                usedSelection = new UsedSelection({
                     user: targetUserId,
-                    league: leagueId
+                    league: leagueId,
+                    driverCycles: [[]],
+                    teamCycles: [[]],
+                    mainDriverCycles: [[]],
+                    reserveDriverCycles: [[]]
                 });
-                if (!usedSelection) {
-                    usedSelection = new UsedSelection({
-                        user: targetUserId,
-                        league: leagueId,
-                        driverCycles: [[]],
-                        teamCycles: [[]],
-                        mainDriverCycles: [[]],
-                        reserveDriverCycles: [[]]
-                    });
-                }
-                const lastDriverCycle = usedSelection.driverCycles?.length
-                    ? usedSelection.driverCycles[usedSelection.driverCycles.length - 1]
-                    : [];
-                const lastTeamCycle = usedSelection.teamCycles?.length
-                    ? usedSelection.teamCycles[usedSelection.teamCycles.length - 1]
-                    : [];
-                let changed = false;
-                for (const d of usedDrivers) {
-                    if (d && d !== 'None' && !lastDriverCycle.includes(d)) {
-                        await usedSelection.addUsedDriver(d);
-                        changed = true;
-                    }
-                }
-                for (const t of usedTeams) {
-                    if (t && t !== 'None' && !lastTeamCycle.includes(t)) {
-                        await usedSelection.addUsedTeam(t);
-                        changed = true;
-                    }
-                }
-                if (changed) await usedSelection.save();
-            } catch (syncErr) {
-                console.warn('[getUsedSelections] UsedSelection backfill failed (response still correct):', syncErr.message);
             }
 
-            return res.json({
-                usedDrivers,
-                usedTeams,
-                usedMainDrivers: usedDrivers,
-                usedReserveDrivers: usedDrivers
-            });
+            try {
+                await rebuildUsedSelectionCyclesFromPast(
+                    usedSelection,
+                    pastSelections,
+                    normalizeDriverName,
+                    normalizeTeamName
+                );
+                await usedSelection.save();
+            } catch (syncErr) {
+                console.warn('[getUsedSelections] UsedSelection rebuild failed:', syncErr.message);
+            }
+
+            const lists = getCurrentCycleUsedLists(usedSelection);
+            return res.json(lists);
         }
 
         // Fallback: use UsedSelection cycles (when round not provided or invalid)
@@ -283,35 +322,7 @@ const getUsedSelections = async (req, res) => {
             await usedSelection.save();
         }
 
-        // Get the current cycle's used items
-        const lastTeamCycleIndex = usedSelection.teamCycles.length - 1;
-        const lastDriverCycleIndex = usedSelection.driverCycles ? usedSelection.driverCycles.length - 1 : -1;
-        
-        // Legacy: fallback to old fields if driverCycles doesn't exist (migration compatibility)
-        const lastMainDriverCycleIndex = usedSelection.mainDriverCycles ? usedSelection.mainDriverCycles.length - 1 : -1;
-        const lastReserveDriverCycleIndex = usedSelection.reserveDriverCycles ? usedSelection.reserveDriverCycles.length - 1 : -1;
-
-        const usedTeams = usedSelection.teamCycles[lastTeamCycleIndex] || [];
-        
-        // Use unified driverCycles if available, otherwise fallback to legacy fields
-        let usedDrivers = [];
-        if (usedSelection.driverCycles && usedSelection.driverCycles.length > 0) {
-            usedDrivers = usedSelection.driverCycles[lastDriverCycleIndex] || [];
-        } else {
-            // Migration: merge old cycles if driverCycles doesn't exist yet
-            const usedMainDrivers = usedSelection.mainDriverCycles[lastMainDriverCycleIndex] || [];
-            const usedReserveDrivers = usedSelection.reserveDriverCycles[lastReserveDriverCycleIndex] || [];
-            // Combine and deduplicate
-            usedDrivers = [...new Set([...usedMainDrivers, ...usedReserveDrivers])];
-        }
-
-        res.json({
-            usedDrivers: usedDrivers, // New unified field
-            usedTeams: usedTeams,
-            // Legacy fields for backward compatibility during migration
-            usedMainDrivers: usedSelection.mainDriverCycles?.[lastMainDriverCycleIndex] || [],
-            usedReserveDrivers: usedSelection.reserveDriverCycles?.[lastReserveDriverCycleIndex] || []
-        });
+        res.json(getCurrentCycleUsedLists(usedSelection));
     } catch (error) {
         console.error('Error getting used selections:', error);
         res.status(500).json({ message: 'Error getting used selections' });
@@ -829,5 +840,8 @@ module.exports = {
     getUsedSelections,
     getCurrentSelections,
     saveSelections,
-    adminOverrideSelection
+    adminOverrideSelection,
+    // Exported for unit tests
+    getCurrentCycleUsedLists,
+    rebuildUsedSelectionCyclesFromPast
 }; 
