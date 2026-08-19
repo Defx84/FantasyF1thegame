@@ -89,16 +89,27 @@ usedSelectionSchema.methods.canUseTeam = async function(team) {
 };
 
 // Unified method to add a used driver (for both main and reserve)
-usedSelectionSchema.methods.addUsedDriver = async function(driver) {
+// allowUnknown: rebuild from race history after a roster change (e.g. Hadjar → Tsunoda)
+usedSelectionSchema.methods.addUsedDriver = async function(driver, options = {}) {
   if (!driver || driver === 'None') return;
-  const { isValidDriver, normalizeDriverName } = await this.getF1DataForSeason();
-  if (!isValidDriver(driver)) throw new Error('Invalid driver name');
+  const { isValidDriver, normalizeDriverName, drivers } = await this.getF1DataForSeason();
+  const allowUnknown = options.allowUnknown === true;
+  if (!isValidDriver(driver)) {
+    if (!allowUnknown) throw new Error('Invalid driver name');
+    const currentCycle = this.driverCycles[this.driverCycles.length - 1];
+    if (!currentCycle.includes(driver)) {
+      currentCycle.push(driver);
+      if (currentCycle.length >= drivers.length) {
+        this.driverCycles.push([]);
+      }
+      this.markModified('driverCycles');
+    }
+    return;
+  }
   const normalizedDriver = normalizeDriverName(driver); // always short name
   let currentCycle = this.driverCycles[this.driverCycles.length - 1];
   if (!currentCycle.includes(normalizedDriver)) {
     currentCycle.push(normalizedDriver);
-    // Get the number of drivers for this season to determine cycle length
-    const { drivers } = await this.getF1DataForSeason();
     const maxDrivers = drivers.length;
     if (currentCycle.length >= maxDrivers) {
       // Create new empty cycle - the last driver should ONLY be in the completed cycle
@@ -111,6 +122,7 @@ usedSelectionSchema.methods.addUsedDriver = async function(driver) {
         newCycle.splice(driverIndex, 1);
       }
     }
+    this.markModified('driverCycles');
   }
 };
 
@@ -124,16 +136,26 @@ usedSelectionSchema.methods.addUsedReserveDriver = async function(driver) {
 };
 
 // Method to add a used team
-usedSelectionSchema.methods.addUsedTeam = async function(team) {
+usedSelectionSchema.methods.addUsedTeam = async function(team, options = {}) {
     if (!team || team === 'None') return;
-  const { isValidTeam, normalizeTeamName } = await this.getF1DataForSeason();
-  if (!isValidTeam(team)) throw new Error('Invalid team name');
+  const { isValidTeam, normalizeTeamName, teams } = await this.getF1DataForSeason();
+  const allowUnknown = options.allowUnknown === true;
+  if (!isValidTeam(team)) {
+    if (!allowUnknown) throw new Error('Invalid team name');
+    const currentCycle = this.teamCycles[this.teamCycles.length - 1];
+    if (!currentCycle.includes(team)) {
+      currentCycle.push(team);
+      if (currentCycle.length >= teams.length) {
+        this.teamCycles.push([]);
+      }
+      this.markModified('teamCycles');
+    }
+    return;
+  }
   const normalizedTeam = normalizeTeamName(team); // always canonical name
   let currentCycle = this.teamCycles[this.teamCycles.length - 1];
   if (!currentCycle.includes(normalizedTeam)) {
     currentCycle.push(normalizedTeam);
-    // Get the number of teams for this season to determine cycle length
-    const { teams } = await this.getF1DataForSeason();
     const maxTeams = teams.length;
     if (currentCycle.length >= maxTeams) {
       // Create new empty cycle - the last team should ONLY be in the completed cycle
@@ -146,6 +168,7 @@ usedSelectionSchema.methods.addUsedTeam = async function(team) {
         newCycle.splice(teamIndex, 1);
       }
     }
+    this.markModified('teamCycles');
   }
 };
 

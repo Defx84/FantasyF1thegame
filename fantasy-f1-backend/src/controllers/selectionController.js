@@ -200,9 +200,23 @@ function getCurrentCycleUsedLists(usedSelection) {
     };
 }
 
+function filterUsedListsForCurrentRoster(lists, isValidDriver, isValidTeam) {
+    const keepDriver = (name) => Boolean(name) && isValidDriver(name);
+    const keepTeam = (name) => Boolean(name) && isValidTeam(name);
+    return {
+        ...lists,
+        usedDrivers: (lists.usedDrivers || []).filter(keepDriver),
+        usedTeams: (lists.usedTeams || []).filter(keepTeam),
+        usedMainDrivers: (lists.usedMainDrivers || []).filter(keepDriver),
+        usedReserveDrivers: (lists.usedReserveDrivers || []).filter(keepDriver)
+    };
+}
+
 /**
  * Rebuild UsedSelection cycles from past RaceSelection docs (ordered by round).
  * Ensures cycles match race history and that a completed pool starts a fresh empty cycle.
+ * allowUnknown keeps removed roster names (e.g. Hadjar after a 2026 seat swap) as cycle
+ * slots so rebuild does not abort and a finished cycle still resets.
  */
 async function rebuildUsedSelectionCyclesFromPast(usedSelection, pastSelections, normalizeDriverName, normalizeTeamName) {
     usedSelection.driverCycles = [[]];
@@ -211,15 +225,16 @@ async function rebuildUsedSelectionCyclesFromPast(usedSelection, pastSelections,
     usedSelection.markModified('teamCycles');
 
     const sorted = [...pastSelections].sort((a, b) => (a.round || 0) - (b.round || 0));
+    const unknown = { allowUnknown: true };
     for (const s of sorted) {
         if (s.mainDriver) {
-            await usedSelection.addUsedDriver(normalizeDriverName(s.mainDriver));
+            await usedSelection.addUsedDriver(normalizeDriverName(s.mainDriver) || s.mainDriver, unknown);
         }
         if (s.reserveDriver) {
-            await usedSelection.addUsedDriver(normalizeDriverName(s.reserveDriver));
+            await usedSelection.addUsedDriver(normalizeDriverName(s.reserveDriver) || s.reserveDriver, unknown);
         }
         if (s.team) {
-            await usedSelection.addUsedTeam(normalizeTeamName(s.team));
+            await usedSelection.addUsedTeam(normalizeTeamName(s.team) || s.team, unknown);
         }
     }
 }
@@ -259,7 +274,7 @@ const getUsedSelections = async (req, res) => {
         if (!isNaN(numericRound) && numericRound >= 1) {
             const leagueDoc = await League.findById(leagueId).select('season').lean();
             const season = (leagueDoc && leagueDoc.season) ? leagueDoc.season : 2026;
-            const { normalizeDriverName, normalizeTeamName } = getF1Validation(season);
+            const { normalizeDriverName, normalizeTeamName, isValidDriver, isValidTeam } = getF1Validation(season);
 
             const pastSelections = await RaceSelection.find({
                 user: targetUserId,
@@ -297,7 +312,11 @@ const getUsedSelections = async (req, res) => {
                 console.warn('[getUsedSelections] UsedSelection rebuild failed:', syncErr.message);
             }
 
-            const lists = getCurrentCycleUsedLists(usedSelection);
+            const lists = filterUsedListsForCurrentRoster(
+                getCurrentCycleUsedLists(usedSelection),
+                isValidDriver,
+                isValidTeam
+            );
             return res.json(lists);
         }
 
@@ -322,7 +341,14 @@ const getUsedSelections = async (req, res) => {
             await usedSelection.save();
         }
 
-        res.json(getCurrentCycleUsedLists(usedSelection));
+        const fallbackLeague = await League.findById(leagueId).select('season').lean();
+        const fallbackSeason = (fallbackLeague && fallbackLeague.season) ? fallbackLeague.season : 2026;
+        const fallbackValidation = getF1Validation(fallbackSeason);
+        res.json(filterUsedListsForCurrentRoster(
+            getCurrentCycleUsedLists(usedSelection),
+            fallbackValidation.isValidDriver,
+            fallbackValidation.isValidTeam
+        ));
     } catch (error) {
         console.error('Error getting used selections:', error);
         res.status(500).json({ message: 'Error getting used selections' });
@@ -843,5 +869,6 @@ module.exports = {
     adminOverrideSelection,
     // Exported for unit tests
     getCurrentCycleUsedLists,
-    rebuildUsedSelectionCyclesFromPast
+    rebuildUsedSelectionCyclesFromPast,
+    filterUsedListsForCurrentRoster
 }; 

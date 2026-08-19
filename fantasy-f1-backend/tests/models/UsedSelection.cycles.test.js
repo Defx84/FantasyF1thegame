@@ -6,7 +6,8 @@ const { F1_DRIVERS_2026 } = require('../../src/constants/f1DriverData2026');
 const { F1_TEAMS_2026 } = require('../../src/constants/f1Data2026');
 const {
   getCurrentCycleUsedLists,
-  rebuildUsedSelectionCyclesFromPast
+  rebuildUsedSelectionCyclesFromPast,
+  filterUsedListsForCurrentRoster
 } = require('../../src/controllers/selectionController');
 const { getF1Validation } = require('../../src/constants/f1DataLoader');
 
@@ -148,5 +149,102 @@ describe('UsedSelection cycle reset', () => {
     const lists = getCurrentCycleUsedLists(used);
     expect(lists.usedDrivers).toHaveLength(4);
     expect(lists.usedTeams).toHaveLength(2);
+  });
+
+  it('rebuild continues when a historical driver is no longer on the roster', async () => {
+    const { normalizeDriverName, normalizeTeamName, isValidDriver } = getF1Validation(2026);
+    const used = new UsedSelection({
+      user: userId,
+      league: league._id,
+      driverCycles: [[]],
+      teamCycles: [[]]
+    });
+
+    const pastSelections = [
+      {
+        round: 1,
+        mainDriver: F1_DRIVERS_2026[0].shortName,
+        reserveDriver: F1_DRIVERS_2026[1].shortName,
+        team: F1_TEAMS_2026[0].name
+      },
+      {
+        round: 2,
+        mainDriver: 'I. Hadjar',
+        reserveDriver: F1_DRIVERS_2026[2].shortName,
+        team: F1_TEAMS_2026[1].name
+      },
+      {
+        round: 3,
+        mainDriver: F1_DRIVERS_2026[3].shortName,
+        reserveDriver: F1_DRIVERS_2026[4].shortName,
+        team: F1_TEAMS_2026[2].name
+      }
+    ];
+
+    await rebuildUsedSelectionCyclesFromPast(
+      used,
+      pastSelections,
+      normalizeDriverName,
+      normalizeTeamName
+    );
+
+    expect(isValidDriver('I. Hadjar')).toBe(false);
+    expect(used.driverCycles[0]).toHaveLength(6);
+    expect(used.teamCycles[0]).toHaveLength(3);
+
+    const lists = getCurrentCycleUsedLists(used);
+    const clientLists = filterUsedListsForCurrentRoster(
+      lists,
+      isValidDriver,
+      (team) => Boolean(team)
+    );
+    expect(clientLists.usedDrivers).toHaveLength(5);
+    expect(clientLists.usedDrivers).not.toContain('I. Hadjar');
+    expect(clientLists.usedDrivers).toContain(F1_DRIVERS_2026[4].shortName);
+  });
+
+  it('rebuild still resets after a removed driver filled a full-cycle slot', async () => {
+    const { normalizeDriverName, normalizeTeamName, isValidDriver, isValidTeam } = getF1Validation(2026);
+    const used = new UsedSelection({
+      user: userId,
+      league: league._id,
+      driverCycles: [[]],
+      teamCycles: [[]]
+    });
+
+    const driversExceptTsunoda = F1_DRIVERS_2026.filter((d) => d.shortName !== 'Y. Tsunoda');
+    const oldRoster = [...driversExceptTsunoda, { shortName: 'I. Hadjar' }];
+    expect(oldRoster).toHaveLength(F1_DRIVERS_2026.length);
+
+    const pastSelections = [];
+    for (let i = 0; i < F1_TEAMS_2026.length; i++) {
+      const d1 = oldRoster[i * 2];
+      const d2 = oldRoster[i * 2 + 1];
+      pastSelections.push({
+        round: i + 1,
+        mainDriver: d1.shortName,
+        reserveDriver: d2.shortName,
+        team: F1_TEAMS_2026[i].name
+      });
+    }
+
+    await rebuildUsedSelectionCyclesFromPast(
+      used,
+      pastSelections,
+      normalizeDriverName,
+      normalizeTeamName
+    );
+
+    expect(used.driverCycles.length).toBeGreaterThanOrEqual(2);
+    expect(used.driverCycles[used.driverCycles.length - 1]).toEqual([]);
+    expect(used.teamCycles[used.teamCycles.length - 1]).toEqual([]);
+
+    const lists = filterUsedListsForCurrentRoster(
+      getCurrentCycleUsedLists(used),
+      isValidDriver,
+      isValidTeam
+    );
+    expect(lists.usedDrivers).toEqual([]);
+    expect(lists.usedTeams).toEqual([]);
   });
 });
