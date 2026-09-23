@@ -89,7 +89,7 @@ usedSelectionSchema.methods.canUseTeam = async function(team) {
 };
 
 // Unified method to add a used driver (for both main and reserve)
-// allowUnknown: rebuild from race history after a roster change (e.g. Hadjar → Tsunoda)
+// allowUnknown: rebuild from race history that may name a driver since dropped from the grid
 usedSelectionSchema.methods.addUsedDriver = async function(driver, options = {}) {
   if (!driver || driver === 'None') return;
   const { isValidDriver, normalizeDriverName, drivers } = await this.getF1DataForSeason();

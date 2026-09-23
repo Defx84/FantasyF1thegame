@@ -11,6 +11,9 @@ const {
 } = require('../../src/controllers/selectionController');
 const { getF1Validation } = require('../../src/constants/f1DataLoader');
 
+// Stands in for a driver dropped from the grid mid-season. Must never match a name in F1_DRIVERS_2026.
+const OFF_ROSTER_DRIVER = 'X. Departed';
+
 let mongoServer;
 let league;
 let userId;
@@ -169,7 +172,7 @@ describe('UsedSelection cycle reset', () => {
       },
       {
         round: 2,
-        mainDriver: 'I. Hadjar',
+        mainDriver: OFF_ROSTER_DRIVER,
         reserveDriver: F1_DRIVERS_2026[2].shortName,
         team: F1_TEAMS_2026[1].name
       },
@@ -188,7 +191,7 @@ describe('UsedSelection cycle reset', () => {
       normalizeTeamName
     );
 
-    expect(isValidDriver('I. Hadjar')).toBe(false);
+    expect(isValidDriver(OFF_ROSTER_DRIVER)).toBe(false);
     expect(used.driverCycles[0]).toHaveLength(6);
     expect(used.teamCycles[0]).toHaveLength(3);
 
@@ -199,7 +202,7 @@ describe('UsedSelection cycle reset', () => {
       (team) => Boolean(team)
     );
     expect(clientLists.usedDrivers).toHaveLength(5);
-    expect(clientLists.usedDrivers).not.toContain('I. Hadjar');
+    expect(clientLists.usedDrivers).not.toContain(OFF_ROSTER_DRIVER);
     expect(clientLists.usedDrivers).toContain(F1_DRIVERS_2026[4].shortName);
   });
 
@@ -212,8 +215,7 @@ describe('UsedSelection cycle reset', () => {
       teamCycles: [[]]
     });
 
-    const driversExceptTsunoda = F1_DRIVERS_2026.filter((d) => d.shortName !== 'Y. Tsunoda');
-    const oldRoster = [...driversExceptTsunoda, { shortName: 'I. Hadjar' }];
+    const oldRoster = [...F1_DRIVERS_2026.slice(0, -1), { shortName: OFF_ROSTER_DRIVER }];
     expect(oldRoster).toHaveLength(F1_DRIVERS_2026.length);
 
     const pastSelections = [];

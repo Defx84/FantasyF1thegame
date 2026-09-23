@@ -215,8 +215,8 @@ function filterUsedListsForCurrentRoster(lists, isValidDriver, isValidTeam) {
 /**
  * Rebuild UsedSelection cycles from past RaceSelection docs (ordered by round).
  * Ensures cycles match race history and that a completed pool starts a fresh empty cycle.
- * allowUnknown keeps removed roster names (e.g. Hadjar after a 2026 seat swap) as cycle
- * slots so rebuild does not abort and a finished cycle still resets.
+ * allowUnknown keeps names dropped from the grid mid-season as cycle slots, so rebuild
+ * does not abort and a finished cycle still resets.
  */
 async function rebuildUsedSelectionCyclesFromPast(usedSelection, pastSelections, normalizeDriverName, normalizeTeamName) {
     usedSelection.driverCycles = [[]];
