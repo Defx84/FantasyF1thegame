@@ -24,6 +24,7 @@ const COUNTRY_CODE_MAP: Record<string, string> = {
   Belgium: 'BE',
   Netherlands: 'NL',
   Singapore: 'SG',
+  Malaysia: 'MY',
   Qatar: 'QA',
   Mexico: 'MX',
   Brazil: 'BR',

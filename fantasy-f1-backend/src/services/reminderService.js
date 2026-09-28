@@ -24,6 +24,7 @@ const COUNTRY_FLAGS = {
   'Italy': '🇮🇹',
   'Azerbaijan': '🇦🇿',
   'Singapore': '🇸🇬',
+  'Malaysia': '🇲🇾',
   'United States': '🇺🇸',
   'Mexico': '🇲🇽',
   'Brazil': '🇧🇷',
