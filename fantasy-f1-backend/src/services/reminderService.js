@@ -150,7 +150,14 @@ async function getTomorrowsRace() {
     ]
   });
   
-  return races.length > 0 ? races[0] : null;
+  // Anchor on the session that closes selections, so sprint weekends send one
+  // reminder before sprint qualifying rather than a second before qualifying.
+  const race = races.find((r) => {
+    const deadline = r.sprintQualifyingStart || r.qualifyingStart;
+    return deadline >= tomorrow && deadline < dayAfterTomorrow;
+  });
+  
+  return race || null;
 }
 
 // Get the next available race (for testing purposes)
