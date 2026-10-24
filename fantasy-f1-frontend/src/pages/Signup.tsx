@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { FaUser, FaEnvelope, FaLock, FaTrophy, FaChartLine, FaCar } from 'react-icons/fa';
 import { useAuth } from '../context/AuthContext';
 import TermsModal from '../components/TermsModal';
+import { isValidNewPassword, PASSWORD_RULE_MESSAGE } from '../utils/passwordPolicy';
 
 // Move FeatureBox outside Signup
 const FeatureBox: React.FC<{ icon: React.FC<{ size?: number; className?: string }>; title: string; description: string }> = ({ icon: Icon, title, description }) => (
@@ -34,6 +35,10 @@ const Signup: React.FC = () => {
       setError('Passwords do not match');
       return;
     }
+    if (!isValidNewPassword(password)) {
+      setError(PASSWORD_RULE_MESSAGE);
+      return;
+    }
     if (!termsAccepted) {
       setError('You must accept the Terms & Conditions and Privacy Policy');
       return;
@@ -49,7 +54,8 @@ const Signup: React.FC = () => {
         navigate('/');
       }, 2000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred during signup');
+      const apiError = (err as { response?: { data?: { error?: string } } })?.response?.data?.error;
+      setError(apiError || (err instanceof Error ? err.message : 'An error occurred during signup'));
     }
   };
 
@@ -164,6 +170,9 @@ const Signup: React.FC = () => {
                     placeholder="••••••••"
                   />
                 </div>
+                <p className="mt-1 text-xs text-white/70">
+                  At least 6 characters, with one capital letter, one number, and one special character.
+                </p>
               </div>
 
               <div>

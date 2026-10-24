@@ -9,6 +9,7 @@ const {
   getProfile,
   forgotPassword,
   resetPassword,
+  changePassword,
   getCurrentUser,
   deleteAccount
 } = require('../controllers/authController');
@@ -20,6 +21,7 @@ router.post('/refresh', refreshToken);
 router.post('/logout', auth, logout);
 router.post('/forgot-password', forgotPassword);
 router.post('/reset-password', resetPassword);
+router.post('/change-password', auth, changePassword);
 
 // Protected routes
 router.get('/me', auth, getCurrentUser);

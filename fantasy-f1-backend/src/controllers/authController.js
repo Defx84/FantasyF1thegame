@@ -4,6 +4,7 @@ const User = require('../models/User');
 const League = require('../models/League');
 const { sendEmail } = require('../utils/email');
 const { generateTokens, addToBlacklist, verifyToken } = require('../utils/tokenUtils');
+const { isValidNewPassword, PASSWORD_RULE_MESSAGE } = require('../utils/passwordPolicy');
 
 // Generate tokens helper function (keeping for backward compatibility)
 const generateTokensHelper = (userId) => {
@@ -32,6 +33,10 @@ const register = async (req, res) => {
       return res.status(400).json({
         error: 'You must accept the Terms & Conditions to register'
       });
+    }
+
+    if (!isValidNewPassword(password)) {
+      return res.status(400).json({ error: PASSWORD_RULE_MESSAGE });
     }
 
     // Check if user already exists
@@ -351,6 +356,10 @@ const resetPassword = async (req, res) => {
   try {
     const { token, newPassword } = req.body;
 
+    if (!isValidNewPassword(newPassword)) {
+      return res.status(400).json({ error: PASSWORD_RULE_MESSAGE });
+    }
+
     // Verify token
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const user = await User.findById(decoded.userId);
@@ -364,6 +373,29 @@ const resetPassword = async (req, res) => {
     await user.save();
 
     res.json({ message: 'Password reset successful' });
+  } catch (error) {
+    res.status(400).json({ error: error.message });
+  }
+};
+
+// Change password for the signed-in user
+const changePassword = async (req, res) => {
+  try {
+    const { newPassword } = req.body;
+
+    if (!isValidNewPassword(newPassword)) {
+      return res.status(400).json({ error: PASSWORD_RULE_MESSAGE });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+
+    user.password = newPassword;
+    await user.save();
+
+    res.json({ message: 'Password updated successfully' });
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -424,6 +456,7 @@ module.exports = {
   getProfile,
   forgotPassword,
   resetPassword,
+  changePassword,
   getCurrentUser,
   deleteAccount
 }; 

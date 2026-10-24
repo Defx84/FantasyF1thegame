@@ -437,9 +437,6 @@ const ProfilePage: React.FC = () => {
               </button>
               {deleteError && <div className="text-red-400 text-sm mt-2">{deleteError}</div>}
             </div>
-              <p className="text-sm text-white/70 mt-2">
-                You will need to re-authenticate to change your password.
-              </p>
           </div>
 
           {/* Leagues Section */}
