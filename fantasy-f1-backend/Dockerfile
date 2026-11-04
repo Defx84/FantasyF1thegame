@@ -1,4 +1,4 @@
-FROM node:18-slim
+FROM node:22.23.4-slim
 
 ENV NODE_ENV=production
 ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
